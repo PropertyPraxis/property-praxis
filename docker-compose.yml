@@ -1,0 +1,61 @@
+version: "3"
+services:
+  api:
+    build: ./server/
+    depends_on:
+      - postgres
+    environment:
+      DATABASE_URL: postgres://user:pass@postgres:5432/db
+      NODE_ENV: development
+      PORT: 5000
+    ports:
+      - "5000:5000"
+    #command: npm run dev
+    volumes:
+      - ./server:/app/
+      - /app/node_modules
+  web:
+    ##this is the dev client
+    build:
+      context: ./client/
+      dockerfile: Dockerfile.dev
+    depends_on:
+      - api
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./client:/app/
+      - /app/node_modules
+
+  tests:
+    build:
+      context: ./client/
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./client:/app/
+      - /app/node_modules
+    command: ["npm", "run", "test"]
+
+  postgres:
+    #image: mdillon/postgis:latest
+    image: mdillon/postgis:11 #this may affect drivers for rstudio!
+    ports:
+      - "35432:5432"
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: db
+  
+  rstudio:
+    build:
+      context: ./rstudio/
+      dockerfile: Dockerfile.dev
+    depends_on:
+      - postgres
+    ports:
+      - "8787:8787"
+    environment:
+      - PASSWORD=rstudiotesting #this style is different than in the other services
+    volumes:
+      - ./rstudio/data:/home/rstudio/pp-pipeline/data
+      - ./rstudio/scripts:/home/rstudio/pp-pipeline/scripts
