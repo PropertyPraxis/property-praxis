@@ -4,7 +4,9 @@
 
 node_modules
 
-/rstudio/data/*
+/rstudio/data/*.csv
+/rstudio/data/*.shp
+
 
 # VS Code stuff
 .vscode/*
