@@ -1,6 +1,6 @@
 # Property Praxis Application Stack
 This application stack includes instructions for setting up a development
-environment for the Property Praxis app.  
+environment for the Property Praxis app (still in development). 
 
 ### Install Docker
 
