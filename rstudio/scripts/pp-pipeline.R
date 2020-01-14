@@ -3,7 +3,6 @@ options(stringsAsFactors = FALSE)
 if(!require(readr)) install.packages("readr")
 if(!require(dplyr)) install.packages("dplyr")
 if(!require(sf)) install.packages("sf")
-if(!require(geojsonio)) install.packages("geojsonio")
 if(!require(httr)) install.packages("httr")
 if(!require(dplyr)) install.packages("dplyr")
 if(!require(stringr)) install.packages("stringr")
@@ -16,7 +15,7 @@ p_load(readr, dplyr, sf, geojsonio, httr, dplyr, stringr, purrr, dotenv)
 home_dir <- try(system("echo $HOME", intern = TRUE))
 ##docker specific logic for running docker exec
 if(home_dir=="/root") home_dir <- "/home/rstudio"
-dotenv::load_dot_env(file = paste0(home_dir, "/pp-pipeline/scripts/pp-pipeline.env"))
+dotenv::load_dot_env(file = paste0(home_dir, "/pp-pipeline/scripts/rstudio.env"))
 
 ##READ IN BOX FILES
 ##still need to figure out api
@@ -25,6 +24,8 @@ dotenv::load_dot_env(file = paste0(home_dir, "/pp-pipeline/scripts/pp-pipeline.e
 # box_auth(client_id = client, client_secret = secret)
 ##SHAPEFILES
 ##read in shapfiles to list
+# IN_DATA_DIR="/home/rstudio/pp-pipeline/data/Property Praxis Data MAC"
+# IN_SHP_DIR="/home/rstudio/pp-pipeline/data/Property Praxis Data MAC/Praxis Shapefiles"
 in_shp_dir <- Sys.getenv("IN_SHP_DIR")
 shps_zip <- list.files(in_shp_dir, pattern="*zip", full.names = TRUE)
 

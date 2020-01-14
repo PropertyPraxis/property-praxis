@@ -3,7 +3,7 @@ RUN npm install -g nodemon
 WORKDIR /app
 
 #COPY package*.json ./
-
+RUN echo hello
 COPY ./package.json ./
 #COPY ./package-lock.json .
 

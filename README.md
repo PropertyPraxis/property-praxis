@@ -134,7 +134,10 @@ docker-compose up -d
 ```
 
 # Addtional Unfinished Instructions are below.  
-
+To connect to the database from host terminal
+```
+psql postgres://<username>:<databasepassword>@localhost:35432/db
+```
 
 To run the front-end build in Nginx, naigate to the 
 client directory and run:
