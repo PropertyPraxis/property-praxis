@@ -19,9 +19,6 @@ dotenv::load_dot_env(file = paste0(home_dir, "/pp-pipeline/scripts/rstudio.env")
 
 ##READ IN BOX FILES
 ##still need to figure out api
-# client <- "e127x79f733ktz2q8zedkn4cq38y424d"
-# secret <- "BsyyQByLNbfxyNPhUI6n5H0Y9oFEuyxw"
-# box_auth(client_id = client, client_secret = secret)
 ##SHAPEFILES
 ##read in shapfiles to list
 # IN_DATA_DIR="/home/rstudio/pp-pipeline/data/Property Praxis Data MAC"
