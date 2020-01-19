@@ -97,8 +97,8 @@ names(pp_full)
 dim(pp_full)
 length(unique(pp_full$full_id))
 ##TABLES
-##1. Parcel
-##2. Owner
+##1. Parcel/Property
+##2. Owner/taxpayer
 
 ##parcels
 #c("parcelno", "propaddr", "propno", "propdir", "propstr", "propzip")
@@ -140,7 +140,7 @@ dim(pp)
 
 ##year table
 year <- c("prop_id", "year")
-pp_year <- pp[,year]
+pp_year <- pp_year[,year]
 pp_year <- pp_year[!duplicated(pp_year),]
 
 
@@ -190,12 +190,17 @@ par_all <- c("taxpayer1",
              ##adding these field 
              ##provides no additional 
              ##records
-             "saledate", 
-             "saleprice",
-             "totsqft",
-             "totacres",
-             "cibyrbuilt",
-             "resyrbuilt")
+             # "taxstatus",
+             # "saledate", 
+             # "saleprice",
+             # "totsqft",
+             # "totacres",
+             # "cibyrbuilt",
+             # "resyrbuilt",
+             # "latitude",
+             # "longitude",
+             # "location"
+             )
 pp_all_join <- pp_full[,par_all]
 pp_all_join <- pp_all_join[!duplicated(pp_all_join),]
 dim(pp_all_join)
