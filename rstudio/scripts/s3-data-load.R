@@ -390,7 +390,7 @@ geomList <- lapply(seq_along(shpList), function(i){
     inner_join(shp, by=c("parcelno", "propaddr"))
   geom <- geom[,c("parprop_id", "parcelno", "propaddr", "geom_agg_count", "geometry")]
   geom <- st_as_sf(geom[!duplicated(geom),])
-  
+  st_crs(geom) = 4326
   return(geom)
 })
 
@@ -411,6 +411,7 @@ geomList2 <- lapply(seq_along(geomList), function(i){
 geomAll <- bind_cols(geomList2)
 geomCols <- names(geomAll)[str_detect(names(geomAll), "geom")]
 parPropGeom <- geomAll[,c("parprop_id", "parcelno", "propaddr", geomCols)]
+st_geometry(parPropGeom) <- "gj"
 
   
 ##Remove intermediary tables from local env
@@ -431,10 +432,90 @@ conn <- RPostgreSQL::dbConnect("PostgreSQL",
                                password = "pass")
 ##get PG version
 dbGetQuery(conn, 'SELECT version();')
-
 #check that Post GIS is installed
 pgPostGIS(conn)
 pgListGeom(conn, geog = TRUE)
+
+
+# dbSendQuery(conn, "CREATE SCHEMA ppraxis;")
+#pgInsert(conn, name=c("ppraxis", "parcel_property_geom"), data.obj=parPropGeom, geom="geom_gj")
+
+# sf::st_write(parPropGeom, dsn=conn, Id(schema="ppraxis", table="parcel_property_geom"),  overwrite = FALSE, append = FALSE)
+# dbSendQuery(conn, "DROP TABLE IF EXISTS tax_property;")
+# dbSendQuery(conn, "DROP TABLE IF EXISTS ppraxis")
+# 
+# dbGetQuery(conn, "SELECT * parcel_property_geom;")
+# dbListFields(conn, "*")
+# dbGetQuery(conn,
+#            "SELECT * FROM information_schema.tables
+#                    WHERE table_schema='ppraxis'")
+
+####using the public schema
+##Add geom table
+sf::st_write(parPropGeom, dsn=conn, layer="parcel_property_geom",  overwrite = FALSE, append = FALSE)
+
+##Add regular tables
+if(!RPostgreSQL::dbExistsTable(conn, "property")){
+  RPostgreSQL::dbWriteTable(conn, "property", prop)
+}
+
+if(!RPostgreSQL::dbExistsTable(conn, "taxpayer_property")){
+  RPostgreSQL::dbWriteTable(conn, "taxpayer_property", taxProp)
+}
+
+if(!RPostgreSQL::dbExistsTable(conn, "year")){
+  RPostgreSQL::dbWriteTable(conn, "year", year)
+}
+
+if(!RPostgreSQL::dbExistsTable(conn, "taxpayer")){
+  RPostgreSQL::dbWriteTable(conn, "taxpayer", tax)
+}
+
+if(!RPostgreSQL::dbExistsTable(conn, "owner_taxpayer")){
+  RPostgreSQL::dbWriteTable(conn, "owner_taxpayer", ownTax)
+}
+
+
+##create PKs
+dbSendQuery(conn,  paste("ALTER TABLE parcel_property_geom",
+                         "ADD CONSTRAINT parcel_property_pk",
+                         "PRIMARY KEY (parprop_id);"))
+
+dbSendQuery(conn,  paste("ALTER TABLE property",
+                         "ADD CONSTRAINT property_pk",
+                         "PRIMARY KEY (prop_id);"))
+
+dbSendQuery(conn,  paste("ALTER TABLE taxpayer_property",
+                         "ADD CONSTRAINT taxpayer_property_pk",
+                         "PRIMARY KEY (taxparprop_id);"))
+
+dbSendQuery(conn,  paste("ALTER TABLE year",
+                         "ADD CONSTRAINT year_pk",
+                         "PRIMARY KEY (taxparprop_id, praxisyear);"))
+
+dbSendQuery(conn,  paste("ALTER TABLE taxpayer",
+                         "ADD CONSTRAINT taxpayer_pk",
+                         "PRIMARY KEY (tp_id);"))
+
+dbSendQuery(conn,  paste("ALTER TABLE owner_taxpayer",
+                         "ADD CONSTRAINT owner_taxpayer_pk",
+                         "PRIMARY KEY (owntax_id);"))
+
+
+##create Fks
+dbSendQuery(conn, paste("ALTER TABLE property",
+                        "ADD CONSTRAINT property_fk FOREIGN KEY (parprop_id) REFERENCES parcel_property_geom (parprop_id);"))
+
+dbSendQuery(conn, paste("ALTER TABLE taxpayer_property",
+                        "ADD CONSTRAINT taxpayer_property_prop_fk FOREIGN KEY (prop_id) REFERENCES property (prop_id);"))
+dbSendQuery(conn, paste("ALTER TABLE taxpayer_property",
+                        "ADD CONSTRAINT taxpayer_property_tp_fk FOREIGN KEY (tp_id) REFERENCES taxpayer (tp_id);"))
+
+dbSendQuery(conn, paste("ALTER TABLE year",
+                        "ADD CONSTRAINT year_fk FOREIGN KEY (taxparprop_id) REFERENCES taxpayer_property (taxparprop_id)"))
+
+dbSendQuery(conn, paste("ALTER TABLE taxpayer",
+                        "ADD CONSTRAINT taxpayer_fk FOREIGN KEY (owntax_id) REFERENCES owner_taxpayer (owntax_id)"))
 
 ##Test joins
 # geomName <- names(geomList[1])
