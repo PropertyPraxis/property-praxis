@@ -92,12 +92,16 @@ rm(list=c("csvObjs",
 
 
 ##DETROIT DATA GEOJSON######
+##parcel data
 try({
   gjUrl <- "https://opendata.arcgis.com/datasets/a210575930354d758c12d7f45eebaa2f_0.geojson"
   gj <- geojson_sf(gjUrl)
 }) 
-
-
+##zipcode data
+try({
+  zipUrl <- "https://opendata.arcgis.com/datasets/f6273f93db1b4f57b7091ef1f43271e7_0.geojson"
+  zips <- geojson_sf(zipUrl)
+}) 
 #################################
 ##TABLE CLEANING / PREP PHASE
 ################################
@@ -411,7 +415,7 @@ geomList2 <- lapply(seq_along(geomList), function(i){
 geomAll <- bind_cols(geomList2)
 geomCols <- names(geomAll)[str_detect(names(geomAll), "geom")]
 parPropGeom <- geomAll[,c("parprop_id", "parcelno", "propaddr", geomCols)]
-st_geometry(parPropGeom) <- "gj"
+# st_geometry(parPropGeom) <- "gj"
 
   
 ##Remove intermediary tables from local env
@@ -451,8 +455,9 @@ pgListGeom(conn, geog = TRUE)
 #                    WHERE table_schema='ppraxis'")
 
 ####using the public schema
-##Add geom table
+##Add geom tables
 sf::st_write(parPropGeom, dsn=conn, layer="parcel_property_geom",  overwrite = FALSE, append = FALSE)
+sf::st_write(zips, dsn=conn, layer="zips_geom",  overwrite = FALSE, append = FALSE)
 
 ##Add regular tables
 if(!RPostgreSQL::dbExistsTable(conn, "property")){

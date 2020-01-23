@@ -12,7 +12,7 @@ services:
       - "5000:5000"
     # command: npm run start
     volumes:
-      - ./server:/app/
+      - ./server/:/app/
       - /app/node_modules
   web:
     ##this is the dev client
@@ -24,7 +24,7 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - ./client:/app/
+      - ./client/:/app/
       - /app/node_modules
 
   # tests:

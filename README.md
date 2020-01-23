@@ -133,10 +133,27 @@ or close active terminal with -d flag
 docker-compose up -d
 ```
 
+## Troubleshooting
+There may be a case where node modules are not installed in a container due to data volumes.
+See this SO post:
+https://stackoverflow.com/questions/30043872/docker-compose-node-modules-not-present-in-a-volume-after-npm-install-succeeds#comment63254549_32785014
+
+You can fix this by either installing directly in the container when package.json changes or
+by running this command:
+```
+docker-compose rm
+docker-compose up --build
+```
+
 # Addtional Unfinished Instructions are below.  
 To connect to the database from host terminal
 ```
 psql postgres://<username>:<databasepassword>@localhost:35432/db
+```
+
+If you get a an timed out error in docker-compose up --build run
+```
+sudo service docker restart
 ```
 
 To run the front-end build in Nginx, naigate to the 
