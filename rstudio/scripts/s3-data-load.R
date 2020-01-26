@@ -43,10 +43,8 @@ warning=function(w){
 })
 
 ###
-AWSObjectsTo(bucket){
-  
-  
-} 
+# AWSObjectsTo(bucket){
+#   } 
 ######
 
 
@@ -110,8 +108,6 @@ gc(rm(list=c("csvObjs",
 try({
   gjUrl <- Sys.getenv("PARCELS_URL")
   gj <- geojson_sf(gjUrl)
-  ##add it to the shpList
-  shpList[["gj"]] <- gj
 }) 
 ##Get zipcode data
 try({
@@ -205,6 +201,8 @@ parcelnoFixer <- function (df){
 ##fix names to follow the other praxis data
 names(gj) <- str_replace_all(names(gj), "_", "")
 gj <- nameFixer(gj)
+##add it to the shpList
+shpList[["gj"]] <- gj
 
 ##Fix col names
 csvList <- lapply(csvList, nameFixer)
@@ -593,6 +591,25 @@ dbSendQuery(conn, paste("DROP VIEW IF EXISTS current_parcels;",
 
 
 ##testing queries
+# shpName <- names(shpList[4])
+# shp <- shpList[[shpName]][!is.na(shpList[[shpName]]$parcelno),
+#                           c("parcelno", "propaddr", "geometry")]
+# # shp <- shp[!duplicated(shp),]
+# shp$tmp_id <- paste0(shp$parcelno, shp$propaddr)
+# dupIds <- unique(shp$tmp_id[duplicated(shp$tmp_id)])
+# dupShp <- shp[shp$tmp_id %in% dupIds, ]
+# dupShp <- dupShp %>% group_by(parcelno, propaddr) %>% 
+#   summarise(geometry=st_union(geometry), geom_agg_count=n())
+# 
+# uniShp <- shp[!shp$tmp_id %in% dupIds, ]
+# shp <- bind_rows(dupShp, uniShp)
+# 
+# geom <- parProp %>% 
+#   inner_join(shp, by=c("parcelno", "propaddr"))
+# geom <- geom[,c("parprop_id", "parcelno", "propaddr", "geom_agg_count", "geometry")]
+# geom <- st_as_sf(geom[!duplicated(geom),])
+# st_crs(geom) = 4326
+
 # x <- dbGetQuery(conn, paste("SELECT DISTINCT ppg.parprop_id, ppg.parcelno, ppg.propaddr, ot.own_id, geom_gj FROM parcel_property_geom AS ppg",
 #                         "LEFT JOIN property AS p ON ppg.parprop_id = p.parprop_id",
 #                        "LEFT JOIN taxpayer_property AS tp ON p.prop_id = tp.prop_id",
