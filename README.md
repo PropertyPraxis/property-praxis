@@ -151,10 +151,13 @@ To connect to the database from host terminal
 psql postgres://<username>:<databasepassword>@localhost:35432/db
 ```
 
-If you get a an timed out error in docker-compose up --build run
+If you get a an timed out error in `docker-compose up --build` run
 ```
 sudo service docker restart
+export DOCKER_CLIENT_TIMEOUT=120
+export COMPOSE_HTTP_TIMEOUT=120
 ```
+https://stackoverflow.com/questions/42230536/docker-compose-up-times-out-with-unixhttpconnectionpool
 
 To run the front-end build in Nginx, naigate to the 
 client directory and run:

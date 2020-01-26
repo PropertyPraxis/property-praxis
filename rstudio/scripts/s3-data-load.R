@@ -3,13 +3,14 @@ if(!require(httr)) install.packages("httr")
 if(!require(aws.s3)) install.packages("aws.s3")
 if(!require(rpostgis)) install.packages("rpostgis")
 if(!require(readr)) install.packages("readr")
+if(!require(readr)) install.packages("readxl")
 if(!require(stringr)) install.packages("stringr")
 if(!require(dplyr)) install.packages("dplyr")
 if(!require(sf)) install.packages("sf")
 if(!require(geojsonsf)) install.packages("geojsonsf")
 if(!require(dotenv)) install.packages("dotenv")
 if(!require(pacman)) install.packages("pacman"); library(pacman)
-p_load(aws.s3, httr, rpostgis, readr, stringr, dplyr, sf, geojsonsf, dotenv)
+p_load(aws.s3, httr, rpostgis, readr, readxl, stringr, dplyr, sf, geojsonsf, dotenv)
 
 #################
 ##ENV SETUP PHASE
@@ -30,6 +31,7 @@ dotenv::load_dot_env(file = paste0(homeDir, "/pp-pipeline/scripts/rstudio.env"))
 ##Note if there is a 403 error, you may need to docker-compose up --build
 tryCatch({
   ppBucket <- get_bucket("property-praxis")
+  
   ##functionto get file names
   getBucketNames <- function(x){
     return(x[[1]][1])
@@ -39,10 +41,20 @@ tryCatch({
 warning=function(w){
   print(w)
 })
+
+###
+AWSObjectsTo(bucket){
   
+  
+} 
+######
+
+
+
 ##separate file names into different lists
 s3FileNames <- lapply(ppBucket, getBucketNames)
-s3Csvs <- s3FileNames[str_detect(s3FileNames, ".csv") & str_detect(s3FileNames, "PPlusFinal")] ##leave out proxiswide.csv
+# s3Csvs <- s3FileNames[str_detect(s3FileNames, ".csv") & str_detect(s3FileNames, "PPlusFinal")] ##leave out proxiswide.csv
+s3Csvs <- s3FileNames[str_detect(s3FileNames, ".csv") & str_detect(s3FileNames, "_edit")] ##these are the edited files with field_21 added
 s3Shpfiles <- s3FileNames[str_detect(s3FileNames, "shp.zip")] 
   
 ##Create the directories to dump the files from aws
@@ -60,55 +72,71 @@ names(shpObjs) <- s3Shpfiles
   
 ##read to local env and write the binary object to disk for persistent storage
 csvList <- lapply(seq_along(csvObjs), function(i){
-  csv <- read_csv(rawToChar(csvObjs[[i]]), col_types = cols(propzip=col_character()))
+  csv <- read_csv(rawToChar(csvObjs[[i]]), col_types = cols(propzip=col_character(), parcelno=col_character()))
   csvName <- basename(s3Csvs[[i]])
   write_csv(csv, file.path(csvDir, csvName))
   return(csv)
 })
-names(csvList) <- lapply(s3Csvs, function(x) basename(x)) %>% str_replace(".csv", "")
-  
+# names(csvList) <- lapply(s3Csvs, function(x) basename(x)) %>% str_replace(".csv", "")
+names(csvList) <- lapply(s3Csvs, function(x) basename(x)) %>% 
+  str_replace("_edit.csv", "") 
+
+
 shpList <- lapply(seq_along(shpObjs), function(i){
   shpZipName <- basename(s3Shpfiles[[i]])
   shpName <- shpZipName %>% str_replace(".zip", "")
   writeBin(shpObjs[[i]], file.path(shpDir, shpZipName))
   unzip(file.path(shpDir, shpZipName), exdir=shpDir)
-  shp <- st_read(file.path(shpDir, shpName))
+  shp <- st_read(file.path(shpDir, shpName), stringsAsFactors=FALSE)
   return(shp)
 })
-names(shpList) <- lapply(s3Shpfiles, function(x) basename(x)) %>% str_replace(".shp.zip", "")
-
-
+names(shpList) <- lapply(s3Shpfiles, function(x) basename(x)) %>% 
+  str_replace(".shp.zip", "")
 
 ##clean up the global env
 #csvNames <- lapply(s3Csvs, function(x) basename(x)) %>% str_replace(".csv", "")
 #shpNames <- lapply(s3Shpfiles, function(x) basename(x)) %>% str_replace(".shp.zip", "")
-rm(list=c("csvObjs", 
+gc(rm(list=c("csvObjs", 
           "shpObjs", 
           "s3Csvs", 
           "s3Shpfiles", 
           "s3FileNames", 
           "ppBucket", 
-          "getBucketNames")); gc()
+          "getBucketNames")))
 
 
 ##DETROIT DATA GEOJSON######
-##parcel data
+##Get parcel data
 try({
-  gjUrl <- "https://opendata.arcgis.com/datasets/a210575930354d758c12d7f45eebaa2f_0.geojson"
+  gjUrl <- Sys.getenv("PARCELS_URL")
   gj <- geojson_sf(gjUrl)
+  ##add it to the shpList
+  shpList[["gj"]] <- gj
 }) 
-##zipcode data
+##Get zipcode data
 try({
-  zipUrl <- "https://opendata.arcgis.com/datasets/f6273f93db1b4f57b7091ef1f43271e7_0.geojson"
+  zipUrl <- Sys.getenv("ZIP_URL")
   zips <- geojson_sf(zipUrl)
 }) 
+
 #################################
 ##TABLE CLEANING / PREP PHASE
 ################################
 
 ##Tables:
 ## 1. parcels_property
+## 2. owner_taxpayer
+## 3. parcel_property_geom
+## 4. property
+## 5. taxpayer          
+## 6. taxpayer_property       
+## 7. year             
+## 8. zips_geom
 
+##Views:
+## TDB
+
+####Function
 ##function to fix the differences in the names in each df
 ##any of the name chages should go in this fucntion
 nameFixer <- function(df){
@@ -145,6 +173,34 @@ addYear <- function(i, dfs){
   return(tmp_df)
 }
 
+###function to make the parcel numbers be the same in csv and shp
+
+parcelnoFixer <- function (df){
+  col <- df$parcelno
+  
+  ##add the period that was removed
+  newCol <- lapply(col, function(val){
+    if(str_detect(val, fixed(".")) || str_detect(val, fixed("-"))){
+      return(val)
+    }else{
+      return(paste0(val, "."))
+    }
+  })
+  
+  
+  ##add the zero that was removed
+  zeroCol <- lapply(newCol, function(val){
+    if(nchar(val) == 8 && str_sub(val, start = -1, end = -1) == "."){
+      return(paste0("0", val))
+    }else{
+      return(val)
+    }
+  })
+  df$parcelno <- unlist(zeroCol)
+  return(df)
+}
+
+
 ##fix the geojson names
 ##fix names to follow the other praxis data
 names(gj) <- str_replace_all(names(gj), "_", "")
@@ -154,6 +210,9 @@ gj <- nameFixer(gj)
 csvList <- lapply(csvList, nameFixer)
 ##Add the year col
 csvList <- lapply(seq_along(csvList), addYear, dfs=csvList)
+##fix parcelno col
+csvList <- lapply(csvList, parcelnoFixer)
+
 
 ##Cols to keep
 ppCols <- c("taxpayer1", 
@@ -179,7 +238,8 @@ ppCols <- c("taxpayer1",
             "totsqft",
             "totacres",
             "cityrbuilt",
-            "resyrbuilt"
+            "resyrbuilt",
+            "field_21"
             #these last geom fields
             #need to be recalculated
             # "latitude",
@@ -194,7 +254,7 @@ ppFull <- ppFull[, ppCols]
 ppFull <- ppFull[!duplicated(ppFull),]
 
 ##cleanup env 
-rm(list=c("csvList")); gc()
+gc(rm(list=c("csvList")))
 ##parcels_property table
 parPropCols <- c("parcelno", "propaddr") #PK
 parProp <- ppFull[,parPropCols]
@@ -214,7 +274,8 @@ prop <- ppFull[,propCols]
 prop <- prop[!duplicated(prop),]
 prop$prop_id <- paste("prop", 1:nrow(prop), sep="-")
 ##add parprop_id to prop table
-prop <- parProp %>% full_join(prop, by=c("parcelno"="parcelno", "propaddr"="propaddr"))
+prop <- parProp %>% 
+  full_join(prop, by=c("parcelno"="parcelno", "propaddr"="propaddr"))
 
 ##owner_taxpayer table
 ownTaxCols <- c("taxpayer1", "own_id")
@@ -374,7 +435,8 @@ praxiscount <- taxParPropYear %>%
   group_by(praxisyear, own_id) %>% 
   summarise(count=sum(n()))
 
-shpList[["gj"]] <- gj
+##
+# shpList[["gj"]] <- gj
 ##geom table (uses praxis shaefiles and geojson)
 geomList <- lapply(seq_along(shpList), function(i){
   shpName <- names(shpList[i])
@@ -398,8 +460,6 @@ geomList <- lapply(seq_along(shpList), function(i){
   return(geom)
 })
 
-##Add the geojson to the list
-# geomList[["gj"]] <- gj
 names(geomList) <- c(paste0("geom_", str_sub(names(shpList), start=-4, end=-1)))
 
 #######
@@ -415,15 +475,22 @@ geomList2 <- lapply(seq_along(geomList), function(i){
 geomAll <- bind_cols(geomList2)
 geomCols <- names(geomAll)[str_detect(names(geomAll), "geom")]
 parPropGeom <- geomAll[,c("parprop_id", "parcelno", "propaddr", geomCols)]
-# st_geometry(parPropGeom) <- "gj"
 
-  
+
+
+
+
 ##Remove intermediary tables from local env
-rm(list=c("taxParProp",
+gc(rm(list=c("taxParProp",
           "taxParPropwIds",
           "shpList",
           "geomList",
-          "geomList2")); gc()
+          "geomList2",
+          "taxParPropYear",
+          "gj",
+          "ppFull",
+          "parProp")))
+
 
 ###################
 ##DB POPULATING PHASE
@@ -432,8 +499,8 @@ rm(list=c("taxParProp",
 conn <- RPostgreSQL::dbConnect("PostgreSQL", 
                                host = "postgres",
                                dbname = "db", 
-                               user = "user", 
-                               password = "pass")
+                               user = Sys.getenv("DB_USER"), 
+                               password = Sys.getenv("DB_PASSWORD"))
 ##get PG version
 dbGetQuery(conn, 'SELECT version();')
 #check that Post GIS is installed
@@ -441,42 +508,36 @@ pgPostGIS(conn)
 pgListGeom(conn, geog = TRUE)
 
 
-# dbSendQuery(conn, "CREATE SCHEMA ppraxis;")
-#pgInsert(conn, name=c("ppraxis", "parcel_property_geom"), data.obj=parPropGeom, geom="geom_gj")
-
-# sf::st_write(parPropGeom, dsn=conn, Id(schema="ppraxis", table="parcel_property_geom"),  overwrite = FALSE, append = FALSE)
-# dbSendQuery(conn, "DROP TABLE IF EXISTS tax_property;")
-# dbSendQuery(conn, "DROP TABLE IF EXISTS ppraxis")
-# 
-# dbGetQuery(conn, "SELECT * parcel_property_geom;")
-# dbListFields(conn, "*")
-# dbGetQuery(conn,
-#            "SELECT * FROM information_schema.tables
-#                    WHERE table_schema='ppraxis'")
-
 ####using the public schema
 ##Add geom tables
-sf::st_write(parPropGeom, dsn=conn, layer="parcel_property_geom",  overwrite = FALSE, append = FALSE)
-sf::st_write(zips, dsn=conn, layer="zips_geom",  overwrite = FALSE, append = FALSE)
+dbSendQuery(conn, "DROP TABLE IF EXISTS parcel_property_geom CASCADE;")
+sf::st_write(parPropGeom, dsn=conn, layer="parcel_property_geom",  overwrite = TRUE, append = FALSE)
+dbSendQuery(conn, "DROP TABLE IF EXISTS zips_geom CASCADE;")
+sf::st_write(zips, dsn=conn, layer="zips_geom",  overwrite = TRUE, append = FALSE)
 
 ##Add regular tables
-if(!RPostgreSQL::dbExistsTable(conn, "property")){
+if(RPostgreSQL::dbExistsTable(conn, "property")){
+  RPostgreSQL::dbSendQuery(conn, "DROP TABLE IF EXISTS property CASCADE;")
   RPostgreSQL::dbWriteTable(conn, "property", prop)
 }
 
-if(!RPostgreSQL::dbExistsTable(conn, "taxpayer_property")){
+if(RPostgreSQL::dbExistsTable(conn, "taxpayer_property")){
+  RPostgreSQL::dbSendQuery(conn, "DROP TABLE IF EXISTS taxpayer_property CASCADE;")
   RPostgreSQL::dbWriteTable(conn, "taxpayer_property", taxProp)
 }
 
-if(!RPostgreSQL::dbExistsTable(conn, "year")){
+if(RPostgreSQL::dbExistsTable(conn, "year")){
+  RPostgreSQL::dbSendQuery(conn, "DROP TABLE IF EXISTS year CASCADE;")
   RPostgreSQL::dbWriteTable(conn, "year", year)
 }
 
-if(!RPostgreSQL::dbExistsTable(conn, "taxpayer")){
+if(RPostgreSQL::dbExistsTable(conn, "taxpayer")){
+  RPostgreSQL::dbSendQuery(conn, "DROP TABLE IF EXISTS taxpayer CASCADE;")
   RPostgreSQL::dbWriteTable(conn, "taxpayer", tax)
 }
 
-if(!RPostgreSQL::dbExistsTable(conn, "owner_taxpayer")){
+if(RPostgreSQL::dbExistsTable(conn, "owner_taxpayer")){
+  RPostgreSQL::dbSendQuery(conn, "DROP TABLE IF EXISTS owner_taxpayer CASCADE;")
   RPostgreSQL::dbWriteTable(conn, "owner_taxpayer", ownTax)
 }
 
@@ -522,7 +583,109 @@ dbSendQuery(conn, paste("ALTER TABLE year",
 dbSendQuery(conn, paste("ALTER TABLE taxpayer",
                         "ADD CONSTRAINT taxpayer_fk FOREIGN KEY (owntax_id) REFERENCES owner_taxpayer (owntax_id)"))
 
-##Test joins
+
+##Create Views
+dbSendQuery(conn, paste("DROP VIEW IF EXISTS current_parcels;",
+                        "CREATE VIEW current_parcels AS",
+                        "SELECT ppg.parprop_id, ppg.parcelno, ppg.propaddr, ppg.geom_gj FROM parcel_property_geom AS ppg",
+                        "LEFT JOIN property AS p ON ppg.parprop_id = p.parprop_id;"))
+
+
+
+##testing queries
+# x <- dbGetQuery(conn, paste("SELECT DISTINCT ppg.parprop_id, ppg.parcelno, ppg.propaddr, ot.own_id, geom_gj FROM parcel_property_geom AS ppg",
+#                         "LEFT JOIN property AS p ON ppg.parprop_id = p.parprop_id",
+#                        "LEFT JOIN taxpayer_property AS tp ON p.prop_id = tp.prop_id",
+#                        "LEFT JOIN taxpayer AS t ON tp.tp_id = t.tp_id",
+#                        "LEFT JOIN owner_taxpayer AS ot ON t.owntax_id = ot.owntax_id;"))
+# 
+# 
+# 
+# # x <- dbGetQuery(conn, "SELECT * FROM current_parcels;")
+# gemo_gj <- sf::st_read(conn, query=paste("SELECT DISTINCT ppg.parprop_id, ppg.parcelno, ppg.propaddr, ot.own_id, geom_gj FROM parcel_property_geom AS ppg",
+#                                    "INNER JOIN property AS p ON ppg.parprop_id = p.parprop_id",
+#                                    "INNER JOIN taxpayer_property AS tp ON p.prop_id = tp.prop_id",
+#                                    "INNER JOIN taxpayer AS t ON tp.tp_id = t.tp_id",
+#                                    "INNER JOIN owner_taxpayer AS ot ON t.owntax_id = ot.owntax_id;"))
+# 
+# 
+# geom_2017 <- sf::st_read(conn, query=paste("SELECT DISTINCT ppg.parprop_id, ppg.parcelno, ppg.propaddr, ot.own_id, y.praxisyear, geom_2017 FROM parcel_property_geom AS ppg",
+#                                            "INNER JOIN property AS p ON ppg.parprop_id = p.parprop_id",
+#                                            "INNER JOIN taxpayer_property AS tp ON p.prop_id = tp.prop_id",
+#                                            "INNER JOIN year AS y on tp.taxparprop_id = y.taxparprop_id",
+#                                            "INNER JOIN taxpayer AS t ON tp.tp_id = t.tp_id",
+#                                            "INNER JOIN owner_taxpayer AS ot ON t.owntax_id = ot.owntax_id",
+#                                            "WHERE y.praxisyear = 2017"))
+# 
+# ##Test joins
+# ######### TEST>>>>>>>>>>>
+# ##2016 csv
+# csv2015 <- csvList[[1]]
+# shp2015 <- shpList[[1]]
+# csv2016 <- csvList[[2]]
+# shp2016 <- shpList[[2]]
+# csv2017 <- csvList[[3]]
+# shp2017 <- shpList[[3]]
+# 
+# shp2017sub <- shp2017[shp2017$propaddr %in% "605 CHALMERS", ]
+# csv2017sub <- csv2017[csv2017$propaddr %in% "605 CHALMERS" ,]
+# pp2017 <- parPropGeom[parPropGeom$propaddr %in% "605 CHALMERS",]
+# 
+# 
+# csv2017sub2 <- csv2017[csv2017$propaddr %in% c("17415 OMIRA", "1734 VIRGINIA PARK", "289 WORCESTER P") ,]
+# shp2017sub2 <- shp2017[shp2017$propaddr %in% c("17415 OMIRA", "1734 VIRGINIA PARK", "289 WORCESTER P") ,]
+# pp20172 <- parPropGeom[parPropGeom$propaddr %in% c("17415 OMIRA", "1734 VIRGINIA PARK", "289 WORCESTER P") ,]
+# ppt <- bind_rows(csv2017sub2, shp2017sub2, pp20172 )
+# 
+# 
+# ppgeomsub <- parPropGeom[(length(parPropGeom$geom_2015) == 0),]
+# 
+# len_2015 <- sapply(parPropGeom$geom_2015[1:10], function(x){
+#   length(x)
+# })
+# 
+# 
+# 
+# ########TEST^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^6
+# z <- parPropGeom[parPropGeom$propaddr %in% "1545 CHERBONEAU PL",]
+# s <- shpList[[3]]
+# s <- s[s$propaddr %in% "1545 CHERBONEAU PL",]
+# 
+# p <- parProp[parProp$propaddr %in% "1545 CHERBONEAU PL",]
+# 
+# c <- ppFull[ppFull$propaddr %in% "1545 CHERBONEAU PL", ]
+# c1 <- csvList[[1]] 
+# c1 <- c1[c1$propaddr %in% "1545 CHERBONEAU PL", ]
+# c2 <- csvList[[2]] 
+# c2 <- c2[c2$propaddr %in% "1545 CHERBONEAU PL", ]
+# c3 <- csvList[[3]] 
+# c3 <- c3[c3$propaddr %in% "1545 CHERBONEAU PL", ]
+# 
+# r <- read_csv(rawToChar(csvObjs[[3]]), col_types = cols(propzip=col_character(), parcelno=col_character()))
+# r <- r[r$propaddr %in% "1545 CHERBONEAU PL", ]
+# 
+# r2 <- read_csv("/home/rstudio/pp-pipeline/data/csvs/PPlusFinal_2017.csv", col_types = cols(propzip=col_character(), parcelno=col_character()))
+# r2 <- r2[r2$propaddr %in% "1545 CHERBONEAU PL", ]
+# 
+# r2o <- read_csv("/home/rstudio/pp-pipeline/data/PPlusFinal_2017.csv", col_types = cols(propzip=col_character(), parcelno=col_character()), trim_ws = TRUE)
+# r2o <- r2o[r2o$propaddr %in% "1545 CHERBONEAU PL", ]
+# 
+# xl <- read_xlsx("/home/rstudio/pp-pipeline/data/PPlusFinal_2017.xlsx")
+# 
+# r2oo <- read.csv("/home/rstudio/pp-pipeline/data/PPlusFinal_2017.csv",  colClasses=c("parcelno"="character"))
+# 
+# 
+# gjc <- gj[gj$propaddr %in%"1545 CHERBONEAU PL",]
+# 
+# g <- geomList[[3]]
+# g <- g[g$propaddr %in% "1545 CHERBONEAU PL",]
+# 
+# pp <- get_object("praxis_csvs/PPlusFinal_2017.csv", bucket = "property-praxis")
+# 
+# ppr <- read_csv2(rawToChar(pp))
+# ppr <- ppr[ppr$propaddr %in%"1545 CHERBONEAU PL",]
+# 
+# sh17 <- 
 # geomName <- names(geomList[1])
 # geom <- geomList[[geomName]][,c("parprop_id", "geometry")] %>%
 #   right_join(parProp, by=c("parprop_id"))

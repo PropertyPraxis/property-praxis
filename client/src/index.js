@@ -6,6 +6,7 @@ import L from "leaflet"; //regular leaflet
 import reducer from "./reducers";
 import middleware from "./middleware";
 import "leaflet/dist/leaflet.css"; //regular leaflet css
+import 'mapbox-gl/dist/mapbox-gl.css'; //mapbox css
 import "./scss/index.scss";
 import App from "./components/App";
 import * as serviceWorker from "./serviceWorker";

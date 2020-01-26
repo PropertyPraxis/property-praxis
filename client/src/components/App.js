@@ -1,6 +1,7 @@
 import React from "react";
 import { handleGetInitialMapDataAction } from "../actions/mapData";
 import { connect } from "react-redux";
+import MapContainer from "./Map/MapContainer";
 import "../scss/App.scss";
 
 class App extends React.Component {
@@ -18,7 +19,7 @@ class App extends React.Component {
     if (loadingState) {
       return "Loading...";
     } else {
-      return JSON.stringify(this.props.mapData);
+      return <MapContainer />;
     }
   }
 }

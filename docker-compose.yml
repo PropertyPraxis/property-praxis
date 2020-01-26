@@ -21,6 +21,7 @@ services:
       dockerfile: Dockerfile.dev
     depends_on:
       - api
+    env_file: ./envs/web.env
     ports:
       - "3000:3000"
     volumes:
