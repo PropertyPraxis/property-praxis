@@ -11,3 +11,35 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+/* This is to make sure that 
+embedded components behave in 
+the content box way.
+ */
+ *,
+ *:before,
+ *:after {
+   box-sizing: inherit;
+ }
+ 
+ /* set max width for images
+  so they are never wider than page*/
+ img {
+   max-width: 100%;
+ }
+ 
+ ul {
+   padding: 0;
+ }
+ 
+ li {
+   list-style-type: none;
+ }
+ 
+ a {
+   text-decoration: none !important;
+ }
+ 
+ a:visited {
+   text-decoration: none !important;
+ }

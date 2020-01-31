@@ -583,13 +583,72 @@ dbSendQuery(conn, paste("ALTER TABLE taxpayer",
 
 
 ##Create Views
-dbSendQuery(conn, paste("DROP VIEW IF EXISTS current_parcels;",
-                        "CREATE VIEW current_parcels AS",
-                        "SELECT ppg.parprop_id, ppg.parcelno, ppg.propaddr, ppg.geom_gj FROM parcel_property_geom AS ppg",
-                        "LEFT JOIN property AS p ON ppg.parprop_id = p.parprop_id;"))
+##These need to be automated
+##parcels_2017
+dbSendQuery(conn, paste("DROP VIEW IF EXISTS parcels_2017;",
+                        "CREATE VIEW parcels_2017 AS",
+                        "(SELECT DISTINCT y.praxisyear, ot.own_id, count.count, geom_2017 FROM parcel_property_geom AS ppg",
+                        "INNER JOIN property AS p ON ppg.parprop_id = p.parprop_id",
+                        "INNER JOIN taxpayer_property AS tp ON p.prop_id = tp.prop_id",
+                        "INNER JOIN year AS y on tp.taxparprop_id = y.taxparprop_id",
+                        "INNER JOIN taxpayer AS t ON tp.tp_id = t.tp_id",
+                        "INNER JOIN owner_taxpayer AS ot ON t.owntax_id = ot.owntax_id",
+                        "INNER JOIN (",
+                          "SELECT DISTINCT y.praxisyear, STRING_AGG(DISTINCT ot.own_id, ',') AS own_id, COUNT(ot.own_id) FROM parcel_property_geom AS ppg",
+                          "INNER JOIN property AS p ON ppg.parprop_id = p.parprop_id",
+                          "INNER JOIN taxpayer_property AS tp ON p.prop_id = tp.prop_id",
+                          "INNER JOIN year AS y on tp.taxparprop_id = y.taxparprop_id",
+                          "INNER JOIN taxpayer AS t ON tp.tp_id = t.tp_id",
+                          "INNER JOIN owner_taxpayer AS ot ON t.owntax_id = ot.owntax_id",
+                          "GROUP BY y.praxisyear, ot.own_id)", 
+                        "AS count ON y.praxisyear = count.praxisyear AND ot.own_id = count.own_id",
+                        "WHERE y.praxisyear = 2017 AND count.count > 9);"))
+##parcels_centroid_2017
+dbSendQuery(conn, paste("DROP VIEW IF EXISTS parcels_centroid_2017;",
+                        "CREATE VIEW parcels_centroid_2017 AS",
+                        "(SELECT DISTINCT y.praxisyear, ot.own_id, count.count, ST_CENTROID(geom_2017) as centroid FROM parcel_property_geom AS ppg",
+                        "INNER JOIN property AS p ON ppg.parprop_id = p.parprop_id",
+                        "INNER JOIN taxpayer_property AS tp ON p.prop_id = tp.prop_id",
+                        "INNER JOIN year AS y on tp.taxparprop_id = y.taxparprop_id",
+                        "INNER JOIN taxpayer AS t ON tp.tp_id = t.tp_id",
+                        "INNER JOIN owner_taxpayer AS ot ON t.owntax_id = ot.owntax_id",
+                        "INNER JOIN (",
+                          "SELECT DISTINCT y.praxisyear, STRING_AGG(DISTINCT ot.own_id, ',') AS own_id, COUNT(ot.own_id) FROM parcel_property_geom AS ppg",
+                          "INNER JOIN property AS p ON ppg.parprop_id = p.parprop_id",
+                          "INNER JOIN taxpayer_property AS tp ON p.prop_id = tp.prop_id",
+                          "INNER JOIN year AS y on tp.taxparprop_id = y.taxparprop_id",
+                          "INNER JOIN taxpayer AS t ON tp.tp_id = t.tp_id",
+                          "INNER JOIN owner_taxpayer AS ot ON t.owntax_id = ot.owntax_id",
+                          "GROUP BY y.praxisyear, ot.own_id)", 
+                        "AS count ON y.praxisyear = count.praxisyear AND ot.own_id = count.own_id",
+                        "WHERE y.praxisyear = 2017 AND count.count > 9);"))
+
+#####TESTING
+geom_2017 <- sf::st_read(conn, query=paste(paste("SELECT DISTINCT ROW_NUMBER() OVER (ORDER BY 1) AS id, y.praxisyear, ot.own_id, count.count, geom_2017 FROM parcel_property_geom AS ppg",
+                                             "INNER JOIN property AS p ON ppg.parprop_id = p.parprop_id",
+                                             "INNER JOIN taxpayer_property AS tp ON p.prop_id = tp.prop_id",
+                                             "INNER JOIN year AS y on tp.taxparprop_id = y.taxparprop_id",
+                                             "INNER JOIN taxpayer AS t ON tp.tp_id = t.tp_id",
+                                             "INNER JOIN owner_taxpayer AS ot ON t.owntax_id = ot.owntax_id",
+                                             "INNER JOIN (",
+                                               "SELECT DISTINCT y.praxisyear, STRING_AGG(DISTINCT ot.own_id, ',') AS own_id, COUNT(ot.own_id) FROM parcel_property_geom AS ppg",
+                                               "INNER JOIN property AS p ON ppg.parprop_id = p.parprop_id",
+                                               "INNER JOIN taxpayer_property AS tp ON p.prop_id = tp.prop_id",
+                                               "INNER JOIN year AS y on tp.taxparprop_id = y.taxparprop_id",
+                                               "INNER JOIN taxpayer AS t ON tp.tp_id = t.tp_id",
+                                               "INNER JOIN owner_taxpayer AS ot ON t.owntax_id = ot.owntax_id",
+                                               "GROUP BY y.praxisyear, ot.own_id) AS count ON y.praxisyear = count.praxisyear AND ot.own_id = count.own_id",
+                                             "WHERE y.praxisyear = 2017 AND count.count > 9")))
 
 
 
+own_count <- dbGetQuery(conn, paste("SELECT DISTINCT y.praxisyear, STRING_AGG(DISTINCT ot.own_id, ',') AS own_id, COUNT(ot.own_id) as count FROM parcel_property_geom AS ppg",
+                              "INNER JOIN property AS p ON ppg.parprop_id = p.parprop_id",
+                              "INNER JOIN taxpayer_property AS tp ON p.prop_id = tp.prop_id",
+                              "INNER JOIN year AS y on tp.taxparprop_id = y.taxparprop_id",
+                              "INNER JOIN taxpayer AS t ON tp.tp_id = t.tp_id",
+                              "INNER JOIN owner_taxpayer AS ot ON t.owntax_id = ot.owntax_id",
+                              "GROUP BY y.praxisyear, ot.own_id"))
 ##testing queries
 # shpName <- names(shpList[4])
 # shp <- shpList[[shpName]][!is.na(shpList[[shpName]]$parcelno),

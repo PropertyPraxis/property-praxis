@@ -1,14 +1,9 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
-import { getMapStateAction } from "../../actions/mapState";
-import ReactMapGL, {Source, Layer} from "react-map-gl";
+import PraxisMap from "./Map";
 
-//this token need to be hidden
+//this token needs to be hidden
 // const MAPBOX_TOKEN = process.env.MAPBOX_TOKEN;
-const MAPBOX_TOKEN =
-  "pk.eyJ1IjoidGltLWhpdGNoaW5zIiwiYSI6ImNqdmNzODZ0dDBkdXIzeW9kbWRtczV3dDUifQ.29F1kg9koRwGRwjg-vpD6A";
-// GeoJSON Data source used in vector tiles, documented at
-// https://gist.github.com/ryanbaumann/a7d970386ce59d11c16278b90dde094d
 
 class MapContainer extends Component {
   zipcodeFillLayer = {
@@ -62,25 +57,10 @@ class MapContainer extends Component {
   }
 
   render() {
-    return (
-      <ReactMapGL
-        {...this.props.mapState}
-        ref={reactMap => (this.reactMap = reactMap)}
-        width="100vw"
-        height="100vh"
-        mapStyle="mapbox://styles/tim-hitchins/ck5rden7f01t51in3cizqexql"
-        onViewportChange={viewport => {
-          this.props.dispatch(getMapStateAction(viewport));
-        }}
-        mapboxApiAccessToken={MAPBOX_TOKEN}
-        onClick={e => {
-          console.log("click: ", e);
-        }}
-      />
-    );
+    return <PraxisMap {...this.props} />;
   }
 }
-function mapStateToProps({ mapState, mapData }) {
-  return { mapState, mapData };
+function mapStateToProps({ mapState, mapData, currentFeature }) {
+  return { mapState, mapData, currentFeature };
 }
 export default connect(mapStateToProps)(MapContainer);

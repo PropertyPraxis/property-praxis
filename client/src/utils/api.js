@@ -7,3 +7,12 @@ export async function getInitialMapData(route) {
   }
   throw new Error(mapDataResponse.status);
 }
+
+export async function getInitialZipcodeData(route) {
+  const mapDataResponse = await fetch(route);
+  if (mapDataResponse.status === 200) {
+    const mapDataJson = await mapDataResponse.json();
+    return mapDataJson;
+  }
+  throw new Error(mapDataResponse.status);
+}
