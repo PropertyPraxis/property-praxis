@@ -1,0 +1,22 @@
+// search contanier is a grid item
+// see app.scss
+
+.search-container {
+  margin: 20px 20px 0 20px;
+  grid-row: 1;
+  grid-column: 1;
+  //   height: 40px;
+  // background-color: red;
+  border: blue solid 3px;
+  z-index: 10;
+  div {
+    width: 100%;
+  }
+}
+
+@media (max-width: 700px) {
+  .search-container {
+    grid-row: 1;
+    grid-column: 1 / span 3;
+  }
+}

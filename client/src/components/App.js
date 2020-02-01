@@ -5,6 +5,7 @@ import {
 } from "../actions/mapData";
 import { connect } from "react-redux";
 import MapContainer from "./Map/MapContainer";
+import SearchContainer from "./Search/SearchContainer";
 import PPLogo from "../Logo/Logo";
 import "../scss/App.scss";
 
@@ -32,7 +33,6 @@ class App extends React.Component {
     this.props.dispatch(
       handleGetInitialMapDataAction("http://localhost:5000/api/ppraxis")
     );
-
     this.props.dispatch(
       handleGetInitialZipcodeDataAction("http://localhost:5000/api/zipcodes")
     );
@@ -55,6 +55,7 @@ class App extends React.Component {
         <main>
           <div className="app-container">
             <MapContainer />
+            <SearchContainer />
             <PPLogo />
           </div>
         </main>

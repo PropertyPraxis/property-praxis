@@ -52,7 +52,7 @@ FROM (
     'properties', to_jsonb(inputs) - 'geom_2017'
   ) AS feature
   FROM (
-    SELECT * FROM parcels_2017
+    SELECT * FROM parcels_2017 LIMIT 1000
   ) inputs
 ) features;`;
 
@@ -81,7 +81,7 @@ FROM (
   SELECT jsonb_build_object(
     'type',       'Feature',
     'geometry',   ST_AsGeoJSON(geometry)::json,
-    'properties', to_jsonb(inputs)
+    'properties', to_jsonb(inputs) - 'geometry'
   ) AS feature
   FROM (
     SELECT * FROM zips_geom
