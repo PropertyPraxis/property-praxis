@@ -31,10 +31,10 @@ class App extends React.Component {
 
     //load data
     this.props.dispatch(
-      handleGetInitialMapDataAction("http://localhost:5000/api/ppraxis")
+      handleGetInitialMapDataAction("http://localhost:5000/api/geojson/parcels/2017")
     );
     this.props.dispatch(
-      handleGetInitialZipcodeDataAction("http://localhost:5000/api/zipcodes")
+      handleGetInitialZipcodeDataAction("http://localhost:5000/api/geojson/zipcodes")
     );
   }
 

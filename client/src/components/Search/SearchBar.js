@@ -1,6 +1,6 @@
 import React, { Component } from "react";
-import { CSSTransition } from "react-transition-group";
-import "../../scss/SearchBar.scss";
+import SearchResults from "./SearchResults";
+import "../../scss/Search.scss";
 
 class SearchBar extends Component {
   render() {
@@ -13,15 +13,15 @@ class SearchBar extends Component {
           <div>Zipcode</div>
         </div>
         <div className="search-bar">
-          <form className="search-form" >
+          <form className="search-form">
             <input
               type="text"
-              placeholder="Search Property Praxis.."
+              placeholder="Search Property Praxis..."
               name="search"
             ></input>
           </form>
         </div>
-        <div className="search-results">search results</div>
+        <SearchResults />
       </div>
     );
   }

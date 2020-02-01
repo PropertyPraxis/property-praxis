@@ -14,9 +14,8 @@
     grid-column: 1 / span 3;
     margin: auto 0;
   }
-  
 }
-
+//search options
 .search-options {
   display: flex;
   justify-content: space-evenly;
@@ -33,6 +32,7 @@
   }
 }
 
+//search bar
 .search-bar {
   width: 100%;
 }
@@ -50,3 +50,5 @@ input[type="text"] {
 input[type="text"]:focus {
   border: 3px solid #555;
 }
+
+//search results
