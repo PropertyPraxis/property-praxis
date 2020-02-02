@@ -9,10 +9,10 @@ const router = new Router();
 router.get("/:id", async (req, res) => {
   const { id } = req.params;
   const { rows } = await db.query(
-    "SELECT * FROM zips_geom WHERE zipcode = $1",
-    [id]
+    "SELECT * FROM property WHERE propzip LIKE $1",
+    [`${id}%`]
   );
-  res.send(rows[0]);
+  res.json(rows);
 });
 
 // export our router to be mounted by the parent application

@@ -1,8 +1,6 @@
 const express = require("express");
 const app = express();
 const mountRoutes = require("./routes"); //index.js
-
-const { Pool, Query } = require("pg");
 const morgan = require("morgan");
 const helmet = require("helmet");
 const cors = require("cors");
@@ -21,5 +19,5 @@ mountRoutes(app);
 
 
 app.listen(5000, () => {
-  console.log("listening on port 5000");
+  console.log("Listening on port 5000...");
 });

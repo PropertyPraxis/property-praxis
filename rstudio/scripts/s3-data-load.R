@@ -587,7 +587,7 @@ dbSendQuery(conn, paste("ALTER TABLE taxpayer",
 ##parcels_2017
 dbSendQuery(conn, paste("DROP VIEW IF EXISTS parcels_2017;",
                         "CREATE VIEW parcels_2017 AS",
-                        "(SELECT DISTINCT y.praxisyear, ot.own_id, count.count, geom_2017 FROM parcel_property_geom AS ppg",
+                        "(SELECT DISTINCT ROW_NUMBER() OVER (ORDER BY 1) AS id, y.praxisyear, ot.own_id, count.count, geom_2017 FROM parcel_property_geom AS ppg",
                         "INNER JOIN property AS p ON ppg.parprop_id = p.parprop_id",
                         "INNER JOIN taxpayer_property AS tp ON p.prop_id = tp.prop_id",
                         "INNER JOIN year AS y on tp.taxparprop_id = y.taxparprop_id",
@@ -606,7 +606,7 @@ dbSendQuery(conn, paste("DROP VIEW IF EXISTS parcels_2017;",
 ##parcels_centroid_2017
 dbSendQuery(conn, paste("DROP VIEW IF EXISTS parcels_centroid_2017;",
                         "CREATE VIEW parcels_centroid_2017 AS",
-                        "(SELECT DISTINCT y.praxisyear, ot.own_id, count.count, ST_CENTROID(geom_2017) as centroid FROM parcel_property_geom AS ppg",
+                        "(SELECT DISTINCT ROW_NUMBER() OVER (ORDER BY 1) AS id, y.praxisyear, ot.own_id, count.count, ST_CENTROID(geom_2017) as centroid FROM parcel_property_geom AS ppg",
                         "INNER JOIN property AS p ON ppg.parprop_id = p.parprop_id",
                         "INNER JOIN taxpayer_property AS tp ON p.prop_id = tp.prop_id",
                         "INNER JOIN year AS y on tp.taxparprop_id = y.taxparprop_id",
@@ -649,6 +649,43 @@ own_count <- dbGetQuery(conn, paste("SELECT DISTINCT y.praxisyear, STRING_AGG(DI
                               "INNER JOIN taxpayer AS t ON tp.tp_id = t.tp_id",
                               "INNER JOIN owner_taxpayer AS ot ON t.owntax_id = ot.owntax_id",
                               "GROUP BY y.praxisyear, ot.own_id"))
+
+## Create geojson in db
+dbSendQuery(conn, paste("DROP VIEW IF EXISTS parcels_gj;",
+                        "CREATE VIEW parcels_gj AS",
+                        "(SELECT jsonb_build_object(",
+                        "'type',     'FeatureCollection',",
+                        "'features', jsonb_agg(feature)",
+                        ")",
+                        "FROM (",
+                        "SELECT jsonb_build_object(",
+                        "'type',       'Feature',",
+                        "'geometry',   ST_AsGeoJSON(geom_2017)::json,",
+                        "'properties', to_jsonb(inputs) - 'geom_2017'",
+                        ") AS feature",
+                        "FROM (",
+                        "SELECT * FROM parcels_2017",
+                        ") inputs",
+                        ") features);"))
+
+##test
+x <- dbGetQuery(conn, "SELECT * from property WHERE propzip = '48224';")
+
+# `SELECT jsonb_build_object(
+#   'type',     'FeatureCollection',
+#   'features', jsonb_agg(feature)
+# )
+# FROM (
+#   SELECT jsonb_build_object(
+#     'type',       'Feature',
+#     'id',          id,
+#     'geometry',   ST_AsGeoJSON(geom_2017)::json,
+#     'properties', to_jsonb(inputs) - 'geom_2017'
+#   ) AS feature
+#   FROM (
+#     SELECT * FROM parcels_2017
+#   ) inputs
+# ) features;`;
 ##testing queries
 # shpName <- names(shpList[4])
 # shp <- shpList[[shpName]][!is.na(shpList[[shpName]]$parcelno),
