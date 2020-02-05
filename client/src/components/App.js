@@ -3,6 +3,7 @@ import {
   handleGetInitialMapDataAction,
   handleGetInitialZipcodeDataAction
 } from "../actions/mapData";
+import { setDocHeightOnWindow } from "../utils/style";
 import { connect } from "react-redux";
 import MapContainer from "./Map/MapContainer";
 import SearchContainer from "./Search/SearchContainer";
@@ -11,42 +12,28 @@ import "../scss/App.scss";
 
 class App extends React.Component {
   componentDidMount() {
-    // important height styling for mobile
-    //this can be placed into utils
-    function setDocHeight() {
-      document.documentElement.style.setProperty(
-        "--vh",
-        `${window.innerHeight / 100}px`
-      );
-    }
-
-    window.addEventListener("resize", function() {
-      setDocHeight();
-    });
-    window.addEventListener("orientationchange", function() {
-      setDocHeight();
-    });
-
-    setDocHeight();
+    //set window height for mobile
+    setDocHeightOnWindow();
 
     //load data
+    const { year } = this.props.mapData;
     this.props.dispatch(
-      handleGetInitialMapDataAction("http://localhost:5000/api/geojson/parcels/2017")
+      handleGetInitialMapDataAction(
+        `http://localhost:5000/api/geojson/parcels/${year}`
+      )
     );
     this.props.dispatch(
-      handleGetInitialZipcodeDataAction("http://localhost:5000/api/geojson/zipcodes")
+      handleGetInitialZipcodeDataAction(
+        "http://localhost:5000/api/geojson/zipcodes"
+      )
     );
   }
 
   render() {
     const { ppraxis, zips } = this.props.mapData;
 
-    console.log("ppraxis", Object.entries(ppraxis).length);
-    console.log("zips", Object.entries(zips).length);
-
     const loadingState =
       Object.entries(ppraxis).length === 0 || Object.entries(zips).length === 0;
-    console.log("Loading state: ", loadingState);
 
     if (loadingState) {
       return "Loading...";

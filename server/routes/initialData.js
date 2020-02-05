@@ -1,3 +1,9 @@
+/*
+Check the MapBox docs for deaeling with large geojson 
+https://docs.mapbox.com/help/troubleshooting/working-with-large-geojson-data/
+*/
+
+
 const Router = require("express-promise-router");
 // const SQL = require("sql-template-strings");
 const db = require("../db"); //index.js
@@ -12,7 +18,7 @@ router.get("/zipcodes", async (req, res) => {
       FROM (
         SELECT jsonb_build_object(
           'type',       'Feature',
-          'geometry',   ST_AsGeoJSON(geometry)::json,
+          'geometry',   ST_AsGeoJSON(geometry, 6)::json,
           'properties', to_jsonb(inputs) - 'geometry'
         ) AS feature
         FROM (
@@ -35,7 +41,7 @@ router.get("/parcels/:year", async (req, res) => {
     SELECT jsonb_build_object(
       'type',       'Feature',
       'id',          id,
-      'geometry',   ST_AsGeoJSON(geom_${year})::json,
+      'geometry',   ST_AsGeoJSON(geom_${year}, 6)::json,
       'properties', to_jsonb(inputs) - 'geom_${year}'
     ) AS feature
     FROM (

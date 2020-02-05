@@ -21,7 +21,7 @@ export async function getInitialZipcodeData(route) {
 
 //debouncing for searches
 const populateSearch = async function(searchTerm, route) {
-  //route can be either 'api/zip-search/' or 'api/address-search/ or api/speculator-search/'
+  //route can be either <host>/api/zipcode-search/ or <host>/api/address-search/ or <host>/api/speculator-search/
   if (searchTerm === "") {
     return { data: {} };
   } else {

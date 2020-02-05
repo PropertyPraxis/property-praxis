@@ -57,7 +57,9 @@ class MapContainer extends Component {
   }
 
   render() {
-    return <PraxisMap {...this.props} />;
+    return (
+    <PraxisMap {...this.props} />
+    );
   }
 }
 function mapStateToProps({ mapState, mapData, currentFeature }) {

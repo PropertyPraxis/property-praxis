@@ -13,6 +13,9 @@ export const parcelLayer = {
   id: "parcel-polygon",
   type: "fill",
   minzoom: 12,
+  // maxzoom: 16,
+  buffer: 0,
+  tolerance: 0.9,
   paint: {
     "fill-color": {
       property: "count",
@@ -27,6 +30,8 @@ export const parcelCentroid = {
   id: "parcel-centroid",
   type: "circle",
   maxzoom: 12,
+  buffer: 0,
+  tolerance: 0.9,
   paint: {
     "circle-radius": 3,
     "circle-color": {
@@ -55,10 +60,7 @@ export const zipsLabel = {
     "text-field": ["get", "zipcode"],
     "text-anchor": "center",
     "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
-    // "text-color": "black",
-    // "text-halo-width": 2,
-    // "text-variable-anchor": ["top", "bottom", "left", "right"],
-    // "text-radial-offset": 0.5,
+
     "text-justify": "auto"
   },
   paint: {

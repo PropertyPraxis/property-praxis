@@ -60,6 +60,7 @@ class PraxisMap extends Component {
           {...this.props.mapState}
           ref={reactMap => (this.reactMap = reactMap)}
           mapStyle="mapbox://styles/tim-hitchins/cjvec50f227zu1gnw0soteeok"
+          // mapStyle="mapbox://styles/tim-hitchins/ck5venmuh1fi81io641ps63bw"
           width="100vw"
           height="100vh"
           minZoom={10}

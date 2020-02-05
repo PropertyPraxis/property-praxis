@@ -1,11 +1,13 @@
 import React, { Component } from "react";
+import { connect } from "react-redux";
 import SearchBar from "./SearchBar";
-
 
 class SearchContainer extends Component {
   render() {
-    return <SearchBar />;
+    return <SearchBar {...this.props} />;
   }
 }
-
-export default SearchContainer;
+function mapStateToProps({ searchState }) {
+  return { searchState };
+}
+export default connect(mapStateToProps)(SearchContainer);

@@ -1,11 +1,13 @@
 import { debouncedPopulateSearch } from "../utils/api";
 
-const SET_SEARCH_TYPE = "SET_SEARCH_TYPE";
-const RESET_SEARCH_TYPE = "RESET_SEARCH";
-const SEARCH_ALL = "SEARCH_ALL";
-const SEARCH_ZIPCODE = "SEARCH_ZIPCODE";
-const SEARCH_SPECULATOR = "SEARCH_SPECULATOR";
-const SEARCH_ADDRESS = "SEARCH_ADDRESS";
+export const SET_SEARCH_TYPE = "SET_SEARCH_TYPE";
+export const RESET_SEARCH_TYPE = "RESET_SEARCH_TYPE";
+export const SET_SEARCH_TERM = "SET_SEARCH_TERM";
+export const RESET_SEARCH_TERM = "SET_SEARCH_TERM";
+export const SEARCH_ALL = "SEARCH_ALL";
+export const SEARCH_ZIPCODE = "SEARCH_ZIPCODE";
+export const SEARCH_SPECULATOR = "SEARCH_SPECULATOR";
+export const SEARCH_ADDRESS = "SEARCH_ADDRESS";
 
 export function setSearchType(type) {
   return {
@@ -16,25 +18,39 @@ export function setSearchType(type) {
   };
 }
 
-export function resetSearch() {
+export function resetSearchType() {
   return {
-    type: RESET_SEARCH,
+    type: RESET_SEARCH_TYPE,
     payload: {
-      data: null
+      searchType: "All"
     }
   };
 }
 
-export function searchZipcode(data) {
+export function setSearchTerm(searchTerm) {
+  return {
+    type: SET_SEARCH_TERM,
+    payload: { searchTerm }
+  };
+}
+
+export function resetSearchTerm() {
+  return {
+    type: RESET_SEARCH_TERM,
+    payload: { searchTerm: null }
+  };
+}
+
+function searchPartialZipcode(partialResults) {
   return {
     type: SEARCH_ZIPCODE,
     payload: {
-      data
+      partialResults
     }
   };
 }
 
-export function searchSpeculator(data) {
+function searchSpeculator(data) {
   return {
     type: SEARCH_SPECULATOR,
     payload: {
@@ -43,7 +59,7 @@ export function searchSpeculator(data) {
   };
 }
 
-export function searchAddress(data) {
+function searchAddress(data) {
   return {
     type: SEARCH_ADDRESS,
     payload: {
@@ -52,15 +68,19 @@ export function searchAddress(data) {
   };
 }
 
-export function handleSearchZipcode(searchTErm){
-    return async dispatch => {
-        return debouncedPopulateSearch(searchTerm, 'api/zipcode-search/')
-          .then(json => {
-            dispatch(searchParcel(json));
-            return json;
-          })
-          .catch(err => {
-            console.log(err);
-          });
-      };
+export function handleSearchPartialZipcode(searchTerm) {
+  return async dispatch => {
+    return debouncedPopulateSearch(
+      searchTerm,
+      `http://localhost:5000/api/zipcode-search/partial/`
+    )
+      .then(json => {
+        dispatch(searchPartialZipcode(json));
+        return json;
+      })
+      .catch(err => {
+        //need to add some more error hadling
+        console.log(err);
+      });
+  };
 }

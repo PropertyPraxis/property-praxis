@@ -2,6 +2,7 @@ import { getInitialMapData, getInitialZipcodeData } from "../utils/api";
 
 export const GET_INITIAL_MAP_DATA = "GET_INITIAL_MAP_DATA";
 export const GET_INITIAL_ZIPCODE_DATA = "GET_INITIAL_ZIPCODE_DATA";
+export const GET_YEAR = "GET_YEAR";
 
 function getInitialMapDataAction(data) {
   return {
@@ -17,7 +18,12 @@ function getInitialZipcodeDataAction(data) {
   };
 }
 
-
+export function getYearAction(year) {
+  return {
+    type: GET_YEAR,
+    payload: { year }
+  };
+}
 
 export function handleGetInitialMapDataAction(route) {
   return dispatch => {

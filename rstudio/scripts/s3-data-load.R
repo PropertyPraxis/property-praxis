@@ -54,6 +54,13 @@ s3FileNames <- lapply(ppBucket, getBucketNames)
 # s3Csvs <- s3FileNames[str_detect(s3FileNames, ".csv") & str_detect(s3FileNames, "PPlusFinal")] ##leave out proxiswide.csv
 s3Csvs <- s3FileNames[str_detect(s3FileNames, ".csv") & str_detect(s3FileNames, "_edit")] ##these are the edited files with field_21 added
 s3Shpfiles <- s3FileNames[str_detect(s3FileNames, "shp.zip")] 
+
+##avail years
+yearList  <- lapply(s3Csvs, function(x){
+  base <- basename(x) %>% 
+    str_replace( "PPlusFinal_", "") %>%
+    str_replace("_edit.csv", "")
+})
   
 ##Create the directories to dump the files from aws
 shpDir <- file.path(homeDir, "pp-pipeline", "data", "shps")
@@ -584,7 +591,32 @@ dbSendQuery(conn, paste("ALTER TABLE taxpayer",
 
 ##Create Views
 ##These need to be automated
-##parcels_2017
+createParcelGeomByYear <- function(years){ ##must be a list
+  lapply(years, function(year){
+    dbSendQuery(conn, paste("DROP VIEW IF EXISTS ", paste0("parcels_", year), "CASCADE;",
+                            "CREATE VIEW ", paste0("parcels_", year), "AS",
+                            "(SELECT DISTINCT ROW_NUMBER() OVER (ORDER BY 1) AS id, y.praxisyear, ot.own_id, count.count,", paste0("geom_", year), "FROM parcel_property_geom AS ppg",
+                            "INNER JOIN property AS p ON ppg.parprop_id = p.parprop_id",
+                            "INNER JOIN taxpayer_property AS tp ON p.prop_id = tp.prop_id",
+                            "INNER JOIN year AS y on tp.taxparprop_id = y.taxparprop_id",
+                            "INNER JOIN taxpayer AS t ON tp.tp_id = t.tp_id",
+                            "INNER JOIN owner_taxpayer AS ot ON t.owntax_id = ot.owntax_id",
+                            "INNER JOIN (",
+                            "SELECT DISTINCT y.praxisyear, STRING_AGG(DISTINCT ot.own_id, ',') AS own_id, COUNT(ot.own_id) FROM parcel_property_geom AS ppg",
+                            "INNER JOIN property AS p ON ppg.parprop_id = p.parprop_id",
+                            "INNER JOIN taxpayer_property AS tp ON p.prop_id = tp.prop_id",
+                            "INNER JOIN year AS y on tp.taxparprop_id = y.taxparprop_id",
+                            "INNER JOIN taxpayer AS t ON tp.tp_id = t.tp_id",
+                            "INNER JOIN owner_taxpayer AS ot ON t.owntax_id = ot.owntax_id",
+                            "GROUP BY y.praxisyear, ot.own_id)", 
+                            "AS count ON y.praxisyear = count.praxisyear AND ot.own_id = count.own_id",
+                            "WHERE y.praxisyear", paste0("= ", year), "AND count.count > 9);"))
+  })
+}
+
+createParcelGeomByYear(yearList)
+
+
 dbSendQuery(conn, paste("DROP VIEW IF EXISTS parcels_2017;",
                         "CREATE VIEW parcels_2017 AS",
                         "(SELECT DISTINCT ROW_NUMBER() OVER (ORDER BY 1) AS id, y.praxisyear, ot.own_id, count.count, geom_2017 FROM parcel_property_geom AS ppg",
@@ -669,7 +701,7 @@ dbSendQuery(conn, paste("DROP VIEW IF EXISTS parcels_gj;",
                         ") features);"))
 
 ##test
-x <- dbGetQuery(conn, "SELECT * from property WHERE propzip = '48224';")
+x <- dbGetQuery(conn, "SELECT pp.parcelno, pp.propaddr from parcel_property AS p;")
 
 # `SELECT jsonb_build_object(
 #   'type',     'FeatureCollection',
