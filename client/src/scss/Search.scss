@@ -1,22 +1,29 @@
 @import "./colors.scss";
 
-.search-container {
-  margin: 20px 20px 0 20px;
+.search-grid-item {
   grid-row: 1;
   grid-column: 1;
-  //   height: 40px;
-  // background-color: red;
-  border: blue solid 3px;
-  z-index: 10;
+  z-index: 100;
+  margin: 20px 20px 0 20px;
 }
 
 @media (max-width: 700px) {
-  .search-container {
-    grid-row: 1;
+  .search-grid-item {
+    // grid-row: 1;
     grid-column: 1 / span 3;
     margin: auto 0;
+    position: absolute;
+    top: 0;
+    width: 100%;
   }
 }
+
+.search-container {
+  // margin: 20px 20px 0 20px;
+  // background-color: red;
+  border: red solid 3px;
+}
+
 //search options
 .search-options {
   display: flex;
@@ -52,17 +59,85 @@
 input[type="text"] {
   width: 80%;
   padding: 12px 20px;
-  box-sizing: border-box;
+  box-sizing: inherit;
   border: 3px solid yellow;
+  border: none;
   -webkit-transition: 0.2s;
   transition: 0.2s;
   outline: none;
 }
 
-input[type="text"]:focus {
-  border: 3px solid #555;
+// input[type="text"]:focus {
+//   border: 3px solid #555;
+// }
+
+.search-form {
+  display: flex;
+  height: 50px;
+  width: 100%;
+  box-sizing: border-box;
+  border-bottom: 3px solid $ui-black;
+  border-left: 3px solid $ui-black;
+  border-right: 3px solid $ui-black;
+}
+
+.search-form:focus-within {
+  border-bottom: 3px solid orange;
+  border-left: 3px solid orange;
+  border-right: 3px solid orange;
+  box-sizing: border-box;
+}
+
+//search button
+.search-button {
+  box-sizing: inherit;
+  width: 20%;
+  height: 100%;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+
+  img {
+    height: 40px;
+    width: 40px;
+    border: none;
+  }
 }
 
 //search results
-.search-name {
+//part of CSS Transition
+
+.partial-results-container {
+  max-height: 70vh;
+  display: flex; /*added*/
+  flex-direction: column;
+  overflow: auto;
+  div {
+    display: flex;
+    width: 100%;
+    padding: 10px;
+    // border: 1px solid blue;
+    box-sizing: border-box;
+    // background-color: white;
+    align-items: center;
+  }
+
+  div:hover {
+    border: 1px solid $ui-black;
+  }
+
+  img {
+    height: 30px;
+    margin-right: 20px;
+  }
+
+  .list-item-odd {
+    background-color: $ui-white;
+  }
+
+  .list-item-even {
+    background-color: $ui-off-white;
+  }
 }

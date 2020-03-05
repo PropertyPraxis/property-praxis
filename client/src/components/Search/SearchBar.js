@@ -1,11 +1,15 @@
 import React, { Component } from "react";
+import { DebounceInput } from "react-debounce-input";
 import {
   setSearchType,
   setSearchTerm,
-  resetSearchTerm,
-  handleSearchPartialZipcode
+  resetSearch,
+  handleSearchPartialZipcode,
+  handleSearchPartialAddress,
+  handleSearchPartialSpeculator
 } from "../../actions/search";
-import SearchResults from "./SearchResults";
+import PartialSearchResults from "./SearchResults";
+import * as searchIcon from "../../assets/img/search.png";
 import "../../scss/Search.scss";
 import styleVars from "../../scss/colors.scss";
 
@@ -32,17 +36,20 @@ class SearchBar extends Component {
   _handleInputChange = async e => {
     const searchTerm = e.target.value;
     const { searchType } = this.props.searchState;
+    const { year } = this.props.mapData;
 
     this.props.dispatch(setSearchTerm(searchTerm));
 
+    //zipcode search
     if (searchType === "Zipcode") {
       this.props.dispatch(handleSearchPartialZipcode(searchTerm));
+    } else if (searchType === "Address") {
+      this.props.dispatch(handleSearchPartialAddress(searchTerm, year));
+    } else if (searchType === "Speculator") {
+      this.props.dispatch(handleSearchPartialSpeculator(searchTerm, year));
+    } else if (searchType === "All") {
     }
   };
-
-  componentDidMount() {
-    // this.props.dispatch(handleSearchZipcode("48214"));
-  }
 
   componentDidUpdate(prevProps) {
     const { searchType } = this.props.searchState;
@@ -53,41 +60,77 @@ class SearchBar extends Component {
   }
   render() {
     const { searchType } = this.props.searchState;
+    const searchRoute = `/${searchType.toLowerCase()}`;
+
     return (
-      <div className="search-container">
-        <div className="search-options">
-          {this._searchButons.map(button => {
-            return (
-              <div
-                key={button}
-                onClick={() => {
-                  this.props.dispatch(resetSearchTerm());
-                  this.props.dispatch(setSearchType(button));
+      <section className="search-grid-item">
+        <div className="search-container">
+          <div className="search-options">
+            {this._searchButons.map(button => {
+              return (
+                <div
+                  key={button}
+                  onClick={() => {
+                    this.props.dispatch(resetSearch());
+                    this.props.dispatch(setSearchType(button));
+                  }}
+                  style={
+                    button === searchType ? { color: styleVars.ppGreen } : null
+                  }
+                >
+                  {button}
+                </div>
+              );
+            })}
+          </div>
+          <div className="search-bar">
+            <div className="search-form">
+              <DebounceInput
+                type="text"
+                placeholder={this._setSearchPlaceholderText(searchType)}
+                onChange={this._handleInputChange}
+                onKeyPress={event => {
+                  //need to update to action
+                  event.persist();
+                  console.log("Keypress event", event);
                 }}
-                style={
-                  button === searchType ? { color: styleVars.ppGreen } : null
-                }
+                minLength={1}
+                debounceTimeout={300}
+                inputRef={this._textInput}
+              />
+              <div
+                className="search-button"
+                onClick={() => {
+                  console.log("clicked");
+                }}
               >
-                {button}
+                <img src={searchIcon} alt="search button"></img>
               </div>
-            );
-          })}
+            </div>
+          </div>
+          <PartialSearchResults {...this.props} />
         </div>
-        <div className="search-bar">
-          <form className="search-form">
-            <input
-              type="text"
-              placeholder={this._setSearchPlaceholderText(searchType)}
-              name="search"
-              onChange={this._handleInputChange}
-              ref={this._textInput}
-            ></input>
-          </form>
-        </div>
-        <SearchResults />
-      </div>
+      </section>
     );
   }
 }
 
 export default SearchBar;
+
+// {/* <input
+//   type="text"
+//   placeholder={this._setSearchPlaceholderText(searchType)}
+//   autoComplete="off"
+//   name="search"
+//   onSubmit={() => {
+//     //need to update to action
+//     console.log("submitted.");
+//   }}
+//   onChange={this._handleInputChange}
+//   onKeyPress={event => {
+//     //need to update to action
+//     event.persist();
+//     console.log("Keypress event", event);
+//   }}
+//   ref={this._textInput}
+// ></input>; */}

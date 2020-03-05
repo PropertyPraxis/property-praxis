@@ -1,4 +1,4 @@
-import { GET_MAP_STATE } from "../actions/mapState";
+import { GET_MAP_STATE, TOGGLE_MODAL } from "../actions/mapState";
 
 const initialViewport = {
   latitude: 42.40230199308517,
@@ -7,6 +7,7 @@ const initialViewport = {
   bearing: 0,
   pitch: 0
 };
+
 
 export default function mapState(state = initialViewport, action) {
   switch (action.type) {

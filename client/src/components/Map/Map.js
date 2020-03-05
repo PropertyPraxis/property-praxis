@@ -24,7 +24,7 @@ class PraxisMap extends Component {
       features,
       srcEvent: { offsetX, offsetY }
     } = event;
-    console.log("event", event);
+    // console.log("event", event);
     const hoveredFeature =
       features && features.find(f => f.layer.id === "parcel-polygon");
     // if (hoveredFeature !== undefined) {

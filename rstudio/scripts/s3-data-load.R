@@ -617,6 +617,20 @@ createParcelGeomByYear <- function(years){ ##must be a list
 createParcelGeomByYear(yearList)
 
 
+createOwnerCount <- function(){
+  dbSendQuery(conn, paste("DROP VIEW IF EXISTS owner_count;",
+                          "CREATE VIEW owner_count AS",
+                          "(SELECT DISTINCT y.praxisyear, STRING_AGG(DISTINCT ot.own_id, ',') AS own_id, COUNT(ot.own_id) as count FROM parcel_property_geom AS ppg",
+                          "INNER JOIN property AS p ON ppg.parprop_id = p.parprop_id",
+                          "INNER JOIN taxpayer_property AS tp ON p.prop_id = tp.prop_id",
+                          "INNER JOIN year AS y on tp.taxparprop_id = y.taxparprop_id",
+                          "INNER JOIN taxpayer AS t ON tp.tp_id = t.tp_id",
+                          "INNER JOIN owner_taxpayer AS ot ON t.owntax_id = ot.owntax_id",
+                          "GROUP BY y.praxisyear, ot.own_id)"))
+}
+
+createOwnerCount()
+
 dbSendQuery(conn, paste("DROP VIEW IF EXISTS parcels_2017;",
                         "CREATE VIEW parcels_2017 AS",
                         "(SELECT DISTINCT ROW_NUMBER() OVER (ORDER BY 1) AS id, y.praxisyear, ot.own_id, count.count, geom_2017 FROM parcel_property_geom AS ppg",
@@ -682,6 +696,13 @@ own_count <- dbGetQuery(conn, paste("SELECT DISTINCT y.praxisyear, STRING_AGG(DI
                               "INNER JOIN owner_taxpayer AS ot ON t.owntax_id = ot.owntax_id",
                               "GROUP BY y.praxisyear, ot.own_id"))
 
+own <- dbGetQuery(conn, paste("SELECT DISTINCT * FROM owner_count",
+# "WHERE levenshtein(own_id, 'MICHAEL KELLY') <= 2",
+"WEHRE own_id LIKE 'MICHAEL KELLY'",
+"AND praxisyear=2017",
+"ORDER BY count DESC;"))
+
+
 ## Create geojson in db
 dbSendQuery(conn, paste("DROP VIEW IF EXISTS parcels_gj;",
                         "CREATE VIEW parcels_gj AS",
@@ -701,7 +722,7 @@ dbSendQuery(conn, paste("DROP VIEW IF EXISTS parcels_gj;",
                         ") features);"))
 
 ##test
-x <- dbGetQuery(conn, "SELECT pp.parcelno, pp.propaddr from parcel_property AS p;")
+x <- dbGetQuery(conn, "SELECT * from property LIMIT 1000;")
 
 # `SELECT jsonb_build_object(
 #   'type',     'FeatureCollection',

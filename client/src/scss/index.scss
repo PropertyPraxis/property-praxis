@@ -19,7 +19,7 @@ the content box way.
  *,
  *:before,
  *:after {
-   box-sizing: inherit;
+   box-sizing: content-box
  }
  
  /* set max width for images

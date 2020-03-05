@@ -2,15 +2,17 @@ import {
   SET_SEARCH_TYPE,
   RESET_SEARCH_TYPE,
   SET_SEARCH_TERM,
-  RESET_SEARCH_TERM,
-  SEARCH_ZIPCODE
+  RESET_SEARCH,
+  SEARCH_ZIPCODE,
+  SEARCH_ADDRESS,
+  SEARCH_SPECULATOR
 } from "../actions/search";
 
 const initialSearchState = {
   searchType: "Zipcode",
-  searchTerm: null,
-  partialResults: null,
-  fullResults: null
+  searchTerm: "",
+  partialResults: [],
+  fullResults: []
 };
 
 export default function searchState(state = initialSearchState, action) {
@@ -21,9 +23,13 @@ export default function searchState(state = initialSearchState, action) {
       return { ...state, ...action.payload };
     case SET_SEARCH_TERM:
       return { ...state, ...action.payload };
-      case RESET_SEARCH_TERM:
-            return { ...state, ...action.payload };
+    case RESET_SEARCH:
+      return { ...state, ...action.payload };
     case SEARCH_ZIPCODE:
+      return { ...state, ...action.payload };
+    case SEARCH_ADDRESS:
+      return { ...state, ...action.payload };
+      case SEARCH_SPECULATOR:
       return { ...state, ...action.payload };
     default:
       return state;

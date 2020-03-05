@@ -1,9 +1,9 @@
-import { debouncedPopulateSearch } from "../utils/api";
+import { populateSearch, populateSearchByYear } from "../utils/api";
 
 export const SET_SEARCH_TYPE = "SET_SEARCH_TYPE";
 export const RESET_SEARCH_TYPE = "RESET_SEARCH_TYPE";
 export const SET_SEARCH_TERM = "SET_SEARCH_TERM";
-export const RESET_SEARCH_TERM = "SET_SEARCH_TERM";
+export const RESET_SEARCH = "RESET_SEARCH";
 export const SEARCH_ALL = "SEARCH_ALL";
 export const SEARCH_ZIPCODE = "SEARCH_ZIPCODE";
 export const SEARCH_SPECULATOR = "SEARCH_SPECULATOR";
@@ -34,10 +34,10 @@ export function setSearchTerm(searchTerm) {
   };
 }
 
-export function resetSearchTerm() {
+export function resetSearch() {
   return {
-    type: RESET_SEARCH_TERM,
-    payload: { searchTerm: null }
+    type: RESET_SEARCH,
+    payload: { searchTerm: "", partialResults: [], fullResults: [] }
   };
 }
 
@@ -50,29 +50,29 @@ function searchPartialZipcode(partialResults) {
   };
 }
 
-function searchSpeculator(data) {
+function searchPartialSpeculator(partialResults) {
   return {
     type: SEARCH_SPECULATOR,
     payload: {
-      data
+      partialResults
     }
   };
 }
 
-function searchAddress(data) {
+function searchPartialAddress(partialResults) {
   return {
     type: SEARCH_ADDRESS,
     payload: {
-      data
+      partialResults
     }
   };
 }
 
 export function handleSearchPartialZipcode(searchTerm) {
   return async dispatch => {
-    return debouncedPopulateSearch(
+    return populateSearch(
       searchTerm,
-      `http://localhost:5000/api/zipcode-search/partial/`
+      `/api/zipcode-search/partial/`
     )
       .then(json => {
         dispatch(searchPartialZipcode(json));
@@ -80,7 +80,43 @@ export function handleSearchPartialZipcode(searchTerm) {
       })
       .catch(err => {
         //need to add some more error hadling
-        console.log(err);
+        throw Error(`An error occured searching: ${err}`);
+      });
+  };
+}
+
+export function handleSearchPartialAddress(searchTerm, year) {
+  return async dispatch => {
+    return populateSearchByYear(
+      searchTerm,
+      year,
+      `/api/address-search/partial/`
+    )
+      .then(json => {
+        dispatch(searchPartialAddress(json));
+        return json;
+      })
+      .catch(err => {
+        //need to add some more error hadling
+        throw Error(`An error occured searching: ${err}`);
+      });
+  };
+}
+
+export function handleSearchPartialSpeculator(searchTerm, year) {
+  return async dispatch => {
+    return populateSearchByYear(
+      searchTerm,
+      year,
+      `/api/speculator-search/partial/`
+    )
+      .then(json => {
+        dispatch(searchPartialSpeculator(json));
+        return json;
+      })
+      .catch(err => {
+        //need to add some more error hadling
+        throw Error(`An error occured searching: ${err}`);
       });
   };
 }
