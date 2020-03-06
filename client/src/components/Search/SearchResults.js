@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { CSSTransition } from "react-transition-group";
 // import { FixedSizeList as List } from "react-window";
 // import AutoSizer from "react-virtualized-auto-sizer";
+import { handleSearchFullZipcode } from "../../actions/search";
 import * as zipcodeIcon from "../../assets/img/zipcode-icon-transparent.png";
 import * as speculatorIcon from "../../assets/img/speculator-icon-transparent.png";
 import * as mapMarkerIcon from "../../assets/img/map-marker-transparent.png";
@@ -17,14 +18,16 @@ const PartialReturnResultSwitch = props => {
     case "Speculator":
       return <PartialSpeculatorResults {...props.searchState} />;
     case "Zipcode":
-      return <PartialZipcodeResults {...props.searchState} />;
+      return <PartialZipcodeResults {...props} />;
     default:
       return null;
   }
 };
 
 const PartialZipcodeResults = props => {
-  const { partialResults } = props;
+  const { partialResults } = props.searchState;
+  const { year } = props.mapData;
+
   return (
     <section>
       <div className="partial-results-container">
@@ -36,6 +39,7 @@ const PartialZipcodeResults = props => {
               onClick={() => {
                 // new action here
                 console.log("Zip: ", result.propzip);
+                props.dispatch(handleSearchFullZipcode(result.propzip, year));
               }}
             >
               <img src={zipcodeIcon} alt="Zipcode Result" /> {result.propzip}
@@ -53,9 +57,6 @@ const PartialAddressResults = props => {
     <section>
       <div className="partial-results-container">
         {partialResults[0].mb.map((result, index) => {
-          {
-            /* return <div key={result.place_name}> {result.place_name}</div>; */
-          }
           return (
             <div
               key={result.place_name}

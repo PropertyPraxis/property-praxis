@@ -7,10 +7,8 @@ const router = new Router();
 
 router.get("/partial/:id/:year", async (req, res) => {
   const { id, year } = req.params;
-
   const decodeId = decodeURI(id).toUpperCase();
-  console.log("dec id", decodeId);
-
+ 
   try {
     //   query the MB Geocoder API
     const mbResponse = await fetch(
@@ -44,6 +42,7 @@ router.get("/partial/:id/:year", async (req, res) => {
   }
 });
 
+// export our router to be mounted by the parent application
 module.exports = router;
 
 // const {

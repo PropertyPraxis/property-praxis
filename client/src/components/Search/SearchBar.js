@@ -4,6 +4,7 @@ import {
   setSearchType,
   setSearchTerm,
   resetSearch,
+  setSearchDisplayType,
   handleSearchPartialZipcode,
   handleSearchPartialAddress,
   handleSearchPartialSpeculator
@@ -31,18 +32,17 @@ class SearchBar extends Component {
     }
   };
 
-  _textInput = React.createRef();
-
   _handleInputChange = async e => {
     const searchTerm = e.target.value;
     const { searchType } = this.props.searchState;
     const { year } = this.props.mapData;
 
     this.props.dispatch(setSearchTerm(searchTerm));
+    this.props.dispatch(setSearchDisplayType("partial"));
 
     //zipcode search
     if (searchType === "Zipcode") {
-      this.props.dispatch(handleSearchPartialZipcode(searchTerm));
+      this.props.dispatch(handleSearchPartialZipcode(searchTerm, year));
     } else if (searchType === "Address") {
       this.props.dispatch(handleSearchPartialAddress(searchTerm, year));
     } else if (searchType === "Speculator") {
@@ -55,7 +55,7 @@ class SearchBar extends Component {
     const { searchType } = this.props.searchState;
     // reset the text to '' when the search type changes
     if (prevProps.searchState.searchType !== searchType) {
-      this._textInput.current.value = "";
+      this._textInput.value = "";
     }
   }
   render() {
@@ -96,7 +96,10 @@ class SearchBar extends Component {
                 }}
                 minLength={1}
                 debounceTimeout={300}
-                inputRef={this._textInput}
+                inputRef={ref => {
+                  //create a ref to the input
+                  this._textInput = ref;
+                }}
               />
               <div
                 className="search-button"

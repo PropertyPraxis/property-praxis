@@ -4,8 +4,10 @@ export const SET_SEARCH_TYPE = "SET_SEARCH_TYPE";
 export const RESET_SEARCH_TYPE = "RESET_SEARCH_TYPE";
 export const SET_SEARCH_TERM = "SET_SEARCH_TERM";
 export const RESET_SEARCH = "RESET_SEARCH";
+export const SET_SEARCH_DISPLAY_TYPE = "SET_SEARCH_DISPLAY_TYPE";
 export const SEARCH_ALL = "SEARCH_ALL";
-export const SEARCH_ZIPCODE = "SEARCH_ZIPCODE";
+export const SEARCH_PARTIAL_ZIPCODE = "SEARCH_PARTIAL_ZIPCODE";
+export const SEARCH_FULL_ZIPCODE = "SEARCH_FULL_ZIPCODE";
 export const SEARCH_SPECULATOR = "SEARCH_SPECULATOR";
 export const SEARCH_ADDRESS = "SEARCH_ADDRESS";
 
@@ -37,15 +39,36 @@ export function setSearchTerm(searchTerm) {
 export function resetSearch() {
   return {
     type: RESET_SEARCH,
-    payload: { searchTerm: "", partialResults: [], fullResults: [] }
+    payload: {
+      searchTerm: "",
+      searchDisplayType: null,
+      partialResults: [],
+      fullResults: []
+    }
   };
 }
 
-function searchPartialZipcode(partialResults) {
+export function setSearchDisplayType(searchDisplayType) {
   return {
-    type: SEARCH_ZIPCODE,
+    type: SET_SEARCH_DISPLAY_TYPE,
+    payload: { searchDisplayType }
+  };
+}
+
+export function searchPartialZipcode(partialResults) {
+  return {
+    type: SEARCH_PARTIAL_ZIPCODE,
     payload: {
       partialResults
+    }
+  };
+}
+
+function searchFullZipcode(fullResults) {
+  return {
+    type: SEARCH_FULL_ZIPCODE,
+    payload: {
+      fullResults
     }
   };
 }
@@ -68,14 +91,29 @@ function searchPartialAddress(partialResults) {
   };
 }
 
-export function handleSearchPartialZipcode(searchTerm) {
+export function handleSearchPartialZipcode(searchTerm, year) {
   return async dispatch => {
-    return populateSearch(
+    return populateSearchByYear(
       searchTerm,
+      year,
       `/api/zipcode-search/partial/`
     )
       .then(json => {
         dispatch(searchPartialZipcode(json));
+        return json;
+      })
+      .catch(err => {
+        //need to add some more error hadling
+        throw Error(`An error occured searching: ${err}`);
+      });
+  };
+}
+
+export function handleSearchFullZipcode(searchTerm, year) {
+  return async dispatch => {
+    return populateSearchByYear(searchTerm, year, `/api/zipcode-search/full/`)
+      .then(json => {
+        dispatch(searchFullZipcode(json));
         return json;
       })
       .catch(err => {
