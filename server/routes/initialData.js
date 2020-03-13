@@ -45,7 +45,7 @@ router.get("/parcels/:year", async (req, res) => {
       'properties', to_jsonb(inputs) - 'geom_${year}'
     ) AS feature
     FROM (
-      SELECT * FROM parcels_${year} LIMIT 100
+      SELECT * FROM parcels_${year}
     ) inputs
   ) features;`;
 

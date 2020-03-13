@@ -5,17 +5,39 @@ const router = new Router();
 
 router.get("/partial/:id/:year", async (req, res) => {
   const { id, year } = req.params;
-
   const decodeId = decodeURI(id).toUpperCase();
-
-//   WHERE levenshtein(own_id, $1) <= 2
-  const query = `SELECT * FROM owner_count
+  try {
+    //   WHERE levenshtein(own_id, $1) <= 2
+    const query = `SELECT * FROM owner_count
                 WHERE own_id LIKE $1
                 AND praxisyear = $2
+                AND count > 9
                 ORDER BY count DESC;`;
 
-  const { rows } = await db.query(query, [`%${decodeId}%`, year]);
-  res.json(rows);
+    const { rows } = await db.query(query, [`%${decodeId}%`, year]);
+    res.json(rows);
+  } catch (err) {
+    res.json(err);
+  }
+});
+
+router.get("/full/:id/:year", async (req, res) => {
+  const { id, year } = req.params;
+
+  try {
+    const query = `SELECT DISTINCT p.*, otp.own_id FROM property as p
+    INNER JOIN taxpayer_property AS tpp ON p.prop_id = tpp.prop_id
+    INNER JOIN year AS y ON tpp.taxparprop_id = y.taxparprop_id
+    INNER JOIN taxpayer as tp ON tpp.tp_id = tp.tp_id
+    INNER JOIN owner_taxpayer as otp ON tp.owntax_id = otp.owntax_id
+    WHERE otp.own_id LIKE $1 AND y.praxisyear = $2`;
+
+    const { rows } = await db.query(query, [`${id}%`, `${year}`]);
+    res.json(rows);
+  } catch (err) {
+    //could use some better error handling
+    res.json(err);
+  }
 });
 
 module.exports = router;

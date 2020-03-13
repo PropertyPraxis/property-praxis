@@ -1,6 +1,8 @@
 import {
   GET_INITIAL_MAP_DATA,
   GET_INITIAL_ZIPCODE_DATA,
+  GET_PARCELS_BY_ZIPCODE,
+  GET_PARCELS_BY_SPECULATOR,
   GET_YEAR
 } from "../actions/mapData";
 
@@ -15,6 +17,10 @@ export default function mapData(state = intialMapData, action) {
     case GET_INITIAL_MAP_DATA:
       return { ...state, ...action.payload };
     case GET_INITIAL_ZIPCODE_DATA:
+      return { ...state, ...action.payload };
+    case GET_PARCELS_BY_ZIPCODE:
+      return { ...state, ...action.payload };
+      case GET_PARCELS_BY_SPECULATOR:
       return { ...state, ...action.payload };
     case GET_YEAR:
       return { ...state, ...action.payload };

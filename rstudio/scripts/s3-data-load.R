@@ -589,13 +589,27 @@ dbSendQuery(conn, paste("ALTER TABLE taxpayer",
                         "ADD CONSTRAINT taxpayer_fk FOREIGN KEY (owntax_id) REFERENCES owner_taxpayer (owntax_id)"))
 
 
+createOwnerCount <- function(){
+  dbSendQuery(conn, paste("DROP TABLE IF EXISTS owner_count;",
+                          "CREATE TABLE owner_count AS",
+                          "(SELECT DISTINCT y.praxisyear, STRING_AGG(DISTINCT ot.own_id, ',') AS own_id, COUNT(ot.own_id) as count FROM parcel_property_geom AS ppg",
+                          "INNER JOIN property AS p ON ppg.parprop_id = p.parprop_id",
+                          "INNER JOIN taxpayer_property AS tp ON p.prop_id = tp.prop_id",
+                          "INNER JOIN year AS y on tp.taxparprop_id = y.taxparprop_id",
+                          "INNER JOIN taxpayer AS t ON tp.tp_id = t.tp_id",
+                          "INNER JOIN owner_taxpayer AS ot ON t.owntax_id = ot.owntax_id",
+                          "GROUP BY y.praxisyear, ot.own_id)"))
+}
+
+createOwnerCount()
+
 ##Create Views
 ##These need to be automated
 createParcelGeomByYear <- function(years){ ##must be a list
   lapply(years, function(year){
     dbSendQuery(conn, paste("DROP VIEW IF EXISTS ", paste0("parcels_", year), "CASCADE;",
                             "CREATE VIEW ", paste0("parcels_", year), "AS",
-                            "(SELECT DISTINCT ROW_NUMBER() OVER (ORDER BY 1) AS id, y.praxisyear, ot.own_id, count.count,", paste0("geom_", year), "FROM parcel_property_geom AS ppg",
+                            "(SELECT DISTINCT ROW_NUMBER() OVER (ORDER BY 1) AS id, y.praxisyear, ot.own_id, count.count, p.propzip, ", paste0("geom_", year), "FROM parcel_property_geom AS ppg",
                             "INNER JOIN property AS p ON ppg.parprop_id = p.parprop_id",
                             "INNER JOIN taxpayer_property AS tp ON p.prop_id = tp.prop_id",
                             "INNER JOIN year AS y on tp.taxparprop_id = y.taxparprop_id",
@@ -617,112 +631,109 @@ createParcelGeomByYear <- function(years){ ##must be a list
 createParcelGeomByYear(yearList)
 
 
-createOwnerCount <- function(){
-  dbSendQuery(conn, paste("DROP VIEW IF EXISTS owner_count;",
-                          "CREATE VIEW owner_count AS",
-                          "(SELECT DISTINCT y.praxisyear, STRING_AGG(DISTINCT ot.own_id, ',') AS own_id, COUNT(ot.own_id) as count FROM parcel_property_geom AS ppg",
-                          "INNER JOIN property AS p ON ppg.parprop_id = p.parprop_id",
-                          "INNER JOIN taxpayer_property AS tp ON p.prop_id = tp.prop_id",
-                          "INNER JOIN year AS y on tp.taxparprop_id = y.taxparprop_id",
-                          "INNER JOIN taxpayer AS t ON tp.tp_id = t.tp_id",
-                          "INNER JOIN owner_taxpayer AS ot ON t.owntax_id = ot.owntax_id",
-                          "GROUP BY y.praxisyear, ot.own_id)"))
-}
-
-createOwnerCount()
-
-dbSendQuery(conn, paste("DROP VIEW IF EXISTS parcels_2017;",
-                        "CREATE VIEW parcels_2017 AS",
-                        "(SELECT DISTINCT ROW_NUMBER() OVER (ORDER BY 1) AS id, y.praxisyear, ot.own_id, count.count, geom_2017 FROM parcel_property_geom AS ppg",
-                        "INNER JOIN property AS p ON ppg.parprop_id = p.parprop_id",
-                        "INNER JOIN taxpayer_property AS tp ON p.prop_id = tp.prop_id",
-                        "INNER JOIN year AS y on tp.taxparprop_id = y.taxparprop_id",
-                        "INNER JOIN taxpayer AS t ON tp.tp_id = t.tp_id",
-                        "INNER JOIN owner_taxpayer AS ot ON t.owntax_id = ot.owntax_id",
-                        "INNER JOIN (",
-                          "SELECT DISTINCT y.praxisyear, STRING_AGG(DISTINCT ot.own_id, ',') AS own_id, COUNT(ot.own_id) FROM parcel_property_geom AS ppg",
-                          "INNER JOIN property AS p ON ppg.parprop_id = p.parprop_id",
-                          "INNER JOIN taxpayer_property AS tp ON p.prop_id = tp.prop_id",
-                          "INNER JOIN year AS y on tp.taxparprop_id = y.taxparprop_id",
-                          "INNER JOIN taxpayer AS t ON tp.tp_id = t.tp_id",
-                          "INNER JOIN owner_taxpayer AS ot ON t.owntax_id = ot.owntax_id",
-                          "GROUP BY y.praxisyear, ot.own_id)", 
-                        "AS count ON y.praxisyear = count.praxisyear AND ot.own_id = count.own_id",
-                        "WHERE y.praxisyear = 2017 AND count.count > 9);"))
+# dbSendQuery(conn, paste("DROP VIEW IF EXISTS parcels_2017;",
+#                         "CREATE VIEW parcels_2017 AS",
+#                         "(SELECT DISTINCT ROW_NUMBER() OVER (ORDER BY 1) AS id, y.praxisyear, ot.own_id, count.count, geom_2017 FROM parcel_property_geom AS ppg",
+#                         "INNER JOIN property AS p ON ppg.parprop_id = p.parprop_id",
+#                         "INNER JOIN taxpayer_property AS tp ON p.prop_id = tp.prop_id",
+#                         "INNER JOIN year AS y on tp.taxparprop_id = y.taxparprop_id",
+#                         "INNER JOIN taxpayer AS t ON tp.tp_id = t.tp_id",
+#                         "INNER JOIN owner_taxpayer AS ot ON t.owntax_id = ot.owntax_id",
+#                         "INNER JOIN (",
+#                           "SELECT DISTINCT y.praxisyear, STRING_AGG(DISTINCT ot.own_id, ',') AS own_id, COUNT(ot.own_id) FROM parcel_property_geom AS ppg",
+#                           "INNER JOIN property AS p ON ppg.parprop_id = p.parprop_id",
+#                           "INNER JOIN taxpayer_property AS tp ON p.prop_id = tp.prop_id",
+#                           "INNER JOIN year AS y on tp.taxparprop_id = y.taxparprop_id",
+#                           "INNER JOIN taxpayer AS t ON tp.tp_id = t.tp_id",
+#                           "INNER JOIN owner_taxpayer AS ot ON t.owntax_id = ot.owntax_id",
+#                           "GROUP BY y.praxisyear, ot.own_id)", 
+#                         "AS count ON y.praxisyear = count.praxisyear AND ot.own_id = count.own_id",
+#                         "WHERE y.praxisyear = 2017 AND count.count > 9);"))
 ##parcels_centroid_2017
-dbSendQuery(conn, paste("DROP VIEW IF EXISTS parcels_centroid_2017;",
-                        "CREATE VIEW parcels_centroid_2017 AS",
-                        "(SELECT DISTINCT ROW_NUMBER() OVER (ORDER BY 1) AS id, y.praxisyear, ot.own_id, count.count, ST_CENTROID(geom_2017) as centroid FROM parcel_property_geom AS ppg",
-                        "INNER JOIN property AS p ON ppg.parprop_id = p.parprop_id",
-                        "INNER JOIN taxpayer_property AS tp ON p.prop_id = tp.prop_id",
-                        "INNER JOIN year AS y on tp.taxparprop_id = y.taxparprop_id",
-                        "INNER JOIN taxpayer AS t ON tp.tp_id = t.tp_id",
-                        "INNER JOIN owner_taxpayer AS ot ON t.owntax_id = ot.owntax_id",
-                        "INNER JOIN (",
-                          "SELECT DISTINCT y.praxisyear, STRING_AGG(DISTINCT ot.own_id, ',') AS own_id, COUNT(ot.own_id) FROM parcel_property_geom AS ppg",
-                          "INNER JOIN property AS p ON ppg.parprop_id = p.parprop_id",
-                          "INNER JOIN taxpayer_property AS tp ON p.prop_id = tp.prop_id",
-                          "INNER JOIN year AS y on tp.taxparprop_id = y.taxparprop_id",
-                          "INNER JOIN taxpayer AS t ON tp.tp_id = t.tp_id",
-                          "INNER JOIN owner_taxpayer AS ot ON t.owntax_id = ot.owntax_id",
-                          "GROUP BY y.praxisyear, ot.own_id)", 
-                        "AS count ON y.praxisyear = count.praxisyear AND ot.own_id = count.own_id",
-                        "WHERE y.praxisyear = 2017 AND count.count > 9);"))
+# dbSendQuery(conn, paste("DROP VIEW IF EXISTS parcels_centroid_2017;",
+#                         "CREATE VIEW parcels_centroid_2017 AS",
+#                         "(SELECT DISTINCT ROW_NUMBER() OVER (ORDER BY 1) AS id, y.praxisyear, ot.own_id, count.count, ST_CENTROID(geom_2017) as centroid FROM parcel_property_geom AS ppg",
+#                         "INNER JOIN property AS p ON ppg.parprop_id = p.parprop_id",
+#                         "INNER JOIN taxpayer_property AS tp ON p.prop_id = tp.prop_id",
+#                         "INNER JOIN year AS y on tp.taxparprop_id = y.taxparprop_id",
+#                         "INNER JOIN taxpayer AS t ON tp.tp_id = t.tp_id",
+#                         "INNER JOIN owner_taxpayer AS ot ON t.owntax_id = ot.owntax_id",
+#                         "INNER JOIN (",
+#                           "SELECT DISTINCT y.praxisyear, STRING_AGG(DISTINCT ot.own_id, ',') AS own_id, COUNT(ot.own_id) FROM parcel_property_geom AS ppg",
+#                           "INNER JOIN property AS p ON ppg.parprop_id = p.parprop_id",
+#                           "INNER JOIN taxpayer_property AS tp ON p.prop_id = tp.prop_id",
+#                           "INNER JOIN year AS y on tp.taxparprop_id = y.taxparprop_id",
+#                           "INNER JOIN taxpayer AS t ON tp.tp_id = t.tp_id",
+#                           "INNER JOIN owner_taxpayer AS ot ON t.owntax_id = ot.owntax_id",
+#                           "GROUP BY y.praxisyear, ot.own_id)", 
+#                         "AS count ON y.praxisyear = count.praxisyear AND ot.own_id = count.own_id",
+#                         "WHERE y.praxisyear = 2017 AND count.count > 9);"))
 
 #####TESTING
-geom_2017 <- sf::st_read(conn, query=paste(paste("SELECT DISTINCT ROW_NUMBER() OVER (ORDER BY 1) AS id, y.praxisyear, ot.own_id, count.count, geom_2017 FROM parcel_property_geom AS ppg",
-                                             "INNER JOIN property AS p ON ppg.parprop_id = p.parprop_id",
-                                             "INNER JOIN taxpayer_property AS tp ON p.prop_id = tp.prop_id",
-                                             "INNER JOIN year AS y on tp.taxparprop_id = y.taxparprop_id",
-                                             "INNER JOIN taxpayer AS t ON tp.tp_id = t.tp_id",
-                                             "INNER JOIN owner_taxpayer AS ot ON t.owntax_id = ot.owntax_id",
-                                             "INNER JOIN (",
-                                               "SELECT DISTINCT y.praxisyear, STRING_AGG(DISTINCT ot.own_id, ',') AS own_id, COUNT(ot.own_id) FROM parcel_property_geom AS ppg",
-                                               "INNER JOIN property AS p ON ppg.parprop_id = p.parprop_id",
-                                               "INNER JOIN taxpayer_property AS tp ON p.prop_id = tp.prop_id",
-                                               "INNER JOIN year AS y on tp.taxparprop_id = y.taxparprop_id",
-                                               "INNER JOIN taxpayer AS t ON tp.tp_id = t.tp_id",
-                                               "INNER JOIN owner_taxpayer AS ot ON t.owntax_id = ot.owntax_id",
-                                               "GROUP BY y.praxisyear, ot.own_id) AS count ON y.praxisyear = count.praxisyear AND ot.own_id = count.own_id",
-                                             "WHERE y.praxisyear = 2017 AND count.count > 9")))
-
-
-
-own_count <- dbGetQuery(conn, paste("SELECT DISTINCT y.praxisyear, STRING_AGG(DISTINCT ot.own_id, ',') AS own_id, COUNT(ot.own_id) as count FROM parcel_property_geom AS ppg",
-                              "INNER JOIN property AS p ON ppg.parprop_id = p.parprop_id",
-                              "INNER JOIN taxpayer_property AS tp ON p.prop_id = tp.prop_id",
-                              "INNER JOIN year AS y on tp.taxparprop_id = y.taxparprop_id",
-                              "INNER JOIN taxpayer AS t ON tp.tp_id = t.tp_id",
-                              "INNER JOIN owner_taxpayer AS ot ON t.owntax_id = ot.owntax_id",
-                              "GROUP BY y.praxisyear, ot.own_id"))
-
-own <- dbGetQuery(conn, paste("SELECT DISTINCT * FROM owner_count",
-# "WHERE levenshtein(own_id, 'MICHAEL KELLY') <= 2",
-"WEHRE own_id LIKE 'MICHAEL KELLY'",
-"AND praxisyear=2017",
-"ORDER BY count DESC;"))
-
-
-## Create geojson in db
-dbSendQuery(conn, paste("DROP VIEW IF EXISTS parcels_gj;",
-                        "CREATE VIEW parcels_gj AS",
-                        "(SELECT jsonb_build_object(",
-                        "'type',     'FeatureCollection',",
-                        "'features', jsonb_agg(feature)",
-                        ")",
-                        "FROM (",
-                        "SELECT jsonb_build_object(",
-                        "'type',       'Feature',",
-                        "'geometry',   ST_AsGeoJSON(geom_2017)::json,",
-                        "'properties', to_jsonb(inputs) - 'geom_2017'",
-                        ") AS feature",
-                        "FROM (",
-                        "SELECT * FROM parcels_2017",
-                        ") inputs",
-                        ") features);"))
-
-##test
-x <- dbGetQuery(conn, "SELECT * from property LIMIT 1000;")
+x <- dbGetQuery(conn, paste("SELECT * FROM "))
+# x <- sf::st_read(conn, query=paste("SELECT DISTINCT pp.*, p.*, otp.own_id, y.praxisyear FROM parcel_property_geom as pp
+#     INNER JOIN property as p ON pp.parprop_id = p.parprop_id
+#     INNER JOIN taxpayer_property AS tpp ON p.prop_id = tpp.prop_id
+#     INNER JOIN year AS y ON tpp.taxparprop_id = y.taxparprop_id
+#     INNER JOIN taxpayer as tp ON tpp.tp_id = tp.tp_id
+#     INNER JOIN owner_taxpayer as otp ON tp.owntax_id = otp.owntax_id
+#     WHERE otp.own_id LIKE '%DELMIKO VAUGHN%' AND y.praxisyear = 2017"))
+# 
+# x <- sf::st_read(conn, query=paste("SELECT * FROM parcels_2017"))
+# test <- sf::st_read(conn, query="SELECT * FROM parcels_2016;")
+# geom_2017 <- sf::st_read(conn, query=paste(paste("SELECT DISTINCT ROW_NUMBER() OVER (ORDER BY 1) AS id, y.praxisyear, ot.own_id, count.count, geom_2017 FROM parcel_property_geom AS ppg",
+#                                              "INNER JOIN property AS p ON ppg.parprop_id = p.parprop_id",
+#                                              "INNER JOIN taxpayer_property AS tp ON p.prop_id = tp.prop_id",
+#                                              "INNER JOIN year AS y on tp.taxparprop_id = y.taxparprop_id",
+#                                              "INNER JOIN taxpayer AS t ON tp.tp_id = t.tp_id",
+#                                              "INNER JOIN owner_taxpayer AS ot ON t.owntax_id = ot.owntax_id",
+#                                              "INNER JOIN (",
+#                                                "SELECT DISTINCT y.praxisyear, STRING_AGG(DISTINCT ot.own_id, ',') AS own_id, COUNT(ot.own_id) FROM parcel_property_geom AS ppg",
+#                                                "INNER JOIN property AS p ON ppg.parprop_id = p.parprop_id",
+#                                                "INNER JOIN taxpayer_property AS tp ON p.prop_id = tp.prop_id",
+#                                                "INNER JOIN year AS y on tp.taxparprop_id = y.taxparprop_id",
+#                                                "INNER JOIN taxpayer AS t ON tp.tp_id = t.tp_id",
+#                                                "INNER JOIN owner_taxpayer AS ot ON t.owntax_id = ot.owntax_id",
+#                                                "GROUP BY y.praxisyear, ot.own_id) AS count ON y.praxisyear = count.praxisyear AND ot.own_id = count.own_id",
+#                                              "WHERE y.praxisyear = 2017 AND count.count > 9")))
+# 
+# 
+# 
+# own_count <- dbGetQuery(conn, paste("SELECT DISTINCT y.praxisyear, STRING_AGG(DISTINCT ot.own_id, ',') AS own_id, COUNT(ot.own_id) as count FROM parcel_property_geom AS ppg",
+#                               "INNER JOIN property AS p ON ppg.parprop_id = p.parprop_id",
+#                               "INNER JOIN taxpayer_property AS tp ON p.prop_id = tp.prop_id",
+#                               "INNER JOIN year AS y on tp.taxparprop_id = y.taxparprop_id",
+#                               "INNER JOIN taxpayer AS t ON tp.tp_id = t.tp_id",
+#                               "INNER JOIN owner_taxpayer AS ot ON t.owntax_id = ot.owntax_id",
+#                               "GROUP BY y.praxisyear, ot.own_id"))
+# 
+# own <- dbGetQuery(conn, paste("SELECT DISTINCT * FROM owner_count",
+# "WHERE own_id LIKE 'MI KELLY'",
+# "AND levenshtein(own_id, 'MICHAEL KELLY') <= 15",
+# "AND praxisyear=2017",
+# "ORDER BY count DESC;"))
+# 
+# 
+# ## Create geojson in db
+# dbSendQuery(conn, paste("DROP VIEW IF EXISTS parcels_gj;",
+#                         "CREATE VIEW parcels_gj AS",
+#                         "(SELECT jsonb_build_object(",
+#                         "'type',     'FeatureCollection',",
+#                         "'features', jsonb_agg(feature)",
+#                         ")",
+#                         "FROM (",
+#                         "SELECT jsonb_build_object(",
+#                         "'type',       'Feature',",
+#                         "'geometry',   ST_AsGeoJSON(geom_2017)::json,",
+#                         "'properties', to_jsonb(inputs) - 'geom_2017'",
+#                         ") AS feature",
+#                         "FROM (",
+#                         "SELECT * FROM parcels_2017",
+#                         ") inputs",
+#                         ") features);"))
+# 
+# ##test
+# x <- dbGetQuery(conn, "SELECT * from property LIMIT 1000;")
 
 # `SELECT jsonb_build_object(
 #   'type',     'FeatureCollection',

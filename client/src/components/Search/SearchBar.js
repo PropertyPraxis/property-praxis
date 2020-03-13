@@ -14,6 +14,14 @@ import * as searchIcon from "../../assets/img/search.png";
 import "../../scss/Search.scss";
 import styleVars from "../../scss/colors.scss";
 
+// use this object to reset to nothing
+const resetSearchOptions = {
+  searchTerm: "",
+  searchDisplayType: null,
+  partialResults: [],
+  fullResults: []
+};
+
 class SearchBar extends Component {
   _searchButons = ["All", "Address", "Speculator", "Zipcode"];
 
@@ -55,11 +63,12 @@ class SearchBar extends Component {
     const { searchType } = this.props.searchState;
     // reset the text to '' when the search type changes
     if (prevProps.searchState.searchType !== searchType) {
+      // this.props.dispatch(setSearchTerm(""));
       this._textInput.value = "";
     }
   }
   render() {
-    const { searchType } = this.props.searchState;
+    const { searchType, searchTerm } = this.props.searchState;
     const searchRoute = `/${searchType.toLowerCase()}`;
 
     return (
@@ -71,7 +80,7 @@ class SearchBar extends Component {
                 <div
                   key={button}
                   onClick={() => {
-                    this.props.dispatch(resetSearch());
+                    this.props.dispatch(resetSearch({...resetSearchOptions}));
                     this.props.dispatch(setSearchType(button));
                   }}
                   style={
@@ -88,6 +97,7 @@ class SearchBar extends Component {
               <DebounceInput
                 type="text"
                 placeholder={this._setSearchPlaceholderText(searchType)}
+                value={searchTerm} //controlled input
                 onChange={this._handleInputChange}
                 onKeyPress={event => {
                   //need to update to action
@@ -111,7 +121,10 @@ class SearchBar extends Component {
               </div>
             </div>
           </div>
-          <PartialSearchResults {...this.props} />
+          <PartialSearchResults
+            // _textInput={this._textInput}
+            {...this.props}
+          />
         </div>
       </section>
     );

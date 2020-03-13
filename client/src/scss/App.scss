@@ -1,9 +1,12 @@
+@import "./colors.scss";
+
 //function for mobile
 @function vh($quantity) {
   @return calc(var(--vh, 1vh) * #{$quantity});
 }
 
 .app-container {
+  background-color: $ui-dark-gray;
   height: vh(100);
   display: grid;
   grid-template-columns: 340px 1fr 1fr;

@@ -3,7 +3,7 @@ import { GET_MAP_STATE, TOGGLE_MODAL } from "../actions/mapState";
 const initialViewport = {
   latitude: 42.40230199308517,
   longitude: -83.11182404081912,
-  zoom: 9,
+  zoom: 10,
   bearing: 0,
   pitch: 0
 };

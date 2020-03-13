@@ -19,6 +19,38 @@ export async function getInitialZipcodeData(route) {
   throw new Error(mapDataResponse.status);
 }
 
+// returns geojson
+export async function getParcelsByZipcode(route) {
+  try {
+    const mapDataResponse = await fetch(route);
+    const mapDataJson = await mapDataResponse.json();
+    return mapDataJson;
+  } catch (err) {
+    throw new Error(err);
+  }
+}
+
+// returns geojson
+export async function getParcelsBySpeculator(route) {
+  try {
+    const mapDataResponse = await fetch(route);
+    const mapDataJson = await mapDataResponse.json();
+    return mapDataJson;
+  } catch (err) {
+    throw new Error(err);
+  }
+}
+
+export async function getMapData(route) {
+  try {
+    const mapDataResponse = await fetch(route);
+    const mapDataJson = await mapDataResponse.json();
+    return mapDataJson;
+  } catch (err) {
+    throw new Error(err);
+  }
+}
+
 //debouncing for searches
 export const populateSearch = async function(searchTerm, route) {
   //route can be either <host>/api/zipcode-search/ or <host>/api/address-search/ or <host>/api/speculator-search/

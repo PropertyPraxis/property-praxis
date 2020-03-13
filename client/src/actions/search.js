@@ -8,7 +8,8 @@ export const SET_SEARCH_DISPLAY_TYPE = "SET_SEARCH_DISPLAY_TYPE";
 export const SEARCH_ALL = "SEARCH_ALL";
 export const SEARCH_PARTIAL_ZIPCODE = "SEARCH_PARTIAL_ZIPCODE";
 export const SEARCH_FULL_ZIPCODE = "SEARCH_FULL_ZIPCODE";
-export const SEARCH_SPECULATOR = "SEARCH_SPECULATOR";
+export const SEARCH_FULL_SPECULATOR = "SEARCH_FULL_SPECULATOR";
+export const SEARCH_PARTIAL_SPECULATOR = "SEARCH_PARTIAL_SPECULATOR";
 export const SEARCH_ADDRESS = "SEARCH_ADDRESS";
 
 export function setSearchType(type) {
@@ -36,15 +37,10 @@ export function setSearchTerm(searchTerm) {
   };
 }
 
-export function resetSearch() {
+export function resetSearch(searchState) {
   return {
     type: RESET_SEARCH,
-    payload: {
-      searchTerm: "",
-      searchDisplayType: null,
-      partialResults: [],
-      fullResults: []
-    }
+    payload: { ...searchState }
   };
 }
 
@@ -75,9 +71,18 @@ function searchFullZipcode(fullResults) {
 
 function searchPartialSpeculator(partialResults) {
   return {
-    type: SEARCH_SPECULATOR,
+    type: SEARCH_PARTIAL_SPECULATOR,
     payload: {
       partialResults
+    }
+  };
+}
+
+function searchFullSpeculator(fullResults) {
+  return {
+    type: SEARCH_FULL_SPECULATOR,
+    payload: {
+      fullResults
     }
   };
 }
@@ -150,6 +155,24 @@ export function handleSearchPartialSpeculator(searchTerm, year) {
     )
       .then(json => {
         dispatch(searchPartialSpeculator(json));
+        return json;
+      })
+      .catch(err => {
+        //need to add some more error hadling
+        throw Error(`An error occured searching: ${err}`);
+      });
+  };
+}
+
+export function handleSearchFullSpeculator(searchTerm, year) {
+  return async dispatch => {
+    return populateSearchByYear(
+      searchTerm,
+      year,
+      `/api/speculator-search/full/`
+    )
+      .then(json => {
+        dispatch(searchFullSpeculator(json));
         return json;
       })
       .catch(err => {

@@ -7,7 +7,7 @@ class SearchContainer extends Component {
     return <SearchBar {...this.props} />;
   }
 }
-function mapStateToProps({ searchState, mapData }) {
-  return { searchState, mapData };
+function mapStateToProps({ searchState, mapData, mapState }) {
+  return { searchState, mapData, mapState };
 }
 export default connect(mapStateToProps)(SearchContainer);

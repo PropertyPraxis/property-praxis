@@ -2,13 +2,7 @@ import React, { Component } from "react";
 import ReactMapGL, { Source, Layer } from "react-map-gl";
 import { getMapStateAction } from "../../actions/mapState";
 import { getHoveredFeatureAction } from "../../actions/currentFeature";
-import {
-  parcelLayer,
-  parcelCentroid,
-  zipsLayer,
-  zipsLabel
-  // heatmapLayer
-} from "./mapStyle";
+import { parcelLayer, parcelCentroid, zipsLayer, zipsLabel } from "./mapStyle";
 import "../../scss/Map.scss";
 
 //this token needs to be hidden
@@ -18,7 +12,9 @@ const MAPBOX_TOKEN =
 // GeoJSON Data source used in vector tiles, documented at
 // https://gist.github.com/ryanbaumann/a7d970386ce59d11c16278b90dde094d
 
+
 class PraxisMap extends Component {
+
   _onHover = event => {
     const {
       features,
@@ -34,7 +30,6 @@ class PraxisMap extends Component {
     // }
   };
 
-  //   _sourceRef = React.createRef();
 
   _onViewportChange = viewport =>
     this.props.dispatch(getMapStateAction({ ...viewport }));
@@ -51,9 +46,8 @@ class PraxisMap extends Component {
       )
     );
   }
+
   render() {
-    // const { zoom } = this.props.mapState;
-    // console.log("zoom", zoom);
     return (
       <div className="map">
         <ReactMapGL
@@ -66,9 +60,6 @@ class PraxisMap extends Component {
           minZoom={10}
           mapboxApiAccessToken={MAPBOX_TOKEN}
           onViewportChange={this._onViewportChange}
-          onClick={e => {
-            console.log("click: ", e);
-          }}
           onHover={this._onHover}
         >
           <Source id="parcels" type="geojson" data={this.props.mapData.ppraxis}>

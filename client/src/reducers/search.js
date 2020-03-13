@@ -7,7 +7,8 @@ import {
   SEARCH_PARTIAL_ZIPCODE,
   SEARCH_FULL_ZIPCODE,
   SEARCH_ADDRESS,
-  SEARCH_SPECULATOR
+  SEARCH_PARTIAL_SPECULATOR,
+  SEARCH_FULL_SPECULATOR
 } from "../actions/search";
 
 const initialSearchState = {
@@ -36,9 +37,12 @@ export default function searchState(state = initialSearchState, action) {
       return { ...state, ...action.payload };
     case SEARCH_ADDRESS:
       return { ...state, ...action.payload };
-    case SEARCH_SPECULATOR:
+    case SEARCH_PARTIAL_SPECULATOR:
+      return { ...state, ...action.payload };
+      case SEARCH_FULL_SPECULATOR:
       return { ...state, ...action.payload };
     default:
       return state;
   }
 }
+

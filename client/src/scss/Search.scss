@@ -114,7 +114,7 @@ input[type="text"] {
   display: flex; /*added*/
   flex-direction: column;
   overflow: auto;
-  div {
+  a > div {
     display: flex;
     width: 100%;
     padding: 10px;
@@ -122,13 +122,14 @@ input[type="text"] {
     box-sizing: border-box;
     // background-color: white;
     align-items: center;
+    color: $ui-black;
   }
 
-  div:hover {
+  a > div:hover {
     border: 1px solid $ui-black;
   }
 
-  img {
+  a > div > img {
     height: 30px;
     margin-right: 20px;
   }
@@ -140,4 +141,11 @@ input[type="text"] {
   .list-item-even {
     background-color: $ui-off-white;
   }
+}
+
+.full-results-container {
+  max-height: 70vh;
+  display: flex; /*added*/
+  flex-direction: column;
+  overflow: auto;
 }
