@@ -1,11 +1,12 @@
 import React, { Component } from "react";
-import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
+import { BrowserRouter as Router, Route } from "react-router-dom";
 import { connect } from "react-redux";
 import queryString from "query-string";
 import {
-  handleGetInitialMapDataAction,
+  // handleGetInitialMapDataAction,
   handleGetInitialZipcodeDataAction,
-  handleGetParcelsByZipcodeAction
+  // handleGetParcelsByZipcodeAction,
+  handleGetParcelsByQueryAction
 } from "../actions/mapData";
 import { getMapStateAction } from "../actions/mapState";
 import { setDocHeightOnWindow } from "../utils/style";
@@ -25,12 +26,41 @@ const routeSwitcher = (location, year) => {
   switch (pathname) {
     case "/zipcode":
       return `/api/geojson/parcels${pathname}/${searchTerm.search}/${year}`;
+    case "/speculator":
+      return `/api/geojson/parcels${pathname}/${searchTerm.search}/${year}`;
     default:
       return `/api/geojson/parcels/${year}`;
   }
 };
 
 class App extends Component {
+  _createNewViewport = geojson => {
+    //check to see what data is loaded
+    const { year } = this.props.mapData;
+    const features = geojson.features;
+    const { mapState } = this.props;
+
+    //instantiate new viewport object
+    const { longitude, latitude, zoom } = createNewViewport(geojson, mapState);
+    const newViewport = {
+      ...mapState,
+      longitude,
+      latitude,
+      zoom,
+      transitionDuration: 1000
+    };
+    // if the return geojson has features aka the search term was
+    // valid then change the veiwport accordingly
+    if (features) {
+      this.props.dispatch(getMapStateAction(newViewport));
+      // if there are no features then do a regular serarch for all parcels
+    } else {
+      this.props.dispatch(
+        handleGetParcelsByQueryAction(`/api/geojson/parcels/${year}`)
+      );
+    }
+  };
+
   componentDidMount() {
     //set window height for mobile
     setDocHeightOnWindow();
@@ -44,43 +74,19 @@ class App extends Component {
     // if there is a search term dispatch the get parcels action
     if (searchTerm !== undefined) {
       const route = routeSwitcher(window.location, year);
-      const { mapState } = this.props;
       this.props
-        .dispatch(handleGetParcelsByZipcodeAction(route))
+        .dispatch(handleGetParcelsByQueryAction(route))
         .then(geojson => {
-          const features = geojson.features;
-          // if the return geojson has features aka the search term was
-          // valid then change the veiwport accordingly
-          if (features) {
-            //trigger new viewport
-            const { longitude, latitude, zoom } = createNewViewport(
-              geojson,
-              mapState
-            );
-
-            this.props.dispatch(
-              getMapStateAction({
-                ...mapState,
-                longitude,
-                latitude,
-                zoom,
-                transitionDuration: 1000
-              })
-            );
-            // if there are no features then do a regular serarch for all parcels
-          } else {
-            this.props.dispatch(
-              handleGetInitialMapDataAction(`/api/geojson/parcels/${year}`)
-            );
-          }
+          this._createNewViewport(geojson);
         });
       // if there is no search term then do a regular search for all parcels
     } else {
-      this.props.dispatch(
-        handleGetInitialMapDataAction(`/api/geojson/parcels/${year}`)
-      );
+      this.props
+        .dispatch(handleGetParcelsByQueryAction(`/api/geojson/parcels/${year}`))
+        .then(geojson => {
+          this._createNewViewport(geojson);
+        });
     }
-
     //load zip data no matter what (this may change)
     this.props.dispatch(
       handleGetInitialZipcodeDataAction("/api/geojson/zipcodes")

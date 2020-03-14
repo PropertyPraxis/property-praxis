@@ -13,8 +13,9 @@ import {
   setSearchDisplayType
 } from "../../actions/search";
 import {
-  handleGetParcelsByZipcodeAction,
-  handleGetParcelsBySpeculatorAction
+  // handleGetParcelsByZipcodeAction,
+  // handleGetParcelsBySpeculatorAction,
+  handleGetParcelsByQueryAction
 } from "../../actions/mapData";
 import * as zipcodeIcon from "../../assets/img/zipcode-icon-transparent.png";
 import * as speculatorIcon from "../../assets/img/speculator-icon-transparent.png";
@@ -40,6 +41,7 @@ const PartialReturnResultSwitch = props => {
 };
 
 const PartialZipcodeResults = props => {
+  console.log("zipcode props", props);
   const { partialResults } = props.searchState;
   const { year } = props.mapData;
   const { mapState } = props;
@@ -61,22 +63,10 @@ const PartialZipcodeResults = props => {
                 const route = `/api/geojson/parcels/zipcode/${result.propzip}/${year}`;
                 //set map data and then create viewport
                 props
-                  .dispatch(handleGetParcelsByZipcodeAction(route))
+                  .dispatch(handleGetParcelsByQueryAction(route))
                   .then(geojson => {
-                    //trigger new viewport
-                    const { longitude, latitude, zoom } = createNewViewport(
-                      geojson,
-                      mapState
-                    );
-                    props.dispatch(
-                      getMapStateAction({
-                        ...mapState,
-                        longitude,
-                        latitude,
-                        zoom,
-                        transitionDuration: 1000
-                      })
-                    );
+                    //trigger new viewport pass down from PartialSearchResults
+                    props.createNewVieport(geojson);
                   });
                 //fill in the text input
                 // props.dispatch(setSearchTerm(result.propzip));
@@ -159,22 +149,10 @@ const PartialSpeculatorResults = props => {
                 const route = `/api/geojson/parcels/speculator/${result.own_id}/${year}`;
                 //set map data and then create viewport
                 props
-                  .dispatch(handleGetParcelsBySpeculatorAction(route))
+                  .dispatch(handleGetParcelsByQueryAction(route))
                   .then(geojson => {
                     //trigger new viewport
-                    const { longitude, latitude, zoom } = createNewViewport(
-                      geojson,
-                      mapState
-                    );
-                    props.dispatch(
-                      getMapStateAction({
-                        ...mapState,
-                        longitude,
-                        latitude,
-                        zoom,
-                        transitionDuration: 1000
-                      })
-                    );
+                    props.createNewVieport(geojson);
                   });
                 //fill in the text input
                 // props.dispatch(setSearchTerm(result.propzip));
@@ -201,11 +179,31 @@ const PartialSpeculatorResults = props => {
 };
 
 class PartialSearchResults extends Component {
+  _createNewViewport = geojson => {
+    const { mapState } = this.props;
+    //trigger new viewport
+    const { longitude, latitude, zoom } = createNewViewport(geojson, mapState);
+    this.props.dispatch(
+      getMapStateAction({
+        ...mapState,
+        longitude,
+        latitude,
+        zoom,
+        transitionDuration: 1000
+      })
+    );
+  };
+
   render() {
     const resultLength = this.props.searchState.partialResults.length;
 
     if (resultLength > 0) {
-      return <PartialReturnResultSwitch {...this.props} />;
+      return (
+        <PartialReturnResultSwitch
+          {...this.props}
+          createNewVieport={this._createNewViewport}
+        />
+      );
     }
     return null;
   }

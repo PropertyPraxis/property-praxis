@@ -20,26 +20,26 @@ export async function getInitialZipcodeData(route) {
 }
 
 // returns geojson
-export async function getParcelsByZipcode(route) {
-  try {
-    const mapDataResponse = await fetch(route);
-    const mapDataJson = await mapDataResponse.json();
-    return mapDataJson;
-  } catch (err) {
-    throw new Error(err);
-  }
-}
+// export async function getParcelsByZipcode(route) {
+//   try {
+//     const mapDataResponse = await fetch(route);
+//     const mapDataJson = await mapDataResponse.json();
+//     return mapDataJson;
+//   } catch (err) {
+//     throw new Error(err);
+//   }
+// }
 
-// returns geojson
-export async function getParcelsBySpeculator(route) {
-  try {
-    const mapDataResponse = await fetch(route);
-    const mapDataJson = await mapDataResponse.json();
-    return mapDataJson;
-  } catch (err) {
-    throw new Error(err);
-  }
-}
+// // returns geojson
+// export async function getParcelsBySpeculator(route) {
+//   try {
+//     const mapDataResponse = await fetch(route);
+//     const mapDataJson = await mapDataResponse.json();
+//     return mapDataJson;
+//   } catch (err) {
+//     throw new Error(err);
+//   }
+// }
 
 export async function getMapData(route) {
   try {
