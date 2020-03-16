@@ -18,22 +18,23 @@ import PraxisModal from "./Modal/Modal";
 import PPLogo from "../Logo/Logo";
 import "../scss/App.scss";
 
-// returns a route dependent on the window location
-const routeSwitcher = (location, year) => {
-  const { pathname, search } = location;
-  const searchTerm = queryString.parse(search);
-
-  switch (pathname) {
-    case "/zipcode":
-      return `/api/geojson/parcels${pathname}/${searchTerm.search}/${year}`;
-    case "/speculator":
-      return `/api/geojson/parcels${pathname}/${searchTerm.search}/${year}`;
-    default:
-      return `/api/geojson/parcels/${year}`;
-  }
-};
-
 class App extends Component {
+  // returns a route dependent on the window location
+  _routeSwitcher = (location, year) => {
+    const { pathname, search } = location;
+    const searchTerm = queryString.parse(search);
+
+    switch (pathname) {
+      case "/zipcode":
+        return `/api/geojson/parcels${pathname}/${searchTerm.search}/${year}`;
+      case "/speculator":
+        return `/api/geojson/parcels${pathname}/${searchTerm.search}/${year}`;
+      default:
+        return `/api/geojson/parcels/${year}`;
+    }
+  };
+
+  // create new vieport dependent on current geojson bbox
   _createNewViewport = geojson => {
     //check to see what data is loaded
     const { year } = this.props.mapData;
@@ -73,14 +74,16 @@ class App extends Component {
     // much logic here!!  may need to work on this a bit more to simplify the mount
     // if there is a search term dispatch the get parcels action
     if (searchTerm !== undefined) {
-      const route = routeSwitcher(window.location, year);
+      const route = this._routeSwitcher(window.location, year);
       this.props
         .dispatch(handleGetParcelsByQueryAction(route))
         .then(geojson => {
           this._createNewViewport(geojson);
         });
       // if there is no search term then do a regular search for all parcels
-    } else {
+    }
+
+    if (searchTerm === undefined) {
       this.props
         .dispatch(handleGetParcelsByQueryAction(`/api/geojson/parcels/${year}`))
         .then(geojson => {
@@ -88,12 +91,15 @@ class App extends Component {
         });
     }
     //load zip data no matter what (this may change)
-    this.props.dispatch(
-      handleGetInitialZipcodeDataAction("/api/geojson/zipcodes")
-    );
+    this.props
+      .dispatch(handleGetInitialZipcodeDataAction("/api/geojson/zipcodes"))
+      .then(geojson => {
+        // this._createNewViewport(geojson);
+      });
   }
 
   render() {
+
     const { ppraxis, zips } = this.props.mapData;
     const { modalIsOpen } = this.props;
     const loadingState =
@@ -101,25 +107,25 @@ class App extends Component {
       ppraxis.features === null ||
       Object.entries(zips).length === 0;
 
-    if (modalIsOpen) {
-      return <PraxisModal />;
-    } else {
-      if (loadingState) {
-        return <Loading />;
-      }
-      return (
-        <main>
-          <div className="app-container">
-            <Router>
-              <Route path="/" component={MapContainer}></Route>
-              <SearchContainer />
-            </Router>
-            <PPLogo />
-          </div>
-        </main>
-      );
+    // if (modalIsOpen) {
+    //   return <PraxisModal />;
+    // } else {
+    if (loadingState) {
+      return <Loading />;
     }
+    return (
+      <main>
+        <div className="app-container">
+          <Router>
+            <Route path="/" component={MapContainer}></Route>
+            <SearchContainer />
+          </Router>
+          <PPLogo />
+        </div>
+      </main>
+    );
   }
+  // }
 }
 
 function mapStateToProps({ mapData, modalIsOpen, mapState }) {

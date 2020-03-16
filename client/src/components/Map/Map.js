@@ -1,8 +1,20 @@
 import React, { Component } from "react";
-import ReactMapGL, { Source, Layer } from "react-map-gl";
+import ReactMapGL, { Source, Layer, Marker } from "react-map-gl";
+import { createNewViewport } from "../../utils/map";
 import { getMapStateAction } from "../../actions/mapState";
 import { getHoveredFeatureAction } from "../../actions/currentFeature";
-import { parcelLayer, parcelCentroid, zipsLayer, zipsLabel } from "./mapStyle";
+import {
+  logMarkerDragEventAction,
+  onMarkerDragEndAction
+} from "../../actions/mapData";
+import {
+  parcelLayer,
+  parcelHighlightLayer,
+  parcelCentroid,
+  zipsLayer,
+  zipsLabel
+} from "./mapStyle";
+import Pin from "./Pin";
 import "../../scss/Map.scss";
 
 //this token needs to be hidden
@@ -12,27 +24,91 @@ const MAPBOX_TOKEN =
 // GeoJSON Data source used in vector tiles, documented at
 // https://gist.github.com/ryanbaumann/a7d970386ce59d11c16278b90dde094d
 
+class PraxisMarker extends React.Component {
+  _logDragEvent(name, event) {
+    this.props.dispatch(logMarkerDragEventAction(name, event));
+  }
+
+  _onMarkerDragStart = event => {
+    this._logDragEvent("onDragStart", event);
+  };
+
+  _onMarkerDrag = event => {
+    this._logDragEvent("onDrag", event);
+  };
+
+  _onMarkerDragEnd = event => {
+    this._logDragEvent("onDragEnd", event);
+    this.props.dispatch(onMarkerDragEndAction(event));
+  };
+
+  render() {
+    const { latitude, longitude } = this.props.mapData.marker;
+    return (
+      <Marker
+        longitude={longitude}
+        latitude={latitude}
+        offsetTop={-20}
+        offsetLeft={-10}
+        draggable
+        onDragStart={this._onMarkerDragStart}
+        onDrag={this._onMarkerDrag}
+        onDragEnd={this._onMarkerDragEnd}
+      >
+        <Pin size={20} />
+      </Marker>
+    );
+  }
+}
 
 class PraxisMap extends Component {
+  // // create new vieport dependent on current geojson bbox
+  // _createNewViewport = () => {
+  //   //check to see what data is loaded
+  //   const { ppraxis } = this.props.mapData; //geojson
+  //   const { features } = this.props.mapData.ppraxis;
+  //   const { mapState } = this.props;
+
+  //   //instantiate new viewport object
+  //   const { longitude, latitude, zoom } = createNewViewport(ppraxis, mapState);
+  //   const newViewport = {
+  //     ...mapState,
+  //     longitude,
+  //     latitude,
+  //     zoom,
+  //     transitionDuration: 1000
+  //   };
+  //   // if the return geojson has features aka the search term was
+  //   // valid then change the veiwport accordingly
+  //   if (features) {
+  //     this.props.dispatch(getMapStateAction(newViewport));
+  //   }
+  // };
 
   _onHover = event => {
     const {
       features,
       srcEvent: { offsetX, offsetY }
     } = event;
-    // console.log("event", event);
+
     const hoveredFeature =
       features && features.find(f => f.layer.id === "parcel-polygon");
-    // if (hoveredFeature !== undefined) {
+
     this.props.dispatch(
       getHoveredFeatureAction({ hoveredFeature, x: offsetX, y: offsetY })
     );
+
+    // let highlightFeatureId;
+    // if (hoveredFeature) {
+    //   highlightFeatureId = hoveredFeature.properties.id;
+    //   console.log(highlightFeatureId)
     // }
   };
 
-
-  _onViewportChange = viewport =>
+  _onViewportChange = viewport => {
+    console.log("Praxismap");
     this.props.dispatch(getMapStateAction({ ...viewport }));
+  };
 
   _renderTooltip() {
     const { hoveredFeature, x, y } = this.props.currentFeature;
@@ -47,7 +123,23 @@ class PraxisMap extends Component {
     );
   }
 
+  // _getCursor = ({ isHovering, isDragging }) => {
+  //   // return isDragging ? 'pointer' : 'default';
+  //   if (isHovering) {
+  //     return "pointer";
+  //   }
+  //   if (isDragging) {
+  //     return "hand";
+  //   }
+  //   return "default";
+  // };
+
   render() {
+    //create the new viewport before rendering
+    const { latitude, longitude } = this.props.mapData.marker;
+    const { hoveredFeature } = this.props.currentFeature;
+    const filter = hoveredFeature ? hoveredFeature.properties.feature_id : "";
+
     return (
       <div className="map">
         <ReactMapGL
@@ -61,10 +153,18 @@ class PraxisMap extends Component {
           mapboxApiAccessToken={MAPBOX_TOKEN}
           onViewportChange={this._onViewportChange}
           onHover={this._onHover}
+          interactiveLayerIds={["parcel-polygon"]}
+          // getCursor={this._getCursor}
         >
+          {latitude && longitude ? <PraxisMarker {...this.props} /> : null}
           <Source id="parcels" type="geojson" data={this.props.mapData.ppraxis}>
             <Layer key="parcel-centroid" {...parcelCentroid} />
             <Layer key="parcel-layer" {...parcelLayer} />
+            <Layer
+              key="highlight-parcel-layer"
+              {...parcelHighlightLayer}
+              filter={["in", "feature_id", filter]}
+            />
           </Source>
           {this._renderTooltip()}
           <Source id="zips" type="geojson" data={this.props.mapData.zips}>

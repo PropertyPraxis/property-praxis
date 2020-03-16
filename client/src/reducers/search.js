@@ -6,7 +6,8 @@ import {
   SET_SEARCH_DISPLAY_TYPE,
   SEARCH_PARTIAL_ZIPCODE,
   SEARCH_FULL_ZIPCODE,
-  SEARCH_ADDRESS,
+  SEARCH_PARTIAL_ADDRESS,
+  SEARCH_FULL_ADDRESS,
   SEARCH_PARTIAL_SPECULATOR,
   SEARCH_FULL_SPECULATOR
 } from "../actions/search";
@@ -35,14 +36,15 @@ export default function searchState(state = initialSearchState, action) {
       return { ...state, ...action.payload };
     case SEARCH_FULL_ZIPCODE:
       return { ...state, ...action.payload };
-    case SEARCH_ADDRESS:
+    case SEARCH_PARTIAL_ADDRESS:
+      return { ...state, ...action.payload };
+    case SEARCH_FULL_ADDRESS:
       return { ...state, ...action.payload };
     case SEARCH_PARTIAL_SPECULATOR:
       return { ...state, ...action.payload };
-      case SEARCH_FULL_SPECULATOR:
+    case SEARCH_FULL_SPECULATOR:
       return { ...state, ...action.payload };
     default:
       return state;
   }
 }
-

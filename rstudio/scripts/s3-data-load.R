@@ -462,6 +462,7 @@ geomList <- lapply(seq_along(shpList), function(i){
   geom <- geom[,c("parprop_id", "parcelno", "propaddr", "geom_agg_count", "geometry")]
   geom <- st_as_sf(geom[!duplicated(geom),])
   st_crs(geom) = 4326
+  # geom <- st_transform(geom, 3857) ##transfor to new proj
   return(geom)
 })
 
@@ -609,7 +610,7 @@ createParcelGeomByYear <- function(years){ ##must be a list
   lapply(years, function(year){
     dbSendQuery(conn, paste("DROP VIEW IF EXISTS ", paste0("parcels_", year), "CASCADE;",
                             "CREATE VIEW ", paste0("parcels_", year), "AS",
-                            "(SELECT DISTINCT ROW_NUMBER() OVER (ORDER BY 1) AS id, y.praxisyear, ot.own_id, count.count, p.propzip, ", paste0("geom_", year), "FROM parcel_property_geom AS ppg",
+                            "(SELECT DISTINCT ROW_NUMBER() OVER (ORDER BY 1) AS feature_id, y.praxisyear, ot.own_id, count.count, p.propzip, ", paste0("geom_", year), "FROM parcel_property_geom AS ppg",
                             "INNER JOIN property AS p ON ppg.parprop_id = p.parprop_id",
                             "INNER JOIN taxpayer_property AS tp ON p.prop_id = tp.prop_id",
                             "INNER JOIN year AS y on tp.taxparprop_id = y.taxparprop_id",
@@ -670,7 +671,8 @@ createParcelGeomByYear(yearList)
 #                         "WHERE y.praxisyear = 2017 AND count.count > 9);"))
 
 #####TESTING
-x <- dbGetQuery(conn, paste("SELECT * FROM "))
+# x <- dbGetQuery(conn, paste("SELECT * FROM parcels_2017"))
+# x <- dbGetQuery(conn, paste("SELECT * FROM owner_count"))
 # x <- sf::st_read(conn, query=paste("SELECT DISTINCT pp.*, p.*, otp.own_id, y.praxisyear FROM parcel_property_geom as pp
 #     INNER JOIN property as p ON pp.parprop_id = p.parprop_id
 #     INNER JOIN taxpayer_property AS tpp ON p.prop_id = tpp.prop_id
@@ -679,7 +681,7 @@ x <- dbGetQuery(conn, paste("SELECT * FROM "))
 #     INNER JOIN owner_taxpayer as otp ON tp.owntax_id = otp.owntax_id
 #     WHERE otp.own_id LIKE '%DELMIKO VAUGHN%' AND y.praxisyear = 2017"))
 # 
-# x <- sf::st_read(conn, query=paste("SELECT * FROM parcels_2017"))
+x <- sf::st_read(conn, query=paste("SELECT * FROM parcels_2017"))
 # test <- sf::st_read(conn, query="SELECT * FROM parcels_2016;")
 # geom_2017 <- sf::st_read(conn, query=paste(paste("SELECT DISTINCT ROW_NUMBER() OVER (ORDER BY 1) AS id, y.praxisyear, ot.own_id, count.count, geom_2017 FROM parcel_property_geom AS ppg",
 #                                              "INNER JOIN property AS p ON ppg.parprop_id = p.parprop_id",

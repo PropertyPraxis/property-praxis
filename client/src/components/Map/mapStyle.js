@@ -12,7 +12,7 @@ const stops = [
 export const parcelLayer = {
   id: "parcel-polygon",
   type: "fill",
-  minzoom: 12,
+  minzoom: 13,
   // maxzoom: 16,
   buffer: 0,
   tolerance: 0.9,
@@ -21,15 +21,30 @@ export const parcelLayer = {
       property: "count",
       stops
     },
-    "fill-opacity": 0.8,
-    "fill-outline-color": "rgba(255,255,255,0.5)"
+    "fill-opacity": 1,
+    "fill-outline-color": "rgba(255,255,255,1)"
+  }
+};
+
+export const parcelHighlightLayer = {
+  id: "highlight-parcel-polygon",
+  type: "fill",
+  source: "parcel-polygon",
+  minzoom: 13,
+  // maxzoom: 16,
+  buffer: 0,
+  tolerance: 0.9,
+  paint: {
+    "fill-color": "rgba(0,0,0,0.4)",
+    "fill-opacity": 1,
+    "fill-outline-color": "rgba(0,0,0,1)"
   }
 };
 
 export const parcelCentroid = {
   id: "parcel-centroid",
   type: "circle",
-  maxzoom: 12,
+  maxzoom: 13,
   buffer: 0,
   tolerance: 0.9,
   paint: {
@@ -44,7 +59,7 @@ export const parcelCentroid = {
 export const zipsLayer = {
   id: "zips",
   type: "line",
-  maxzoom: 12,
+  maxzoom: 13,
   paint: {
     "line-width": 3,
     "line-dasharray": [3, 3],
@@ -55,7 +70,7 @@ export const zipsLayer = {
 export const zipsLabel = {
   id: "zips-label",
   type: "symbol",
-  maxzoom: 12,
+  maxzoom: 13,
   layout: {
     "text-field": ["get", "zipcode"],
     "text-anchor": "center",
@@ -65,7 +80,7 @@ export const zipsLabel = {
   },
   paint: {
     "text-halo-color": "white",
-    "text-halo-width": 1,
+    "text-halo-width": 1
   }
 };
 

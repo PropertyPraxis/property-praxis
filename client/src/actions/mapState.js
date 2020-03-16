@@ -1,5 +1,5 @@
 export const GET_MAP_STATE = "GET_MAP_STATE";
-
+// export const NEW_MAP_STATE = "NEW_MAP_STATE";
 
 export function getMapStateAction(viewport) {
   return {
@@ -8,3 +8,9 @@ export function getMapStateAction(viewport) {
   };
 }
 
+// export function newMapStateAction(viewport) {
+//   return {
+//     type: NEW_MAP_STATE,
+//     payload: viewport
+//   };
+// }

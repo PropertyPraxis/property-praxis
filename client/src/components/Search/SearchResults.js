@@ -9,13 +9,15 @@ import { getMapStateAction } from "../../actions/mapState";
 import {
   handleSearchFullZipcode,
   handleSearchFullSpeculator,
+  handleSearchFullAddress,
   resetSearch,
   setSearchDisplayType
 } from "../../actions/search";
 import {
   // handleGetParcelsByZipcodeAction,
   // handleGetParcelsBySpeculatorAction,
-  handleGetParcelsByQueryAction
+  handleGetParcelsByQueryAction,
+  setMarkerCoordsAction
 } from "../../actions/mapData";
 import * as zipcodeIcon from "../../assets/img/zipcode-icon-transparent.png";
 import * as speculatorIcon from "../../assets/img/speculator-icon-transparent.png";
@@ -30,7 +32,7 @@ const PartialReturnResultSwitch = props => {
     case "All":
       return null;
     case "Address":
-      return <PartialAddressResults {...props.searchState} />;
+      return <PartialAddressResults {...props} />;
     case "Speculator":
       return <PartialSpeculatorResults {...props} />;
     case "Zipcode":
@@ -41,10 +43,8 @@ const PartialReturnResultSwitch = props => {
 };
 
 const PartialZipcodeResults = props => {
-  console.log("zipcode props", props);
   const { partialResults } = props.searchState;
   const { year } = props.mapData;
-  const { mapState } = props;
 
   return (
     <section>
@@ -104,23 +104,57 @@ const FullZipcodeResults = props => {
 };
 
 const PartialAddressResults = props => {
-  const { partialResults } = props;
+  const { partialResults } = props.searchState;
+  const { year } = props.mapData;
   return (
     <section>
       <div className="partial-results-container">
         {partialResults[0].mb.map((result, index) => {
           return (
-            <div
+            <Link
               key={result.place_name}
+              to={{
+                pathname: "/address",
+                search: `search=${result.place_name}`
+              }}
               className={index % 2 ? "list-item-odd" : "list-item-even"}
               onClick={() => {
-                // new action here
-                console.log("Address: ", result);
+                //add a point marker
+                const [longitude, latitude] = result.geometry.coordinates;
+                props.dispatch(setMarkerCoordsAction(latitude, longitude));
+                props.createNewVieport(result);
+
+                //query the db
+                const coords = encodeURI(
+                  JSON.stringify({ longitude, latitude })
+                );
+                props.dispatch(handleSearchFullAddress(coords, year ));
+
+                //set map data and then create viewport
+                const route = `http://localhost:5000/api/geojson/parcels/address/${coords}/${year}`;
+                props
+                  .dispatch(handleGetParcelsByQueryAction(route))
+                  .then(geojson => {
+                    //trigger new viewport pass down from PartialSearchResults
+                    // props.createNewVieport(geojson);
+                  });
+                //fill in the text input
+                // props.dispatch(setSearchTerm(result.propzip));
+                props.dispatch(
+                  resetSearch({
+                    // partialResults: [],
+                    searchTerm: result.place_name
+                  })
+                );
+                // set the display type to full
+                props.dispatch(setSearchDisplayType("full"));
               }}
             >
-              <img src={mapMarkerIcon} alt="Address Result" />
-              {result.place_name}
-            </div>
+              <div>
+                <img src={mapMarkerIcon} alt="Address Result" />
+                {result.place_name}
+              </div>
+            </Link>
           );
         })}
       </div>
@@ -152,6 +186,7 @@ const PartialSpeculatorResults = props => {
                   .dispatch(handleGetParcelsByQueryAction(route))
                   .then(geojson => {
                     //trigger new viewport
+                    //Note this is creating a default because it is a point
                     props.createNewVieport(geojson);
                   });
                 //fill in the text input

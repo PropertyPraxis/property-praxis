@@ -10,7 +10,8 @@ export const SEARCH_PARTIAL_ZIPCODE = "SEARCH_PARTIAL_ZIPCODE";
 export const SEARCH_FULL_ZIPCODE = "SEARCH_FULL_ZIPCODE";
 export const SEARCH_FULL_SPECULATOR = "SEARCH_FULL_SPECULATOR";
 export const SEARCH_PARTIAL_SPECULATOR = "SEARCH_PARTIAL_SPECULATOR";
-export const SEARCH_ADDRESS = "SEARCH_ADDRESS";
+export const SEARCH_PARTIAL_ADDRESS = "SEARCH_PARTIAL_ADDRESS";
+export const SEARCH_FULL_ADDRESS = "SEARCH_FULL_ADDRESS";
 
 export function setSearchType(type) {
   return {
@@ -89,9 +90,18 @@ function searchFullSpeculator(fullResults) {
 
 function searchPartialAddress(partialResults) {
   return {
-    type: SEARCH_ADDRESS,
+    type: SEARCH_FULL_ADDRESS,
     payload: {
       partialResults
+    }
+  };
+}
+
+function searchFullAddress(fullResults) {
+  return {
+    type: SEARCH_PARTIAL_ADDRESS,
+    payload: {
+      fullResults
     }
   };
 }
@@ -146,6 +156,24 @@ export function handleSearchPartialAddress(searchTerm, year) {
   };
 }
 
+export function handleSearchFullAddress(searchTerm, year) {
+  return async dispatch => {
+    return populateSearchByYear(
+      searchTerm,
+      year,
+      `/api/address-search/full/`
+    )
+      .then(json => {
+        dispatch(searchFullAddress(json));
+        return json;
+      })
+      .catch(err => {
+        //need to add some more error hadling
+        throw Error(`An error occured searching: ${err}`);
+      });
+  };
+}
+
 export function handleSearchPartialSpeculator(searchTerm, year) {
   return async dispatch => {
     return populateSearchByYear(
@@ -172,6 +200,7 @@ export function handleSearchFullSpeculator(searchTerm, year) {
       `/api/speculator-search/full/`
     )
       .then(json => {
+        debugger;
         dispatch(searchFullSpeculator(json));
         return json;
       })
