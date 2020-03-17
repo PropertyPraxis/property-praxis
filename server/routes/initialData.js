@@ -31,7 +31,7 @@ router.get("/zipcodes", async (req, res) => {
 
 router.get("/parcels/:year", async (req, res) => {
   const { year } = req.params;
-  
+
   try {
     const query = `SELECT jsonb_build_object(
     'type',     'FeatureCollection',
@@ -45,7 +45,7 @@ router.get("/parcels/:year", async (req, res) => {
       'properties', to_jsonb(inputs) - 'geom_${year}'
     ) AS feature
     FROM (
-      SELECT * FROM parcels_${year} LIMIT 100
+      SELECT * FROM parcels_${year}
     ) inputs
   ) features;`;
 

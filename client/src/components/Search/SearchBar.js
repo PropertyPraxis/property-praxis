@@ -80,7 +80,7 @@ class SearchBar extends Component {
                 <div
                   key={button}
                   onClick={() => {
-                    this.props.dispatch(resetSearch({...resetSearchOptions}));
+                    this.props.dispatch(resetSearch({ ...resetSearchOptions }));
                     this.props.dispatch(setSearchType(button));
                   }}
                   style={
@@ -94,6 +94,14 @@ class SearchBar extends Component {
           </div>
           <div className="search-bar">
             <div className="search-form">
+              <div
+                className="clear-button"
+                onClick={() => {
+                  this.props.dispatch(resetSearch({ ...resetSearchOptions }));
+                }}
+              >
+                &times;
+              </div>
               <DebounceInput
                 type="text"
                 placeholder={this._setSearchPlaceholderText(searchType)}

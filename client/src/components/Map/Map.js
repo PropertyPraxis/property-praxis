@@ -62,29 +62,6 @@ class PraxisMarker extends React.Component {
 }
 
 class PraxisMap extends Component {
-  // // create new vieport dependent on current geojson bbox
-  // _createNewViewport = () => {
-  //   //check to see what data is loaded
-  //   const { ppraxis } = this.props.mapData; //geojson
-  //   const { features } = this.props.mapData.ppraxis;
-  //   const { mapState } = this.props;
-
-  //   //instantiate new viewport object
-  //   const { longitude, latitude, zoom } = createNewViewport(ppraxis, mapState);
-  //   const newViewport = {
-  //     ...mapState,
-  //     longitude,
-  //     latitude,
-  //     zoom,
-  //     transitionDuration: 1000
-  //   };
-  //   // if the return geojson has features aka the search term was
-  //   // valid then change the veiwport accordingly
-  //   if (features) {
-  //     this.props.dispatch(getMapStateAction(newViewport));
-  //   }
-  // };
-
   _onHover = event => {
     const {
       features,
@@ -97,16 +74,9 @@ class PraxisMap extends Component {
     this.props.dispatch(
       getHoveredFeatureAction({ hoveredFeature, x: offsetX, y: offsetY })
     );
-
-    // let highlightFeatureId;
-    // if (hoveredFeature) {
-    //   highlightFeatureId = hoveredFeature.properties.id;
-    //   console.log(highlightFeatureId)
-    // }
   };
 
   _onViewportChange = viewport => {
-    console.log("Praxismap");
     this.props.dispatch(getMapStateAction({ ...viewport }));
   };
 
@@ -122,17 +92,6 @@ class PraxisMap extends Component {
       )
     );
   }
-
-  // _getCursor = ({ isHovering, isDragging }) => {
-  //   // return isDragging ? 'pointer' : 'default';
-  //   if (isHovering) {
-  //     return "pointer";
-  //   }
-  //   if (isDragging) {
-  //     return "hand";
-  //   }
-  //   return "default";
-  // };
 
   render() {
     //create the new viewport before rendering

@@ -110,25 +110,21 @@ const PartialAddressResults = props => {
     <section>
       <div className="partial-results-container">
         {partialResults[0].mb.map((result, index) => {
+          const [longitude, latitude] = result.geometry.coordinates;
+          const coords = encodeURI(JSON.stringify({ longitude, latitude }));
           return (
             <Link
               key={result.place_name}
               to={{
                 pathname: "/address",
-                search: `search=${result.place_name}`
+                search: `search=${result.place_name}&coordinates=${coords}`
               }}
               className={index % 2 ? "list-item-odd" : "list-item-even"}
               onClick={() => {
                 //add a point marker
-                const [longitude, latitude] = result.geometry.coordinates;
                 props.dispatch(setMarkerCoordsAction(latitude, longitude));
                 props.createNewVieport(result);
-
-                //query the db
-                const coords = encodeURI(
-                  JSON.stringify({ longitude, latitude })
-                );
-                props.dispatch(handleSearchFullAddress(coords, year ));
+                props.dispatch(handleSearchFullAddress(coords, year));
 
                 //set map data and then create viewport
                 const route = `http://localhost:5000/api/geojson/parcels/address/${coords}/${year}`;

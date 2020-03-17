@@ -158,11 +158,7 @@ export function handleSearchPartialAddress(searchTerm, year) {
 
 export function handleSearchFullAddress(searchTerm, year) {
   return async dispatch => {
-    return populateSearchByYear(
-      searchTerm,
-      year,
-      `/api/address-search/full/`
-    )
+    return populateSearchByYear(searchTerm, year, `/api/address-search/full/`)
       .then(json => {
         dispatch(searchFullAddress(json));
         return json;
@@ -200,7 +196,6 @@ export function handleSearchFullSpeculator(searchTerm, year) {
       `/api/speculator-search/full/`
     )
       .then(json => {
-        debugger;
         dispatch(searchFullSpeculator(json));
         return json;
       })
