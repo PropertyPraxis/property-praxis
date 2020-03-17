@@ -1,71 +1,124 @@
 @import "./colors.scss";
 
 .results-container-enter {
-    height: 100%;
-    width: 0;
-    z-index: 10000;
-    position: absolute;
-    right: 0;
-    top: 0;
+  height: 100%;
+  width: 0;
+  z-index: 50;
+  grid-row: 1 / 4;
+  grid-column: 1 / 2;
+  background-color: white;
+  display: flex;
+  overflow: auto;
+}
+
+.results-container-enter-active,
+.results-container-enter-done,
+.results-container-appear {
+  height: 100%;
+  width: 340px;
+  grid-row: 1 / 4;
+  grid-column: 1 / 2;
+  z-index: 50;
+  background-color: white;
+  transition: width 300ms;
+  border-radius: 4px 0 0 4px;
+  box-shadow: -10px 0 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  overflow: auto;
+}
+
+.results-container-exit {
+  height: 100%;
+  width: 340px;
+  z-index: 50;
+  grid-row: 1 / 4;
+  grid-column: 1 / 2;
+  background-color: white;
+  border-radius: 4px 0 0 4px;
+  box-shadow: -10px 0 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  overflow: auto;
+}
+
+.results-container-exit-active {
+  height: 100%;
+  width: 0;
+  z-index: 50;
+  grid-row: 1 / 4;
+  grid-column: 1 / 2;
+  background-color: white;
+  transition: width 300ms;
+  overflow: auto;
+}
+
+// inner div
+.results-inner {
+  display: flex;
+  flex-direction: column;
+  margin: 115px 15px 15px 15px;
+}
+
+@media screen and (max-width: 700px) {
+  .results-container-enter {
+    height: 0;
+    width: 100%;
+    z-index: 50;
+    grid-row: 2 / 4;
+    grid-column: 1 / 4;
     background-color: white;
     display: flex;
     overflow: auto;
-  }
-  
-  .results-container-enter-active,
-  .results-container-enter-done {
-    height: 100%;
-    width: 350px;
-    z-index: 1000;
     position: absolute;
-    right: 0;
-    top: 0;
-    background-color: white;
-    transition: width 300ms;
-    border-radius: 4px 0 0 4px;
-    box-shadow: -10px 0 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-    overflow: auto;
+    bottom: 0;
   }
-  
+
+  .results-container-enter-active,
+  .results-container-enter-done,
+  .results-container-appear {
+    height: 100%;
+    max-height: 500px;
+    width: 100%;
+    grid-row: 2 / 4;
+    grid-column: 1 / 4;
+    z-index: 50;
+    background-color: white;
+    transition: height 300ms;
+    border-radius: 4px 0 0 4px;
+    box-shadow: -10px 0 8px 0 rgba(0, 0, 0, 0.2),
+      0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    overflow: auto;
+    position: absolute;
+    bottom: 0;
+  }
+
   .results-container-exit {
     height: 100%;
-    width: 350px;
-    z-index: 1000;
-    position: absolute;
-    right: 0;
-    top: 0;
+    max-height: 500px;
+    width: 100%;
+    z-index: 50;
+    grid-row: 2 / 4;
+    grid-column: 1 / 4;
     background-color: white;
     border-radius: 4px 0 0 4px;
-    box-shadow: -10px 0 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    box-shadow: -10px 0 8px 0 rgba(0, 0, 0, 0.2),
+      0 6px 20px 0 rgba(0, 0, 0, 0.19);
     overflow: auto;
-  }
-  
-  .results-container-exit-active {
-    height: 100%;
-    width: 0;
-    z-index: 10000;
     position: absolute;
-    right: 0;
-    top: 0;
-    background-color: white;
-    transition: width 300ms;
-    overflow: auto;
+    bottom: 0;
   }
 
-
-///address results
-.results-container-open {
-  grid-column: 1 / 2;
-  grid-row: 1 / 4;
-  background-color: white;
-  z-index: 50;
-}
-
-
-.results-container-closed {
-    grid-column: 1 / 2;
-    grid-row: 1 / 4;
-    background-color: white;
+  .results-container-exit-active {
+    height: 0;
+    width: 100%;
     z-index: 50;
+    grid-row: 2 / 4;
+    grid-column: 1 / 4;
+    background-color: white;
+    transition: height 300ms;
+    overflow: auto;
+    position: absolute;
+    bottom: 0;
   }
 
+  .results-inner {
+    margin: 15px;
+  }
+}

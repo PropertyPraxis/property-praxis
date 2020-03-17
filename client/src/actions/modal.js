@@ -6,3 +6,4 @@ export function toggleModalAction(isOpen) {
     payload: isOpen
   };
 }
+

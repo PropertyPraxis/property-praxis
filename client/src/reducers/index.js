@@ -3,6 +3,7 @@ import mapState from "./mapState";
 import searchState from "./search";
 import currentFeature from "./currentFeature";
 import toggleModal from "./modal";
+import toggleResults from "./results";
 import { combineReducers } from "redux";
 
 export default combineReducers({
@@ -10,5 +11,6 @@ export default combineReducers({
   mapState,
   searchState,
   currentFeature,
-  modalIsOpen: toggleModal
+  modalIsOpen: toggleModal,
+  resultsIsOpen: toggleResults
 });

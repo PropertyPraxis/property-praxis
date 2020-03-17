@@ -10,6 +10,7 @@ import {
   setMarkerCoordsAction
 } from "../actions/mapData";
 import { getMapStateAction } from "../actions/mapState";
+import { toggleResultsAction } from "./../actions/results";
 import { setDocHeightOnWindow } from "../utils/style";
 import { createNewViewport } from "../utils/map";
 import MapContainer from "./Map/MapContainer";
