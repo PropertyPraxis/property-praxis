@@ -10,7 +10,10 @@ import {
   setMarkerCoordsAction
 } from "../actions/mapData";
 import { getMapStateAction } from "../actions/mapState";
-import { toggleResultsAction } from "./../actions/results";
+import {
+  // toggleResultsAction,
+  handleGetViewerImageAction
+} from "./../actions/results";
 import { setDocHeightOnWindow } from "../utils/style";
 import { createNewViewport } from "../utils/map";
 import MapContainer from "./Map/MapContainer";
@@ -91,6 +94,7 @@ class App extends Component {
       const route = this._routeSwitcher(window.location, year);
       // set the marker
       this.props.dispatch(setMarkerCoordsAction(latitude, longitude));
+      this.props.dispatch(handleGetViewerImageAction(longitude, latitude));
       //set the parcels within buffer
       this.props
         .dispatch(handleGetParcelsByQueryAction(route))

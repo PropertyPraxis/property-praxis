@@ -7,6 +7,8 @@ import {
   logMarkerDragEventAction,
   onMarkerDragEndAction
 } from "../../actions/mapData";
+import { handleGetParcelsByQueryAction } from "../../actions/mapData";
+import { handleGetViewerImageAction } from "../../actions/results";
 import {
   parcelLayer,
   parcelHighlightLayer,
@@ -15,6 +17,7 @@ import {
   zipsLabel
 } from "./mapStyle";
 import Pin from "./Pin";
+import { ReactComponent as ArrowIcon } from "../../assets/img/map-arrow-icon.svg";
 import "../../scss/Map.scss";
 
 //this token needs to be hidden
@@ -40,6 +43,24 @@ class PraxisMarker extends React.Component {
   _onMarkerDragEnd = event => {
     this._logDragEvent("onDragEnd", event);
     this.props.dispatch(onMarkerDragEndAction(event));
+
+    //then do stuff with the new coords
+    const [longitude, latitude] = event.lngLat;
+    const { year } = this.props.mapData;
+
+    const encodedCoords = encodeURI(
+      JSON.stringify({
+        longitude: longitude,
+        latitude: latitude
+      })
+    );
+    debugger;
+    const route = `http://localhost:5000/api/geojson/parcels/address/${encodedCoords}/${year}`;
+    // query the parcels
+    this.props.dispatch(handleGetParcelsByQueryAction(route));
+
+    // set the image viewer
+    this.props.dispatch(handleGetViewerImageAction(longitude, latitude));
   };
 
   render() {
@@ -60,6 +81,8 @@ class PraxisMarker extends React.Component {
     );
   }
 }
+
+class NavigationMarker extends Component {}
 
 class PraxisMap extends Component {
   _onHover = event => {
@@ -113,8 +136,20 @@ class PraxisMap extends Component {
           onViewportChange={this._onViewportChange}
           onHover={this._onHover}
           interactiveLayerIds={["parcel-polygon"]}
+          onClick={e => {
+            console.log("map click:", e);
+          }}
           // getCursor={this._getCursor}
         >
+          <Marker
+            latitude={42.35554476757099}
+            longitude={-82.9895677109488}
+            // offsetLeft={-20}
+            // offsetTop={-10}
+          >
+            <ArrowIcon style={{ transform: "rotate(350deg)" }} />
+          </Marker>
+
           {latitude && longitude ? <PraxisMarker {...this.props} /> : null}
           <Source id="parcels" type="geojson" data={this.props.mapData.ppraxis}>
             <Layer key="parcel-centroid" {...parcelCentroid} />

@@ -7,11 +7,11 @@ import "../../scss/Results.scss";
 
 const Results = props => {
   return (
-    <section>
+    <section className="results-outer">
       <div className="results-inner">
-        <div>
-          <MapViewer />
-        </div>
+          <MapViewer {...props}/>
+          <div>Property Praxis Address</div>
+          <div>Speculator</div>
       </div>
     </section>
   );
@@ -19,12 +19,12 @@ const Results = props => {
 
 class ResultsContainer extends Component {
   render() {
-    const { resultsIsOpen } = this.props;
+    const { isOpen } = this.props.results;
     return (
       <CSSTransition
-        in={resultsIsOpen}
+        in={true} //set to isOpen
         appear={true}
-        timeout={3000}
+        timeout={300}
         classNames="results-container"
       >
         {state => {
@@ -35,8 +35,8 @@ class ResultsContainer extends Component {
     );
   }
 }
-function mapStateToProps({ mapData, mapState, resultsIsOpen }) {
-  return { mapData, mapState, resultsIsOpen };
+function mapStateToProps({ mapData, mapState, results }) {
+  return { mapData, mapState, results };
 }
 export default connect(mapStateToProps)(ResultsContainer);
 //

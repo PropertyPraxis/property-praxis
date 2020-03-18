@@ -1,7 +1,4 @@
 // import { CSSTransition } from "react-transition-group";
-// import { FixedSizeList as List } from "react-window";
-// import AutoSizer from "react-virtualized-auto-sizer";
-// import queryString from "query-string";
 import React, { Component } from "react";
 import { Link } from "react-router-dom";
 import { createNewViewport } from "../../utils/map";
@@ -14,11 +11,10 @@ import {
   setSearchDisplayType
 } from "../../actions/search";
 import {
-  // handleGetParcelsByZipcodeAction,
-  // handleGetParcelsBySpeculatorAction,
   handleGetParcelsByQueryAction,
   setMarkerCoordsAction
 } from "../../actions/mapData";
+import { handleGetViewerImageAction } from "../../actions/results";
 import * as zipcodeIcon from "../../assets/img/zipcode-icon-transparent.png";
 import * as speculatorIcon from "../../assets/img/speculator-icon-transparent.png";
 import * as mapMarkerIcon from "../../assets/img/map-marker-transparent.png";
@@ -125,7 +121,9 @@ const PartialAddressResults = props => {
                 props.dispatch(setMarkerCoordsAction(latitude, longitude));
                 props.createNewVieport(result);
                 props.dispatch(handleSearchFullAddress(coords, year));
-
+                
+                //set new viewer in results
+                props.dispatch(handleGetViewerImageAction(longitude, latitude));
                 //set map data and then create viewport
                 const route = `http://localhost:5000/api/geojson/parcels/address/${coords}/${year}`;
                 props

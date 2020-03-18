@@ -1,9 +1,20 @@
-import { TOGGLE_RESULTS } from "../actions/results";
+import { TOGGLE_RESULTS, GET_VIEWER_IMAGE } from "../actions/results";
 
-export default function toggleResults(state = true, action) {
+const initialResults = {
+  isOpen: false,
+  viewer: {
+    bearing: null,
+    key: null,
+    viewerMarker: null
+  }
+};
+
+export default function results(state = initialResults, action) {
   switch (action.type) {
     case TOGGLE_RESULTS:
-      return action.payload;
+      return { ...state, ...action.payload };
+    case GET_VIEWER_IMAGE:
+      return { ...state, ...action.payload };
     default:
       return state;
   }

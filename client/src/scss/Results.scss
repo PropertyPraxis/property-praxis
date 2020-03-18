@@ -1,5 +1,10 @@
 @import "./colors.scss";
 
+section.results-outer {
+  background-color: pink;
+  border-radius: 0 5px 5px 0;
+}
+
 .results-container-enter {
   height: 100%;
   width: 0;
@@ -53,7 +58,8 @@
 .results-inner {
   display: flex;
   flex-direction: column;
-  margin: 115px 15px 15px 15px;
+  margin: 115px 20px 20px 20px;
+  
 }
 
 @media screen and (max-width: 700px) {
@@ -120,5 +126,10 @@
 
   .results-inner {
     margin: 15px;
+  }
+
+  section.results-outer {
+    background-color: pink;
+    border-radius: 5px 5px 0 0;
   }
 }
