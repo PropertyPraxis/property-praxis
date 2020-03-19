@@ -3,9 +3,7 @@ import { BrowserRouter as Router, Route } from "react-router-dom";
 import { connect } from "react-redux";
 import queryString from "query-string";
 import {
-  // handleGetInitialMapDataAction,
   handleGetInitialZipcodeDataAction,
-  // handleGetParcelsByZipcodeAction,
   handleGetParcelsByQueryAction,
   setMarkerCoordsAction
 } from "../actions/mapData";
@@ -44,6 +42,7 @@ class App extends Component {
     }
   };
 
+  // Duplicated in PraxisMap!!
   // create new vieport dependent on current geojson bbox
   _createNewViewport = geojson => {
     //check to see what data is loaded
@@ -88,6 +87,7 @@ class App extends Component {
         });
     }
 
+    // for an address point
     if (search !== undefined && coordinates !== undefined) {
       const { latitude, longitude } = JSON.parse(coordinates);
 
