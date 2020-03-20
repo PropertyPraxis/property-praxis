@@ -42,7 +42,12 @@ router.get("/parcels/:year", async (req, res) => {
       'type',       'Feature',
       'id',          feature_id,
       'geometry',   ST_AsGeoJSON(geom_${year}, 6)::json,
-      'properties', to_jsonb(inputs) - 'geom_${year}'
+      'centroid',   ST_AsText(centroid),
+      'properties', to_jsonb(inputs) - 
+        'geom_${year}' - 'parcelno' - 'cityrbuilt' - 'praxisyear' - 
+        'propaddr' - 'propdir' - 'propno' - 'propstr' - 'resyrbuilt' -
+        'row.names' - 'saledate' - 'saleprice' - 'taxparprop_id' - 
+        'taxpayer1' - 'totacres' - 'totsqft' - 'centroid'
     ) AS feature
     FROM (
       SELECT * FROM parcels_${year}

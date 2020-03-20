@@ -142,6 +142,8 @@ class PraxisMap extends Component {
           );
     };
 
+    // add a new marker if user clicks on a parcel features
+    // nothing happens if there is no feature
   _handleMapClick(event) {
     const { hoveredFeature } = this.props.currentFeature;
 

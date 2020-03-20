@@ -1,12 +1,13 @@
 import { getImageKey } from "../utils/viewer";
 
-export const TOGGLE_RESULTS = "TOGGLE_RESULTS";
+export const TOGGLE_FULL_RESULTS = "TOGGLE_FULL_RESULTS";
 export const GET_VIEWER_IMAGE = "GET_VIEWER_IMAGE";
+export const TOGGLE_PARTIAL_RESULTS = "TOGGLE_PARTIAL_RESULTS";
 
-export function toggleResultsAction(isOpen) {
+export function toggleFullResultsAction(isOpen) {
   return {
-    type: TOGGLE_RESULTS,
-    payload: { isOpen }
+    type: TOGGLE_FULL_RESULTS,
+    payload: { isFullResultsOpen: isOpen }
   };
 }
 
@@ -14,6 +15,15 @@ function getViewerImageAction(viewer) {
   return {
     type: GET_VIEWER_IMAGE,
     payload: { viewer }
+  };
+}
+
+export function togglePartialResultsAction(isOpen) {
+  return {
+    type: TOGGLE_PARTIAL_RESULTS,
+    payload: {
+      isPartialResultsOpen: isOpen
+    }
   };
 }
 

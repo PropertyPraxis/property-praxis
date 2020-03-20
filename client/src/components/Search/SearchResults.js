@@ -4,6 +4,9 @@ import { Link } from "react-router-dom";
 import { createNewViewport } from "../../utils/map";
 import { getMapStateAction } from "../../actions/mapState";
 import {
+  handleSearchPartialZipcode,
+  handleSearchPartialAddress,
+  handleSearchPartialSpeculator,
   handleSearchFullZipcode,
   handleSearchFullSpeculator,
   handleSearchFullAddress,
@@ -14,11 +17,17 @@ import {
   handleGetParcelsByQueryAction,
   setMarkerCoordsAction
 } from "../../actions/mapData";
-import { handleGetViewerImageAction } from "../../actions/results";
+import {
+  handleGetViewerImageAction,
+  togglePartialResultsAction,
+  toggleFullResultsAction
+} from "../../actions/results";
+import { capitalizeFirstLetter } from "../../utils/style";
 import * as zipcodeIcon from "../../assets/img/zipcode-icon-transparent.png";
 import * as speculatorIcon from "../../assets/img/speculator-icon-transparent.png";
 import * as mapMarkerIcon from "../../assets/img/map-marker-transparent.png";
 import "../../scss/Search.scss";
+import { toggleModalAction } from "../../actions/modal";
 
 // use this object to reset to nothing
 
@@ -54,6 +63,11 @@ const PartialZipcodeResults = props => {
                 search: `search=${result.propzip}`
               }}
               onClick={() => {
+                // change the partial results
+                props.dispatch(
+                  handleSearchPartialZipcode(result.propzip, year)
+                );
+
                 props.dispatch(handleSearchFullZipcode(result.propzip, year));
                 // the route to parcels in zip
                 const route = `/api/geojson/parcels/zipcode/${result.propzip}/${year}`;
@@ -62,7 +76,7 @@ const PartialZipcodeResults = props => {
                   .dispatch(handleGetParcelsByQueryAction(route))
                   .then(geojson => {
                     //trigger new viewport pass down from PartialSearchResults
-                    props.createNewVieport(geojson);
+                    props.createNewViewport(geojson);
                   });
                 //fill in the text input
                 // props.dispatch(setSearchTerm(result.propzip));
@@ -74,6 +88,12 @@ const PartialZipcodeResults = props => {
                 );
                 // set the display type to full
                 props.dispatch(setSearchDisplayType("full"));
+
+                //close the partial results after
+                props.togglePartialResults(false);
+
+                //toggle the results pane
+                props.dispatch(toggleFullResultsAction(true));
               }}
             >
               <div className={index % 2 ? "list-item-odd" : "list-item-even"}>
@@ -117,11 +137,16 @@ const PartialAddressResults = props => {
               }}
               className={index % 2 ? "list-item-odd" : "list-item-even"}
               onClick={() => {
+                // change the partial results
+                props.dispatch(
+                  handleSearchPartialAddress(result.place_name, year)
+                );
+
                 //add a point marker
                 props.dispatch(setMarkerCoordsAction(latitude, longitude));
-                props.createNewVieport(result);
+                props.createNewViewport(result);
                 props.dispatch(handleSearchFullAddress(coords, year));
-                
+
                 //set new viewer in results
                 props.dispatch(handleGetViewerImageAction(longitude, latitude));
                 //set map data and then create viewport
@@ -130,7 +155,7 @@ const PartialAddressResults = props => {
                   .dispatch(handleGetParcelsByQueryAction(route))
                   .then(geojson => {
                     //trigger new viewport pass down from PartialSearchResults
-                    // props.createNewVieport(geojson);
+                    // props.createNewViewport(geojson);
                   });
                 //fill in the text input
                 // props.dispatch(setSearchTerm(result.propzip));
@@ -142,6 +167,9 @@ const PartialAddressResults = props => {
                 );
                 // set the display type to full
                 props.dispatch(setSearchDisplayType("full"));
+
+                //close the partial results after
+                props.togglePartialResults(false);
               }}
             >
               <div>
@@ -172,6 +200,11 @@ const PartialSpeculatorResults = props => {
                 search: `search=${result.own_id}`
               }}
               onClick={() => {
+                // change the partial results
+                props.dispatch(
+                  handleSearchPartialSpeculator(result.own_id, year)
+                );
+
                 props.dispatch(handleSearchFullSpeculator(result.own_id, year));
                 // the route to parcels in zip
                 const route = `/api/geojson/parcels/speculator/${result.own_id}/${year}`;
@@ -181,7 +214,7 @@ const PartialSpeculatorResults = props => {
                   .then(geojson => {
                     //trigger new viewport
                     //Note this is creating a default because it is a point
-                    props.createNewVieport(geojson);
+                    props.createNewViewport(geojson);
                   });
                 //fill in the text input
                 // props.dispatch(setSearchTerm(result.propzip));
@@ -193,11 +226,16 @@ const PartialSpeculatorResults = props => {
                 );
                 // set the display type to full
                 props.dispatch(setSearchDisplayType("full"));
+
+                //close the partial results after
+                props.togglePartialResults(false);
+
+                //open the drawer
               }}
             >
               <div className={index % 2 ? "list-item-odd" : "list-item-even"}>
                 <img src={speculatorIcon} alt="Speculator Result" />
-                {result.own_id}
+                {capitalizeFirstLetter(result.own_id)}
               </div>
             </Link>
           );
@@ -208,6 +246,11 @@ const PartialSpeculatorResults = props => {
 };
 
 class PartialSearchResults extends Component {
+  // when user clicks on a result the partial results disappear
+  _togglePartialResults = isOpen => {
+    this.props.dispatch(togglePartialResultsAction(isOpen));
+  };
+
   _createNewViewport = geojson => {
     const { mapState } = this.props;
     //trigger new viewport
@@ -225,12 +268,14 @@ class PartialSearchResults extends Component {
 
   render() {
     const resultLength = this.props.searchState.partialResults.length;
+    const { isPartialResultsOpen } = this.props.results;
 
-    if (resultLength > 0) {
+    if (resultLength > 0 && isPartialResultsOpen) {
       return (
         <PartialReturnResultSwitch
           {...this.props}
-          createNewVieport={this._createNewViewport}
+          createNewViewport={this._createNewViewport}
+          togglePartialResults={this._togglePartialResults}
         />
       );
     }

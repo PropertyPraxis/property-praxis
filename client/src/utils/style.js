@@ -16,3 +16,13 @@ export function setDocHeightOnWindow() {
 
   setDocHeight();
 }
+
+export function capitalizeFirstLetter(string) {
+  const lowerString = string.toLowerCase();
+  const strArray = lowerString.split(" ");
+  const capitalizedStrArray = strArray.map(val => {
+    return val.charAt(0).toUpperCase() + val.slice(1);
+  });
+
+  return capitalizedStrArray.join(" ")
+}

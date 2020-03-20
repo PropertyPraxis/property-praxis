@@ -9,6 +9,7 @@ import {
   handleSearchPartialAddress,
   handleSearchPartialSpeculator
 } from "../../actions/search";
+import { togglePartialResultsAction } from "../../actions/results";
 import PartialSearchResults from "./SearchResults";
 import * as searchIcon from "../../assets/img/search.png";
 import "../../scss/Search.scss";
@@ -51,11 +52,14 @@ class SearchBar extends Component {
     //zipcode search
     if (searchType === "Zipcode") {
       this.props.dispatch(handleSearchPartialZipcode(searchTerm, year));
-    } else if (searchType === "Address") {
+    }
+    if (searchType === "Address") {
       this.props.dispatch(handleSearchPartialAddress(searchTerm, year));
-    } else if (searchType === "Speculator") {
+    }
+    if (searchType === "Speculator") {
       this.props.dispatch(handleSearchPartialSpeculator(searchTerm, year));
-    } else if (searchType === "All") {
+    }
+    if (searchType === "All") {
     }
   };
 
@@ -84,7 +88,7 @@ class SearchBar extends Component {
                     this.props.dispatch(setSearchType(button));
                   }}
                   style={
-                    button === searchType ? { color: styleVars.ppGreen } : null
+                    button === searchType ? { color: styleVars.ppRose } : null
                   }
                 >
                   {button}
@@ -118,6 +122,9 @@ class SearchBar extends Component {
                   //create a ref to the input
                   this._textInput = ref;
                 }}
+                onFocus={() => {
+                  this.props.dispatch(togglePartialResultsAction(true));
+                }}
               />
               <div
                 className="search-button"
@@ -132,6 +139,7 @@ class SearchBar extends Component {
           <PartialSearchResults
             // _textInput={this._textInput}
             {...this.props}
+            // handleInputChange={this._handleInputChange}
           />
         </div>
       </section>

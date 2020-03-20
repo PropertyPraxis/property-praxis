@@ -4,7 +4,7 @@ import bbox from "@turf/bbox";
 // funtion to create the new viwport to zoom to
 export function createNewViewport(geojson, mapState) {
   const { features } = geojson;
-  
+
   let featureCount;
   if (geojson.features) {
     //check to make sure the features have geometries
@@ -49,5 +49,19 @@ export function createNewViewport(geojson, mapState) {
     latitude: 42.40230199308517,
     longitude: -83.11182404081912,
     zoom: 10
+  };
+}
+
+export function coordsFromWKT(wkt) {
+  if (wkt === "POINT EMPTY") return null;
+
+  //else do this
+  const coordsArray = wkt
+    .replace("POINT(", "")
+    .replace(")", "")
+    .split(" ");
+  return {
+    longitude: Number(coordsArray[0]),
+    latitude: Number(coordsArray[1])
   };
 }

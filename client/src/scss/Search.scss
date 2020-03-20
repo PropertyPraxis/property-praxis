@@ -21,7 +21,7 @@
 .search-container {
   // margin: 20px 20px 0 20px;
   // background-color: red;
-  border: red solid 3px;
+  // border: red solid 3px;
 }
 
 //search options
@@ -82,9 +82,9 @@ input[type="text"] {
 }
 
 .search-form:focus-within {
-  border-bottom: 3px solid orange;
-  border-left: 3px solid orange;
-  border-right: 3px solid orange;
+  border-bottom: 3px solid $pp-rose;
+  border-left: 3px solid $pp-rose;
+  border-right: 3px solid $pp-rose;
   box-sizing: border-box;
 }
 

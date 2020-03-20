@@ -1,7 +1,7 @@
 @import "./colors.scss";
 
 section.results-outer {
-  background-color: pink;
+  // background-color: pink;
   border-radius: 0 5px 5px 0;
 }
 
@@ -43,7 +43,8 @@ section.results-outer {
   overflow: auto;
 }
 
-.results-container-exit-active {
+.results-container-exit-active,
+.results-container-exit-done {
   height: 100%;
   width: 0;
   z-index: 50;
@@ -59,19 +60,34 @@ section.results-outer {
   display: flex;
   flex-direction: column;
   margin: 115px 20px 20px 20px;
-  
+}
+
+.results-hamburger-button {
+  position: relative;
+  align-self: flex-end;
+  bottom: 110px;
+  left: 15px;
+  cursor: pointer;
+}
+
+.results-hamburger-button:hover {
+  color: $pp-rose;
+}
+
+.results-hamburger-button:active {
+  transform: translateY(+1px);
 }
 
 @media screen and (max-width: 700px) {
   .results-container-enter {
     height: 0;
     width: 100%;
-    z-index: 50;
+    // z-index: 50;
     grid-row: 2 / 4;
     grid-column: 1 / 4;
-    background-color: white;
-    display: flex;
-    overflow: auto;
+    // background-color: white;
+    // display: flex;
+    // overflow: auto;
     position: absolute;
     bottom: 0;
   }
@@ -84,13 +100,13 @@ section.results-outer {
     width: 100%;
     grid-row: 2 / 4;
     grid-column: 1 / 4;
-    z-index: 50;
-    background-color: white;
-    transition: height 300ms;
-    border-radius: 4px 0 0 4px;
-    box-shadow: -10px 0 8px 0 rgba(0, 0, 0, 0.2),
-      0 6px 20px 0 rgba(0, 0, 0, 0.19);
-    overflow: auto;
+    // z-index: 50;
+    // background-color: white;
+    // transition: height 300ms;
+    // border-radius: 4px 0 0 4px;
+    // box-shadow: -10px 0 8px 0 rgba(0, 0, 0, 0.2),
+    //   0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    // overflow: auto;
     position: absolute;
     bottom: 0;
   }
@@ -99,27 +115,28 @@ section.results-outer {
     height: 100%;
     max-height: 500px;
     width: 100%;
-    z-index: 50;
+    // z-index: 50;
     grid-row: 2 / 4;
     grid-column: 1 / 4;
-    background-color: white;
-    border-radius: 4px 0 0 4px;
-    box-shadow: -10px 0 8px 0 rgba(0, 0, 0, 0.2),
-      0 6px 20px 0 rgba(0, 0, 0, 0.19);
-    overflow: auto;
+    // background-color: white;
+    // border-radius: 4px 0 0 4px;
+    // box-shadow: -10px 0 8px 0 rgba(0, 0, 0, 0.2),
+    //   0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    // overflow: auto;
     position: absolute;
     bottom: 0;
   }
 
-  .results-container-exit-active {
+  .results-container-exit-active,
+  .results-container-exit-done {
     height: 0;
     width: 100%;
-    z-index: 50;
+    // z-index: 50;
     grid-row: 2 / 4;
     grid-column: 1 / 4;
-    background-color: white;
+    // background-color: white;
     transition: height 300ms;
-    overflow: auto;
+    // overflow: auto;
     position: absolute;
     bottom: 0;
   }
@@ -129,7 +146,11 @@ section.results-outer {
   }
 
   section.results-outer {
-    background-color: pink;
     border-radius: 5px 5px 0 0;
+  }
+
+  .results-hamburger-button {
+    bottom: 5px;
+    left: 0;
   }
 }
