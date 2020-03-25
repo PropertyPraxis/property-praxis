@@ -13,7 +13,6 @@ export async function getImageKey(longitude, latitude) {
     const lookAtRoute = `https://a.mapillary.com/v3/images?client_id=${MAPILLARY_CLIENT_ID}&lookat=${longitude},${latitude}&closeto=${longitude},${latitude}&organization_keys=${ORG_KEY}`;
     const lookAtResponse = await fetch(lookAtRoute);
     const lookAtJson = await lookAtResponse.json();
-
     // need to return the key here
     if (lookAtJson.features.length > 0) {
       // get coordinates of the viewer
@@ -33,15 +32,23 @@ export async function getImageKey(longitude, latitude) {
       const closeToResponse = await fetch(closeToRoute);
       const closeToJson = await closeToResponse.json();
 
-      // get coordinates of the viewer
-      const { coordinates } = closeToJson.features[0].geometry;
-      //get the image key
-      const { key } = closeToJson.features[0].properties;
-      // then create a point
-      const viewerMarker = turf.point(coordinates);
-      const bearing = turf.bearing(viewerMarker, addressMarker);
+      if (closeToJson.features[0] !== undefined) {
+        // get coordinates of the viewer
+        const { coordinates } = closeToJson.features[0].geometry;
+        //get the image key
+        const { key } = closeToJson.features[0].properties;
+        // then create a point
+        const viewerMarker = turf.point(coordinates);
+        const bearing = turf.bearing(viewerMarker, addressMarker);
 
-      return { key, bearing, viewerMarker };
+        return { key, bearing, viewerMarker };
+      }
+      //else if there is no geom return nulls
+      return {
+        bearing: null,
+        key: null,
+        viewerMarker: null
+      };
     }
 
     return {

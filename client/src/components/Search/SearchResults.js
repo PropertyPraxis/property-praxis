@@ -1,4 +1,3 @@
-// import { CSSTransition } from "react-transition-group";
 import React, { Component } from "react";
 import { Link } from "react-router-dom";
 import { createNewViewport } from "../../utils/map";
@@ -15,21 +14,21 @@ import {
 } from "../../actions/search";
 import {
   handleGetParcelsByQueryAction,
-  setMarkerCoordsAction
+  setMarkerCoordsAction,
+  dataIsLoadingAction
 } from "../../actions/mapData";
 import {
   handleGetViewerImageAction,
   togglePartialResultsAction,
-  toggleFullResultsAction
+  toggleFullResultsAction,
+  handleGetDownloadDataAction
 } from "../../actions/results";
-import { capitalizeFirstLetter } from "../../utils/style";
+import { capitalizeFirstLetter } from "../../utils/helper";
 import * as zipcodeIcon from "../../assets/img/zipcode-icon-transparent.png";
 import * as speculatorIcon from "../../assets/img/speculator-icon-transparent.png";
 import * as mapMarkerIcon from "../../assets/img/map-marker-transparent.png";
 import "../../scss/Search.scss";
 import { toggleModalAction } from "../../actions/modal";
-
-// use this object to reset to nothing
 
 const PartialReturnResultSwitch = props => {
   const { searchType } = props.searchState;
@@ -50,7 +49,6 @@ const PartialReturnResultSwitch = props => {
 const PartialZipcodeResults = props => {
   const { partialResults } = props.searchState;
   const { year } = props.mapData;
-
   return (
     <section>
       <div className="partial-results-container">
@@ -63,6 +61,9 @@ const PartialZipcodeResults = props => {
                 search: `search=${result.propzip}`
               }}
               onClick={() => {
+                //trigger data loading
+                props.dispatch(dataIsLoadingAction(true));
+
                 // change the partial results
                 props.dispatch(
                   handleSearchPartialZipcode(result.propzip, year)
@@ -70,13 +71,16 @@ const PartialZipcodeResults = props => {
 
                 props.dispatch(handleSearchFullZipcode(result.propzip, year));
                 // the route to parcels in zip
-                const route = `/api/geojson/parcels/zipcode/${result.propzip}/${year}`;
+                const geoJsonRoute = `/api/geojson/parcels/zipcode/${result.propzip}/${year}`;
                 //set map data and then create viewport
                 props
-                  .dispatch(handleGetParcelsByQueryAction(route))
+                  .dispatch(handleGetParcelsByQueryAction(geoJsonRoute))
                   .then(geojson => {
                     //trigger new viewport pass down from PartialSearchResults
                     props.createNewViewport(geojson);
+
+                    //trigger data loading off
+                    props.dispatch(dataIsLoadingAction(false));
                   });
                 //fill in the text input
                 // props.dispatch(setSearchTerm(result.propzip));
@@ -87,10 +91,14 @@ const PartialZipcodeResults = props => {
                   })
                 );
                 // set the display type to full
-                props.dispatch(setSearchDisplayType("full"));
+                props.dispatch(setSearchDisplayType("full-zipcode"));
 
                 //close the partial results after
                 props.togglePartialResults(false);
+
+                // trigger the dowload data action
+                const downloadDataRoute = `/api/zipcode-search/download/${result.propzip}/${year}`;
+                props.dispatch(handleGetDownloadDataAction(downloadDataRoute));
 
                 //toggle the results pane
                 props.dispatch(toggleFullResultsAction(true));
@@ -102,18 +110,6 @@ const PartialZipcodeResults = props => {
             </Link>
           );
         })}
-      </div>
-    </section>
-  );
-};
-
-const FullZipcodeResults = props => {
-  const { fullResults } = props.searchState;
-
-  return (
-    <section>
-      <div className="full-results-container">
-        <div></div>
       </div>
     </section>
   );
@@ -144,6 +140,8 @@ const PartialAddressResults = props => {
 
                 //add a point marker
                 props.dispatch(setMarkerCoordsAction(latitude, longitude));
+
+                //create new vieport based on geojson result
                 props.createNewViewport(result);
                 props.dispatch(handleSearchFullAddress(coords, year));
 
@@ -200,6 +198,9 @@ const PartialSpeculatorResults = props => {
                 search: `search=${result.own_id}`
               }}
               onClick={() => {
+                //trigger data loading
+                props.dispatch(dataIsLoadingAction(true));
+
                 // change the partial results
                 props.dispatch(
                   handleSearchPartialSpeculator(result.own_id, year)
@@ -207,14 +208,17 @@ const PartialSpeculatorResults = props => {
 
                 props.dispatch(handleSearchFullSpeculator(result.own_id, year));
                 // the route to parcels in zip
-                const route = `/api/geojson/parcels/speculator/${result.own_id}/${year}`;
+                const geoJsonRoute = `/api/geojson/parcels/speculator/${result.own_id}/${year}`;
                 //set map data and then create viewport
                 props
-                  .dispatch(handleGetParcelsByQueryAction(route))
+                  .dispatch(handleGetParcelsByQueryAction(geoJsonRoute))
                   .then(geojson => {
                     //trigger new viewport
                     //Note this is creating a default because it is a point
                     props.createNewViewport(geojson);
+
+                    //trigger data loading off
+                    props.dispatch(dataIsLoadingAction(false));
                   });
                 //fill in the text input
                 // props.dispatch(setSearchTerm(result.propzip));
@@ -225,12 +229,17 @@ const PartialSpeculatorResults = props => {
                   })
                 );
                 // set the display type to full
-                props.dispatch(setSearchDisplayType("full"));
+                props.dispatch(setSearchDisplayType("full-speculator"));
 
                 //close the partial results after
                 props.togglePartialResults(false);
 
-                //open the drawer
+                // trigger the dowload data action
+                const downloadDataRoute = `/api/speculator-search/download/${result.own_id}/${year}`;
+                props.dispatch(handleGetDownloadDataAction(downloadDataRoute));
+                
+                //toggle the results pane
+                props.dispatch(toggleFullResultsAction(true));
               }}
             >
               <div className={index % 2 ? "list-item-odd" : "list-item-even"}>

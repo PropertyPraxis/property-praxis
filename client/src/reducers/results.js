@@ -1,7 +1,8 @@
 import {
   TOGGLE_FULL_RESULTS,
   GET_VIEWER_IMAGE,
-  TOGGLE_PARTIAL_RESULTS
+  TOGGLE_PARTIAL_RESULTS,
+  GET_DOWNLOAD_DATA
 } from "../actions/results";
 
 const initialResults = {
@@ -11,7 +12,8 @@ const initialResults = {
     key: null,
     viewerMarker: null
   },
-  isPartialResultsOpen: true
+  isPartialResultsOpen: true,
+  downloadData: null
 };
 
 export default function results(state = initialResults, action) {
@@ -21,6 +23,8 @@ export default function results(state = initialResults, action) {
     case GET_VIEWER_IMAGE:
       return { ...state, ...action.payload };
     case TOGGLE_PARTIAL_RESULTS:
+      return { ...state, ...action.payload };
+    case GET_DOWNLOAD_DATA:
       return { ...state, ...action.payload };
     default:
       return state;

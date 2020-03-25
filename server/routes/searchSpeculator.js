@@ -40,6 +40,22 @@ router.get("/full/:id/:year", async (req, res) => {
   }
 });
 
+router.get("/download/:id/:year", async (req, res) => {
+  const { id, year } = req.params;
+  try {
+    const query = `SELECT DISTINCT ROW_NUMBER() OVER (ORDER BY 1) as id, ST_X(centroid) as longitude, 
+    own_id, count as property_count, parcelno, propaddr, propno, propdir, propstr, propzip,
+    resyrbuilt, saledate, saleprice, taxpayer1, totacres, totsqft, ST_Y(centroid) as latitude
+    FROM parcels_${year} WHERE own_id LIKE $1;`;
+
+    const { rows } = await db.query(query, [`%${id}%`]);
+    res.json(rows);
+  } catch (err) {
+    //could use some better error handling
+    res.json(err);
+  }
+});
+
 module.exports = router;
 
 // FOR FULL QUERY

@@ -16,28 +16,6 @@ router.get("/partial/:id/:year", async (req, res) => {
     );
     const mbJson = await mbResponse.json();
     const mbFeatures = mbJson.features;
-    ////////////////////////////////////////
-    // query the db
-    // Note this may need to be shifted to be a view on db creation
-    // const query = `SELECT ppg.parcelno, CONCAT( (p.propno || ' ' ||
-    //                 CASE WHEN p.propdir = '0' THEN '' ELSE p.propdir END),
-    //                 (p.propstr || ', '), 'Detroit, Michigan ', (p.propzip) ) AS address
-    //                 FROM property AS p
-    //                 INNER JOIN parcel_property_geom AS ppg ON p.parprop_id = ppg.parprop_id
-    //                 INNER JOIN taxpayer_property AS tpp ON p.prop_id = tpp.prop_id
-    //                 INNER JOIN year AS y ON tpp.taxparprop_id = y.taxparprop_id
-    //                 WHERE levenshtein( (p.propno || ' ' ||
-    //                 CASE WHEN p.propdir = '0' THEN '' ELSE p.propdir END
-    //                 || p.propstr || ', DETROIT, MICHIGAN ' || p.propzip), $1) <= 5
-    //                 OR (p.propno || ' ' ||
-    //                 CASE WHEN p.propdir = '0' THEN '' ELSE p.propdir END
-    //                 || p.propstr || ', DETROIT, MICHIGAN ' || p.propzip) LIKE $2
-    //                 AND y.praxisyear = $3`;
-
-    // const { rows } = await db.query(query, [decodeId, `${decodeId}%`, year]);
-    // return an array
-    // res.json([{ mb: mbFeatures }, { db: rows }]);
-    ////////////////////////////////////////
     res.json([{ mb: mbFeatures }]);
   } catch (err) {
     res.json(err);
@@ -49,7 +27,7 @@ router.get("/full/:coords/:year", async (req, res) => {
   const { longitude, latitude } = JSON.parse(decodeURI(coords));
 
   try {
-    const query =  `SELECT DISTINCT p.*, otp.own_id 
+    const query = `SELECT DISTINCT p.*, otp.own_id 
     FROM parcel_property_geom AS ppg
     INNER JOIN property as p ON ppg.parprop_id = p.parprop_id
     INNER JOIN taxpayer_property AS tpp ON p.prop_id = tpp.prop_id
@@ -65,6 +43,49 @@ router.get("/full/:coords/:year", async (req, res) => {
     res.json(err);
   }
 });
+
+router.get("/download/:coords/:year", async (req, res) => {
+  const { coords, year } = req.params;
+  const { longitude, latitude } = JSON.parse(decodeURI(coords));
+
+  try {
+    const query = `SELECT DISTINCT ROW_NUMBER() OVER (ORDER BY 1) as id, ST_X(centroid) as longitude,
+      own_id, count as property_count, parcelno, propaddr, propno, propdir, propstr, propzip,
+      resyrbuilt, saledate, saleprice, taxpayer1, totacres, totsqft, ST_Y(centroid) as latitude
+      FROM parcels_${year} 
+      WHERE ST_Intersects(ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326), geom_${year})`;
+
+    const { rows } = await db.query(query);
+
+    res.json(rows);
+  } catch (err) {
+    //could use some better error handling
+    res.json(err);
+  }
+});
+
 // export our router to be mounted by the parent application
 module.exports = router;
 
+////////////////////////////////////////
+// query the db
+// Note this may need to be shifted to be a view on db creation
+// const query = `SELECT ppg.parcelno, CONCAT( (p.propno || ' ' ||
+//                 CASE WHEN p.propdir = '0' THEN '' ELSE p.propdir END),
+//                 (p.propstr || ', '), 'Detroit, Michigan ', (p.propzip) ) AS address
+//                 FROM property AS p
+//                 INNER JOIN parcel_property_geom AS ppg ON p.parprop_id = ppg.parprop_id
+//                 INNER JOIN taxpayer_property AS tpp ON p.prop_id = tpp.prop_id
+//                 INNER JOIN year AS y ON tpp.taxparprop_id = y.taxparprop_id
+//                 WHERE levenshtein( (p.propno || ' ' ||
+//                 CASE WHEN p.propdir = '0' THEN '' ELSE p.propdir END
+//                 || p.propstr || ', DETROIT, MICHIGAN ' || p.propzip), $1) <= 5
+//                 OR (p.propno || ' ' ||
+//                 CASE WHEN p.propdir = '0' THEN '' ELSE p.propdir END
+//                 || p.propstr || ', DETROIT, MICHIGAN ' || p.propzip) LIKE $2
+//                 AND y.praxisyear = $3`;
+
+// const { rows } = await db.query(query, [decodeId, `${decodeId}%`, year]);
+// return an array
+// res.json([{ mb: mbFeatures }, { db: rows }]);
+////////////////////////////////////////

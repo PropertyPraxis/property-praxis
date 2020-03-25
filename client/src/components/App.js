@@ -5,14 +5,21 @@ import queryString from "query-string";
 import {
   handleGetInitialZipcodeDataAction,
   handleGetParcelsByQueryAction,
-  setMarkerCoordsAction
+  setMarkerCoordsAction,
+  dataIsLoadingAction
 } from "../actions/mapData";
-import { getMapStateAction } from "../actions/mapState";
 import {
-  // toggleResultsAction,
-  handleGetViewerImageAction
-} from "./../actions/results";
-import { setDocHeightOnWindow } from "../utils/style";
+  setSearchTerm,
+  setSearchType,
+  setSearchDisplayType,
+  handleSearchPartialZipcode,
+  handleSearchPartialSpeculator,
+  handleSearchPartialAddress
+} from "./../actions/search";
+import { togglePartialResultsAction } from "./../actions/results";
+import { getMapStateAction } from "../actions/mapState";
+import { handleGetViewerImageAction } from "./../actions/results";
+import { setDocHeightOnWindow, pathnameToSearchType } from "../utils/helper";
 import { createNewViewport } from "../utils/map";
 import MapContainer from "./Map/MapContainer";
 import SearchContainer from "./Search/SearchContainer";
@@ -23,6 +30,21 @@ import PPLogo from "../Logo/Logo";
 import "../scss/App.scss";
 
 class App extends Component {
+  _setSearch = (searchTerm, searchType, year) => {
+    this.props.dispatch(setSearchDisplayType("partial"));
+    this.props.dispatch(togglePartialResultsAction(false));
+    //zipcode search
+    if (searchType === "Zipcode") {
+      this.props.dispatch(handleSearchPartialZipcode(searchTerm, year));
+    }
+    if (searchType === "Address") {
+      this.props.dispatch(handleSearchPartialAddress(searchTerm, year));
+    }
+    if (searchType === "Speculator") {
+      this.props.dispatch(handleSearchPartialSpeculator(searchTerm, year));
+    }
+  };
+
   // returns a route dependent on the window location
   _routeSwitcher = (location, year) => {
     const { pathname } = location;
@@ -75,23 +97,45 @@ class App extends Component {
     //check to see what data is loaded
     const { year } = this.props.mapData;
     const { coordinates, search } = queryString.parse(window.location.search);
+    const { pathname } = window.location;
+
+    //set the searchtype
+    const searchType = pathnameToSearchType(pathname);
+    this.props.dispatch(setSearchType(searchType));
 
     // much logic here!!  may need to work on this a bit more to simplify the mount
     // if there is a search term dispatch the get parcels action
     if (search !== undefined && coordinates === undefined) {
+      //set the search term
+      this.props.dispatch(setSearchTerm(search));
+
+      //set the other search options
+      this._setSearch(search, searchType, year);
+
       const route = this._routeSwitcher(window.location, year);
+      this.props.dispatch(dataIsLoadingAction(true));
       this.props
         .dispatch(handleGetParcelsByQueryAction(route))
         .then(geojson => {
           this._createNewViewport(geojson);
+          this.props.dispatch(dataIsLoadingAction(false));
         });
     }
 
     // for an address point
     if (search !== undefined && coordinates !== undefined) {
+      //set the search term
+      this.props.dispatch(setSearchTerm(search));
+
+      //set the other search options
+      this._setSearch(search, searchType, year);
+
       const { latitude, longitude } = JSON.parse(coordinates);
 
       const route = this._routeSwitcher(window.location, year);
+      //loading
+      this.props.dispatch(dataIsLoadingAction(true));
+
       // set the marker
       this.props.dispatch(setMarkerCoordsAction(latitude, longitude));
       this.props.dispatch(handleGetViewerImageAction(longitude, latitude));
@@ -100,15 +144,18 @@ class App extends Component {
         .dispatch(handleGetParcelsByQueryAction(route))
         .then(geojson => {
           this._createNewViewport(geojson);
+          this.props.dispatch(dataIsLoadingAction(false));
         });
     }
 
     // if there is no search term then do a regular search for all parcels
     if (search === undefined) {
+      this.props.dispatch(dataIsLoadingAction(true));
       this.props
         .dispatch(handleGetParcelsByQueryAction(`/api/geojson/parcels/${year}`))
         .then(geojson => {
           this._createNewViewport(geojson);
+          this.props.dispatch(dataIsLoadingAction(false));
         });
     }
     //load zip data no matter what (this may change)
@@ -120,7 +167,7 @@ class App extends Component {
   }
 
   render() {
-    const { ppraxis, zips } = this.props.mapData;
+    const { ppraxis, zips, dataIsLoading } = this.props.mapData;
     const { modalIsOpen } = this.props;
 
     const loadingState =

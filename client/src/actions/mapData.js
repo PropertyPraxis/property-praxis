@@ -1,20 +1,17 @@
 import {
   getInitialMapData,
   getInitialZipcodeData,
-  // getParcelsByZipcode,
-  // getParcelsBySpeculator,
   getMapData
 } from "../utils/api";
 
 export const GET_INITIAL_MAP_DATA = "GET_INITIAL_MAP_DATA";
 export const GET_INITIAL_ZIPCODE_DATA = "GET_INITIAL_ZIPCODE_DATA";
-// export const GET_PARCELS_BY_ZIPCODE = "GET_PARCELS_BY_ZIPCODE";
-// export const GET_PARCELS_BY_SPECULATOR = "GET_PARCELS_BY_SPECULATOR";
 export const GET_PARCELS_BY_QUERY = "GET_PARCELS_BY_QUERY";
 export const GET_YEAR = "GET_YEAR";
 export const LOG_MARKER_DRAG = "LOG_MARKER_DRAG";
 export const MARKER_DRAG_END = "MARKER_DRAG_END";
 export const SET_MARKER_COORDS = "SET_MARKER_COORDS";
+export const DATA_IS_LOADING = "DATA_IS_LOADING";
 
 function getInitialMapDataAction(data) {
   return {
@@ -77,6 +74,13 @@ export function setMarkerCoordsAction(latitude, longitude) {
   };
 }
 
+export function dataIsLoadingAction(dataIsLoading) {
+  return {
+    type: DATA_IS_LOADING,
+    payload: { dataIsLoading }
+  };
+}
+
 export function handleGetInitialMapDataAction(route) {
   return dispatch => {
     return getInitialMapData(route)
@@ -109,7 +113,6 @@ export function handleGetParcelsByQueryAction(route) {
   return dispatch => {
     return getMapData(route)
       .then(json => {
-        // dispatch(getParcelsByQueryAction({}));
         dispatch(getParcelsByQueryAction(json));
         return json;
       })
@@ -118,7 +121,11 @@ export function handleGetParcelsByQueryAction(route) {
       });
   };
 }
+// export const GET_PARCELS_BY_ZIPCODE = "GET_PARCELS_BY_ZIPCODE";
+// export const GET_PARCELS_BY_SPECULATOR = "GET_PARCELS_BY_SPECULATOR";
 
+// getParcelsByZipcode,
+// getParcelsBySpeculator,
 // this action is the same as getInitialMapDataAction
 // export function getParcelsByZipcodeAction(data) {
 //   return {

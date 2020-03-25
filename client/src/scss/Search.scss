@@ -18,10 +18,8 @@
   }
 }
 
-.search-container {
-  // margin: 20px 20px 0 20px;
-  // background-color: red;
-  // border: red solid 3px;
+.search-container { 
+  box-shadow: 8px 8px 10px 0 rgba(0, 0, 0, 0.3);
 }
 
 //search options
@@ -124,7 +122,7 @@ input[type="text"] {
 //part of CSS Transition
 
 .partial-results-container {
-  max-height: 70vh;
+  max-height: 62vh;
   display: flex; /*added*/
   flex-direction: column;
   overflow: auto;

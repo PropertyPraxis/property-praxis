@@ -14,7 +14,7 @@ import {
 
 const initialSearchState = {
   searchType: "Zipcode",
-  searchTerm: "",
+  searchTerm: null,
   searchDisplayType: null,
   partialResults: [],
   fullResults: []

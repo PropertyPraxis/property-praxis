@@ -19,3 +19,10 @@
     grid-template-rows: 1fr 1fr 1fr;
   }
 }
+
+@media (max-width: 350px) {
+  .app-container {
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr;
+  }
+}

@@ -19,28 +19,6 @@ export async function getInitialZipcodeData(route) {
   throw new Error(mapDataResponse.status);
 }
 
-// returns geojson
-// export async function getParcelsByZipcode(route) {
-//   try {
-//     const mapDataResponse = await fetch(route);
-//     const mapDataJson = await mapDataResponse.json();
-//     return mapDataJson;
-//   } catch (err) {
-//     throw new Error(err);
-//   }
-// }
-
-// // returns geojson
-// export async function getParcelsBySpeculator(route) {
-//   try {
-//     const mapDataResponse = await fetch(route);
-//     const mapDataJson = await mapDataResponse.json();
-//     return mapDataJson;
-//   } catch (err) {
-//     throw new Error(err);
-//   }
-// }
-
 export async function getMapData(route) {
   try {
     const mapDataResponse = await fetch(route);
@@ -83,6 +61,17 @@ export const populateSearchByYear = async function(searchTerm, year, route) {
   }
 };
 
+//function helper for downloading data
+export async function getDownloadData(route) {
+  try {
+    const response = await fetch(route);
+    const json = await response.json();
+    return json;
+  } catch (err) {
+    throw Error(`An error occured searching: ${err}`);
+  }
+}
+
 //debounce the search
 // export const debouncedPopulateSearch = pDebounce(populateSearch, 500);
 
@@ -97,4 +86,26 @@ export const populateSearchByYear = async function(searchTerm, year, route) {
 //     throw Error(response.statusText);
 //   }
 //   return json;
+// }
+
+// returns geojson
+// export async function getParcelsByZipcode(route) {
+//   try {
+//     const mapDataResponse = await fetch(route);
+//     const mapDataJson = await mapDataResponse.json();
+//     return mapDataJson;
+//   } catch (err) {
+//     throw new Error(err);
+//   }
+// }
+
+// // returns geojson
+// export async function getParcelsBySpeculator(route) {
+//   try {
+//     const mapDataResponse = await fetch(route);
+//     const mapDataJson = await mapDataResponse.json();
+//     return mapDataJson;
+//   } catch (err) {
+//     throw new Error(err);
+//   }
 // }

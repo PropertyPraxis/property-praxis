@@ -9,7 +9,11 @@ import {
   handleSearchPartialAddress,
   handleSearchPartialSpeculator
 } from "../../actions/search";
-import { togglePartialResultsAction } from "../../actions/results";
+import {
+  togglePartialResultsAction,
+  toggleFullResultsAction
+} from "../../actions/results";
+import { setMarkerCoordsAction } from "../../actions/mapData";
 import PartialSearchResults from "./SearchResults";
 import * as searchIcon from "../../assets/img/search.png";
 import "../../scss/Search.scss";
@@ -60,6 +64,31 @@ class SearchBar extends Component {
       this.props.dispatch(handleSearchPartialSpeculator(searchTerm, year));
     }
     if (searchType === "All") {
+      //fill in here
+    }
+  };
+
+  // STILL WORKING ON THIS
+  _handleKeyPress = async e => {
+    const { searchType, searchTerm } = this.props.searchState;
+    const { year } = this.props.mapData;
+    const { key } = e;
+
+    // if it is an enter hit
+    if (key === "Enter") {
+      console.log("Enter press", this._textInput.value);
+      // //zipcode search
+      // if (searchType === "Zipcode") {
+      //   this.props.dispatch(handleSearchPartialZipcode(searchTerm, year));
+      // }
+      // if (searchType === "Address") {
+      //   this.props.dispatch(handleSearchPartialAddress(searchTerm, year));
+      // }
+      // if (searchType === "Speculator") {
+      //   this.props.dispatch(handleSearchPartialSpeculator(searchTerm, year));
+      // }
+      // if (searchType === "All") {
+      // }
     }
   };
 
@@ -86,6 +115,8 @@ class SearchBar extends Component {
                   onClick={() => {
                     this.props.dispatch(resetSearch({ ...resetSearchOptions }));
                     this.props.dispatch(setSearchType(button));
+                    this.props.dispatch(toggleFullResultsAction(false));
+                    this.props.dispatch(setMarkerCoordsAction(null, null));
                   }}
                   style={
                     button === searchType ? { color: styleVars.ppRose } : null
@@ -114,7 +145,7 @@ class SearchBar extends Component {
                 onKeyPress={event => {
                   //need to update to action
                   event.persist();
-                  console.log("Keypress event", event);
+                  this._handleKeyPress(event);
                 }}
                 minLength={1}
                 debounceTimeout={300}
