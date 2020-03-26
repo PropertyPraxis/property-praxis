@@ -22,7 +22,7 @@ export async function getInitialZipcodeData(route) {
 export async function getMapData(route) {
   try {
     const mapDataResponse = await fetch(route);
-    const mapDataJson = await mapDataResponse.json();
+    const mapDataJson = await mapDataResponse.json()
     return mapDataJson;
   } catch (err) {
     throw new Error(err);

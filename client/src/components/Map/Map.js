@@ -249,7 +249,6 @@ class PraxisMap extends Component {
       const newUrl = `/address?search=${encodeURI(
         addressString
       )}&coordinates=${encodedCoords}`;
-
       //change the url
       window.history.pushState(state, title, newUrl);
 
@@ -265,12 +264,15 @@ class PraxisMap extends Component {
         .dispatch(handleSearchPartialAddress(addressString, year))
         .then(json => {
           // set the search term to the first result of geocoder
+          debugger;
+          // if (json[0].mb.length > 0) {
           const proxySearchTerm = json[0].mb[0].place_name;
           this.props.dispatch(
             resetSearch({
               searchTerm: proxySearchTerm
             })
           );
+          // }
         });
       this.props.dispatch(dataIsLoadingAction(false));
       //set the display type to address

@@ -24,19 +24,24 @@ class ResultsContainer extends Component {
 
   render() {
     const { isFullResultsOpen } = this.props.results;
-    return (
-      <CSSTransition
-        in={isFullResultsOpen} //set to isOpen
-        appear={true}
-        timeout={300}
-        classNames="results-container"
-      >
-        <FullResults
-          {...this.props}
-          createNewViewport={this._createNewViewport}
-        />
-      </CSSTransition>
-    );
+    const { searchTerm } = this.props.searchState;
+    debugger;
+    if (searchTerm) {
+      return (
+        <CSSTransition
+          in={isFullResultsOpen} //set to isOpen
+          appear={true}
+          timeout={300}
+          classNames="results-container"
+        >
+          <FullResults
+            {...this.props}
+            createNewViewport={this._createNewViewport}
+          />
+        </CSSTransition>
+      );
+    }
+    return null;
   }
 }
 function mapStateToProps({ mapData, mapState, results, searchState }) {

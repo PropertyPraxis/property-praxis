@@ -45,7 +45,7 @@ router.get("/parcels/:year", async (req, res) => {
       'centroid',   ST_AsText(centroid),
       'properties', to_jsonb(inputs) - 
         'geom_${year}' - 'parcelno' - 'cityrbuilt' - 'praxisyear' - 
-        'propaddr' - 'propdir' - 'propno' - 'propstr' - 'resyrbuilt' -
+        'propaddr' - 'resyrbuilt' -
         'row.names' - 'saledate' - 'saleprice' - 'taxparprop_id' - 
         'taxpayer1' - 'totacres' - 'totsqft' - 'centroid'
     ) AS feature

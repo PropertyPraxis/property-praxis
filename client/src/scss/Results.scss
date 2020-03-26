@@ -6,7 +6,8 @@
   //start inner to display none
   .results-inner {
     display: none;
-    width: 300px;
+    // width: 300px;
+    max-width: 300px;
   }
 }
 
@@ -86,9 +87,13 @@
 .results-hamburger-button {
   position: relative;
   align-self: flex-end;
-  bottom: 103px;
+  bottom: 106px;
   left: 15px;
   cursor: pointer;
+  z-index: 55;
+  background-color: white;
+  border-radius: 4px;
+  padding: 2px;
 }
 
 .results-hamburger-button:hover {
@@ -103,6 +108,7 @@
   width: 100%;
   height: 250px;
   box-shadow: 5px 10px 8px #888888;
+  // position: sticky;
 }
 
 .results-title {
@@ -153,6 +159,17 @@
 
 .address-context {
   margin: 0 0 10px 45px;
+  display: flex;
+  align-items: center;
+
+  img {
+    height: 20px;
+    width: 20px;
+  }
+}
+
+.address-context:hover {
+  color: $pp-rose;
 }
 
 .download-button {
@@ -163,7 +180,7 @@
   align-items: center;
   justify-content: center;
   padding: 5px 5px 5px 0;
-  border: 2px solid black;
+  border: 3px solid $ui-black;
   img {
     height: 40px;
     width: 40px;
@@ -171,11 +188,46 @@
 }
 
 .download-button:hover {
-  border: 2px solid $pp-rose;
+  border: 3px solid $pp-rose;
 }
 
 .download-button:active {
   transform: translateY(+1px);
+}
+
+.address-properties {
+  display: flex;
+  flex-direction: column;
+  font-weight: 800;
+  font-size: 1.1rem;
+  max-height: 35vh;
+  overflow: auto;
+  div {
+    margin: 5px;
+  }
+
+  img {
+    height: 20px;
+    width: 20px;
+  }
+  span {
+    display: block;
+    font-size: 1rem;
+    font-weight: 300;
+  }
+}
+
+.address-properties > div:first-child {
+  cursor: pointer;
+
+  :hover {
+    color: $pp-rose;
+  }
+
+  span {
+    display: flex;
+    align-items: center;
+  }
 }
 
 @media screen and (max-width: 700px) {
@@ -230,14 +282,17 @@
     .results-inner {
       margin: 15px;
       width: calc(100% - 30px);
+      max-width: calc(100% - 30px);
     }
   }
 
   .results-hamburger-button {
-    bottom: 5px;
-    left: 0;
+    position: sticky;
+    top: 15px;
   }
-
+  .address-properties {
+    max-height: 100%;
+  }
   //addd css for partial results
   .partial-results-mobile {
     max-height: 35vh;

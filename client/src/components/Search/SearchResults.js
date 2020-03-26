@@ -10,7 +10,8 @@ import {
   handleSearchFullSpeculator,
   handleSearchFullAddress,
   resetSearch,
-  setSearchDisplayType
+  setSearchDisplayType,
+  setSearchType
 } from "../../actions/search";
 import {
   handleGetParcelsByQueryAction,
@@ -115,144 +116,272 @@ const PartialZipcodeResults = props => {
   );
 };
 
-const PartialAddressResults = props => {
-  const { partialResults } = props.searchState;
-  const { year } = props.mapData;
-  return (
-    <section>
-      <div className="partial-results-container">
-        {partialResults[0].mb.map((result, index) => {
-          const [longitude, latitude] = result.geometry.coordinates;
-          const coords = encodeURI(JSON.stringify({ longitude, latitude }));
-          return (
-            <Link
-              key={result.place_name}
-              to={{
-                pathname: "/address",
-                search: `search=${result.place_name}&coordinates=${coords}`
-              }}
-              className={index % 2 ? "list-item-odd" : "list-item-even"}
-              onClick={() => {
-                // change the partial results
-                props.dispatch(
-                  handleSearchPartialAddress(result.place_name, year)
-                );
+class PartialAddressResults extends Component {
+  _onResultClick = result => {
+    const { year } = this.props.mapData;
+    const [longitude, latitude] = result.geometry.coordinates;
+    const encodedCoords = encodeURI(JSON.stringify({ longitude, latitude }));
+    //trigger data loading
+    this.props.dispatch(dataIsLoadingAction(true));
 
-                //add a point marker
-                props.dispatch(setMarkerCoordsAction(latitude, longitude));
+    // change the partial results
+    this.props.dispatch(handleSearchPartialAddress(result.place_name, year));
 
-                //create new vieport based on geojson result
-                props.createNewViewport(result);
-                props.dispatch(handleSearchFullAddress(coords, year));
+    //add a point marker
+    this.props.dispatch(setMarkerCoordsAction(latitude, longitude));
 
-                //set new viewer in results
-                props.dispatch(handleGetViewerImageAction(longitude, latitude));
-                //set map data and then create viewport
-                const route = `http://localhost:5000/api/geojson/parcels/address/${coords}/${year}`;
-                props
-                  .dispatch(handleGetParcelsByQueryAction(route))
-                  .then(geojson => {
-                    //trigger new viewport pass down from PartialSearchResults
-                    // props.createNewViewport(geojson);
-                  });
-                //fill in the text input
-                // props.dispatch(setSearchTerm(result.propzip));
-                props.dispatch(
-                  resetSearch({
-                    // partialResults: [],
-                    searchTerm: result.place_name
-                  })
-                );
-                // set the display type to full
-                props.dispatch(setSearchDisplayType("full"));
+    // get the download data for coords
+    const downloadRoute = `/api/address-search/download/${encodedCoords}/${year}`;
+    this.props.dispatch(handleGetDownloadDataAction(downloadRoute));
 
-                //close the partial results after
-                props.togglePartialResults(false);
-              }}
-            >
-              <div>
-                <img src={mapMarkerIcon} alt="Address Result" />
-                {result.place_name}
-              </div>
-            </Link>
-          );
-        })}
-      </div>
-    </section>
-  );
-};
+    //set new viewer in results
+    this.props.dispatch(handleGetViewerImageAction(longitude, latitude));
 
-const PartialSpeculatorResults = props => {
-  const { partialResults } = props.searchState;
-  const { year } = props.mapData;
-  const { mapState } = props;
-  return (
-    <section>
-      <div className="partial-results-container">
-        {partialResults.map((result, index) => {
-          return (
-            <Link
-              key={result.propzip}
-              to={{
-                pathname: "/speculator",
-                search: `search=${result.own_id}`
-              }}
-              onClick={() => {
-                //trigger data loading
-                props.dispatch(dataIsLoadingAction(true));
+    //set map data and then create viewport
+    const geojsonRoute = `http://localhost:5000/api/geojson/parcels/address/${encodedCoords}/${year}`;
+    this.props
+      .dispatch(handleGetParcelsByQueryAction(geojsonRoute))
+      .then(geojson => {
+        //trigger new viewport pass down from PartialSearchResults
+        this.props.createNewViewport(geojson);
+        //trigger data loading off
+        this.props.dispatch(dataIsLoadingAction(false));
+      });
+    //fill in the text input
+    this.props.dispatch(
+      resetSearch({
+        searchTerm: result.place_name
+      })
+    );
+    // set the display type to single-address
+    this.props.dispatch(setSearchType("Address"));
+    this.props.dispatch(setSearchDisplayType("single-address"));
+    this.props.dispatch(toggleFullResultsAction(true));
+    this.props.togglePartialResults(false);
+  };
 
-                // change the partial results
-                props.dispatch(
-                  handleSearchPartialSpeculator(result.own_id, year)
-                );
+  render() {
+    const { partialResults } = this.props.searchState;
 
-                props.dispatch(handleSearchFullSpeculator(result.own_id, year));
-                // the route to parcels in zip
-                const geoJsonRoute = `/api/geojson/parcels/speculator/${result.own_id}/${year}`;
-                //set map data and then create viewport
-                props
-                  .dispatch(handleGetParcelsByQueryAction(geoJsonRoute))
-                  .then(geojson => {
-                    //trigger new viewport
-                    //Note this is creating a default because it is a point
-                    props.createNewViewport(geojson);
+    return (
+      <section>
+        <div className="partial-results-container">
+          {partialResults[0].mb.map((result, index) => {
+            const [longitude, latitude] = result.geometry.coordinates;
+            const encodedCoords = encodeURI(
+              JSON.stringify({ longitude, latitude })
+            );
+            return (
+              <Link
+                key={result.place_name}
+                to={{
+                  pathname: "/address",
+                  search: `search=${result.place_name}&coordinates=${encodedCoords}`
+                }}
+                className={index % 2 ? "list-item-odd" : "list-item-even"}
+                onClick={() => {
+                  this._onResultClick(result);
+                }}
+              >
+                <div>
+                  <img src={mapMarkerIcon} alt="Address Result" />
+                  {result.place_name}
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      </section>
+    );
+  }
+}
 
-                    //trigger data loading off
-                    props.dispatch(dataIsLoadingAction(false));
-                  });
-                //fill in the text input
-                // props.dispatch(setSearchTerm(result.propzip));
-                props.dispatch(
-                  resetSearch({
-                    // partialResults: [],
-                    searchTerm: result.own_id
-                  })
-                );
-                // set the display type to full
-                props.dispatch(setSearchDisplayType("full-speculator"));
+class PartialSpeculatorResults extends Component {
+  _onResultClick = result => {
+    const { year } = this.props.mapData;
+    // const { mapState } = this.props;
+    //trigger data loading
+    this.props.dispatch(dataIsLoadingAction(true));
 
-                //close the partial results after
-                props.togglePartialResults(false);
+    // change the partial results
+    this.props.dispatch(handleSearchPartialSpeculator(result.own_id, year));
 
-                // trigger the dowload data action
-                const downloadDataRoute = `/api/speculator-search/download/${result.own_id}/${year}`;
-                props.dispatch(handleGetDownloadDataAction(downloadDataRoute));
-                
-                //toggle the results pane
-                props.dispatch(toggleFullResultsAction(true));
-              }}
-            >
-              <div className={index % 2 ? "list-item-odd" : "list-item-even"}>
-                <img src={speculatorIcon} alt="Speculator Result" />
-                {capitalizeFirstLetter(result.own_id)}
-              </div>
-            </Link>
-          );
-        })}
-      </div>
-    </section>
-  );
-};
+    // trigger the dowload data action
+    const downloadDataRoute = `/api/speculator-search/download/${result.own_id}/${year}`;
+    this.props.dispatch(handleGetDownloadDataAction(downloadDataRoute));
+
+    // the route to parcels in zip
+    const geoJsonRoute = `/api/geojson/parcels/speculator/${result.own_id}/${year}`;
+    //set map data and then create viewport
+    this.props
+      .dispatch(handleGetParcelsByQueryAction(geoJsonRoute))
+      .then(geojson => {
+        //trigger new viewport
+        //Note this is creating a default because it is a point
+        this.props.createNewViewport(geojson);
+
+        //trigger data loading off
+        this.props.dispatch(dataIsLoadingAction(false));
+      });
+    //fill in the text input
+    // this.props.dispatch(setSearchTerm(result.propzip));
+    this.props.dispatch(
+      resetSearch({
+        searchTerm: result.own_id
+      })
+    );
+
+    this.props.dispatch(setSearchType("Speculator"));
+    // set the display type to full
+    this.props.dispatch(setSearchDisplayType("full-speculator"));
+    //toggle the results pane
+    this.props.dispatch(toggleFullResultsAction(true));
+    //close the partial results after
+    this.props.dispatch(togglePartialResultsAction(false));
+  };
+
+  render() {
+    const { partialResults } = this.props.searchState;
+    const { year } = this.props.mapData;
+    const { mapState } = this.props;
+    return (
+      <section>
+        <div className="partial-results-container">
+          {partialResults.map((result, index) => {
+            return (
+              <Link
+                key={index}
+                to={{
+                  pathname: "/speculator",
+                  search: `search=${result.own_id}`
+                }}
+                onClick={() => {
+                  this._onResultClick(result);
+                  // //trigger data loading
+                  // this.props.dispatch(dataIsLoadingAction(true));
+                  // // change the partial results
+                  // this.props.dispatch(
+                  //   handleSearchPartialSpeculator(result.own_id, year)
+                  // );
+                  // this.props.dispatch(
+                  //   handleSearchFullSpeculator(result.own_id, year)
+                  // );
+                  // // the route to parcels in zip
+                  // const geoJsonRoute = `/api/geojson/parcels/speculator/${result.own_id}/${year}`;
+                  // //set map data and then create viewport
+                  // this.props
+                  //   .dispatch(handleGetParcelsByQueryAction(geoJsonRoute))
+                  //   .then(geojson => {
+                  //     //trigger new viewport
+                  //     //Note this is creating a default because it is a point
+                  //     this.props.createNewViewport(geojson);
+                  //     //trigger data loading off
+                  //     this.props.dispatch(dataIsLoadingAction(false));
+                  //   });
+                  // //fill in the text input
+                  // // this.props.dispatch(setSearchTerm(result.propzip));
+                  // this.props.dispatch(
+                  //   resetSearch({
+                  //     // partialResults: [],
+                  //     searchTerm: result.own_id
+                  //   })
+                  // );
+                  // // set the display type to full
+                  // this.props.dispatch(setSearchDisplayType("full-speculator"));
+                  // //close the partial results after
+                  // this.props.dispatch(togglePartialResultsAction(false));
+                  // // trigger the dowload data action
+                  // const downloadDataRoute = `/api/speculator-search/download/${result.own_id}/${year}`;
+                  // this.props.dispatch(
+                  //   handleGetDownloadDataAction(downloadDataRoute)
+                  // );
+                  // //toggle the results pane
+                  // this.props.dispatch(toggleFullResultsAction(true));
+                }}
+              >
+                <div className={index % 2 ? "list-item-odd" : "list-item-even"}>
+                  <img src={speculatorIcon} alt="Speculator Result" />
+                  {capitalizeFirstLetter(result.own_id)}
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      </section>
+    );
+  }
+}
+// const PartialSpeculatorResults = props => {
+//   const { partialResults } = props.searchState;
+//   const { year } = props.mapData;
+//   const { mapState } = props;
+//   return (
+//     <section>
+//       <div className="partial-results-container">
+//         {partialResults.map((result, index) => {
+//           return (
+//             <Link
+//               key={result.propzip}
+//               to={{
+//                 pathname: "/speculator",
+//                 search: `search=${result.own_id}`
+//               }}
+//               onClick={() => {
+//                 //trigger data loading
+//                 props.dispatch(dataIsLoadingAction(true));
+
+//                 // change the partial results
+//                 props.dispatch(
+//                   handleSearchPartialSpeculator(result.own_id, year)
+//                 );
+
+//                 props.dispatch(handleSearchFullSpeculator(result.own_id, year));
+//                 // the route to parcels in zip
+//                 const geoJsonRoute = `/api/geojson/parcels/speculator/${result.own_id}/${year}`;
+//                 //set map data and then create viewport
+//                 props
+//                   .dispatch(handleGetParcelsByQueryAction(geoJsonRoute))
+//                   .then(geojson => {
+//                     //trigger new viewport
+//                     //Note this is creating a default because it is a point
+//                     props.createNewViewport(geojson);
+
+//                     //trigger data loading off
+//                     props.dispatch(dataIsLoadingAction(false));
+//                   });
+//                 //fill in the text input
+//                 // props.dispatch(setSearchTerm(result.propzip));
+//                 props.dispatch(
+//                   resetSearch({
+//                     // partialResults: [],
+//                     searchTerm: result.own_id
+//                   })
+//                 );
+//                 // set the display type to full
+//                 props.dispatch(setSearchDisplayType("full-speculator"));
+
+//                 //close the partial results after
+//                 props.dispatch(togglePartialResultsAction(false));
+
+//                 // trigger the dowload data action
+//                 const downloadDataRoute = `/api/speculator-search/download/${result.own_id}/${year}`;
+//                 props.dispatch(handleGetDownloadDataAction(downloadDataRoute));
+
+//                 //toggle the results pane
+//                 props.dispatch(toggleFullResultsAction(true));
+//               }}
+//             >
+//               <div className={index % 2 ? "list-item-odd" : "list-item-even"}>
+//                 <img src={speculatorIcon} alt="Speculator Result" />
+//                 {capitalizeFirstLetter(result.own_id)}
+//               </div>
+//             </Link>
+//           );
+//         })}
+//       </div>
+//     </section>
+//   );
+// };
 
 class PartialSearchResults extends Component {
   // when user clicks on a result the partial results disappear
