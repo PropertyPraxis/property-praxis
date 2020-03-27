@@ -7,8 +7,6 @@ import { getHoveredFeatureAction } from "../../actions/currentFeature";
 import {
   handleSearchPartialAddress,
   resetSearch,
-  setSearchType,
-  setSearchDisplayType
 } from "../../actions/search";
 import {
   logMarkerDragEventAction,
@@ -75,7 +73,9 @@ class PraxisMarker extends React.Component {
       //from praxis map
       this.props.createNewViewport(geojson);
 
+      // a single address with marker on it
       if (
+        geojson.features &&
         geojson.features.length === 1 &&
         geojson.features[0].properties.distance === 0
       ) {
@@ -109,23 +109,41 @@ class PraxisMarker extends React.Component {
             const proxySearchTerm = json[0].mb[0].place_name;
             this.props.dispatch(
               resetSearch({
-                searchTerm: proxySearchTerm
+                searchTerm: proxySearchTerm,
+                searchType: "Address",
+                searchDisplayType: "single-address"
               })
             );
           });
       }
-      //get viewer image
-      // this.props.dispatch(handleGetViewerImageAction(longitude, latitude));
 
+      if (geojson.features && geojson.features.length > 1) {
+        this.props.dispatch(
+          resetSearch({
+            searchTerm: "",
+            searchType: "All",
+            partialResults: [],
+            searchDisplayType: "multiple-parcels"
+          })
+        );
+      }
+
+      //empty geojson
+      if (geojson.features[0].properties.id === -1) {
+        this.props.dispatch(
+          resetSearch({
+            searchTerm: "",
+            searchType: "All",
+            partialResults: [],
+            searchDisplayType: "out-of-bounds"
+          })
+        );
+      }
       //handle all the download data and setting search
       this.props.dispatch(dataIsLoadingAction(true));
       const downloadDataRoute = `/api/address-search/download/${encodedCoords}/${year}`;
       this.props.dispatch(handleGetDownloadDataAction(downloadDataRoute));
-
       this.props.dispatch(dataIsLoadingAction(false));
-      //set the display type to address
-      this.props.dispatch(setSearchType("Address"));
-      this.props.dispatch(setSearchDisplayType("single-address"));
       this.props.dispatch(toggleFullResultsAction(true));
       this.props.dispatch(togglePartialResultsAction(false));
     });
@@ -152,8 +170,6 @@ class PraxisMarker extends React.Component {
     );
   }
 }
-
-// class NavigationMarker extends Component {}
 
 class PraxisMap extends Component {
   _onHover = event => {
@@ -264,20 +280,16 @@ class PraxisMap extends Component {
         .dispatch(handleSearchPartialAddress(addressString, year))
         .then(json => {
           // set the search term to the first result of geocoder
-          debugger;
-          // if (json[0].mb.length > 0) {
           const proxySearchTerm = json[0].mb[0].place_name;
           this.props.dispatch(
             resetSearch({
-              searchTerm: proxySearchTerm
+              searchTerm: proxySearchTerm,
+              searchType: "Address",
+              searchDisplayType: "single-address"
             })
           );
-          // }
         });
       this.props.dispatch(dataIsLoadingAction(false));
-      //set the display type to address
-      this.props.dispatch(setSearchType("Address"));
-      this.props.dispatch(setSearchDisplayType("single-address"));
       this.props.dispatch(toggleFullResultsAction(true));
       this.props.dispatch(togglePartialResultsAction(false));
     }
@@ -287,6 +299,7 @@ class PraxisMap extends Component {
     const { latitude, longitude } = this.props.mapData.marker;
     const { hoveredFeature } = this.props.currentFeature;
     const filter = hoveredFeature ? hoveredFeature.properties.feature_id : "";
+    const { ppraxis, zips } = this.props.mapData;
 
     return (
       <div className="map">
@@ -308,22 +321,13 @@ class PraxisMap extends Component {
           }}
           // getCursor={this._getCursor}
         >
-          {/* <Marker
-            latitude={42.35554476757099}
-            longitude={-82.9895677109488}
-            // offsetLeft={-20}
-            // offsetTop={-10}
-          >
-            <ArrowIcon style={{ transform: "rotate(350deg)" }} />
-          </Marker> */}
-
           {latitude && longitude ? (
             <PraxisMarker
               {...this.props}
               createNewViewport={this._createNewViewport}
             />
           ) : null}
-          <Source id="parcels" type="geojson" data={this.props.mapData.ppraxis}>
+          <Source id="parcels" type="geojson" data={ppraxis}>
             <Layer key="parcel-centroid" {...parcelCentroid} />
             <Layer key="parcel-layer" {...parcelLayer} />
             <Layer
@@ -333,7 +337,7 @@ class PraxisMap extends Component {
             />
           </Source>
           {this._renderTooltip()}
-          <Source id="zips" type="geojson" data={this.props.mapData.zips}>
+          <Source id="zips" type="geojson" data={zips}>
             <Layer key="zips-layer" {...zipsLayer} />
             <Layer key="zips-label" {...zipsLabel} />
           </Source>
@@ -344,38 +348,11 @@ class PraxisMap extends Component {
 }
 
 export default PraxisMap;
-
-// _onClick = event => {
-//     const feature = event.features[0];
-//     const clusterId = feature.properties.id;
-
-//     const mapboxSource = this._sourceRef.current.getSource();
-
-//     mapboxSource.getClusterExpansionZoom(clusterId, (err, zoom) => {
-//       if (err) {
-//         return;
-//       }
-
-//       this.props.dispatch(
-//         getMapStateAction({
-//           //   ...viewport,
-//           ...this.props.mapState,
-//           longitude: feature.geometry.coordinates[0],
-//           latitude: feature.geometry.coordinates[1],
-//           zoom,
-//           transitionDuration: 500
-//         })
-//       );
-//     });
-//   };
-
-// onViewportChange={this._onViewportChange}
-// interactiveLayerIds={[clusterLayer.id]}
-//   data="https://docs.mapbox.com/mapbox-gl-js/assets/earthquakes.geojson"
-//   cluster={true}
-//   clusterMaxZoom={20}
-//   clusterRadius={5}
-//   ref={this._sourceRef}
-// <Layer {...clusterLayer} />
-// <Layer {...clusterCountLayer} />
-// <Layer {...unclusteredPointLayer} />
+/* <Marker
+  latitude={42.35554476757099}
+  longitude={-82.9895677109488}
+  // offsetLeft={-20}
+  // offsetTop={-10}
+>
+  <ArrowIcon style={{ transform: "rotate(350deg)" }} />
+</Marker>; */

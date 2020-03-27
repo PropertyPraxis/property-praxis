@@ -38,6 +38,7 @@ router.get("/full/:coords/:year", async (req, res) => {
     ST_Intersects(ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326), ppg.geom_${year})`;
 
     const { rows } = await db.query(query, [`${year}`]);
+
     res.json({ rows });
   } catch (err) {
     res.json(err);
@@ -56,6 +57,17 @@ router.get("/download/:coords/:year", async (req, res) => {
       WHERE ST_Intersects(ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326), geom_${year})`;
 
     const { rows } = await db.query(query);
+
+    // query again if the result is 0 
+    if (rows.length === 0) {
+      const query = `SELECT DISTINCT ROW_NUMBER() OVER (ORDER BY 1) as id, ST_X(centroid) as longitude,
+      own_id, count as property_count, parcelno, propaddr, propno, propdir, propstr, propzip,
+      resyrbuilt, saledate, saleprice, taxpayer1, totacres, totsqft, ST_Y(centroid) as latitude
+      FROM parcels_${year} 
+      WHERE ST_Distance(ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326)::geography, geom_${year}::geography) < 1000;`;
+      const { rows } = await db.query(query);
+      res.json(rows);
+    }
 
     res.json(rows);
   } catch (err) {

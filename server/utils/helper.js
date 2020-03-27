@@ -1,25 +1,31 @@
 // function to find the single target address at distance 0
 function findTargetAddress(features) {
-  const targetAddress = features
-    .map(feature => {
-      if (feature.properties.distance === 0) {
-        return feature;
-      }
-      return null;
-    })
-    .filter(result => result !== null);
+  if (features) {
+    const targetAddress = features
+      .map(feature => {
+        if (feature.properties.distance === 0) {
+          return feature;
+        }
+        return null;
+      })
+      .filter(result => result !== null);
 
-  const nearbyAddresses = features
-    .map(feature => {
-      if (feature.properties.distance !== 0) {
-        return feature;
-      }
-      return null;
-    })
-    .filter(result => result !== null);
+    const nearbyAddresses = features
+      .map(feature => {
+        if (feature.properties.distance !== 0) {
+          return feature;
+        }
+        return null;
+      })
+      .filter(result => result !== null);
 
-  console.log(targetAddress);
-  return { targetAddress, nearbyAddresses };
+    return { targetAddress, nearbyAddresses };
+  }
+
+  return {
+    targetAddress: [],
+    nearbyAddresses: []
+  };
 }
 
 function buildGeoJSONTemplate(features) {

@@ -12,6 +12,7 @@ export const SEARCH_FULL_SPECULATOR = "SEARCH_FULL_SPECULATOR";
 export const SEARCH_PARTIAL_SPECULATOR = "SEARCH_PARTIAL_SPECULATOR";
 export const SEARCH_PARTIAL_ADDRESS = "SEARCH_PARTIAL_ADDRESS";
 export const SEARCH_FULL_ADDRESS = "SEARCH_FULL_ADDRESS";
+export const SEARCH_PARTIAL_ALL = "SEARCH_PARTIAL_ALL";
 
 export function setSearchType(type) {
   return {
@@ -90,7 +91,16 @@ function searchFullSpeculator(fullResults) {
 
 function searchPartialAddress(partialResults) {
   return {
-    type: SEARCH_FULL_ADDRESS,
+    type: SEARCH_PARTIAL_ADDRESS,
+    payload: {
+      partialResults
+    }
+  };
+}
+
+function searchPartialAll(partialResults) {
+  return {
+    type: SEARCH_PARTIAL_ALL,
     payload: {
       partialResults
     }
@@ -203,5 +213,34 @@ export function handleSearchFullSpeculator(searchTerm, year) {
         //need to add some more error hadling
         throw Error(`An error occured searching: ${err}`);
       });
+  };
+}
+
+export function handleSearchPartialAll(searchTerm, year) {
+  return async dispatch => {
+    const partialAddressResults = await populateSearchByYear(
+      searchTerm,
+      year,
+      `/api/address-search/partial/`
+    );
+
+    const partialSpeculatorResults = await populateSearchByYear(
+      searchTerm,
+      year,
+      `/api/speculator-search/partial/`
+    );
+
+    const partialZipcodeResults = await populateSearchByYear(
+      searchTerm,
+      year,
+      `/api/zipcode-search/partial/`
+    );
+    dispatch(
+      searchPartialAll([
+        partialAddressResults,
+        partialSpeculatorResults,
+        partialZipcodeResults
+      ])
+    );
   };
 }

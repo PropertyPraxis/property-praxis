@@ -18,7 +18,7 @@
   }
 }
 
-.search-container { 
+.search-container {
   box-shadow: 8px 8px 10px 0 rgba(0, 0, 0, 0.3);
 }
 
@@ -160,4 +160,21 @@ input[type="text"] {
   display: flex; /*added*/
   flex-direction: column;
   overflow: auto;
+}
+
+.partial-results-container-all {
+  max-height: 62vh;
+  overflow: auto;
+
+  section > .partial-results-container {
+    max-height: none !important;
+  }
+}
+
+.partial-results-all-title {
+  text-align: center;
+  background-color: $ui-white;
+  padding: 5px;
+  font-size: 1.1rem;
+  font-weight: 500;
 }

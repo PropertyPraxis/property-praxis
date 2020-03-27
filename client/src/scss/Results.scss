@@ -6,7 +6,7 @@
   //start inner to display none
   .results-inner {
     display: none;
-    // width: 300px;
+    width: 300px;
     max-width: 300px;
   }
 }
@@ -81,13 +81,13 @@
 .results-inner {
   // display: flex;
   flex-direction: column;
-  margin: 105px 20px 20px 20px;
+  margin: 95px 20px 20px 20px;
 }
 
 .results-hamburger-button {
   position: relative;
   align-self: flex-end;
-  bottom: 106px;
+  bottom: 95px;
   left: 15px;
   cursor: pointer;
   z-index: 55;
@@ -113,8 +113,13 @@
 
 .results-title {
   font-size: 1.1rem;
-  margin-bottom: 15px;
+  margin-bottom: 8px;
   font-weight: 900;
+
+  div {
+    display: inline;
+    font-size: 1.8rem;
+  }
 }
 
 .number-circle {
@@ -200,7 +205,7 @@
   flex-direction: column;
   font-weight: 800;
   font-size: 1.1rem;
-  max-height: 35vh;
+  max-height: 32vh;
   overflow: auto;
   div {
     margin: 5px;
@@ -295,6 +300,6 @@
   }
   //addd css for partial results
   .partial-results-mobile {
-    max-height: 35vh;
+    max-height: 30vh;
   }
 }

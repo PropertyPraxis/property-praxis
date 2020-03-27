@@ -29,7 +29,6 @@ import {
   handleGetDownloadDataAction
 } from "../../actions/results";
 import MapViewer from "./MapViewer";
-import DownloadData from "../Download/DownloadData";
 import * as mapMarkerIcon from "../../assets/img/map-marker-transparent.png";
 import * as downloadIcon from "../../assets/img/download-icon.png";
 import * as infoIcon from "../../assets/img/info-icon.png";
@@ -43,6 +42,8 @@ const ResultsSwitcher = props => {
     <ParcelResults {...props} resultsType="zipcode-results" />
   ) : searchDisplayType === "full-speculator" && !dataIsLoading ? (
     <ParcelResults {...props} resultsType="speculator-results" />
+  ) : searchDisplayType === "multiple-parcels" && !dataIsLoading ? (
+    <ParcelResults {...props} resultsType="multiple-parcels" />
   ) : searchDisplayType === "single-address" && !dataIsLoading ? (
     <SingleAddressResults {...props} />
   ) : (
@@ -51,7 +52,6 @@ const ResultsSwitcher = props => {
 };
 
 //currently this works for zipcodes
-// props for this will be:
 // resultsType zipcode-results, speculator-results
 class ParcelResults extends Component {
   render() {
@@ -65,11 +65,19 @@ class ParcelResults extends Component {
         <div className="results-title">
           <span className="number-circle">{features.length}</span>
           {resultsType === "zipcode-results"
-            ? " properties listed in"
+            ? " properties in"
             : resultsType === "speculator-results"
-            ? " properties owned by"
+            ? " properties for"
+            : resultsType === "multiple-parcels"
+            ? " properties within 1km"
             : null}
-          <span> {capitalizeFirstLetter(searchTerm)}</span>
+          <div>
+            {" "}
+            {resultsType === "zipcode-results" ||
+            resultsType === "speculator-results"
+              ? capitalizeFirstLetter(searchTerm)
+              : null}
+          </div>
         </div>
 
         <div className="partial-results-container partial-results-mobile">
@@ -184,14 +192,13 @@ class SingleAddressResults extends Component {
         //trigger new viewport pass down from PartialSearchResults
         this.props.createNewViewport(geojson);
         //fill in the text input
-        this.props.dispatch(setSearchType("Zipcode"));
         this.props.dispatch(
           resetSearch({
-            searchTerm: propzip
+            searchTerm: propzip,
+            searchType: "Zipcode",
+            searchDisplayType: "full-zipcode"
           })
         );
-        // set the display type to full
-        this.props.dispatch(setSearchDisplayType("full-zipcode"));
 
         //close the partial results after
         this.props.dispatch(togglePartialResultsAction(false));
@@ -213,7 +220,6 @@ class SingleAddressResults extends Component {
     const { own_id } = features[0].properties;
     // change the partial results
     this.props.dispatch(handleSearchPartialSpeculator(own_id, year));
-    // this.props.dispatch(handleSearchFullSpeculator(own_id, year));
 
     //set loading
     this.props.dispatch(dataIsLoadingAction(true));
@@ -228,15 +234,13 @@ class SingleAddressResults extends Component {
         //Note this is creating a default because it is a point
         this.props.createNewViewport(geojson);
         //fill in the text input
-        this.props.dispatch(setSearchType("Speculator"));
         this.props.dispatch(
           resetSearch({
-            searchTerm: own_id
+            searchTerm: own_id,
+            searchType: "Speculator",
+            searchDisplayType: "full-speculator"
           })
         );
-        // set the display type to full
-        this.props.dispatch(setSearchDisplayType("full-speculator"));
-
         //close the partial results after
         this.props.dispatch(togglePartialResultsAction(false));
 
@@ -252,11 +256,8 @@ class SingleAddressResults extends Component {
   };
 
   render() {
-    // const SingleAddressResults = props => {
     const { features } = this.props.mapData.ppraxis;
     let { searchTerm } = this.props.searchState;
-    // const { targetAddress, nearbyAddresses } = findTargetAddress(features);
-    // if (searchTerm === null) searchTerm = ",";
     if (features.length > 0 && features[0].properties.distance === 0) {
       /// all the properties of address
       const {
@@ -356,7 +357,6 @@ class FullResults extends Component {
       .replace(/\//g, "_")
       .replace(/,/g, "");
     console.log("filename: ", filename);
-    // if (downloadData) {
     return (
       <section className="results-outer">
         <div className="results-inner">
@@ -379,9 +379,6 @@ class FullResults extends Component {
         </div>
       </section>
     );
-    // }
-
-    // return <div className="results-outer">results outer</div>;
   }
 }
 

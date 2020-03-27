@@ -7,7 +7,8 @@ import {
   setSearchDisplayType,
   handleSearchPartialZipcode,
   handleSearchPartialAddress,
-  handleSearchPartialSpeculator
+  handleSearchPartialSpeculator,
+  handleSearchPartialAll
 } from "../../actions/search";
 import {
   togglePartialResultsAction,
@@ -64,7 +65,7 @@ class SearchBar extends Component {
       this.props.dispatch(handleSearchPartialSpeculator(searchTerm, year));
     }
     if (searchType === "All") {
-      //fill in here
+      this.props.dispatch(handleSearchPartialAll(searchTerm, year));
     }
   };
 
@@ -133,6 +134,7 @@ class SearchBar extends Component {
                 className="clear-button"
                 onClick={() => {
                   this.props.dispatch(resetSearch({ ...resetSearchOptions }));
+                  this.props.dispatch(setMarkerCoordsAction(null, null));
                 }}
               >
                 &times;
@@ -146,6 +148,9 @@ class SearchBar extends Component {
                   //need to update to action
                   event.persist();
                   this._handleKeyPress(event);
+                }}
+                onClick={() => {
+                  this.props.dispatch(toggleFullResultsAction(false));
                 }}
                 minLength={1}
                 debounceTimeout={300}
@@ -179,21 +184,3 @@ class SearchBar extends Component {
 }
 
 export default SearchBar;
-
-// {/* <input
-//   type="text"
-//   placeholder={this._setSearchPlaceholderText(searchType)}
-//   autoComplete="off"
-//   name="search"
-//   onSubmit={() => {
-//     //need to update to action
-//     console.log("submitted.");
-//   }}
-//   onChange={this._handleInputChange}
-//   onKeyPress={event => {
-//     //need to update to action
-//     event.persist();
-//     console.log("Keypress event", event);
-//   }}
-//   ref={this._textInput}
-// ></input>; */}

@@ -25,8 +25,7 @@ class ResultsContainer extends Component {
   render() {
     const { isFullResultsOpen } = this.props.results;
     const { searchTerm } = this.props.searchState;
-
-    if (searchTerm) {
+    if (searchTerm !== null) {
       return (
         <CSSTransition
           in={isFullResultsOpen} //set to isOpen
