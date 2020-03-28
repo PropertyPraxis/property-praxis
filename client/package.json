@@ -25,6 +25,7 @@
     "react-map-gl": "^5.2.1",
     "react-mapillary": "0.0.9",
     "react-modal": "^3.11.1",
+    "react-rangeslider": "^2.2.0",
     "react-redux": "^7.1.3",
     "react-responsive": "^8.0.3",
     "react-router-dom": "^5.1.2",

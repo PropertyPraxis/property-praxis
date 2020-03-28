@@ -83,10 +83,11 @@ router.get("/address/:coords/:year", async (req, res) => {
 
   let geoJSON;
   if (targetAddress.length === 0 && nearbyAddresses.length === 0) {
+    //this is a default empty geojson
     geoJSON = buildGeoJSONTemplate([
       {
         type: "Feature",
-        properties: {id: -1},
+        properties: { id: -1 },
         geometry: { type: "GeometryCollection", geometries: [] }
       }
     ]);

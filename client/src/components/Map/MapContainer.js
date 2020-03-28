@@ -35,7 +35,13 @@ class MapContainer extends Component {
     return <PraxisMap {...this.props} />;
   }
 }
-function mapStateToProps({ mapState, mapData, currentFeature, results }) {
-  return { mapState, mapData, currentFeature, results };
+function mapStateToProps({
+  mapState,
+  mapData,
+  currentFeature,
+  results,
+  controller
+}) {
+  return { mapState, mapData, currentFeature, results, controller };
 }
 export default connect(mapStateToProps)(MapContainer);

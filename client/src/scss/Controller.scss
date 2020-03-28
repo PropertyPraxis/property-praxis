@@ -1,0 +1,73 @@
+@import "./colors.scss";
+
+.parcel-layer-controller-container {
+  position: absolute;
+  bottom: 25px;
+  right: 25px;
+  z-index: 40;
+  background-color: $ui-white;
+  border: 3px solid $ui-black;
+  padding: 5px;
+  box-shadow: 8px 8px 10px 0 rgba(0, 0, 0, 0.3);
+}
+
+.parcel-layer-palette {
+  display: flex;
+  
+  div {
+    height: 15px;
+    width: 30px;
+    cursor: pointer;
+    box-sizing: border-box;
+  }
+
+  div:hover {
+    border: 1px solid $ui-black;
+  }
+}
+
+.parcel-layer-palette-labels {
+  display: flex;
+  margin: 5px 0 5px 5px;
+  div {
+    transform: rotate(315deg);
+    height: 20px;
+    width: 30px;
+    font-size: 0.7rem;
+  }
+}
+
+//range slider override css
+.rangeslider-horizontal .rangeslider__handle {
+  width: 10px;
+  height: 20px;
+  left: -10px;
+  box-shadow: none;
+}
+
+.rangeslider .rangeslider__handle {
+  background: #fff;
+  border: 1px solid #ccc;
+  cursor: pointer;
+  display: inline-block;
+}
+.rangeslider__fill {
+  background-color: #3f3f3f !important;
+}
+
+.rangeslider-vertical .rangeslider__fill {
+  width: 100%;
+  box-shadow: none;
+  bottom: 0;
+}
+
+.rangeslider__handle:after {
+  display: none;
+}
+
+.rangeslider {
+  margin: 10px 0;
+  position: relative;
+  background: #e6e6e6;
+  touch-action: none;
+}

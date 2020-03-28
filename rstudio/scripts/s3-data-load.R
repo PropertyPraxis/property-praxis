@@ -440,6 +440,19 @@ praxiscount <- taxParPropYear %>%
   group_by(praxisyear, own_id) %>% 
   summarise(count=sum(n()))
 
+countGrouper <- function (val){
+  if(val > 9 & val <= 20) return(1)
+  else if(val > 20 & val <= 100) return(2)
+  else if(val > 100 & val <= 200) return(3)
+  else if(val > 200 & val <= 500) return(4)
+  else if(val > 500 & val <= 1000) return(5)
+  else if(val > 1000 & val <= 1500) return(6)
+  else if(val > 1500 & val <= 2000) return(7)
+  else return(0)
+}
+## create the group col for filtering
+praxiscount$group <- unlist(lapply(praxiscount$count, countGrouper))
+
 ##
 # shpList[["gj"]] <- gj
 ##geom table (uses praxis shaefiles and geojson)
@@ -593,16 +606,43 @@ dbSendQuery(conn, paste("ALTER TABLE taxpayer",
 createOwnerCount <- function(){
   dbSendQuery(conn, paste("DROP TABLE IF EXISTS owner_count;",
                           "CREATE TABLE owner_count AS",
-                          "(SELECT DISTINCT y.praxisyear, STRING_AGG(DISTINCT ot.own_id, ',') AS own_id, COUNT(ot.own_id) as count FROM parcel_property_geom AS ppg",
+                          "(SELECT DISTINCT y.praxisyear, STRING_AGG(DISTINCT ot.own_id, ',') AS own_id, COUNT(ot.own_id) AS count",
+                          "FROM parcel_property_geom AS ppg",
                           "INNER JOIN property AS p ON ppg.parprop_id = p.parprop_id",
                           "INNER JOIN taxpayer_property AS tp ON p.prop_id = tp.prop_id",
                           "INNER JOIN year AS y on tp.taxparprop_id = y.taxparprop_id",
                           "INNER JOIN taxpayer AS t ON tp.tp_id = t.tp_id",
                           "INNER JOIN owner_taxpayer AS ot ON t.owntax_id = ot.owntax_id",
                           "GROUP BY y.praxisyear, ot.own_id)"))
+  
+  dbSendQuery(conn, paste("ALTER TABLE owner_count ADD COLUMN own_group INT;",
+                          "UPDATE owner_count",
+                          "SET own_group = 1",
+                          "WHERE count > 9 AND count <= 20;",
+                          "UPDATE owner_count",
+                          "SET own_group = 2",
+                          "WHERE count > 20 AND count <= 100;",
+                          "UPDATE owner_count",
+                          "SET own_group = 3",
+                          "WHERE count > 100 AND count <= 200;",
+                          "UPDATE owner_count",
+                          "SET own_group = 4",
+                          "WHERE count > 200 AND count <= 500;",
+                          "UPDATE owner_count",
+                          "SET own_group = 5",
+                          "WHERE count > 500 AND count <= 1000;",
+                          "UPDATE owner_count",
+                          "SET own_group = 6",
+                          "WHERE count > 1000 AND count <= 1500;",
+                          "UPDATE owner_count",
+                          "SET own_group = 7",
+                          "WHERE count > 1500 AND count <= 2000;"
+                          ))
+  
 }
 
 createOwnerCount()
+
 
 ##Create Views
 ##These need to be automated
@@ -611,7 +651,8 @@ createParcelGeomByYear <- function(years){ ##must be a list
     dbSendQuery(conn, paste("DROP TABLE IF EXISTS ", paste0("parcels_", year), "CASCADE;",
                             "CREATE TABLE ", paste0("parcels_", year), "AS",
                             "(SELECT DISTINCT ROW_NUMBER() OVER (ORDER BY 1) AS feature_id, y.*,", 
-                            "ot.own_id, ot.taxpayer1, count.count, p.propno, p.propdir, p.propstr, p.propzip, ", 
+                            "ppg.parcelno, ppg.propaddr, ot.own_id, ot.taxpayer1, count.count, p.propno, p.propdir, p.propstr, p.propzip, ",
+                            "ST_centroid(", paste0("geom_", year), ") AS centroid, ",
                             paste0("geom_", year), 
                             "FROM parcel_property_geom AS ppg",
                             "INNER JOIN property AS p ON ppg.parprop_id = p.parprop_id",
@@ -629,6 +670,30 @@ createParcelGeomByYear <- function(years){ ##must be a list
                             "GROUP BY y.praxisyear, ot.own_id)", 
                             "AS count ON y.praxisyear = count.praxisyear AND ot.own_id = count.own_id",
                             "WHERE y.praxisyear", paste0("= ", year), "AND count.count > 9);"))
+    
+    dbSendQuery(conn, paste("ALTER TABLE " , paste0("parcels_", year), "ADD COLUMN own_group INT;",
+                            "UPDATE ", paste0("parcels_", year),
+                            "SET own_group = 1",
+                            "WHERE count > 9 AND count <= 20;",
+                            "UPDATE ", paste0("parcels_", year),
+                            "SET own_group = 2",
+                            "WHERE count > 20 AND count <= 100;",
+                            "UPDATE ", paste0("parcels_", year),
+                            "SET own_group = 3",
+                            "WHERE count > 100 AND count <= 200;",
+                            "UPDATE ", paste0("parcels_", year),
+                            "SET own_group = 4",
+                            "WHERE count > 200 AND count <= 500;",
+                            "UPDATE ", paste0("parcels_", year),
+                            "SET own_group = 5",
+                            "WHERE count > 500 AND count <= 1000;",
+                            "UPDATE ", paste0("parcels_", year),
+                            "SET own_group = 6",
+                            "WHERE count > 1000 AND count <= 1500;",
+                            "UPDATE ", paste0("parcels_", year),
+                            "SET own_group = 7",
+                            "WHERE count > 1500 AND count <= 2000;"
+    ))
   })
 }
 
@@ -685,7 +750,7 @@ x <- sf::st_read(conn, query=paste("SELECT DISTINCT pp.*, p.*, otp.own_id, y.pra
     WHERE y.praxisyear = 2017"))
 # 
 x <- sf::st_read(conn, query=paste("SELECT * FROM parcels_2017"))
-# test <- sf::st_read(conn, query="SELECT * FROM parcels_2016;")
+test <- sf::st_read(conn, query="SELECT * FROM parcels_2016;")
 # geom_2017 <- sf::st_read(conn, query=paste(paste("SELECT DISTINCT ROW_NUMBER() OVER (ORDER BY 1) AS id, y.praxisyear, ot.own_id, count.count, geom_2017 FROM parcel_property_geom AS ppg",
 #                                              "INNER JOIN property AS p ON ppg.parprop_id = p.parprop_id",
 #                                              "INNER JOIN taxpayer_property AS tp ON p.prop_id = tp.prop_id",

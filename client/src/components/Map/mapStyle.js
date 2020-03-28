@@ -1,12 +1,14 @@
+import * as styleVars from "../../scss/colors.scss";
+
 //this is where specific mapstyles will go for layers.
 const stops = [
-  [20, "#3288bd"],
-  [100, "#99d594"],
-  [200, "#e6f598"],
-  [500, "#ffffbf"],
-  [1000, "#fee08b"],
-  [1500, "#fc8d59"],
-  [2000, "#d53e4f"]
+  [20, styleVars.parcelStop1],
+  [100, styleVars.parcelStop2],
+  [200, styleVars.parcelStop3],
+  [500, styleVars.parcelStop4],
+  [1000, styleVars.parcelStop5],
+  [1500, styleVars.parcelStop6],
+  [2000, styleVars.parcelStop7]
 ];
 
 export const parcelLayer = {
@@ -16,14 +18,14 @@ export const parcelLayer = {
   // maxzoom: 16,
   buffer: 0,
   tolerance: 0.9,
-  paint: {
-    "fill-color": {
-      property: "count",
-      stops
-    },
-    "fill-opacity": 1,
-    "fill-outline-color": "rgba(255,255,255,1)"
-  }
+  // paint: {
+  //   "fill-color": {
+  //     property: "count",
+  //     stops
+  //   },
+  //   "fill-opacity": 1,
+  //   "fill-outline-color": "rgba(255,255,255,1)"
+  // }
 };
 
 export const parcelHighlightLayer = {

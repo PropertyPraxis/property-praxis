@@ -42,6 +42,10 @@ export function pathnameToSearchType(path) {
       return "All";
   }
 }
+//function to build filter
+// export function createParcelLayerFilter(val){
+
+// }
 
 // function to find the single target address at distance 0
 export function findTargetAddress(features) {
@@ -76,4 +80,35 @@ export function createAddressString(propno, propdir, propstr, propzip) {
   }`;
 
   return addressString;
+}
+
+export function createLayerFilter(arr) {
+  let layerFilter = [];
+
+  const fullFilter = arr.map(item => {
+    if (item === "10-20") {
+      return [...layerFilter, ...[["==", "own_group", 1]]];
+    }
+    if (item == "100") {
+      return [...layerFilter, ...[["==", "own_group", 2]]];
+    }
+    if (item == "200") {
+      return [...layerFilter, ...[["==", "own_group", 3]]];
+    }
+    if (item == "500") {
+      return [...layerFilter, ...[["==", "own_group", 4]]];
+    }
+    if (item == "1000") {
+      return [...layerFilter, ...[["==", "own_group", 5]]];
+    }
+    if (item == "1500") {
+      return [...layerFilter, ...[["==", "own_group", 6]]];
+    }
+    if (item == "2000") {
+      return [...layerFilter, ...[["==", "own_group", 7]]];
+    }
+    return null;
+  });
+
+  return ["none", ...fullFilter.flat(1)];
 }

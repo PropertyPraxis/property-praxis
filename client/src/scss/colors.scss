@@ -6,7 +6,23 @@ $ui-light-gray: #e1e0e0;
 $pp-green: #9ac0a2;
 $pp-rose: #f85e5c;
 
+$parcel-stop-1: #3288bd;
+$parcel-stop-2: #99d594;
+$parcel-stop-3: #e6f598;
+$parcel-stop-4: #ffffbf;
+$parcel-stop-5: #fee08b;
+$parcel-stop-6: #fc8d59;
+$parcel-stop-7: #d53e4f;
+
 :export {
   ppGreen: $pp-green;
   ppRose: $pp-rose;
+  uiLightGray: $ui-light-gray;
+  parcelStop1: $parcel-stop-1;
+  parcelStop2: $parcel-stop-2;
+  parcelStop3: $parcel-stop-3;
+  parcelStop4: $parcel-stop-4;
+  parcelStop5: $parcel-stop-5;
+  parcelStop6: $parcel-stop-6;
+  parcelStop7: $parcel-stop-7;
 }

@@ -4,6 +4,7 @@ import searchState from "./search";
 import currentFeature from "./currentFeature";
 import toggleModal from "./modal";
 import results from "./results";
+import controller from "./controller";
 import { combineReducers } from "redux";
 
 export default combineReducers({
@@ -12,5 +13,6 @@ export default combineReducers({
   searchState,
   currentFeature,
   modalIsOpen: toggleModal,
-  results
+  results,
+  controller
 });

@@ -1,12 +1,14 @@
 import React, { Component } from "react";
 import ReactMapGL, { Source, Layer, Marker } from "react-map-gl";
+import ParcelLayerController from "./ParcelLayerController";
 import { createNewViewport } from "../../utils/map";
-import { createAddressString } from "../../utils/helper";
+import { createAddressString, createLayerFilter } from "../../utils/helper";
 import { getMapStateAction } from "../../actions/mapState";
 import { getHoveredFeatureAction } from "../../actions/currentFeature";
 import {
   handleSearchPartialAddress,
   resetSearch,
+  setSearchDisplayType
 } from "../../actions/search";
 import {
   logMarkerDragEventAction,
@@ -30,12 +32,14 @@ import {
 } from "./mapStyle";
 import Pin from "./Pin";
 // import { ReactComponent as ArrowIcon } from "../../assets/img/map-arrow-icon.svg";
+import * as styleVars from "../../scss/colors.scss";
 import "../../scss/Map.scss";
 
 //this token needs to be hidden
 // const MAPBOX_TOKEN = process.env.MAPBOX_TOKEN;
 const MAPBOX_TOKEN =
-  "pk.eyJ1IjoidGltLWhpdGNoaW5zIiwiYSI6ImNqdmNzODZ0dDBkdXIzeW9kbWRtczV3dDUifQ.29F1kg9koRwGRwjg-vpD6A";
+  "pk.eyJ1IjoibWFwcGluZ2FjdGlvbiIsImEiOiJjazZrMTQ4bW4wMXpxM251cnllYnR6NjMzIn0.9KhQIoSfLvYrGCl3Hf_9Bw";
+// "pk.eyJ1IjoidGltLWhpdGNoaW5zIiwiYSI6ImNqdmNzODZ0dDBkdXIzeW9kbWRtczV3dDUifQ.29F1kg9koRwGRwjg-vpD6A";
 // GeoJSON Data source used in vector tiles, documented at
 // https://gist.github.com/ryanbaumann/a7d970386ce59d11c16278b90dde094d
 
@@ -66,6 +70,9 @@ class PraxisMarker extends React.Component {
         latitude: latitude
       })
     );
+
+    //trigger a null display to set to loading
+    this.props.dispatch(setSearchDisplayType(null));
 
     const route = `http://localhost:5000/api/geojson/parcels/address/${encodedCoords}/${year}`;
     // query the parcels
@@ -101,6 +108,7 @@ class PraxisMarker extends React.Component {
 
         //change the url
         window.history.pushState(state, title, newUrl);
+        debugger;
         // change the partial results
         this.props
           .dispatch(handleSearchPartialAddress(addressString, year))
@@ -165,13 +173,22 @@ class PraxisMarker extends React.Component {
         onDrag={this._onMarkerDrag}
         onDragEnd={this._onMarkerDragEnd}
       >
-        <Pin size={20} />
+        <Pin size={30} />
       </Marker>
     );
   }
 }
 
 class PraxisMap extends Component {
+  _stops = [
+    [20, styleVars.parcelStop1],
+    [100, styleVars.parcelStop2],
+    [200, styleVars.parcelStop3],
+    [500, styleVars.parcelStop4],
+    [1000, styleVars.parcelStop5],
+    [1500, styleVars.parcelStop6],
+    [2000, styleVars.parcelStop7]
+  ];
   _onHover = event => {
     const {
       features,
@@ -298,16 +315,20 @@ class PraxisMap extends Component {
     //create the new viewport before rendering
     const { latitude, longitude } = this.props.mapData.marker;
     const { hoveredFeature } = this.props.currentFeature;
-    const filter = hoveredFeature ? hoveredFeature.properties.feature_id : "";
+    const highlightFilter = hoveredFeature
+      ? hoveredFeature.properties.feature_id
+      : "";
     const { ppraxis, zips } = this.props.mapData;
+    const { sliderValue, filter } = this.props.controller;
+    const parcelLayerFilter = createLayerFilter(filter);
 
     return (
       <div className="map">
         <ReactMapGL
           {...this.props.mapState}
           ref={reactMap => (this.reactMap = reactMap)}
-          mapStyle="mapbox://styles/tim-hitchins/cjvec50f227zu1gnw0soteeok"
-          // mapStyle="mapbox://styles/tim-hitchins/ck5venmuh1fi81io641ps63bw"
+          // mapStyle="mapbox://styles/mappingaction/ck8agoqtt043l1ik9bvf3v0cv" //monochrome
+          mapStyle="mapbox://styles/mappingaction/ck8agtims11p11imzvekvyjvy" //satellite
           width="100vw"
           height="100vh"
           minZoom={10}
@@ -319,7 +340,6 @@ class PraxisMap extends Component {
           onClick={e => {
             this._handleMapClick(e);
           }}
-          // getCursor={this._getCursor}
         >
           {latitude && longitude ? (
             <PraxisMarker
@@ -329,11 +349,23 @@ class PraxisMap extends Component {
           ) : null}
           <Source id="parcels" type="geojson" data={ppraxis}>
             <Layer key="parcel-centroid" {...parcelCentroid} />
-            <Layer key="parcel-layer" {...parcelLayer} />
+            <Layer
+              key="parcel-layer"
+              {...parcelLayer}
+              paint={{
+                "fill-color": {
+                  property: "count",
+                  stops: this._stops
+                },
+                "fill-opacity": sliderValue / 100,
+                "fill-outline-color": "rgba(255,255,255,1)"
+              }}
+              filter={parcelLayerFilter}
+            />
             <Layer
               key="highlight-parcel-layer"
               {...parcelHighlightLayer}
-              filter={["in", "feature_id", filter]}
+              filter={["in", "feature_id", highlightFilter]}
             />
           </Source>
           {this._renderTooltip()}
@@ -342,6 +374,7 @@ class PraxisMap extends Component {
             <Layer key="zips-label" {...zipsLabel} />
           </Source>
         </ReactMapGL>
+        <ParcelLayerController {...this.props} />
       </div>
     );
   }
