@@ -1,5 +1,6 @@
 export const SET_SLIDER_VALUE = "SET_SLIDER_VALUE";
 export const SET_PARCEL_FILTER = "SET_PARCEL_FILTER";
+export const TOGGLE_BASEMAP = "TOGGLE_BASEMAP";
 
 export function setSliderValueAction(sliderValue) {
   return {
@@ -15,4 +16,9 @@ export function setParcelFilterAction(val) {
   };
 }
 
-// export function handleSetParcelFilterAction(val) {}
+export function toggleBasemapAction(basemapLayer) {
+  return {
+    type: TOGGLE_BASEMAP,
+    payload: {basemapLayer}
+  };
+}

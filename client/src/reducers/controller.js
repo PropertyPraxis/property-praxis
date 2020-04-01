@@ -1,8 +1,13 @@
-import { SET_SLIDER_VALUE, SET_PARCEL_FILTER } from "../actions/controller";
+import {
+  SET_SLIDER_VALUE,
+  SET_PARCEL_FILTER,
+  TOGGLE_BASEMAP
+} from "../actions/controller";
 
 const initialControllerState = {
   sliderValue: 100,
-  filter: []
+  filter: [],
+  basemapLayer: "mapbox://styles/mappingaction/ck8agoqtt043l1ik9bvf3v0cv"
 };
 
 export default function controller(state = initialControllerState, action) {
@@ -17,6 +22,8 @@ export default function controller(state = initialControllerState, action) {
         ? (filter = oldFilter.filter(item => item !== newFilter[0]))
         : (filter = [...oldFilter, ...newFilter]);
       return { ...state, ...{ filter } };
+    case TOGGLE_BASEMAP:
+      return { ...state, ...action.payload };
     default:
       return state;
   }

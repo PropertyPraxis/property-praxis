@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import ReactMapGL, { Source, Layer, Marker } from "react-map-gl";
 import ParcelLayerController from "./ParcelLayerController";
+import BasemapController from "./BasemapController";
 import { createNewViewport } from "../../utils/map";
 import { createAddressString, createLayerFilter } from "../../utils/helper";
 import { getMapStateAction } from "../../actions/mapState";
@@ -74,7 +75,7 @@ class PraxisMarker extends React.Component {
     //trigger a null display to set to loading
     this.props.dispatch(setSearchDisplayType(null));
 
-    const route = `http://localhost:5000/api/geojson/parcels/address/${encodedCoords}/${year}`;
+    const route = `/api/geojson/parcels/address/${encodedCoords}/${year}`;
     // query the parcels
     this.props.dispatch(handleGetParcelsByQueryAction(route)).then(geojson => {
       //from praxis map
@@ -180,15 +181,26 @@ class PraxisMarker extends React.Component {
 }
 
 class PraxisMap extends Component {
+  // _stops = [
+  //   [20, styleVars.parcelStop1],
+  //   [100, styleVars.parcelStop2],
+  //   [200, styleVars.parcelStop3],
+  //   [500, styleVars.parcelStop4],
+  //   [1000, styleVars.parcelStop5],
+  //   [1500, styleVars.parcelStop6],
+  //   [2000, styleVars.parcelStop7]
+  // ];
+
   _stops = [
-    [20, styleVars.parcelStop1],
-    [100, styleVars.parcelStop2],
-    [200, styleVars.parcelStop3],
-    [500, styleVars.parcelStop4],
-    [1000, styleVars.parcelStop5],
-    [1500, styleVars.parcelStop6],
-    [2000, styleVars.parcelStop7]
+    [1, styleVars.parcelStop1],
+    [2, styleVars.parcelStop2],
+    [3, styleVars.parcelStop3],
+    [4, styleVars.parcelStop4],
+    [5, styleVars.parcelStop5],
+    [6, styleVars.parcelStop6],
+    [7, styleVars.parcelStop7]
   ];
+
   _onHover = event => {
     const {
       features,
@@ -263,7 +275,7 @@ class PraxisMap extends Component {
       const coordinates = { longitude: longitude, latitude: latitude };
       const encodedCoords = encodeURI(JSON.stringify(coordinates));
 
-      const route = `http://localhost:5000/api/geojson/parcels/address/${encodedCoords}/${year}`;
+      const route = `/api/geojson/parcels/address/${encodedCoords}/${year}`;
       this.props
         .dispatch(handleGetParcelsByQueryAction(route))
         .then(geojson => {
@@ -319,6 +331,7 @@ class PraxisMap extends Component {
       ? hoveredFeature.properties.feature_id
       : "";
     const { ppraxis, zips } = this.props.mapData;
+    const { basemapLayer } = this.props.controller;
     const { sliderValue, filter } = this.props.controller;
     const parcelLayerFilter = createLayerFilter(filter);
 
@@ -327,8 +340,8 @@ class PraxisMap extends Component {
         <ReactMapGL
           {...this.props.mapState}
           ref={reactMap => (this.reactMap = reactMap)}
-          // mapStyle="mapbox://styles/mappingaction/ck8agoqtt043l1ik9bvf3v0cv" //monochrome
-          mapStyle="mapbox://styles/mappingaction/ck8agtims11p11imzvekvyjvy" //satellite
+          mapStyle={basemapLayer} //monochrome
+          // mapStyle="mapbox://styles/mappingaction/ck8agtims11p11imzvekvyjvy" //satellite
           width="100vw"
           height="100vh"
           minZoom={10}
@@ -354,7 +367,7 @@ class PraxisMap extends Component {
               {...parcelLayer}
               paint={{
                 "fill-color": {
-                  property: "count",
+                  property: "own_group",
                   stops: this._stops
                 },
                 "fill-opacity": sliderValue / 100,
@@ -375,6 +388,7 @@ class PraxisMap extends Component {
           </Source>
         </ReactMapGL>
         <ParcelLayerController {...this.props} />
+        <BasemapController {...this.props} />
       </div>
     );
   }

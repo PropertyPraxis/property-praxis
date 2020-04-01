@@ -89,22 +89,22 @@ export function createLayerFilter(arr) {
     if (item === "10-20") {
       return [...layerFilter, ...[["==", "own_group", 1]]];
     }
-    if (item == "100") {
+    if (item === "100") {
       return [...layerFilter, ...[["==", "own_group", 2]]];
     }
-    if (item == "200") {
+    if (item === "200") {
       return [...layerFilter, ...[["==", "own_group", 3]]];
     }
-    if (item == "500") {
+    if (item === "500") {
       return [...layerFilter, ...[["==", "own_group", 4]]];
     }
-    if (item == "1000") {
+    if (item === "1000") {
       return [...layerFilter, ...[["==", "own_group", 5]]];
     }
-    if (item == "1500") {
+    if (item === "1500") {
       return [...layerFilter, ...[["==", "own_group", 6]]];
     }
-    if (item == "2000") {
+    if (item === "2000") {
       return [...layerFilter, ...[["==", "own_group", 7]]];
     }
     return null;

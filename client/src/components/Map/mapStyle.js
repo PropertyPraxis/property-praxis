@@ -1,14 +1,24 @@
 import * as styleVars from "../../scss/colors.scss";
 
 //this is where specific mapstyles will go for layers.
+// const stops = [
+//   [20, styleVars.parcelStop1],
+//   [100, styleVars.parcelStop2],
+//   [200, styleVars.parcelStop3],
+//   [500, styleVars.parcelStop4],
+//   [1000, styleVars.parcelStop5],
+//   [1500, styleVars.parcelStop6],
+//   [2000, styleVars.parcelStop7]
+// ];
+
 const stops = [
-  [20, styleVars.parcelStop1],
-  [100, styleVars.parcelStop2],
-  [200, styleVars.parcelStop3],
-  [500, styleVars.parcelStop4],
-  [1000, styleVars.parcelStop5],
-  [1500, styleVars.parcelStop6],
-  [2000, styleVars.parcelStop7]
+  [1, styleVars.parcelStop1],
+  [2, styleVars.parcelStop2],
+  [3, styleVars.parcelStop3],
+  [4, styleVars.parcelStop4],
+  [5, styleVars.parcelStop5],
+  [6, styleVars.parcelStop6],
+  [7, styleVars.parcelStop7]
 ];
 
 export const parcelLayer = {
@@ -17,7 +27,7 @@ export const parcelLayer = {
   minzoom: 13,
   // maxzoom: 16,
   buffer: 0,
-  tolerance: 0.9,
+  tolerance: 0.9
   // paint: {
   //   "fill-color": {
   //     property: "count",
@@ -52,7 +62,7 @@ export const parcelCentroid = {
   paint: {
     "circle-radius": 3,
     "circle-color": {
-      property: "count",
+      property: "own_group",
       stops
     }
   }

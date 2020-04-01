@@ -121,6 +121,7 @@ export function handleGetParcelsByQueryAction(route) {
       });
   };
 }
+
 // export const GET_PARCELS_BY_ZIPCODE = "GET_PARCELS_BY_ZIPCODE";
 // export const GET_PARCELS_BY_SPECULATOR = "GET_PARCELS_BY_SPECULATOR";
 
