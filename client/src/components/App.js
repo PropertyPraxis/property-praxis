@@ -6,7 +6,7 @@ import {
   handleGetInitialZipcodeDataAction,
   handleGetParcelsByQueryAction,
   setMarkerCoordsAction,
-  dataIsLoadingAction
+  dataIsLoadingAction,
 } from "../actions/mapData";
 import {
   setSearchTerm,
@@ -14,7 +14,7 @@ import {
   setSearchDisplayType,
   handleSearchPartialZipcode,
   handleSearchPartialSpeculator,
-  handleSearchPartialAddress
+  handleSearchPartialAddress,
 } from "./../actions/search";
 import { togglePartialResultsAction } from "./../actions/results";
 import { getMapStateAction } from "../actions/mapState";
@@ -25,8 +25,8 @@ import MapContainer from "./Map/MapContainer";
 import SearchContainer from "./Search/SearchContainer";
 import ResultsContainer from "./Results/ResultsContainer";
 import Loading from "./Loading/Loading";
-import PraxisModal from "./Modal/Modal";
-import PPLogo from "../Logo/Logo";
+import PraxisModal from "./Modal/PraxisModal";
+import PPLogo from "./Logo/Logo";
 import "../scss/App.scss";
 
 class App extends Component {
@@ -66,7 +66,7 @@ class App extends Component {
 
   // Duplicated in PraxisMap!!
   // create new vieport dependent on current geojson bbox
-  _createNewViewport = geojson => {
+  _createNewViewport = (geojson) => {
     //check to see what data is loaded
     const { year } = this.props.mapData;
     const features = geojson.features;
@@ -78,7 +78,7 @@ class App extends Component {
       longitude,
       latitude,
       zoom,
-      transitionDuration: 1000
+      transitionDuration: 1000,
     };
 
     // if the return geojson has features aka the search term was
@@ -116,7 +116,7 @@ class App extends Component {
       this.props.dispatch(dataIsLoadingAction(true));
       this.props
         .dispatch(handleGetParcelsByQueryAction(route))
-        .then(geojson => {
+        .then((geojson) => {
           this._createNewViewport(geojson);
           this.props.dispatch(dataIsLoadingAction(false));
         });
@@ -142,7 +142,7 @@ class App extends Component {
       //set the parcels within buffer
       this.props
         .dispatch(handleGetParcelsByQueryAction(route))
-        .then(geojson => {
+        .then((geojson) => {
           this._createNewViewport(geojson);
           this.props.dispatch(dataIsLoadingAction(false));
         });
@@ -153,7 +153,7 @@ class App extends Component {
       this.props.dispatch(dataIsLoadingAction(true));
       this.props
         .dispatch(handleGetParcelsByQueryAction(`/api/geojson/parcels/${year}`))
-        .then(geojson => {
+        .then((geojson) => {
           this._createNewViewport(geojson);
           this.props.dispatch(dataIsLoadingAction(false));
         });
@@ -161,14 +161,14 @@ class App extends Component {
     //load zip data no matter what (this may change)
     this.props
       .dispatch(handleGetInitialZipcodeDataAction("/api/geojson/zipcodes"))
-      .then(geojson => {
+      .then((geojson) => {
         // this._createNewViewport(geojson);
       });
   }
 
   render() {
     const { ppraxis, zips, dataIsLoading } = this.props.mapData;
-    const { modalIsOpen } = this.props;
+    const { isOpen } = this.props.modal;
 
     const loadingState =
       Object.entries(ppraxis).length === 0 ||
@@ -185,6 +185,7 @@ class App extends Component {
             <Route path="/" component={MapContainer}></Route>
             <SearchContainer />
             <ResultsContainer />
+            {isOpen ? <PraxisModal /> : null}
           </Router>
           <PPLogo />
         </div>
@@ -193,7 +194,7 @@ class App extends Component {
   }
 }
 
-function mapStateToProps({ mapData, modalIsOpen, mapState }) {
-  return { mapData, modalIsOpen, mapState };
+function mapStateToProps({ mapData, modal, mapState }) {
+  return { mapData, modal, mapState };
 }
 export default connect(mapStateToProps)(App);

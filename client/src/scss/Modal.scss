@@ -1,31 +1,145 @@
 @import "./colors.scss";
 
-.overlay {
-  position: fixed;
-  top: 0;
+/* The Modal (background) */
+.modal {
+  // display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1000; /* Sit on top */
+  padding-top: 100px; /* Location of the box */
   left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: $ui-dark-gray;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0, 0, 0); /* Fallback color */
+  background-color: rgba(0, 0, 0, 0.8); /* Black w/ opacity */
 }
 
-.modal {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  right: auto;
-  bottom: auto;
-  margin-right: -30%;
-  transform: translate(-50%, -50%);
-  z-index: 2000;
+.modal-container {
+  background-color: #fefefe;
+  margin: auto;
+  padding: 10px 20px;
 
-  ///////////////
-  padding: 30px;
-  background-color: $ui-white;
+  border: 3px solid $ui-black;
+  width: 80%;
+  max-width: 1000px;
   border-radius: 4px;
-  border: 1px solid $ui-black;
 
-  div > p {
-    line-height: 1.6;
+  h1 {
+    text-align: center;
   }
 }
+
+.modal-container > div:nth-child(3) {
+  overflow-y: auto;
+  max-height: 400px;
+  line-height: 1.6;
+}
+
+// close button in modal
+.modal-container > div:first-child {
+  text-align: right;
+}
+
+.modal-container > div:first-child:hover {
+  color: $pp-rose;
+}
+
+.modal-container > div:active {
+  transform: translateY(+1px);
+}
+
+.modal-nav {
+  margin: 0 auto;
+  display: flex;
+  width: 80%;
+  justify-content: center;
+
+  div {
+    box-sizing: border-box;
+    font-size: 1.3rem;
+    font-weight: 600;
+    padding: 5px;
+    margin: 5px;
+    text-align: center;
+    border-bottom: 3px solid $ui-white;
+  }
+
+  div:hover {
+    color: $pp-rose;
+    border-bottom: 3px solid $pp-rose;
+  }
+}
+
+.modal-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.6;
+  max-height: 200px;
+  overflow-y: auto;
+
+  h3 {
+    text-align: center;
+  }
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+
+  div {
+    margin: 5px;
+    max-width: 225px;
+  }
+
+  a > img {
+    margin: 5px;
+    max-width: 225px;
+    max-height: 40px;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .modal {
+    padding-top: 5px;
+  }
+
+  h1 {
+    font-size: 120%;
+  }
+
+  .modal-nav > div {
+    font-size: 0.8rem;
+  }
+}
+// .overlay {
+//   position: fixed;
+//   top: 0;
+//   left: 0;
+//   right: 0;
+//   bottom: 0;
+//   background-color: $ui-dark-gray;
+// }
+
+// .modal {
+//   position: absolute;
+//   top: 50%;
+//   left: 50%;
+//   right: auto;
+//   bottom: auto;
+//   margin-right: -30%;
+//   transform: translate(-50%, -50%);
+//   z-index: 2000;
+
+//   ///////////////
+//   padding: 30px;
+//   background-color: $ui-white;
+//   border-radius: 4px;
+//   border: 1px solid $ui-black;
+
+//   div > p {
+//     line-height: 1.6;
+//   }
+// }

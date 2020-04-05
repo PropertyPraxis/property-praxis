@@ -1,9 +1,16 @@
-import { TOGGLE_MODAL } from "../actions/modal";
+import { TOGGLE_MODAL, TOGGLE_MODAL_OPTIONS } from "../actions/modal";
 
-export default function toggleModal(state = true, action) {
+const initialModalState = {
+  selection: "About",
+  isOpen: true,
+};
+
+export default function modal(state = initialModalState, action) {
   switch (action.type) {
     case TOGGLE_MODAL:
-      return action.payload;
+      return { ...state, ...action.payload };
+    case TOGGLE_MODAL_OPTIONS:
+      return { ...state, ...action.payload };
     default:
       return state;
   }
