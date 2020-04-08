@@ -7,8 +7,6 @@ import {
   handleSearchPartialAddress,
   handleSearchPartialSpeculator,
   handleSearchFullZipcode,
-  handleSearchFullSpeculator,
-  handleSearchFullAddress,
   resetSearch,
   setSearchDisplayType,
   setSearchType
@@ -29,7 +27,6 @@ import * as zipcodeIcon from "../../assets/img/zipcode-icon-transparent.png";
 import * as speculatorIcon from "../../assets/img/speculator-icon-transparent.png";
 import * as mapMarkerIcon from "../../assets/img/map-marker-transparent.png";
 import "../../scss/Search.scss";
-import { toggleModalAction } from "../../actions/modal";
 
 const PartialReturnResultSwitch = props => {
   const { searchType, partialResults } = props.searchState;
@@ -108,6 +105,7 @@ class PartialZipcodeResults extends Component {
   render() {
     // const { partialResults } = this.props.searchState;
     const { partialSearchResults } = this.props;
+    const { year } = this.props.mapData;
     return (
       <section>
         <div className="partial-results-container">
@@ -117,7 +115,7 @@ class PartialZipcodeResults extends Component {
                 key={result.propzip}
                 to={{
                   pathname: "/zipcode",
-                  search: `search=${result.propzip}`
+                  search: `search=${result.propzip}&year=${year}`
                 }}
                 onClick={() => {
                   this._onResultClick(result);
@@ -198,8 +196,8 @@ class PartialAddressResults extends Component {
   };
 
   render() {
-    const { partialResults } = this.props.searchState;
     const { partialSearchResults } = this.props;
+    const { year } = this.props.mapData;
     return (
       <section>
         <div className="partial-results-container">
@@ -213,7 +211,7 @@ class PartialAddressResults extends Component {
                 key={result.place_name}
                 to={{
                   pathname: "/address",
-                  search: `search=${result.place_name}&coordinates=${encodedCoords}`
+                  search: `search=${result.place_name}&coordinates=${encodedCoords}&year=${year}`
                 }}
                 className={index % 2 ? "list-item-odd" : "list-item-even"}
                 onClick={() => {
@@ -236,6 +234,7 @@ class PartialAddressResults extends Component {
 class PartialSpeculatorResults extends Component {
   _onResultClick = result => {
     const { year } = this.props.mapData;
+    
     // const { mapState } = this.props;
     //trigger data loading
     this.props.dispatch(dataIsLoadingAction(true));
@@ -278,8 +277,8 @@ class PartialSpeculatorResults extends Component {
   };
 
   render() {
-    const { partialResults } = this.props.searchState;
     const { partialSearchResults } = this.props;
+    const { year } = this.props.mapData;
     return (
       <section>
         <div className="partial-results-container">
@@ -289,7 +288,7 @@ class PartialSpeculatorResults extends Component {
                 key={index}
                 to={{
                   pathname: "/speculator",
-                  search: `search=${result.own_id}`
+                  search: `search=${result.own_id}&year=${year}`
                 }}
                 onClick={() => {
                   this._onResultClick(result);
@@ -311,7 +310,6 @@ class PartialSpeculatorResults extends Component {
 class PartialAllResults extends Component {
   render() {
     const { partialResults } = this.props.searchState;
-
     return (
       <div className="partial-results-container-all">
         {partialResults[0].length > 0 && partialResults[0][0].mb.length > 0 ? (

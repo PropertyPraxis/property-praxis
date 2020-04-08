@@ -18,7 +18,7 @@ const stops = [
   [4, styleVars.parcelStop4],
   [5, styleVars.parcelStop5],
   [6, styleVars.parcelStop6],
-  [7, styleVars.parcelStop7]
+  [7, styleVars.parcelStop7],
 ];
 
 export const parcelLayer = {
@@ -27,7 +27,7 @@ export const parcelLayer = {
   minzoom: 13,
   // maxzoom: 16,
   buffer: 0,
-  tolerance: 0.9
+  tolerance: 0.9,
   // paint: {
   //   "fill-color": {
   //     property: "count",
@@ -49,8 +49,8 @@ export const parcelHighlightLayer = {
   paint: {
     "fill-color": "rgba(0,0,0,0.4)",
     "fill-opacity": 1,
-    "fill-outline-color": "rgba(0,0,0,1)"
-  }
+    "fill-outline-color": "rgba(0,0,0,1)",
+  },
 };
 
 export const parcelCentroid = {
@@ -59,13 +59,13 @@ export const parcelCentroid = {
   maxzoom: 13,
   buffer: 0,
   tolerance: 0.9,
-  paint: {
-    "circle-radius": 3,
-    "circle-color": {
-      property: "own_group",
-      stops
-    }
-  }
+  // paint: {
+  //   "circle-radius": 3,
+  //   "circle-color": {
+  //     property: "own_group",
+  //     stops
+  //   }
+  // }
 };
 
 export const zipsLayer = {
@@ -75,8 +75,8 @@ export const zipsLayer = {
   paint: {
     "line-width": 3,
     "line-dasharray": [3, 3],
-    "line-color": "red"
-  }
+    "line-color": "red",
+  },
 };
 
 export const zipsLabel = {
@@ -88,12 +88,12 @@ export const zipsLabel = {
     "text-anchor": "center",
     "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
 
-    "text-justify": "auto"
+    "text-justify": "auto",
   },
   paint: {
     "text-halo-color": "white",
-    "text-halo-width": 1
-  }
+    "text-halo-width": 1,
+  },
 };
 
 ///TESTIG BELOW
@@ -115,7 +115,7 @@ export const heatmapLayer = {
       0,
       1,
       MAX_ZOOM_LEVEL,
-      3
+      3,
     ],
     // Color ramp for heatmap.  Domain is 0 (low) to 1 (high).
     // Begin color ramp at 0-stop with a 0-transparancy color
@@ -135,7 +135,7 @@ export const heatmapLayer = {
       0.8,
       "rgb(239,138,98)",
       0.9,
-      "rgb(255,201,101)"
+      "rgb(255,201,101)",
     ],
     // Adjust the heatmap radius by zoom level
     "heatmap-radius": [
@@ -145,11 +145,11 @@ export const heatmapLayer = {
       0,
       2,
       MAX_ZOOM_LEVEL,
-      20
+      20,
     ],
     // Transition from heatmap to circle layer by zoom level
-    "heatmap-opacity": ["interpolate", ["linear"], ["zoom"], 7, 1, 19, 0]
-  }
+    "heatmap-opacity": ["interpolate", ["linear"], ["zoom"], 7, 1, 19, 0],
+  },
 };
 
 //TEST STYLES BELOW

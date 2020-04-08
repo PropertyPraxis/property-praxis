@@ -9,7 +9,6 @@ import {
   dataIsLoadingAction,
 } from "../actions/mapData";
 import {
-  setSearchTerm,
   setSearchType,
   setSearchDisplayType,
   handleSearchPartialZipcode,
@@ -21,6 +20,7 @@ import { toggleModalAction } from "./../actions/modal";
 import {
   togglePartialResultsAction,
   toggleFullResultsAction,
+  handleGetDownloadDataAction,
 } from "./../actions/results";
 import { getMapStateAction } from "../actions/mapState";
 import { handleGetViewerImageAction } from "./../actions/results";
@@ -69,7 +69,7 @@ class App extends Component {
     }
   };
 
-  _resultSwitcher = (searchType, searchTerm, geojson) => {
+  _resultSwitcher = (searchType, searchTerm, geojson, year) => {
     if (searchType === "Speculator") {
       this.props.dispatch(
         resetSearch({
@@ -150,10 +150,10 @@ class App extends Component {
     setDocHeightOnWindow();
 
     //check to see what data is loaded
-    const { year } = this.props.mapData;
-    const { coordinates, search } = queryString.parse(window.location.search);
+    // const { year } = this.props.mapData;
+    const { coordinates, search, year } = queryString.parse(window.location.search);
     const { pathname } = window.location;
-
+ 
     //set the searchtype
     const searchType = pathnameToSearchType(pathname);
     this.props.dispatch(setSearchType(searchType));
@@ -177,7 +177,7 @@ class App extends Component {
         .then((geojson) => {
           this._createNewViewport(geojson);
 
-          this._resultSwitcher(searchType, search, geojson);
+          this._resultSwitcher(searchType, search, geojson, year);
 
           this.props.dispatch(dataIsLoadingAction(false));
         });
@@ -207,7 +207,7 @@ class App extends Component {
       this.props
         .dispatch(handleGetParcelsByQueryAction(route))
         .then((geojson) => {
-          this._resultSwitcher(searchType, search, geojson);
+          this._resultSwitcher(searchType, search, geojson, year);
 
           this._createNewViewport(geojson);
           this.props.dispatch(dataIsLoadingAction(false));

@@ -107,7 +107,7 @@ class PraxisMarker extends React.Component {
           const title = "";
           const newUrl = `/address?search=${encodeURI(
             addressString
-          )}&coordinates=${encodedCoords}`;
+          )}&coordinates=${encodedCoords}&year=${year}`;
 
           //change the url
           window.history.pushState(state, title, newUrl);
@@ -229,6 +229,7 @@ class PraxisMap extends Component {
         <div className="tooltip" style={{ left: x, top: y }}>
           <div>Speculator: {hoveredFeature.properties.own_id}</div>
           <div>Properties owned: {hoveredFeature.properties.count}</div>
+          <div>{hoveredFeature.properties.propaddr}</div>
         </div>
       )
     );
@@ -295,7 +296,7 @@ class PraxisMap extends Component {
       const title = "";
       const newUrl = `/address?search=${encodeURI(
         addressString
-      )}&coordinates=${encodedCoords}`;
+      )}&coordinates=${encodedCoords}&year=${year}`;
       //change the url
       window.history.pushState(state, title, newUrl);
 
@@ -337,9 +338,11 @@ class PraxisMap extends Component {
     const { sliderValue, filter } = this.props.controller;
     const parcelLayerFilter = createLayerFilter(filter);
 
+    console.log(parcelLayerFilter);
+
     // parcels existence
-    const parcelLayerLoadingState =
-      Object.entries(ppraxis).length === 0 || ppraxis.features === null;
+    // const parcelLayerLoadingState =
+    //   Object.entries(ppraxis).length === 0 || ppraxis.features === null;
 
     return (
       <div className="map">
@@ -368,7 +371,19 @@ class PraxisMap extends Component {
           ) : null}
 
           <Source id="parcels" type="geojson" data={ppraxis}>
-            <Layer key="parcel-centroid" {...parcelCentroid} />
+            <Layer
+              key="parcel-centroid"
+              {...parcelCentroid}
+              filter={parcelLayerFilter}
+              paint={{
+                "circle-radius": 3,
+                "circle-color": {
+                  property: "own_group",
+                  stops: this._stops,
+                },
+                "circle-opacity": sliderValue / 100,
+              }}
+            />
 
             <Layer
               key="parcel-layer"

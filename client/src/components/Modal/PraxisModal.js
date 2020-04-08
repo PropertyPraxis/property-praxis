@@ -228,6 +228,7 @@ class SearchForm extends Component {
       this.props.dispatch(
         resetSearch({
           searchTerm: zipcodeValue,
+          searchType: "Zipcode",
         })
       );
       // set the display type to full
@@ -242,48 +243,26 @@ class SearchForm extends Component {
 
       //toggle the results pane
       this.props.dispatch(toggleFullResultsAction(true));
+
+      //change the url
+      const state = null;
+      const title = "";
+      const newUrl = `/zipcode?search=${zipcodeValue}&year=${yearValue}`;
+
+      //change the url
+      window.history.pushState(state, title, newUrl);
     }
 
     if (yearValue && !zipcodeValue && zipcodeCheckboxValue) {
-            // close the modal
-            this.props.dispatch(toggleModalAction(false));
-
-            //trigger data loading
-            // this.props.dispatch(dataIsLoadingAction(true));
-      
-            // change the partial results
-            // this.props.dispatch(handleSearchPartialZipcode(zipcodeValue, yearValue));
-      
-            // handle the query
-            const geoJsonRoute = `/api/geojson/parcels/${yearValue}`;
-            this.props
-              .dispatch(handleGetParcelsByQueryAction(geoJsonRoute))
-              .then((geojson) => {
-                //trigger new viewport pass down from PartialSearchResults
-                this._createNewViewport(geojson);
-      
-                //trigger data loading off
-                // this.props.dispatch(dataIsLoadingAction(false));
-              });
-            //fill in the text input
-            // this.props.dispatch(setSearchTerm(zipcodeValue));
-            // this.props.dispatch(
-            //   resetSearch({
-            //     searchTerm: zipcodeValue,
-            //   })
-            // );
-            // // set the display type to full
-            // this.props.dispatch(setSearchDisplayType("full-zipcode"));
-      
-            // //close the partial results after
-            // this.props.dispatch(togglePartialResultsAction(true));
-      
-            // trigger the dowload data action
-            // const downloadDataRoute = `/api/zipcode-search/download/${4}/${yearValue}`;
-            // this.props.dispatch(handleGetDownloadDataAction(downloadDataRoute));
-      
-            //toggle the results pane
-            // this.props.dispatch(toggleFullResultsAction(true));
+      // close the modal
+      this.props.dispatch(toggleModalAction(false));
+      const geoJsonRoute = `/api/geojson/parcels/${yearValue}`;
+      this.props
+        .dispatch(handleGetParcelsByQueryAction(geoJsonRoute))
+        .then((geojson) => {
+          //trigger new viewport pass down from PartialSearchResults
+          this._createNewViewport(geojson);
+        });
     }
   };
 

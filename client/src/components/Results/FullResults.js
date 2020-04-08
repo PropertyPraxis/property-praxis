@@ -1,13 +1,8 @@
 import React, { Component } from "react";
-import { connect } from "react-redux";
 import { Link } from "react-router-dom";
-import { CSVLink, CSVDownload } from "react-csv";
+import { CSVLink } from "react-csv";
 import { coordsFromWKT } from "../../utils/map";
-import {
-  findTargetAddress,
-  createAddressString,
-  capitalizeFirstLetter
-} from "../../utils/helper";
+import { createAddressString, capitalizeFirstLetter } from "../../utils/helper";
 import {
   handleSearchPartialZipcode,
   handleSearchPartialAddress,
@@ -15,18 +10,17 @@ import {
   resetSearch,
   setSearchType,
   setSearchDisplayType,
-  setSearchTerm
 } from "../../actions/search";
 import {
   handleGetParcelsByQueryAction,
   setMarkerCoordsAction,
-  dataIsLoadingAction
+  dataIsLoadingAction,
 } from "../../actions/mapData";
 import {
   handleGetViewerImageAction,
   toggleFullResultsAction,
   togglePartialResultsAction,
-  handleGetDownloadDataAction
+  handleGetDownloadDataAction,
 } from "../../actions/results";
 import MapViewer from "./MapViewer";
 import * as mapMarkerIcon from "../../assets/img/map-marker-transparent.png";
@@ -34,7 +28,7 @@ import * as downloadIcon from "../../assets/img/download-icon.png";
 import * as infoIcon from "../../assets/img/info-icon.png";
 import "../../scss/Results.scss";
 
-const ResultsSwitcher = props => {
+const ResultsSwitcher = (props) => {
   const { searchDisplayType } = props.searchState;
   const { dataIsLoading } = props.mapData;
 
@@ -54,6 +48,23 @@ const ResultsSwitcher = props => {
 //currently this works for zipcodes
 // resultsType zipcode-results, speculator-results
 class ParcelResults extends Component {
+  componentDidMount() {
+    const { resultsType } = this.props;
+    const { year } = this.props.mapData;
+    const { searchTerm } = this.props.searchState;
+    if (resultsType === "speculator-results") {
+      // trigger the dowload data action
+      const downloadDataRoute = `/api/speculator-search/download/${searchTerm}/${year}`;
+      this.props.dispatch(handleGetDownloadDataAction(downloadDataRoute));
+    }
+
+    if (resultsType === "zipcode-results") {
+      // trigger the dowload data action
+      const downloadDataRoute = `/api/zipcode-search/download/${searchTerm}/${year}`;
+      this.props.dispatch(handleGetDownloadDataAction(downloadDataRoute));
+    }
+  }
+
   render() {
     const { features } = this.props.mapData.ppraxis;
     const { year } = this.props.mapData;
@@ -65,14 +76,13 @@ class ParcelResults extends Component {
         <div className="results-title">
           <span className="number-circle">{features.length}</span>
           {resultsType === "zipcode-results"
-            ? " properties in"
+            ? " properties in "
             : resultsType === "speculator-results"
-            ? " properties for"
+            ? " properties for "
             : resultsType === "multiple-parcels"
             ? " properties within 1km"
             : null}
           <div>
-            {" "}
             {resultsType === "zipcode-results" ||
             resultsType === "speculator-results"
               ? capitalizeFirstLetter(searchTerm)
@@ -104,7 +114,7 @@ class ParcelResults extends Component {
                 <Link
                   to={{
                     pathname: "/address",
-                    search: `search=${addressString}&coordinates=${encodedCoords}`
+                    search: `search=${addressString}&coordinates=${encodedCoords}&year=${year}`,
                   }}
                   key={index}
                   className={index % 2 ? "list-item-odd" : "list-item-even"}
@@ -114,12 +124,12 @@ class ParcelResults extends Component {
                     // change the partial results
                     this.props
                       .dispatch(handleSearchPartialAddress(addressString, year))
-                      .then(json => {
+                      .then((json) => {
                         // set the search term to the first result of geocoder
                         const proxySearchTerm = json[0].mb[0].place_name;
                         this.props.dispatch(
                           resetSearch({
-                            searchTerm: proxySearchTerm
+                            searchTerm: proxySearchTerm,
                           })
                         );
                       });
@@ -127,12 +137,6 @@ class ParcelResults extends Component {
                     //add a point marker
                     this.props.dispatch(
                       setMarkerCoordsAction(latitude, longitude)
-                    );
-
-                    // get the download data for coords
-                    const downloadRoute = `/api/address-search/download/${encodedCoords}/${year}`;
-                    this.props.dispatch(
-                      handleGetDownloadDataAction(downloadRoute)
                     );
 
                     //set new viewer in results
@@ -143,7 +147,7 @@ class ParcelResults extends Component {
                     const geojsonRoute = `http://localhost:5000/api/geojson/parcels/address/${encodedCoords}/${year}`;
                     this.props
                       .dispatch(handleGetParcelsByQueryAction(geojsonRoute))
-                      .then(geojson => {
+                      .then((geojson) => {
                         //trigger new viewport pass down from PartialSearchResults
                         this.props.createNewViewport(geojson);
                         //loading
@@ -173,10 +177,23 @@ class ParcelResults extends Component {
   }
 }
 class SingleAddressResults extends Component {
+  componentDidMount() {
+    // get the download data for coords
+    const { year } = this.props.mapData;
+    const { centroid } = this.props.mapData.ppraxis.features[0];
+    const coords = coordsFromWKT(centroid);
+    const encodedCoords = encodeURI(JSON.stringify(coords));
+    const downloadRoute = `/api/address-search/download/${encodedCoords}/${year}`;
+    this.props.dispatch(handleGetDownloadDataAction(downloadRoute));
+  }
+
   _onZipcodeClick = () => {
     const { features } = this.props.mapData.ppraxis;
     const { year } = this.props.mapData;
     const { propzip } = features[0].properties;
+
+    //set any marker to null
+    this.props.dispatch(setMarkerCoordsAction(null, null));
 
     // change the partial results
     this.props.dispatch(handleSearchPartialZipcode(propzip, year));
@@ -188,7 +205,7 @@ class SingleAddressResults extends Component {
     //set map data and then create viewport
     this.props
       .dispatch(handleGetParcelsByQueryAction(geoJsonRoute))
-      .then(geojson => {
+      .then((geojson) => {
         //trigger new viewport pass down from PartialSearchResults
         this.props.createNewViewport(geojson);
         //fill in the text input
@@ -196,21 +213,25 @@ class SingleAddressResults extends Component {
           resetSearch({
             searchTerm: propzip,
             searchType: "Zipcode",
-            searchDisplayType: "full-zipcode"
+            searchDisplayType: "full-zipcode",
           })
         );
 
         //close the partial results after
         this.props.dispatch(togglePartialResultsAction(false));
 
-        // trigger the dowload data action
-        const downloadDataRoute = `/api/zipcode-search/download/${propzip}/${year}`;
-        this.props.dispatch(handleGetDownloadDataAction(downloadDataRoute));
-
         //toggle the results pane
         this.props.dispatch(toggleFullResultsAction(true));
         //trigger data loading off
         this.props.dispatch(dataIsLoadingAction(false));
+
+        //change the url
+        const state = null;
+        const title = "";
+        const newUrl = `/zipcode?search=${propzip}&year=${year}`;
+
+        //change the url
+        window.history.pushState(state, title, newUrl);
       });
   };
 
@@ -218,6 +239,10 @@ class SingleAddressResults extends Component {
     const { features } = this.props.mapData.ppraxis;
     const { year } = this.props.mapData;
     const { own_id } = features[0].properties;
+
+    //set any marker to null
+    this.props.dispatch(setMarkerCoordsAction(null, null));
+
     // change the partial results
     this.props.dispatch(handleSearchPartialSpeculator(own_id, year));
 
@@ -229,7 +254,7 @@ class SingleAddressResults extends Component {
     //set map data and then create viewport
     this.props
       .dispatch(handleGetParcelsByQueryAction(geojsonRoute))
-      .then(geojson => {
+      .then((geojson) => {
         //trigger new viewport
         //Note this is creating a default because it is a point
         this.props.createNewViewport(geojson);
@@ -238,20 +263,24 @@ class SingleAddressResults extends Component {
           resetSearch({
             searchTerm: own_id,
             searchType: "Speculator",
-            searchDisplayType: "full-speculator"
+            searchDisplayType: "full-speculator",
           })
         );
         //close the partial results after
         this.props.dispatch(togglePartialResultsAction(false));
 
-        // trigger the dowload data action
-        const downloadDataRoute = `/api/speculator-search/download/${own_id}/${year}`;
-        this.props.dispatch(handleGetDownloadDataAction(downloadDataRoute));
-
         //toggle the results pane
         this.props.dispatch(toggleFullResultsAction(true));
         //trigger data loading off
         this.props.dispatch(dataIsLoadingAction(false));
+
+        //change the url
+        const state = null;
+        const title = "";
+        const newUrl = `/speculator?search=${own_id}&year=${year}`;
+
+        //change the url
+        window.history.pushState(state, title, newUrl);
       });
   };
 
@@ -269,13 +298,19 @@ class SingleAddressResults extends Component {
         saleprice,
         taxpayer1,
         totacres,
-        totsqft
+        totsqft,
       } = features[0].properties;
 
+      //this logic can move to utils
       const addressList = searchTerm.split(", ");
-      const addressContext = addressList
-        .slice(1, addressList.length - 1)
-        .join(", ");
+      let addressContext;
+      if (addressList.length > 2) {
+        addressContext = addressList
+          .slice(1, addressList.length - 1)
+          .join(", ");
+      } else {
+        addressContext = addressList[1];
+      }
 
       return (
         <div>
@@ -369,6 +404,7 @@ class FullResults extends Component {
             &#9776;
           </div>
           <ResultsSwitcher {...this.props} />
+
           {downloadData && !dataIsLoading ? (
             <CSVLink data={downloadData} filename={filename}>
               <div className="download-button">
