@@ -337,6 +337,10 @@ class PraxisMap extends Component {
     const { sliderValue, filter } = this.props.controller;
     const parcelLayerFilter = createLayerFilter(filter);
 
+    // parcels existence
+    const parcelLayerLoadingState =
+      Object.entries(ppraxis).length === 0 || ppraxis.features === null;
+
     return (
       <div className="map">
         <ReactMapGL
@@ -362,8 +366,10 @@ class PraxisMap extends Component {
               createNewViewport={this._createNewViewport}
             />
           ) : null}
+
           <Source id="parcels" type="geojson" data={ppraxis}>
             <Layer key="parcel-centroid" {...parcelCentroid} />
+
             <Layer
               key="parcel-layer"
               {...parcelLayer}
@@ -383,6 +389,7 @@ class PraxisMap extends Component {
               filter={["in", "feature_id", highlightFilter]}
             />
           </Source>
+
           {this._renderTooltip()}
           <Source id="zips" type="geojson" data={zips}>
             <Layer key="zips-layer" {...zipsLayer} />

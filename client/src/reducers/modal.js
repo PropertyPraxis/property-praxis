@@ -1,7 +1,7 @@
 import { TOGGLE_MODAL, TOGGLE_MODAL_OPTIONS } from "../actions/modal";
 
 const initialModalState = {
-  selection: "About",
+  selection: "Search",
   isOpen: true,
 };
 

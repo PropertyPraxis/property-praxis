@@ -61,6 +61,7 @@ router.get("/parcels/:year", async (req, res) => {
   }
 });
 
+
 module.exports = router;
 
 //example query that returns geojson

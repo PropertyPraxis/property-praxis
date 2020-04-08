@@ -15,8 +15,13 @@ import {
   handleSearchPartialZipcode,
   handleSearchPartialSpeculator,
   handleSearchPartialAddress,
+  resetSearch,
 } from "./../actions/search";
-import { togglePartialResultsAction } from "./../actions/results";
+import { toggleModalAction } from "./../actions/modal";
+import {
+  togglePartialResultsAction,
+  toggleFullResultsAction,
+} from "./../actions/results";
 import { getMapStateAction } from "../actions/mapState";
 import { handleGetViewerImageAction } from "./../actions/results";
 import { setDocHeightOnWindow, pathnameToSearchType } from "../utils/helper";
@@ -64,6 +69,56 @@ class App extends Component {
     }
   };
 
+  _resultSwitcher = (searchType, searchTerm, geojson) => {
+    if (searchType === "Speculator") {
+      this.props.dispatch(
+        resetSearch({
+          searchTerm,
+          searchDisplayType: "full-speculator",
+        })
+      );
+    }
+
+    if (searchType === "Zipcode") {
+      this.props.dispatch(
+        resetSearch({
+          searchTerm,
+          searchDisplayType: "full-zipcode",
+        })
+      );
+    }
+
+    if (searchType === "Address") {
+      if (
+        geojson.features &&
+        geojson.features.length === 1 &&
+        geojson.features[0].properties.distance === 0
+      ) {
+        this.props.dispatch(
+          resetSearch({
+            searchTerm,
+            searchType: "Address",
+            searchDisplayType: "single-address",
+          })
+        );
+      }
+
+      /////
+      if (geojson.features && geojson.features.length > 1) {
+        this.props.dispatch(
+          resetSearch({
+            searchTerm,
+            searchType: "Address",
+            searchDisplayType: "multiple-parcels",
+          })
+        );
+      }
+    }
+
+    //toggle the results pane
+    this.props.dispatch(toggleFullResultsAction(true));
+  };
+
   // Duplicated in PraxisMap!!
   // create new vieport dependent on current geojson bbox
   _createNewViewport = (geojson) => {
@@ -106,8 +161,11 @@ class App extends Component {
     // much logic here!!  may need to work on this a bit more to simplify the mount
     // if there is a search term dispatch the get parcels action
     if (search !== undefined && coordinates === undefined) {
+      //close the modal
+      this.props.dispatch(toggleModalAction(false));
+
       //set the search term
-      this.props.dispatch(setSearchTerm(search));
+      // this.props.dispatch(setSearchTerm(search));
 
       //set the other search options
       this._setSearch(search, searchType, year);
@@ -118,14 +176,20 @@ class App extends Component {
         .dispatch(handleGetParcelsByQueryAction(route))
         .then((geojson) => {
           this._createNewViewport(geojson);
+
+          this._resultSwitcher(searchType, search, geojson);
+
           this.props.dispatch(dataIsLoadingAction(false));
         });
     }
 
     // for an address point
     if (search !== undefined && coordinates !== undefined) {
+      //close the modal
+      this.props.dispatch(toggleModalAction(false));
+
       //set the search term
-      this.props.dispatch(setSearchTerm(search));
+      // this.props.dispatch(setSearchTerm(search));
 
       //set the other search options
       this._setSearch(search, searchType, year);
@@ -143,6 +207,8 @@ class App extends Component {
       this.props
         .dispatch(handleGetParcelsByQueryAction(route))
         .then((geojson) => {
+          this._resultSwitcher(searchType, search, geojson);
+
           this._createNewViewport(geojson);
           this.props.dispatch(dataIsLoadingAction(false));
         });

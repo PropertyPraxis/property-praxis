@@ -22,7 +22,7 @@ export async function getInitialZipcodeData(route) {
 export async function getMapData(route) {
   try {
     const mapDataResponse = await fetch(route);
-    const mapDataJson = await mapDataResponse.json()
+    const mapDataJson = await mapDataResponse.json();
     return mapDataJson;
   } catch (err) {
     throw new Error(err);
@@ -30,7 +30,7 @@ export async function getMapData(route) {
 }
 
 //debouncing for searches
-export const populateSearch = async function(searchTerm, route) {
+export const populateSearch = async function (searchTerm, route) {
   //route can be either <host>/api/zipcode-search/ or <host>/api/address-search/ or <host>/api/speculator-search/
   if (searchTerm === "") {
     return [];
@@ -44,7 +44,7 @@ export const populateSearch = async function(searchTerm, route) {
   }
 };
 
-export const populateSearchByYear = async function(searchTerm, year, route) {
+export const populateSearchByYear = async function (searchTerm, year, route) {
   //route can be either <host>/api/zipcode-search/ or <host>/api/address-search/ or <host>/api/speculator-search/
   if (searchTerm === "") {
     return [];
@@ -63,6 +63,26 @@ export const populateSearchByYear = async function(searchTerm, year, route) {
 
 //function helper for downloading data
 export async function getDownloadData(route) {
+  try {
+    const response = await fetch(route);
+    const json = await response.json();
+    return json;
+  } catch (err) {
+    throw Error(`An error occured searching: ${err}`);
+  }
+}
+
+export async function getPraxisYears(route) {
+  try {
+    const response = await fetch(route);
+    const json = await response.json();
+    return json;
+  } catch (err) {
+    throw Error(`An error occured searching: ${err}`);
+  }
+}
+
+export async function getPraxisZipcodes(route) {
   try {
     const response = await fetch(route);
     const json = await response.json();

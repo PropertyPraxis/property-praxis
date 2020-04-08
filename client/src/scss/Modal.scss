@@ -37,15 +37,16 @@
 }
 
 // close button in modal
-.modal-container > div:first-child {
+.modal-close-button:first-child {
   text-align: right;
+  font-size: 1.5rem;
 }
 
-.modal-container > div:first-child:hover {
+.modal-close-button:first-child:hover {
   color: $pp-rose;
 }
 
-.modal-container > div:active {
+.modal-close-button:active {
   transform: translateY(+1px);
 }
 
@@ -76,11 +77,33 @@
   flex-direction: column;
   align-items: center;
   line-height: 1.6;
-  max-height: 200px;
+  max-height: 250px;
   overflow-y: auto;
 
   h3 {
     text-align: center;
+  }
+}
+
+.modal-form {
+  box-sizing: border-box;
+
+  div > label {
+    display: block;
+    width: 165px;
+    height: 30px;
+    font-weight: 500;
+    font-size: 1.3rem;
+  }
+
+  div > input {
+    width: 160px;
+  }
+
+
+  input:last-child {
+    display: block;
+    width: 150px;
   }
 }
 
@@ -101,6 +124,14 @@
   }
 }
 
+.small-text {
+  display: block;
+  font-size: small;
+  font-style: italic;
+  position: relative;
+  bottom: 5px;
+  margin-bottom: 10px;
+}
 @media screen and (max-width: 600px) {
   .modal {
     padding-top: 5px;

@@ -77,6 +77,16 @@ router.get("/download/:id/:year", async (req, res) => {
   }
 });
 
+router.get("/praxiszipcodes", async (req, res) => {
+  try {
+    const query = "SELECT DISTINCT zipcode FROM zips_geom;";
+    const { rows } = await db.query(query);
+    res.json(rows);
+  } catch (err) {
+    res.json(err);
+  }
+});
+
 // export our router to be mounted by the parent application
 module.exports = router;
 
