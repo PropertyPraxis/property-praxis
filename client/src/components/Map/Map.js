@@ -73,14 +73,14 @@ class PraxisMarker extends React.Component {
     );
 
     //trigger a null display to set to loading
-    this.props.dispatch(setSearchDisplayType(null));
+    // this.props.dispatch(setSearchDisplayType(null));
 
     const route = `/api/geojson/parcels/address/${encodedCoords}/${year}`;
 
     //start the download action
     this.props.dispatch(dataIsLoadingAction(true));
-    const downloadDataRoute = `/api/address-search/download/${encodedCoords}/${year}`;
-    this.props.dispatch(handleGetDownloadDataAction(downloadDataRoute));
+    // const downloadDataRoute = `/api/address-search/download/${encodedCoords}/${year}`;
+    // this.props.dispatch(handleGetDownloadDataAction(downloadDataRoute));
 
     // query the parcels
     this.props
@@ -118,6 +118,9 @@ class PraxisMarker extends React.Component {
           //change the url
           window.history.pushState(state, title, newUrl);
 
+          // trigger the new search display
+          this.props.dispatch(setSearchDisplayType("single-address"));
+
           // change the partial results
           this.props
             .dispatch(handleSearchPartialAddress(addressString, year))
@@ -128,7 +131,6 @@ class PraxisMarker extends React.Component {
                 resetSearch({
                   searchTerm: proxySearchTerm,
                   searchType: "Address",
-                  searchDisplayType: "single-address",
                 })
               );
             });
@@ -276,6 +278,24 @@ class PraxisMap extends Component {
         .dispatch(handleGetParcelsByQueryAction(route))
         .then((geojson) => {
           this._createNewViewport(geojson);
+          this.props.dispatch(setSearchDisplayType("single-address"));
+
+          // change the partial results
+          this.props
+            .dispatch(handleSearchPartialAddress(addressString, year))
+            .then((json) => {
+              // set the search term to the first result of geocoder
+              const proxySearchTerm = json[0].mb[0].place_name;
+              this.props.dispatch(
+                resetSearch({
+                  searchTerm: proxySearchTerm,
+                  searchType: "Address",
+                })
+              );
+            });
+          this.props.dispatch(dataIsLoadingAction(false));
+          this.props.dispatch(toggleFullResultsAction(true));
+          this.props.dispatch(togglePartialResultsAction(false));
         });
 
       //build the address string
@@ -296,26 +316,8 @@ class PraxisMap extends Component {
       this.props.dispatch(handleGetViewerImageAction(longitude, latitude));
       //handle all the download data and setting search
       this.props.dispatch(dataIsLoadingAction(true));
-      const downloadDataRoute = `/api/address-search/download/${encodedCoords}/${year}`;
-      this.props.dispatch(handleGetDownloadDataAction(downloadDataRoute));
-
-      // change the partial results
-      this.props
-        .dispatch(handleSearchPartialAddress(addressString, year))
-        .then((json) => {
-          // set the search term to the first result of geocoder
-          const proxySearchTerm = json[0].mb[0].place_name;
-          this.props.dispatch(
-            resetSearch({
-              searchTerm: proxySearchTerm,
-              searchType: "Address",
-              searchDisplayType: "single-address",
-            })
-          );
-        });
-      this.props.dispatch(dataIsLoadingAction(false));
-      this.props.dispatch(toggleFullResultsAction(true));
-      this.props.dispatch(togglePartialResultsAction(false));
+      // const downloadDataRoute = `/api/address-search/download/${encodedCoords}/${year}`;
+      // this.props.dispatch(handleGetDownloadDataAction(downloadDataRoute));
     }
   }
   render() {
