@@ -374,7 +374,7 @@ class SingleAddressResults extends Component {
         </div>
       );
     }
-    return <div>No PP listing for this address</div>;
+    return <div>LOADING...</div>;
   }
 }
 
@@ -391,7 +391,7 @@ class FullResults extends Component {
       .join("_")
       .replace(/\//g, "_")
       .replace(/,/g, "");
-    console.log("filename: ", filename);
+
     return (
       <section className="results-outer">
         <div className="results-inner">

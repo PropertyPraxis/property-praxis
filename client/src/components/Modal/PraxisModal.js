@@ -65,6 +65,12 @@ class PraxisModal extends React.Component {
 
     const zipcodesRoute = "/api/zipcode-search/praxiszipcodes";
     this.props.dispatch(handleGetZipcodesAction(zipcodesRoute));
+
+    const { pathname } = window.location;
+
+    if (pathname !== "/") {
+      this.props.dispatch(toggleModalAction(false));
+    }
   }
 
   render() {
@@ -117,7 +123,6 @@ class Child extends Component {
               );
             })}
           </div>
-          <hr></hr>
           {selection === "About" ? (
             <About {...this.props} />
           ) : selection === "Search" ? (
@@ -210,7 +215,7 @@ class SearchForm extends Component {
       this.props.dispatch(dataIsLoadingAction(true));
 
       // change the partial results
-      this.props.dispatch(handleSearchPartialZipcode(zipcodeValue, yearValue));
+      // this.props.dispatch(handleSearchPartialZipcode(zipcodeValue, yearValue));
 
       // handle the query
       const geoJsonRoute = `/api/geojson/parcels/zipcode/${zipcodeValue}/${yearValue}`;
@@ -256,12 +261,12 @@ class SearchForm extends Component {
     if (yearValue && !zipcodeValue && zipcodeCheckboxValue) {
       // close the modal
       this.props.dispatch(toggleModalAction(false));
-      const geoJsonRoute = `/api/geojson/parcels/${yearValue}`;
+      this.props.dispatch(dataIsLoadingAction(true));
       this.props
-        .dispatch(handleGetParcelsByQueryAction(geoJsonRoute))
+        .dispatch(handleGetParcelsByQueryAction(`/api/geojson/parcels/${yearValue}`))
         .then((geojson) => {
-          //trigger new viewport pass down from PartialSearchResults
           this._createNewViewport(geojson);
+          this.props.dispatch(dataIsLoadingAction(false));
         });
     }
   };
@@ -365,7 +370,7 @@ class SearchForm extends Component {
 }
 
 const DownloadData = (props) => {
-  return <div>Download Data</div>;
+  return <div>Download Data (in development...)</div>;
 };
 
 function mapStateToProps({ modal, mapData, mapState }) {

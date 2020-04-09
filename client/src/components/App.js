@@ -7,6 +7,7 @@ import {
   handleGetParcelsByQueryAction,
   setMarkerCoordsAction,
   dataIsLoadingAction,
+  getYearAction,
 } from "../actions/mapData";
 import {
   setSearchType,
@@ -16,11 +17,9 @@ import {
   handleSearchPartialAddress,
   resetSearch,
 } from "./../actions/search";
-import { toggleModalAction } from "./../actions/modal";
 import {
   togglePartialResultsAction,
   toggleFullResultsAction,
-  handleGetDownloadDataAction,
 } from "./../actions/results";
 import { getMapStateAction } from "../actions/mapState";
 import { handleGetViewerImageAction } from "./../actions/results";
@@ -34,7 +33,7 @@ import PraxisModal from "./Modal/PraxisModal";
 import PPLogo from "./Logo/Logo";
 import "../scss/App.scss";
 
-class App extends Component {
+class MapApp extends Component {
   _setSearch = (searchTerm, searchType, year) => {
     this.props.dispatch(setSearchDisplayType("partial"));
     this.props.dispatch(togglePartialResultsAction(false));
@@ -150,10 +149,18 @@ class App extends Component {
     setDocHeightOnWindow();
 
     //check to see what data is loaded
-    // const { year } = this.props.mapData;
-    const { coordinates, search, year } = queryString.parse(window.location.search);
+    let { coordinates, search, year } = queryString.parse(
+      window.location.search
+    );
     const { pathname } = window.location;
- 
+
+    //set the year
+    if (year) {
+      this.props.dispatch(getYearAction(year));
+    } else {
+      year = this.props.mapData.year;
+    }
+
     //set the searchtype
     const searchType = pathnameToSearchType(pathname);
     this.props.dispatch(setSearchType(searchType));
@@ -161,12 +168,6 @@ class App extends Component {
     // much logic here!!  may need to work on this a bit more to simplify the mount
     // if there is a search term dispatch the get parcels action
     if (search !== undefined && coordinates === undefined) {
-      //close the modal
-      this.props.dispatch(toggleModalAction(false));
-
-      //set the search term
-      // this.props.dispatch(setSearchTerm(search));
-
       //set the other search options
       this._setSearch(search, searchType, year);
 
@@ -185,12 +186,6 @@ class App extends Component {
 
     // for an address point
     if (search !== undefined && coordinates !== undefined) {
-      //close the modal
-      this.props.dispatch(toggleModalAction(false));
-
-      //set the search term
-      // this.props.dispatch(setSearchTerm(search));
-
       //set the other search options
       this._setSearch(search, searchType, year);
 
@@ -202,6 +197,8 @@ class App extends Component {
 
       // set the marker
       this.props.dispatch(setMarkerCoordsAction(latitude, longitude));
+      
+      //set the viewer
       this.props.dispatch(handleGetViewerImageAction(longitude, latitude));
       //set the parcels within buffer
       this.props
@@ -215,7 +212,7 @@ class App extends Component {
     }
 
     // if there is no search term then do a regular search for all parcels
-    if (search === undefined) {
+    if (search === undefined || pathname === "/") {
       this.props.dispatch(dataIsLoadingAction(true));
       this.props
         .dispatch(handleGetParcelsByQueryAction(`/api/geojson/parcels/${year}`))
@@ -240,7 +237,6 @@ class App extends Component {
       Object.entries(ppraxis).length === 0 ||
       ppraxis.features === null ||
       Object.entries(zips).length === 0;
-
     if (loadingState) {
       return <Loading />;
     }
@@ -251,13 +247,22 @@ class App extends Component {
             <Route path="/" component={MapContainer}></Route>
             <SearchContainer />
             <ResultsContainer />
-            {isOpen ? <PraxisModal /> : null}
           </Router>
           <PPLogo />
         </div>
       </main>
     );
   }
+}
+
+function App(props) {
+  const { isOpen } = props.modal;
+
+  if (isOpen) {
+    return <PraxisModal {...props} />;
+  }
+
+  return <MapApp {...props} />;
 }
 
 function mapStateToProps({ mapData, modal, mapState }) {

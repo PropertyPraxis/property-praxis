@@ -29,7 +29,7 @@ class ParcelLayerController extends Component {
             return (
               <div
                 key={color}
-                title={labels[index]}
+                title={`Upto ${labels[index]} speculator owned properties`}
                 style={
                   filter.indexOf(labels[index]) === -1
                     ? { backgroundColor: color[1] }
@@ -38,7 +38,7 @@ class ParcelLayerController extends Component {
                 onClick={event => {
                   event.preventDefault();
                   this.props.dispatch(
-                    setParcelFilterAction(event.target.title)
+                    setParcelFilterAction(labels[index])
                   );
                 }}
               ></div>

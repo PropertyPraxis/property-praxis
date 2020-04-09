@@ -8,21 +8,21 @@ export const GET_DOWNLOAD_DATA = "GET_DOWNLOAD_DATA";
 export function toggleFullResultsAction(isOpen) {
   return {
     type: TOGGLE_FULL_RESULTS,
-    payload: { isFullResultsOpen: isOpen }
+    payload: { isFullResultsOpen: isOpen },
   };
 }
 
 function getViewerImageAction(viewer) {
   return {
     type: GET_VIEWER_IMAGE,
-    payload: { viewer }
+    payload: { viewer },
   };
 }
 
 function getDownloadDataAction(downloadData) {
   return {
     type: GET_DOWNLOAD_DATA,
-    payload: { downloadData }
+    payload: { downloadData },
   };
 }
 
@@ -30,39 +30,40 @@ export function togglePartialResultsAction(isOpen) {
   return {
     type: TOGGLE_PARTIAL_RESULTS,
     payload: {
-      isPartialResultsOpen: isOpen
-    }
+      isPartialResultsOpen: isOpen,
+    },
   };
 }
 
 export function handleGetViewerImageAction(longitude, latitude) {
-  return dispatch => {
+  return (dispatch) => {
     return getImageKey(longitude, latitude)
-      .then(viewer => {
+      .then((viewer) => {
         dispatch(
           getViewerImageAction({
             bearing: null,
             key: null,
-            viewerMarker: null
+            viewerMarker: null,
           })
         );
         dispatch(getViewerImageAction(viewer));
         return viewer;
       })
-      .catch(err => {
+      .catch((err) => {
         throw Error(`An error occured searching: ${err}`);
       });
   };
 }
 
 export function handleGetDownloadDataAction(route) {
-  return dispatch => {
+  return (dispatch) => {
+    // dispatch(getDownloadDataAction(null));
     return getDownloadData(route)
-      .then(data => {
+      .then((data) => {
         dispatch(getDownloadDataAction(data));
         return data;
       })
-      .catch(err => {
+      .catch((err) => {
         throw Error(`An error occured searching: ${err}`);
       });
   };

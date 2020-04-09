@@ -76,6 +76,12 @@ class PraxisMarker extends React.Component {
     this.props.dispatch(setSearchDisplayType(null));
 
     const route = `/api/geojson/parcels/address/${encodedCoords}/${year}`;
+
+    //start the download action
+    this.props.dispatch(dataIsLoadingAction(true));
+    const downloadDataRoute = `/api/address-search/download/${encodedCoords}/${year}`;
+    this.props.dispatch(handleGetDownloadDataAction(downloadDataRoute));
+
     // query the parcels
     this.props
       .dispatch(handleGetParcelsByQueryAction(route))
@@ -151,12 +157,9 @@ class PraxisMarker extends React.Component {
           );
         }
         //handle all the download data and setting search
-        this.props.dispatch(dataIsLoadingAction(true));
-        const downloadDataRoute = `/api/address-search/download/${encodedCoords}/${year}`;
-        this.props.dispatch(handleGetDownloadDataAction(downloadDataRoute));
-        this.props.dispatch(dataIsLoadingAction(false));
         this.props.dispatch(toggleFullResultsAction(true));
         this.props.dispatch(togglePartialResultsAction(false));
+        this.props.dispatch(dataIsLoadingAction(false));
       });
 
     // set the image viewer regardless
@@ -183,16 +186,6 @@ class PraxisMarker extends React.Component {
 }
 
 class PraxisMap extends Component {
-  // _stops = [
-  //   [20, styleVars.parcelStop1],
-  //   [100, styleVars.parcelStop2],
-  //   [200, styleVars.parcelStop3],
-  //   [500, styleVars.parcelStop4],
-  //   [1000, styleVars.parcelStop5],
-  //   [1500, styleVars.parcelStop6],
-  //   [2000, styleVars.parcelStop7]
-  // ];
-
   _stops = [
     [1, styleVars.parcelStop1],
     [2, styleVars.parcelStop2],
@@ -299,7 +292,6 @@ class PraxisMap extends Component {
       )}&coordinates=${encodedCoords}&year=${year}`;
       //change the url
       window.history.pushState(state, title, newUrl);
-
       //get viewer image
       this.props.dispatch(handleGetViewerImageAction(longitude, latitude));
       //handle all the download data and setting search
@@ -338,19 +330,13 @@ class PraxisMap extends Component {
     const { sliderValue, filter } = this.props.controller;
     const parcelLayerFilter = createLayerFilter(filter);
 
-    console.log(parcelLayerFilter);
-
-    // parcels existence
-    // const parcelLayerLoadingState =
-    //   Object.entries(ppraxis).length === 0 || ppraxis.features === null;
-
     return (
       <div className="map">
         <ReactMapGL
           {...this.props.mapState}
+          mapOptions={{ attributionControl: false }}
           ref={(reactMap) => (this.reactMap = reactMap)}
-          mapStyle={basemapLayer} //monochrome
-          // mapStyle="mapbox://styles/mappingaction/ck8agtims11p11imzvekvyjvy" //satellite
+          mapStyle={basemapLayer}
           width="100vw"
           height="100vh"
           minZoom={10}
