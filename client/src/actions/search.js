@@ -235,6 +235,7 @@ export function handleSearchPartialAll(searchTerm, year) {
       year,
       `/api/zipcode-search/partial/`
     );
+
     dispatch(
       searchPartialAll([
         partialAddressResults,

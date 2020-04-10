@@ -144,7 +144,7 @@ class ParcelResults extends Component {
                       handleGetViewerImageAction(longitude, latitude)
                     );
                     //set map data and then create viewport
-                    const geojsonRoute = `http://localhost:5000/api/geojson/parcels/address/${encodedCoords}/${year}`;
+                    const geojsonRoute = `/api/geojson/parcels/address/${encodedCoords}/${year}`;
                     this.props
                       .dispatch(handleGetParcelsByQueryAction(geojsonRoute))
                       .then((geojson) => {

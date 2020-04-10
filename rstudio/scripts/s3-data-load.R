@@ -511,9 +511,9 @@ gc(rm(list=c("taxParProp",
           "parProp")))
 
 
-###################
+#########################
 ##DB POPULATING PHASE
-###################
+########################
 ##Create connection to DB
 conn <- RPostgreSQL::dbConnect("PostgreSQL", 
                                host = "postgres",
@@ -538,9 +538,15 @@ sf::st_write(zips, dsn=conn, layer="zips_geom",  overwrite = TRUE, append = FALS
 if(RPostgreSQL::dbExistsTable(conn, "property")){
   RPostgreSQL::dbSendQuery(conn, "DROP TABLE IF EXISTS property CASCADE;")
   RPostgreSQL::dbWriteTable(conn, "property", prop)
+}else {
+  RPostgreSQL::dbSendQuery(conn, "DROP TABLE IF EXISTS property CASCADE;")
+  RPostgreSQL::dbWriteTable(conn, "property", prop)
 }
 
 if(RPostgreSQL::dbExistsTable(conn, "taxpayer_property")){
+  RPostgreSQL::dbSendQuery(conn, "DROP TABLE IF EXISTS taxpayer_property CASCADE;")
+  RPostgreSQL::dbWriteTable(conn, "taxpayer_property", taxProp)
+}else{
   RPostgreSQL::dbSendQuery(conn, "DROP TABLE IF EXISTS taxpayer_property CASCADE;")
   RPostgreSQL::dbWriteTable(conn, "taxpayer_property", taxProp)
 }
@@ -548,14 +554,23 @@ if(RPostgreSQL::dbExistsTable(conn, "taxpayer_property")){
 if(RPostgreSQL::dbExistsTable(conn, "year")){
   RPostgreSQL::dbSendQuery(conn, "DROP TABLE IF EXISTS year CASCADE;")
   RPostgreSQL::dbWriteTable(conn, "year", year)
+}else{
+  RPostgreSQL::dbSendQuery(conn, "DROP TABLE IF EXISTS year CASCADE;")
+  RPostgreSQL::dbWriteTable(conn, "year", year)
 }
 
 if(RPostgreSQL::dbExistsTable(conn, "taxpayer")){
   RPostgreSQL::dbSendQuery(conn, "DROP TABLE IF EXISTS taxpayer CASCADE;")
   RPostgreSQL::dbWriteTable(conn, "taxpayer", tax)
+}else{
+  RPostgreSQL::dbSendQuery(conn, "DROP TABLE IF EXISTS taxpayer CASCADE;")
+  RPostgreSQL::dbWriteTable(conn, "taxpayer", tax)
 }
 
 if(RPostgreSQL::dbExistsTable(conn, "owner_taxpayer")){
+  RPostgreSQL::dbSendQuery(conn, "DROP TABLE IF EXISTS owner_taxpayer CASCADE;")
+  RPostgreSQL::dbWriteTable(conn, "owner_taxpayer", ownTax)
+}else{
   RPostgreSQL::dbSendQuery(conn, "DROP TABLE IF EXISTS owner_taxpayer CASCADE;")
   RPostgreSQL::dbWriteTable(conn, "owner_taxpayer", ownTax)
 }
@@ -699,7 +714,9 @@ createParcelGeomByYear <- function(years){ ##must be a list
 
 createParcelGeomByYear(yearList)
 
-
+################################
+## TESTING BELOW
+###############################
 # dbSendQuery(conn, paste("DROP VIEW IF EXISTS parcels_2017;",
 #                         "CREATE VIEW parcels_2017 AS",
 #                         "(SELECT DISTINCT ROW_NUMBER() OVER (ORDER BY 1) AS id, y.praxisyear, ot.own_id, count.count, geom_2017 FROM parcel_property_geom AS ppg",
@@ -741,16 +758,16 @@ createParcelGeomByYear(yearList)
 #####TESTING
 # x <- dbGetQuery(conn, paste("SELECT * FROM parcels_2017"))
 # x <- dbGetQuery(conn, paste("SELECT * FROM owner_count"))
-x <- sf::st_read(conn, query=paste("SELECT DISTINCT pp.*, p.*, otp.own_id, y.praxisyear FROM parcel_property_geom as pp
-    INNER JOIN property as p ON pp.parprop_id = p.parprop_id
-    INNER JOIN taxpayer_property AS tpp ON p.prop_id = tpp.prop_id
-    INNER JOIN year AS y ON tpp.taxparprop_id = y.taxparprop_id
-    INNER JOIN taxpayer as tp ON tpp.tp_id = tp.tp_id
-    INNER JOIN owner_taxpayer as otp ON tp.owntax_id = otp.owntax_id
-    WHERE y.praxisyear = 2017"))
-# 
-x <- sf::st_read(conn, query=paste("SELECT * FROM parcels_2017"))
-test <- sf::st_read(conn, query="SELECT * FROM parcels_2016;")
+# x <- sf::st_read(conn, query=paste("SELECT DISTINCT pp.*, p.*, otp.own_id, y.praxisyear FROM parcel_property_geom as pp
+#     INNER JOIN property as p ON pp.parprop_id = p.parprop_id
+#     INNER JOIN taxpayer_property AS tpp ON p.prop_id = tpp.prop_id
+#     INNER JOIN year AS y ON tpp.taxparprop_id = y.taxparprop_id
+#     INNER JOIN taxpayer as tp ON tpp.tp_id = tp.tp_id
+#     INNER JOIN owner_taxpayer as otp ON tp.owntax_id = otp.owntax_id
+#     WHERE y.praxisyear = 2017"))
+# # 
+# x <- sf::st_read(conn, query=paste("SELECT * FROM parcels_2017"))
+# test <- sf::st_read(conn, query="SELECT * FROM parcels_2016;")
 # geom_2017 <- sf::st_read(conn, query=paste(paste("SELECT DISTINCT ROW_NUMBER() OVER (ORDER BY 1) AS id, y.praxisyear, ot.own_id, count.count, geom_2017 FROM parcel_property_geom AS ppg",
 #                                              "INNER JOIN property AS p ON ppg.parprop_id = p.parprop_id",
 #                                              "INNER JOIN taxpayer_property AS tp ON p.prop_id = tp.prop_id",

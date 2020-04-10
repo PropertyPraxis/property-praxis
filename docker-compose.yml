@@ -19,6 +19,7 @@ services:
     build:
       context: ./client/
       dockerfile: Dockerfile.dev
+      # dockerfile: Dockerfile #change this back when done
     depends_on:
       - api
     env_file: ./envs/web.env
@@ -27,15 +28,6 @@ services:
     volumes:
       - ./client/:/app/
       - /app/node_modules
-
-  # tests:
-  #   build:
-  #     context: ./client/
-  #     dockerfile: Dockerfile.dev
-  #   volumes:
-  #     - ./client:/app/
-  #     - /app/node_modules
-  #   command: ["npm", "run", "test"]
 
   postgres:
     #image: mdillon/postgis:latest
@@ -58,3 +50,12 @@ services:
     volumes:
       - ./rstudio/data:/home/rstudio/pp-pipeline/data
       - ./rstudio/scripts:/home/rstudio/pp-pipeline/scripts
+
+    # tests:
+    #   build:
+    #     context: ./client/
+    #     dockerfile: Dockerfile.dev
+    #   volumes:
+    #     - ./client:/app/
+    #     - /app/node_modules
+    #   command: ["npm", "run", "test"]

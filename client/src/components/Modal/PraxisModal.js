@@ -12,7 +12,6 @@ import {
 import { createNewViewport } from "../../utils/map";
 import { getMapStateAction } from "../../actions/mapState";
 import {
-  handleSearchPartialZipcode,
   resetSearch,
   setSearchDisplayType,
 } from "../../actions/search";

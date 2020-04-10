@@ -145,6 +145,11 @@ docker-compose rm
 docker-compose up --build
 ```
 
+There may also be an issue with node-sass bindings on install.
+See these SO posts:
+https://stackoverflow.com/questions/41942769/issue-to-node-sass-and-docker
+https://stackoverflow.com/questions/37986800/node-sass-couldnt-find-a-binding-for-your-current-environment/55657576#55657576
+
 # Addtional Unfinished Instructions are below.  
 To connect to the database from host terminal
 ```

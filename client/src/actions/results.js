@@ -57,7 +57,7 @@ export function handleGetViewerImageAction(longitude, latitude) {
 
 export function handleGetDownloadDataAction(route) {
   return (dispatch) => {
-    // dispatch(getDownloadDataAction(null));
+    dispatch(getDownloadDataAction(null));
     return getDownloadData(route)
       .then((data) => {
         dispatch(getDownloadDataAction(data));

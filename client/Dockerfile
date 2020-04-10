@@ -11,5 +11,6 @@ RUN npm run build
 # /app/build
 # check out docker hub nginx docs for more info 
 FROM nginx
-EXPOSE 80
+EXPOSE 3000
+COPY ./nginx/default.conf /etc/nginx/conf.d/default.conf
 COPY --from=builder /app/build /usr/share/nginx/html
