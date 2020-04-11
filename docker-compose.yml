@@ -37,7 +37,7 @@ services:
     ports:
       - "35432:5432"
     env_file: ./envs/db.env
-  
+
   rstudio:
     build:
       context: ./rstudio/
@@ -50,7 +50,6 @@ services:
     volumes:
       - ./rstudio/data:/home/rstudio/pp-pipeline/data
       - ./rstudio/scripts:/home/rstudio/pp-pipeline/scripts
-
     # tests:
     #   build:
     #     context: ./client/

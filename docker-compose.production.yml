@@ -4,9 +4,9 @@ services:
     restart: always
     build:
       context: ./nginx/
-      dockerfile: Dockerfile 
+      dockerfile: Dockerfile
     ports:
-      - '3050:80'
+      - "3050:80"
     depends_on:
       - api
       - client
@@ -16,12 +16,12 @@ services:
       dockerfile: Dockerfile
     depends_on:
       - postgres
-    env_file: ./envs/api-production.env
+    env_file: ./envs/api-prod.env
     volumes:
       - ./server/:/app/
       - /app/node_modules
-  
-client:
+
+  client:
     build:
       context: ./client/
       dockerfile: Dockerfile
@@ -35,7 +35,7 @@ client:
     ports:
       - "35432:5432"
     env_file: ./envs/db.env
-  
+
   rstudio:
     build:
       context: ./rstudio/

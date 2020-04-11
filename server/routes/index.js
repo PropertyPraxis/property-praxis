@@ -5,6 +5,8 @@ const initialData = require("./initialData");
 const searchParcels = require("./searchParcels");
 const searchPraxisYears = require("./searchPraxisYears");
 
+console.log(process.env.NODE_ENV)
+
 // depending on how nginx is set up in production,
 // the "/api will need to be removed"
 if (process.env.NODE_ENV === "development") {
@@ -20,11 +22,11 @@ if (process.env.NODE_ENV === "development") {
 
 if (process.env.NODE_ENV === "production") {
   module.exports = (app) => {
-    app.use("/api/address-search", searchAddresses);
-    app.use("/api/zipcode-search", searchZipcodes);
-    app.use("/api/speculator-search", searchSpeculators);
-    app.use("/api/geojson", initialData);
-    app.use("/api/geojson/parcels", searchParcels);
-    app.use("/api/praxisyears", searchPraxisYears);
+    app.use("/address-search", searchAddresses);
+    app.use("/zipcode-search", searchZipcodes);
+    app.use("/speculator-search", searchSpeculators);
+    app.use("/geojson", initialData);
+    app.use("/geojson/parcels", searchParcels);
+    app.use("/praxisyears", searchPraxisYears);
   };
 }
