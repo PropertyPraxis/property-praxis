@@ -62,7 +62,7 @@ class MapApp extends Component {
       case "/speculator":
         return `/api/geojson/parcels${pathname}/${search}/${year}`;
       case "/address":
-        return `http://localhost:5000/api/geojson/parcels/address/${encodedCoords}/${year}`;
+        return `/api/geojson/parcels/address/${encodedCoords}/${year}`;
       default:
         return `/api/geojson/parcels/${year}`;
     }
