@@ -1,0 +1,26 @@
+version: "3"
+services:
+  api:
+    build:
+      context: ./server/
+      dockerfile: Dockerfile.dev
+    depends_on:
+      - postgres
+    env_file: ./envs/api.env
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./server/:/app/
+      - /app/node_modules
+  web:
+    build:
+      context: ./client/
+      dockerfile: Dockerfile.dev
+    depends_on:
+      - api
+    env_file: ./envs/web.env
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./client/:/app/
+      - /app/node_modules
