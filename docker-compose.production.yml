@@ -1,12 +1,13 @@
 version: "3"
 services:
   nginx:
-    restart: always
+    restart: unless-stopped
     build:
       context: ./nginx/
       dockerfile: Dockerfile
     ports:
-      - "3050:80"
+      - "80:80"
+      - "443:443"
     depends_on:
       - api
       - client
@@ -29,22 +30,3 @@ services:
     volumes:
       - ./client/:/app/
       - /app/node_modules
-
-  postgres:
-    image: mdillon/postgis:11
-    ports:
-      - "35432:5432"
-    env_file: ./envs/db.env
-
-  rstudio:
-    build:
-      context: ./rstudio/
-      dockerfile: Dockerfile
-    depends_on:
-      - postgres
-    ports:
-      - "8787:8787"
-    env_file: ./envs/rstudio.env
-    volumes:
-      - ./rstudio/data:/home/rstudio/pp-pipeline/data
-      - ./rstudio/scripts:/home/rstudio/pp-pipeline/scripts

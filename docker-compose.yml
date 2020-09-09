@@ -1,36 +1,6 @@
 version: "3"
 services:
-  api:
-    #build: ./server/
-    build:
-      context: ./server/
-      dockerfile: Dockerfile.dev
-    depends_on:
-      - postgres
-    env_file: ./envs/api.env
-    ports:
-      - "5000:5000"
-    # command: npm run start
-    volumes:
-      - ./server/:/app/
-      - /app/node_modules
-  web:
-    ##this is the dev client
-    build:
-      context: ./client/
-      dockerfile: Dockerfile.dev
-      # dockerfile: Dockerfile #change this back when done
-    depends_on:
-      - api
-    env_file: ./envs/web.env
-    ports:
-      - "3000:3000"
-    volumes:
-      - ./client/:/app/
-      - /app/node_modules
-
   postgres:
-    #image: mdillon/postgis:latest
     image: mdillon/postgis:11 #this may affect drivers for rstudio!
     # volumes:
     #   - ./db-data:/var/lib/postgresql/data
@@ -50,11 +20,3 @@ services:
     volumes:
       - ./rstudio/data:/home/rstudio/pp-pipeline/data
       - ./rstudio/scripts:/home/rstudio/pp-pipeline/scripts
-    # tests:
-    #   build:
-    #     context: ./client/
-    #     dockerfile: Dockerfile.dev
-    #   volumes:
-    #     - ./client:/app/
-    #     - /app/node_modules
-    #   command: ["npm", "run", "test"]

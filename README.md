@@ -1,6 +1,6 @@
-# Property Praxis Application Stack
-This application stack includes instructions for setting up a development
-environment for the Property Praxis app (still in development). 
+# Property Praxis
+
+This application stack includes instructions for setting up a development and production environments for the Property Praxis app.
 
 ### Install Docker
 
@@ -9,11 +9,13 @@ Install Docker (from https://docs.docker.com/install/linux/docker-ce/ubuntu/#set
 #### Setup the Repo
 
 1. Update the apt package index:
+
 ```
 sudo apt-get update
 ```
 
 2. Install packages to allow apt to use a repository over HTTPS:
+
 ```
 sudo apt-get install \
     apt-transport-https \
@@ -24,17 +26,20 @@ sudo apt-get install \
 ```
 
 3. Add Docker’s official GPG key:
+
 ```
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
 ```
 
-Verify that you now have the key with the fingerprint `9DC8 5822 9FC7 DD38 854A E2D8 8D81 803C 0EBF CD88`, 
+Verify that you now have the key with the fingerprint `9DC8 5822 9FC7 DD38 854A E2D8 8D81 803C 0EBF CD88`,
 by searching for the last 8 characters of the fingerprint.
+
 ```
 sudo apt-key fingerprint 0EBFCD88
 ```
 
 4. Use the following command to set up the stable repository
+
 ```
 sudo add-apt-repository \
    "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
@@ -45,16 +50,19 @@ sudo add-apt-repository \
 #### Install Docker Engine -Community
 
 1. Update the apt package index.
+
 ```
 sudo apt-get update
 ```
 
 2. Install the latest version of Docker Engine - Community and containerd
+
 ```
 sudo apt-get install docker-ce docker-ce-cli containerd.io
 ```
 
 4. Verify that Docker Engine - Community is installed correctly by running the `hello-world` image.
+
 ```
 sudo docker run hello-world
 ```
@@ -64,38 +72,45 @@ sudo docker run hello-world
 Manually install Docker Compose (from https://docs.docker.com/compose/install/#install-compose)
 
 1. Run this command to download the current stable release of Docker Compose:
+
 ```
 sudo curl -L "https://github.com/docker/compose/releases/download/1.25.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 ```
 
 2. Apply executable permissions to the binary:
+
 ```
 sudo chmod +x /usr/local/bin/docker-compose
 ```
 
 3. Test the intallation
+
 ```
 docker-compose --version
 ```
 
-#### Run Docker without Sudo 
+#### Run Docker without Sudo
 
 1. Create the `docker` group
+
 ```
 sudo groupadd docker
 ```
 
 2. Add your user to the `docker` group
+
 ```
 sudo usermod -aG docker $USER
 ```
 
 3. On Linux, you can also run the following command to activate the changes to groups:
+
 ```
 newgrp docker
 ```
 
 4. Verify that you can run `docker` commands without `sudo`.
+
 ```
 docker run hello-world
 ```
@@ -106,40 +121,116 @@ Follow these instructions so that Docker and its services start automatically on
 (from https://docs.docker.com/install/linux/linux-postinstall/#configure-docker-to-start-on-boot)
 
 1. systemd
+
 ```
 sudo systemctl enable docker
 ```
+
 To disable this behavior, use disable instead.
+
 ```
 sudo systemctl disable docker
 ```
 
-## Clone Repo and Build App
+## Running a Dev Environment
 
 Make a new directory and clone this repo.
+
 ```
 mkdir property-praxis && cd property-praxis
 git clone <repo link>
 ```
 
-To run this stack in development, navigate to the 
+To run this stack in development, navigate to the
 root directory of the repo and run:
+
 ```
 docker-compose up --build
 docker-compose up
 ```
-or close active terminal with -d flag
+
+or detach terminal with -d flag
+
 ```
 docker-compose up -d
 ```
 
+## Running a Production Environment
+
+Make a new directory and clone this repo.
+
+```
+mkdir property-praxis && cd property-praxis
+git clone <repo link>
+```
+
+To run this stack in development, navigate to the
+root directory of the repo and run:
+
+```
+docker-compose up --build
+docker-compose up
+```
+
+or detach terminal with -d flag
+
+```
+docker-compose up -d
+```
+
+## Include Required Environment Variables
+
+In order to compose the dev and prod environments, you will need to include the following`.env` files in
+the `./envs` directory:
+
+- `api-prod.env`
+- `api.env`
+- `db.env`
+- `rstudio.env`
+- `web.env`
+
+And in the `./rstudio/scripts/` directory include:
+
+- `rstudio.env`
+
+## Connecting to the PostGIS Database
+
+While running a dev or prod environement, you can connect to the PostGIS DB via the host terminal using the following command:
+
+```
+psql postgres://<username>:<databasepassword>@localhost:35432/db
+```
+
+## Run RStudio
+
+Create the directory to clone the repo
+
+```
+mkdir -p ~/propertypraxis && cd ~/propertypraxis
+git clone https://github.com/timhitchins/property-praxis-data-pipeline.git
+```
+
+After installing and cloning the repo, build the image.
+Remember to set your password
+
+```
+cd ~/propertypraxis/rstudio
+docker build -t timhitchins/rstudio-property-praxis .
+docker run -e PASSWORD=rstudiotesting --rm -p 8787:8787 \
+    -v ${PWD}/data:${HOME}/pp-pipeline/data \
+    -v ${PWD}/scripts:${HOME}/pp-pipeline/scripts \
+    timhitchins/rstudio-property-praxis
+```
+
 ## Troubleshooting
+
 There may be a case where node modules are not installed in a container due to data volumes.
 See this SO post:
 https://stackoverflow.com/questions/30043872/docker-compose-node-modules-not-present-in-a-volume-after-npm-install-succeeds#comment63254549_32785014
 
 You can fix this by either installing directly in the container when package.json changes or
 by running this command:
+
 ```
 docker-compose rm
 docker-compose up --build
@@ -150,42 +241,12 @@ See these SO posts:
 https://stackoverflow.com/questions/41942769/issue-to-node-sass-and-docker
 https://stackoverflow.com/questions/37986800/node-sass-couldnt-find-a-binding-for-your-current-environment/55657576#55657576
 
-# Addtional Unfinished Instructions are below.  
-To connect to the database from host terminal
-```
-psql postgres://<username>:<databasepassword>@localhost:35432/db
-```
+If you get a an timed out error in `docker-compose up --build` run:
 
-If you get a an timed out error in `docker-compose up --build` run
 ```
 sudo service docker restart
 export DOCKER_CLIENT_TIMEOUT=120
 export COMPOSE_HTTP_TIMEOUT=120
 ```
+
 https://stackoverflow.com/questions/42230536/docker-compose-up-times-out-with-unixhttpconnectionpool
-
-To run the front-end build in Nginx, naigate to the 
-client directory and run:
-(you will not see any output)
-```
-docker build .
-docker run -p 8080:80 \<containerid\>
-```
- ## Build the RStudio Docker Image
-
-Create the directory to clone the repo
-```
-mkdir -p ~/propertypraxis && cd ~/propertypraxis
-git clone https://github.com/timhitchins/property-praxis-data-pipeline.git
-```
-
-After installing and cloning the repo, build the image.
-Remember to set your password
-```
-cd ~/propertypraxis/pp-pipeline
-docker build -t timhitchins/rstudio-property-praxis .
-docker run -e PASSWORD=rstudiotesting --rm -p 8787:8787 \
-    -v ${PWD}/data:${HOME}/pp-pipeline/data \
-    -v ${PWD}/scripts:${HOME}/pp-pipeline/scripts \
-    timhitchins/rstudio-property-praxis 
-```

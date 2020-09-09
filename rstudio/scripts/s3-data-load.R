@@ -77,8 +77,9 @@ names(shpObjs) <- s3Shpfiles
   
 ##read to local env and write the binary object to disk for persistent storage
 csvList <- lapply(seq_along(csvObjs), function(i){
-  csv <- read_csv(rawToChar(csvObjs[[i]]), col_types = cols(propzip=col_character(), parcelno=col_character()))
+  csv <- read_csv(rawToChar(csvObjs[[i]]), col_types = cols(propzip=col_character(), parcelno=col_character(), count=col_character()))
   csvName <- basename(s3Csvs[[i]])
+  print(paste("Writing", csvName))
   write_csv(csv, file.path(csvDir, csvName))
   return(csv)
 })
@@ -164,10 +165,47 @@ nameFixer <- function(df){
   return(df)
 }
 
+##function to subset csv list items to needed cols
+##Cols to keep
+ppCols <- c("taxpayer1", 
+            "taxpayer2", 
+            "own_id",
+            "tpaddr", 
+            "tpcity", 
+            "tpstate", 
+            "tpzip", 
+            "parcelno", 
+            "propaddr", 
+            "propno", 
+            "propdir", 
+            "propstr", 
+            "propzip",
+            "praxisyear",
+            ##adding these field 
+            ##provides no additional 
+            ##records
+            "taxstatus",
+            "saledate",
+            "saleprice",
+            "totsqft",
+            "totacres",
+            "cityrbuilt",
+            "resyrbuilt",
+            "field_21"
+)
+
+## define the function
+subsetCsv <- function(df){
+  subDf <- df[, ppCols]
+  return(subDf)
+} 
+
+
 ##function to add in the year col to csvList
 addYear <- function(i, dfs){
   year <- names(dfs[i]) %>% str_split("_")
   year <- as.numeric(year[[1]][2])
+  print(paste("Adding year", year))
   tmp_df <- dfs[[i]]
   if(is.numeric(year[[1]]) && !is.na(year[[1]])){
     tmp_df$praxisyear <- year
@@ -203,7 +241,6 @@ parcelnoFixer <- function (df){
   return(df)
 }
 
-
 ##fix the geojson names
 ##fix names to follow the other praxis data
 names(gj) <- str_replace_all(names(gj), "_", "")
@@ -213,44 +250,17 @@ shpList[["gj"]] <- gj
 
 ##Fix col names
 csvList <- lapply(csvList, nameFixer)
+
+##TESTING
+##subset the csvs
+#csvList <- lapply(csvList, subsetCsv)
+###################
+
 ##Add the year col
 csvList <- lapply(seq_along(csvList), addYear, dfs=csvList)
 ##fix parcelno col
 csvList <- lapply(csvList, parcelnoFixer)
 
-
-##Cols to keep
-ppCols <- c("taxpayer1", 
-            "taxpayer2", 
-            "own_id",
-            "tpaddr", 
-            "tpcity", 
-            "tpstate", 
-            "tpzip", 
-            "parcelno", 
-            "propaddr", 
-            "propno", 
-            "propdir", 
-            "propstr", 
-            "propzip",
-            "praxisyear",
-            ##adding these field 
-            ##provides no additional 
-            ##records
-            "taxstatus",
-            "saledate",
-            "saleprice",
-            "totsqft",
-            "totacres",
-            "cityrbuilt",
-            "resyrbuilt",
-            "field_21"
-            #these last geom fields
-            #need to be recalculated
-            # "latitude",
-            # "longitude",
-            # "location"
-)
 
 ##Bind the data to one DF
 ##bind the df list for a full dataset
@@ -491,7 +501,7 @@ geomList2 <- lapply(seq_along(geomList), function(i){
   return(geom)
 })
 
-geomAll <- bind_cols(geomList2)
+geomAll <- bind_cols(geomList2, .name_repair = "minimal")
 geomCols <- names(geomAll)[str_detect(names(geomAll), "geom")]
 parPropGeom <- geomAll[,c("parprop_id", "parcelno", "propaddr", geomCols)]
 
@@ -530,9 +540,9 @@ pgListGeom(conn, geog = TRUE)
 ####using the public schema
 ##Add geom tables
 dbSendQuery(conn, "DROP TABLE IF EXISTS parcel_property_geom CASCADE;")
-sf::st_write(parPropGeom, dsn=conn, layer="parcel_property_geom",  overwrite = TRUE, append = FALSE)
+sf::st_write(parPropGeom, dsn=conn, layer="parcel_property_geom")
 dbSendQuery(conn, "DROP TABLE IF EXISTS zips_geom CASCADE;")
-sf::st_write(zips, dsn=conn, layer="zips_geom",  overwrite = TRUE, append = FALSE)
+sf::st_write(zips, dsn=conn, layer="zips_geom")
 
 ##Add regular tables
 if(RPostgreSQL::dbExistsTable(conn, "property")){
