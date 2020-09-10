@@ -11,7 +11,7 @@ services:
   rstudio:
     build:
       context: ./rstudio/
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile
     depends_on:
       - postgres
     ports:

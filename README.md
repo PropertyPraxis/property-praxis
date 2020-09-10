@@ -201,25 +201,24 @@ While running a dev or prod environement, you can connect to the PostGIS DB via 
 psql postgres://<username>:<databasepassword>@localhost:35432/db
 ```
 
-## Run RStudio
+## Run RStudio with PostGIS DB
 
 Create the directory to clone the repo
 
 ```
 mkdir -p ~/propertypraxis && cd ~/propertypraxis
-git clone https://github.com/timhitchins/property-praxis-data-pipeline.git
+git clone <repo link>
 ```
 
-After installing and cloning the repo, build the image.
-Remember to set your password
+Start the containers.
 
 ```
-cd ~/propertypraxis/rstudio
-docker build -t timhitchins/rstudio-property-praxis .
-docker run -e PASSWORD=rstudiotesting --rm -p 8787:8787 \
-    -v ${PWD}/data:${HOME}/pp-pipeline/data \
-    -v ${PWD}/scripts:${HOME}/pp-pipeline/scripts \
-    timhitchins/rstudio-property-praxis
+docker-compose up -d postgres rstudio 
+```
+
+Load the initial PG DB by running this R script.
+```
+docker-compose exec rstudio Rscript /home/rstudio/pp-pipeline/scripts/s3-data-load.R
 ```
 
 ## Troubleshooting
