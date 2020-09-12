@@ -36,7 +36,7 @@ if (homeDir == "/root") {
 
 print(
   paste0(
-    "Loading environment variables from",
+    "Loading environment variables from ",
     homeDir,
     "/pp-pipeline/scripts/rstudio.env"
   )
@@ -159,6 +159,7 @@ names(shpList) <- lapply(s3Shpfiles, function(x)
   basename(x)) %>%
   str_replace(".shp.zip", "")
 
+
 ##clean up the global env
 print("Cleaning up global environement...")
 gc(rm(
@@ -231,7 +232,6 @@ for (i in 1:10) {
   }
 }
 
-
 #################################
 ##TABLE CLEANING / PREP PHASE
 ################################
@@ -260,8 +260,9 @@ nameFixer <- function(df) {
     "taxpayer2"
   names(df)[names(df) == "cibyrbuilt"] <- "cityrbuilt"
   
-  ##gj name changes
-  names(df)[names(df) == "parcelnumber"] <- "parcelno"
+  ##shp name changes
+  names(df)[names(df) %in% c("parcelnumber", "parcel_num", "parcelnum")] <-
+    "parcelno"
   names(df)[names(df) == "address"] <- "propaddr"
   names(df)[names(df) == "zipcode"] <- "propzip"
   
@@ -303,8 +304,7 @@ ppCols <- c(
   "totsqft",
   "totacres",
   "cityrbuilt",
-  "resyrbuilt",
-  "field_21"
+  "resyrbuilt"
 )
 
 
@@ -347,6 +347,27 @@ parcelnoFixer <- function (df) {
   return(df)
 }
 
+## some propno were not included
+## this function adds it
+propnoFixer <- function(df) {
+  dfNames <- names(df)
+  if (!"propno" %in% dfNames) {
+    df$propno <- unlist(lapply(df$propstr, function(val) {
+      valSplit <- val %>% str_split(" ")
+      valSplitNo <- valSplit[[1]][[1]]
+      
+      if (!is.na(as.numeric(valSplitNo))) {
+        return(as.double(valSplitNo))
+      } else {
+        return(NA)
+      }
+    }))
+    
+  }
+  return(df)
+}
+
+
 ## fix the GeoJSON names to follow the other praxis data conventions
 names(gj) <- str_replace_all(names(gj), "_", "")
 gj <- nameFixer(gj)
@@ -354,23 +375,25 @@ gj <- nameFixer(gj)
 ## add it to the shpList
 shpList[["gj"]] <- gj
 
-## fix col names
-print(paste("Standardizing column names for", names(csvList), "..."))
-csvList <- lapply(csvList, nameFixer)
+print(paste("Standardizing", names(shpList), "..."))
+shpList <- lapply(shpList, nameFixer)
+
+## fix col names and add propno
+print(paste("Standardizing", names(csvList), "..."))
+csvList <-
+  lapply(csvList, nameFixer) %>% 
+  lapply(propnoFixer) %>%
+  lapply(parcelnoFixer)
 
 ## add the year col
 csvList <- lapply(seq_along(csvList), addYear, dfs = csvList)
-
-## fix parcelno col
-print(paste("Fixing broken parcel numbers for all CSVs..."))
-csvList <- lapply(csvList, parcelnoFixer)
 
 
 ## bind the df list for a full dataset
 print(paste("Binding all CSVs and removing duplicates..."))
 ppFull <- bind_rows(csvList)
 ppFull <- ppFull[, ppCols]
-ppFull <- ppFull[!duplicated(ppFull),]
+ppFull <- ppFull[!duplicated(ppFull), ]
 
 ##cleanup env
 print("Cleaning up global environement...")
@@ -380,7 +403,7 @@ gc(rm(list = c("csvList")))
 print("Creating parcels_property table...")
 parPropCols <- c("parcelno", "propaddr") #PK
 parProp <- ppFull[, parPropCols]
-parProp <- parProp[!duplicated(parProp), ]
+parProp <- parProp[!duplicated(parProp),]
 parProp$parprop_id <- paste("parprop", 1:nrow(parProp), sep = "-")
 
 ##property table
@@ -392,7 +415,7 @@ propCols <- c("parcelno",
               "propzip")
 
 prop <- ppFull[, propCols]
-prop <- prop[!duplicated(prop),]
+prop <- prop[!duplicated(prop), ]
 prop$prop_id <- paste("prop", 1:nrow(prop), sep = "-")
 ##add parprop_id to prop table
 prop <- parProp %>%
@@ -402,7 +425,7 @@ prop <- parProp %>%
 print("Creating owner_taxpayer table...")
 ownTaxCols <- c("taxpayer1", "own_id")
 ownTax <- ppFull[, ownTaxCols]
-ownTax <- ownTax[!duplicated(ownTax),]
+ownTax <- ownTax[!duplicated(ownTax), ]
 ownTax$owntax_id <- paste("owntax", 1:nrow(ownTax), sep = "-")
 
 ##taxpayer table
@@ -418,7 +441,7 @@ taxCols <- c(
   "taxstatus"
 )
 tax <- ppFull[, taxCols]
-tax <- tax[!duplicated(tax),]
+tax <- tax[!duplicated(tax), ]
 tax$tp_id <- paste("tp", 1:nrow(tax), sep = "-")
 
 ##add owntax_id to tax table
@@ -443,7 +466,7 @@ taxParPropCols <- c(
 )
 
 taxParProp <- ppFull[, taxParPropCols]
-taxParProp <- taxParProp[!duplicated(taxParProp),]
+taxParProp <- taxParProp[!duplicated(taxParProp), ]
 taxParProp$taxparprop_id <-
   paste("tpp", 1:nrow(taxParProp), sep = "-")
 
@@ -475,7 +498,7 @@ taxParPropwIds <- taxParProp %>%
 ##remove redundant cols
 taxPropCols <- c("tp_id", "prop_id", "taxparprop_id")
 taxProp <- taxParPropwIds[, taxPropCols]
-taxProp <- taxProp[!duplicated(taxProp),]
+taxProp <- taxProp[!duplicated(taxProp), ]
 
 ##Back to Prop table
 ##remove redundant cols
@@ -498,7 +521,6 @@ tax <- tax[, c(
   "tpzip",
   "taxstatus"
 )]
-
 
 
 ##Rejoin everything
@@ -535,7 +557,7 @@ yearCols <- c(
   "praxisyear"
 )
 year <- ppFull[, yearCols]
-year <- year[!duplicated(year),]
+year <- year[!duplicated(year), ]
 
 ##Join entire dataset to year
 taxParPropYear <- taxParProp %>%
@@ -559,8 +581,6 @@ taxParPropYear <- taxParProp %>%
     )
   )
 
-
-
 ##remove redundant fields
 year <- taxParPropYear[, c(
   "taxparprop_id",
@@ -572,7 +592,7 @@ year <- taxParPropYear[, c(
   "resyrbuilt",
   "praxisyear"
 )]
-year <- year[!duplicated(year),]
+year <- year[!duplicated(year), ]
 
 ##create count column
 ##This can be joined to the full dataset
@@ -602,7 +622,6 @@ countGrouper <- function (val) {
 ## create the group col for filtering
 praxiscount$group <- unlist(lapply(praxiscount$count, countGrouper))
 
-
 ##geom table (uses praxis shaefiles and geojson)
 geomList <- lapply(seq_along(shpList), function(i) {
   print(paste("Creating geometry table for", names(shpList[i]), "..."))
@@ -611,12 +630,12 @@ geomList <- lapply(seq_along(shpList), function(i) {
                             c("parcelno", "propaddr", "geometry")]
   shp$tmp_id <- paste0(shp$parcelno, shp$propaddr)
   dupIds <- unique(shp$tmp_id[duplicated(shp$tmp_id)])
-  dupShp <- shp[shp$tmp_id %in% dupIds, ]
+  dupShp <- shp[shp$tmp_id %in% dupIds,]
   dupShp <- dupShp %>% group_by(parcelno, propaddr) %>%
     summarise(geometry = st_union(geometry),
               geom_agg_count = n())
   
-  uniShp <- shp[!shp$tmp_id %in% dupIds, ]
+  uniShp <- shp[!shp$tmp_id %in% dupIds,]
   shp <- bind_rows(dupShp, uniShp)
   
   geom <- parProp %>%
@@ -627,7 +646,7 @@ geomList <- lapply(seq_along(shpList), function(i) {
              "propaddr",
              "geom_agg_count",
              "geometry")]
-  geom <- st_as_sf(geom[!duplicated(geom),])
+  geom <- st_as_sf(geom[!duplicated(geom), ])
   st_crs(geom) = 4326
   return(geom)
 })
@@ -645,7 +664,8 @@ geomList2 <- lapply(seq_along(geomList), function(i) {
     right_join(parProp, by = c("parprop_id"))
   names(geom)[names(geom) == "geometry"] <- geomName
   st_geometry(geom) <- geomName
-  return(geom)
+  orderedGeom <- geom[order(geom$parprop_id),]
+  return(orderedGeom)
 })
 
 print("Creating parcel_property table...")
@@ -653,7 +673,9 @@ geomAll <- bind_cols(geomList2)
 keepCols <- c("parprop_id...1", "parcelno...3", "propaddr...4")
 geomCols <- names(geomAll)[str_detect(names(geomAll), "geom")]
 parPropGeom <- geomAll[, c(keepCols, geomCols)]
-names(parPropGeom) <- c("parprop_id", "parcelno", "propaddr", geomCols) 
+names(parPropGeom) <-
+  c("parprop_id", "parcelno", "propaddr", geomCols)
+
 
 ##Remove intermediary tables from local env
 print("Cleaning up global environement...")

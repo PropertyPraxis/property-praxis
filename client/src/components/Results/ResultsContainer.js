@@ -7,7 +7,7 @@ import { getMapStateAction } from "../../actions/mapState";
 import "../../scss/Results.scss";
 
 class ResultsContainer extends Component {
-  _createNewViewport = geojson => {
+  _createNewViewport = (geojson) => {
     const { mapState } = this.props;
     //trigger new viewport
     const { longitude, latitude, zoom } = createNewViewport(geojson, mapState);
@@ -17,7 +17,7 @@ class ResultsContainer extends Component {
         longitude,
         latitude,
         zoom,
-        transitionDuration: 1000
+        transitionDuration: 1000,
       })
     );
   };
@@ -43,8 +43,9 @@ class ResultsContainer extends Component {
     return null;
   }
 }
+
 function mapStateToProps({ mapData, mapState, results, searchState }) {
   return { mapData, mapState, results, searchState };
 }
+
 export default connect(mapStateToProps)(ResultsContainer);
-//

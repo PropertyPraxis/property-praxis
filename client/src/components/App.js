@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { BrowserRouter as Router, Route } from "react-router-dom";
 import { connect } from "react-redux";
 import queryString from "query-string";
+import PropTypes from "prop-types";
 import {
   handleGetInitialZipcodeDataAction,
   handleGetParcelsByQueryAction,
@@ -197,7 +198,7 @@ class MapApp extends Component {
 
       // set the marker
       this.props.dispatch(setMarkerCoordsAction(latitude, longitude));
-      
+
       //set the viewer
       this.props.dispatch(handleGetViewerImageAction(longitude, latitude));
       //set the parcels within buffer
@@ -254,6 +255,10 @@ class MapApp extends Component {
     );
   }
 }
+
+MapApp.propTypes = {
+  mapData: PropTypes.object.isRequired,
+};
 
 function App(props) {
   const { isOpen } = props.modal;
