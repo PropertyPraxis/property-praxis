@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
+import PropTypes from "prop-types";
 import queryString from "query-string";
 import PraxisMap from "./Map";
 
@@ -9,8 +10,8 @@ class MapContainer extends Component {
     type: "fill",
     source: {
       type: "geojson",
-      data: this.props.mapData
-    }
+      data: this.props.mapData,
+    },
   };
 
   zipcodeLineLayer = {
@@ -18,8 +19,8 @@ class MapContainer extends Component {
     type: "line",
     source: {
       type: "geojson",
-      data: this.props.mapData
-    }
+      data: this.props.mapData,
+    },
   };
 
   componentDidUpdate(prevProps) {
@@ -35,12 +36,22 @@ class MapContainer extends Component {
     return <PraxisMap {...this.props} />;
   }
 }
+
+MapContainer.propTypes = {
+  mapState: PropTypes.object.isRequired,
+  mapData: PropTypes.object.isRequired,
+  currentFeature: PropTypes.object.isRequired,
+  results: PropTypes.object.isRequired,
+  controller: PropTypes.object.isRequired,
+  location: PropTypes.object.isRequired,
+};
+
 function mapStateToProps({
   mapState,
   mapData,
   currentFeature,
   results,
-  controller
+  controller,
 }) {
   return { mapState, mapData, currentFeature, results, controller };
 }

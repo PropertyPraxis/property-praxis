@@ -137,7 +137,7 @@ class Child extends Component {
           ) : selection === "Search" ? (
             <Search {...this.props} />
           ) : selection === "Download Data" ? (
-            <DownloadData {...this.props} />
+            <DownloadData />
           ) : null}
           <div className="modal-footer">
             <a
@@ -413,7 +413,7 @@ SearchForm.propTypes = {
   dispatch: PropTypes.func.isRequired,
 };
 
-const DownloadData = (props) => {
+const DownloadData = () => {
   return <div>Download Data (in development...)</div>;
 };
 

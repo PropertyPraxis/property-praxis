@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import PropTypes from "prop-types";
 import ReactMapGL, { Source, Layer, Marker } from "react-map-gl";
 import ParcelLayerController from "./ParcelLayerController";
 import BasemapController from "./BasemapController";
@@ -186,6 +187,20 @@ class PraxisMarker extends React.Component {
     );
   }
 }
+
+PraxisMarker.propTypes = {
+  mapData: PropTypes.shape({
+    marker: PropTypes.shape(
+      {
+        latitude: PropTypes.number.isRequired,
+        longitude: PropTypes.number.isRequired,
+      }.isRequired
+    ),
+    year: PropTypes.string.isRequired,
+  }).isRequired,
+  createNewViewport: PropTypes.func.isRequired,
+  dispatch: PropTypes.func.isRequired,
+};
 
 class PraxisMap extends Component {
   _stops = [
@@ -405,6 +420,33 @@ class PraxisMap extends Component {
     );
   }
 }
+
+PraxisMap.propTypes = {
+  mapData: PropTypes.shape({
+    marker: PropTypes.shape(
+      {
+        latitude: PropTypes.number.isRequired,
+        longitude: PropTypes.number.isRequired,
+      }.isRequired
+    ),
+    year: PropTypes.string.isRequired,
+    ppraxis: PropTypes.object.isRequired,
+    zips: PropTypes.object.isRequired,
+  }).isRequired,
+  currentFeature: PropTypes.shape({
+    hoveredFeature: PropTypes.oneOfType([
+      PropTypes.object.isRequired,
+      PropTypes.oneOf([undefined]),
+    ]),
+  }).isRequired,
+  controller: PropTypes.shape({
+    filter: PropTypes.array.isRequired,
+    sliderValue: PropTypes.number.isRequired,
+    basemapLayer: PropTypes.string.isRequired,
+  }).isRequired,
+  mapState: PropTypes.object.isRequired,
+  dispatch: PropTypes.func.isRequired,
+};
 
 export default PraxisMap;
 /* <Marker

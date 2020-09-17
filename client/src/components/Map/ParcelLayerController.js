@@ -1,16 +1,17 @@
 import React, { Component } from "react";
+import PropTypes from "prop-types";
 import Slider from "react-rangeslider";
 import {
   setSliderValueAction,
-  setParcelFilterAction
+  setParcelFilterAction,
 } from "../../actions/controller";
 import "react-rangeslider/lib/index.css";
 import * as styleVars from "../../scss/colors.scss";
 import "../../scss/Controller.scss";
 
 class ParcelLayerController extends Component {
-  _getColors = styles => {
-    return styles.filter(style => style[0].indexOf("parcelStop") > -1);
+  _getColors = (styles) => {
+    return styles.filter((style) => style[0].indexOf("parcelStop") > -1);
   };
 
   render() {
@@ -20,7 +21,7 @@ class ParcelLayerController extends Component {
     return (
       <div className="parcel-layer-controller-container">
         <div className="parcel-layer-palette-labels">
-          {labels.map(label => {
+          {labels.map((label) => {
             return <div key={label}>{label}</div>;
           })}
         </div>
@@ -35,11 +36,9 @@ class ParcelLayerController extends Component {
                     ? { backgroundColor: color[1] }
                     : { backgroundColor: styleVars.uiLightGray }
                 }
-                onClick={event => {
+                onClick={(event) => {
                   event.preventDefault();
-                  this.props.dispatch(
-                    setParcelFilterAction(labels[index])
-                  );
+                  this.props.dispatch(setParcelFilterAction(labels[index]));
                 }}
               ></div>
             );
@@ -51,7 +50,7 @@ class ParcelLayerController extends Component {
             min={0}
             max={100}
             orientation="horizontal"
-            onChange={value => {
+            onChange={(value) => {
               this.props.dispatch(setSliderValueAction(value));
             }}
           />
@@ -60,5 +59,13 @@ class ParcelLayerController extends Component {
     );
   }
 }
+
+ParcelLayerController.propTypes = {
+  controller: PropTypes.shape({
+    filter: PropTypes.array.isRequired,
+    sliderValue: PropTypes.number.isRequired,
+  }).isRequired,
+  dispatch: PropTypes.func.isRequired,
+};
 
 export default ParcelLayerController;
