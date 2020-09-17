@@ -132,6 +132,26 @@ To disable this behavior, use disable instead.
 sudo systemctl disable docker
 ```
 
+## Run RStudio with PostGIS DB to populate DB
+
+Create the directory to clone the repo
+
+```
+mkdir -p ~/propertypraxis && cd ~/propertypraxis
+git clone <repo link>
+```
+
+Start the containers.
+
+```
+docker-compose up -d postgres rstudio 
+```
+
+Load the initial PG DB by running this R script.
+```
+docker-compose exec rstudio Rscript /home/rstudio/pp-pipeline/scripts/s3-data-load.R
+```
+
 ## Running a Dev Environment
 
 Make a new directory and clone this repo.
@@ -164,18 +184,23 @@ mkdir property-praxis && cd property-praxis
 git clone <repo link>
 ```
 
-To run this stack in development, navigate to the
+To run this stack in production, navigate to the
 root directory of the repo and run:
 
 ```
-docker-compose up --build
-docker-compose up
+docker-compose -f docker-compose.yml -f docker-compose.production.yml --build
+```
+
+or if you have already built the images
+
+```
+docker-compose -f docker-compose.yml -f docker-compose.production.yml up
 ```
 
 or detach terminal with -d flag
 
 ```
-docker-compose up -d
+docker-compose -f docker-compose.yml -f docker-compose.production.yml up -d
 ```
 
 ## Include Required Environment Variables
@@ -195,30 +220,10 @@ And in the `./rstudio/scripts/` directory include:
 
 ## Connecting to the PostGIS Database
 
-While running a dev or prod environement, you can connect to the PostGIS DB via the host terminal using the following command:
+While running a dev or prod environment, you can connect to the PostGIS DB via the host terminal using the following command:
 
 ```
 psql postgres://<username>:<databasepassword>@localhost:35432/db
-```
-
-## Run RStudio with PostGIS DB
-
-Create the directory to clone the repo
-
-```
-mkdir -p ~/propertypraxis && cd ~/propertypraxis
-git clone <repo link>
-```
-
-Start the containers.
-
-```
-docker-compose up -d postgres rstudio 
-```
-
-Load the initial PG DB by running this R script.
-```
-docker-compose exec rstudio Rscript /home/rstudio/pp-pipeline/scripts/s3-data-load.R
 ```
 
 ## Troubleshooting

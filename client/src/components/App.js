@@ -257,11 +257,17 @@ class MapApp extends Component {
 }
 
 MapApp.propTypes = {
+  modal: PropTypes.shape({
+    isOpen: PropTypes.bool.isRequired,
+  }),
   mapData: PropTypes.shape({
     dataIsLoading: PropTypes.bool.isRequired,
     ppraxis: PropTypes.object.isRequired,
     zips: PropTypes.object.isRequired,
+    year: PropTypes.string.isRequired,
   }).isRequired,
+  mapState: PropTypes.object.isRequired,
+  dispatch: PropTypes.func.isRequired,
 };
 
 function App(props) {
@@ -273,6 +279,14 @@ function App(props) {
 
   return <MapApp {...props} />;
 }
+
+App.propTypes = {
+  mapData: PropTypes.object.isRequired,
+  mapState: PropTypes.object.isRequired,
+  modal: PropTypes.shape({
+    isOpen: PropTypes.bool.isRequired,
+  }).isRequired,
+};
 
 function mapStateToProps({ mapData, modal, mapState }) {
   return { mapData, modal, mapState };

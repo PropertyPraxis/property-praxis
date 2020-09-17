@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import { DebounceInput } from "react-debounce-input";
+import PropTypes from "prop-types";
 import {
   setSearchType,
   setSearchTerm,
@@ -8,11 +9,11 @@ import {
   handleSearchPartialZipcode,
   handleSearchPartialAddress,
   handleSearchPartialSpeculator,
-  handleSearchPartialAll
+  handleSearchPartialAll,
 } from "../../actions/search";
 import {
   togglePartialResultsAction,
-  toggleFullResultsAction
+  toggleFullResultsAction,
 } from "../../actions/results";
 import { setMarkerCoordsAction } from "../../actions/mapData";
 import PartialSearchResults from "./SearchResults";
@@ -25,13 +26,13 @@ const resetSearchOptions = {
   searchTerm: "",
   searchDisplayType: null,
   partialResults: [],
-  fullResults: []
+  fullResults: [],
 };
 
 class SearchBar extends Component {
   _searchButons = ["All", "Address", "Speculator", "Zipcode"];
 
-  _setSearchPlaceholderText = searchType => {
+  _setSearchPlaceholderText = (searchType) => {
     switch (searchType) {
       case "All":
         return "Search Property Praxis...";
@@ -46,7 +47,7 @@ class SearchBar extends Component {
     }
   };
 
-  _handleInputChange = async e => {
+  _handleInputChange = async (e) => {
     const searchTerm = e.target.value;
     const { searchType } = this.props.searchState;
     const { year } = this.props.mapData;
@@ -70,7 +71,7 @@ class SearchBar extends Component {
   };
 
   // STILL WORKING ON THIS
-  _handleKeyPress = async e => {
+  _handleKeyPress = async (e) => {
     const { searchType, searchTerm } = this.props.searchState;
     const { year } = this.props.mapData;
     const { key } = e;
@@ -109,7 +110,7 @@ class SearchBar extends Component {
       <section className="search-grid-item">
         <div className="search-container">
           <div className="search-options">
-            {this._searchButons.map(button => {
+            {this._searchButons.map((button) => {
               return (
                 <div
                   key={button}
@@ -144,7 +145,7 @@ class SearchBar extends Component {
                 placeholder={this._setSearchPlaceholderText(searchType)}
                 value={searchTerm} //controlled input
                 onChange={this._handleInputChange}
-                onKeyPress={event => {
+                onKeyPress={(event) => {
                   //need to update to action
                   event.persist();
                   this._handleKeyPress(event);
@@ -154,7 +155,7 @@ class SearchBar extends Component {
                 }}
                 minLength={1}
                 debounceTimeout={300}
-                inputRef={ref => {
+                inputRef={(ref) => {
                   //create a ref to the input
                   this._textInput = ref;
                 }}
@@ -182,5 +183,15 @@ class SearchBar extends Component {
     );
   }
 }
+
+SearchBar.propTypes = {
+  searchState: PropTypes.shape({
+    searchType: PropTypes.string.isRequired,
+    searchTerm: PropTypes.string.isRequired,
+  }).isRequired,
+  mapData: PropTypes.shape({
+    year: PropTypes.string.isRequired,
+  }).isRequired,
+};
 
 export default SearchBar;
