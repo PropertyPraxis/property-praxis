@@ -60,6 +60,13 @@ const PartialReturnResultSwitch = (props) => {
   }
 };
 
+PartialReturnResultSwitch.propTypes = {
+  searchState: PropTypes.shape({
+    searchState: PropTypes.object.isRequired,
+    partialResults: PropTypes.array.isRequired,
+  }).isRequired,
+};
+
 class PartialZipcodeResults extends Component {
   _onResultClick = (result) => {
     const { year } = this.props.mapData;
@@ -134,6 +141,14 @@ class PartialZipcodeResults extends Component {
     );
   }
 }
+
+PartialZipcodeResults.propTypes = {
+  mapData: PropTypes.shape({
+    year: PropTypes.string.isRequired,
+  }).isRequired,
+  partialSearchResults: PropTypes.string.isRequired,
+  dispatch: PropTypes.func.isRequired,
+};
 
 class PartialAddressResults extends Component {
   _onResultClick = (result) => {
@@ -231,6 +246,14 @@ class PartialAddressResults extends Component {
   }
 }
 
+PartialAddressResults.propTypes = {
+  mapData: PropTypes.shape({
+    year: PropTypes.string.isRequired,
+  }).isRequired,
+  partialSearchResults: PropTypes.string.isRequired,
+  dispatch: PropTypes.func.isRequired,
+};
+
 class PartialSpeculatorResults extends Component {
   _onResultClick = (result) => {
     const { year } = this.props.mapData;
@@ -307,6 +330,14 @@ class PartialSpeculatorResults extends Component {
   }
 }
 
+PartialSpeculatorResults.propTypes = {
+  mapData: PropTypes.shape({
+    year: PropTypes.string.isRequired,
+  }).isRequired,
+  partialSearchResults: PropTypes.string.isRequired,
+  dispatch: PropTypes.func.isRequired,
+};
+
 class PartialAllResults extends Component {
   render() {
     const { partialResults } = this.props.searchState;
@@ -342,6 +373,11 @@ class PartialAllResults extends Component {
     );
   }
 }
+
+PartialAllResults.propTypes = {
+  searchState: PropTypes.shape({ partialResults: PropTypes.array.isRequired })
+    .isRequired,
+};
 
 class PartialSearchResults extends Component {
   // when user clicks on a result the partial results disappear

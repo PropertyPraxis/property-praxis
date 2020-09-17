@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import { Link } from "react-router-dom";
+import PropTypes from "prop-types";
 import { CSVLink } from "react-csv";
 import { coordsFromWKT } from "../../utils/map";
 import { createAddressString, capitalizeFirstLetter } from "../../utils/helper";
@@ -43,6 +44,17 @@ const ResultsSwitcher = (props) => {
   ) : (
     "LOADING..."
   );
+};
+
+ResultsSwitcher.propTypes = {
+  searchState: PropTypes.shape({
+    searchDisplayType: PropTypes.oneOfType([
+      PropTypes.string,
+      PropTypes.oneOf([null]),
+    ]),
+  }).isRequired,
+  mapData: PropTypes.shape({ dataIsLoading: PropTypes.bool.isRequired })
+    .isRequired,
 };
 
 //currently this works for zipcodes
@@ -176,6 +188,19 @@ class ParcelResults extends Component {
     );
   }
 }
+
+ParcelResults.propTypes = {
+  mapData: PropTypes.shape({
+    year: PropTypes.string.isRequired,
+    ppraxis: PropTypes.object.isRequired,
+  }).isRequired,
+  searchState: PropTypes.shape({
+    searchTerm: PropTypes.string.isRequired,
+  }).isRequired,
+  resultsType: PropTypes.string.isRequired,
+  dispatch: PropTypes.func.isRequired,
+};
+
 class SingleAddressResults extends Component {
   componentDidMount() {
     // get the download data for coords
@@ -378,6 +403,17 @@ class SingleAddressResults extends Component {
   }
 }
 
+SingleAddressResults.propTypes = {
+  mapData: PropTypes.shape({
+    year: PropTypes.string.isRequired,
+    ppraxis: PropTypes.object.isRequired,
+  }).isRequired,
+  searchState: PropTypes.shape({
+    searchTerm: PropTypes.string.isRequired,
+  }).isRequired,
+  dispatch: PropTypes.func.isRequired,
+};
+
 class FullResults extends Component {
   render() {
     const { searchTerm, searchType } = this.props.searchState;
@@ -417,5 +453,25 @@ class FullResults extends Component {
     );
   }
 }
+
+FullResults.propTypes = {
+  searchState: PropTypes.shape({
+    searchTerm: PropTypes.oneOfType([
+      PropTypes.string,
+      PropTypes.oneOf([null]),
+    ]),
+    searchType: PropTypes.string.isRequired,
+  }).isRequired,
+  mapData: PropTypes.shape({
+    dataIsLoading: PropTypes.bool.isRequired,
+  }).isRequired,
+  results: PropTypes.shape({
+    downloadData: PropTypes.oneOfType([
+      PropTypes.array,
+      PropTypes.oneOf([null]),
+    ]),
+  }).isRequired,
+  dispatch: PropTypes.func.isRequired,
+};
 
 export default FullResults;

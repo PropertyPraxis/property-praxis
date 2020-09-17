@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-// import PropTypes from "prop-types";
+import PropTypes from "prop-types";
 import * as Mapillary from "mapillary-js";
 import { MapillaryViewer } from "react-mapillary";
 // import { handleGetViewerImageAction } from "../../actions/results";
@@ -18,8 +18,8 @@ class MapViewer extends Component {
       {
         component: {
           cover: false,
-          marker: true
-        }
+          marker: true,
+        },
       }
     );
 
@@ -34,18 +34,18 @@ class MapViewer extends Component {
     markerComponent.add([defaultMarker]); //interactiveMarker,
 
     mly.moveCloseTo(latitude, longitude).then(
-      function(node) {
+      function (node) {
         console.log("key is: ", node.key);
       },
-      function(error) {
+      function (error) {
         console.error("move close to error: ", error);
-        mly.moveToKey(key).catch(function(e) {
+        mly.moveToKey(key).catch(function (e) {
           console.error(e);
         });
       }
     );
     // Viewer size is dynamic so resize should be called every time the window size changes
-    window.addEventListener("resize", function() {
+    window.addEventListener("resize", function () {
       mly.resize();
     });
   }
@@ -54,6 +54,14 @@ class MapViewer extends Component {
     return <div className="map-viewer" id="mly"></div>;
   }
 }
+
+MapViewer.propTypes = {
+  results: PropTypes.shape({
+    viewer: PropTypes.shape({ key: PropTypes.string.isRequired }.isRequired),
+  }).isRequired,
+};
+
+export default MapViewer;
 
 //////REACT MAPILLARY VIEWER
 // class MapViewer extends Component {
@@ -84,5 +92,3 @@ class MapViewer extends Component {
 //     return <div>Loading Image...</div>;
 //   }
 // }
-
-export default MapViewer;

@@ -9,7 +9,7 @@ class SearchContainer extends Component {
   }
 }
 
-SearchBar.propTypes = {
+SearchContainer.propTypes = {
   searchState: PropTypes.object.isRequired,
   mapData: PropTypes.object.isRequired,
   mapState: PropTypes.object.isRequired,

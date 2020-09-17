@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
+import PropTypes from "prop-types";
 import { CSSTransition } from "react-transition-group";
 import FullResults from "./FullResults";
 import { createNewViewport } from "../../utils/map";
@@ -43,6 +44,19 @@ class ResultsContainer extends Component {
     return null;
   }
 }
+
+ResultsContainer.propTypes = {
+  mapData: PropTypes.object.isRequired,
+  mapState: PropTypes.object.isRequired,
+  results: PropTypes.shape({ isFullResultsOpen: PropTypes.bool.isRequired })
+    .isRequired,
+  searchState: PropTypes.shape({
+    searchTerm: PropTypes.oneOfType([
+      PropTypes.string,
+      PropTypes.number, //null
+    ]),
+  }).isRequired,
+};
 
 function mapStateToProps({ mapData, mapState, results, searchState }) {
   return { mapData, mapState, results, searchState };

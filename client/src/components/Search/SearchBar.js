@@ -187,11 +187,15 @@ class SearchBar extends Component {
 SearchBar.propTypes = {
   searchState: PropTypes.shape({
     searchType: PropTypes.string.isRequired,
-    searchTerm: PropTypes.string.isRequired,
+    searchTerm: PropTypes.oneOfType([
+      PropTypes.string,
+      PropTypes.oneOf([null]),
+    ]),
   }).isRequired,
   mapData: PropTypes.shape({
     year: PropTypes.string.isRequired,
   }).isRequired,
+  dispatch: PropTypes.func.isRequired,
 };
 
 export default SearchBar;
