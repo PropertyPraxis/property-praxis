@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import ReactDOM from "react-dom";
-// import Modal from "react-modal";
+import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import {
   handleGetYearsAction,
@@ -11,10 +11,7 @@ import {
 } from "../../actions/mapData";
 import { createNewViewport } from "../../utils/map";
 import { getMapStateAction } from "../../actions/mapState";
-import {
-  resetSearch,
-  setSearchDisplayType,
-} from "../../actions/search";
+import { resetSearch, setSearchDisplayType } from "../../actions/search";
 import {
   toggleFullResultsAction,
   togglePartialResultsAction,
@@ -82,6 +79,19 @@ class PraxisModal extends React.Component {
     );
   }
 }
+// years, zipcodes
+PraxisModal.propTypes = {
+  mapData: PropTypes.shape({
+    years: PropTypes.oneOfType([
+      PropTypes.array,
+      PropTypes.number, //null
+    ]),
+    zips: PropTypes.object.isRequired,
+  }).isRequired,
+  modal: PropTypes.shape({
+    selection: PropTypes.string.isRequired,
+  }),
+};
 
 class Child extends Component {
   handleClick = (selection) => {
@@ -123,7 +133,7 @@ class Child extends Component {
             })}
           </div>
           {selection === "About" ? (
-            <About {...this.props} />
+            <About />
           ) : selection === "Search" ? (
             <Search {...this.props} />
           ) : selection === "Download Data" ? (
@@ -151,7 +161,13 @@ class Child extends Component {
   }
 }
 
-const About = (props) => {
+Child.propTypes = {
+  modal: PropTypes.shape({
+    selection: PropTypes.string.isRequired,
+  }),
+};
+
+const About = () => {
   return (
     <div className="modal-content">
       <p>
@@ -186,6 +202,19 @@ class Search extends Component {
     return null;
   }
 }
+
+Search.propTypes = {
+  mapData: PropTypes.shape({
+    years: PropTypes.oneOfType([
+      PropTypes.array,
+      PropTypes.number, //null
+    ]),
+    zipcodes: PropTypes.oneOfType([
+      PropTypes.array,
+      PropTypes.number, //null
+    ]),
+  }).isRequired,
+};
 
 class SearchForm extends Component {
   _zipcodeRef = React.createRef();
@@ -262,7 +291,9 @@ class SearchForm extends Component {
       this.props.dispatch(toggleModalAction(false));
       this.props.dispatch(dataIsLoadingAction(true));
       this.props
-        .dispatch(handleGetParcelsByQueryAction(`/api/geojson/parcels/${yearValue}`))
+        .dispatch(
+          handleGetParcelsByQueryAction(`/api/geojson/parcels/${yearValue}`)
+        )
         .then((geojson) => {
           this._createNewViewport(geojson);
           this.props.dispatch(dataIsLoadingAction(false));
@@ -367,6 +398,20 @@ class SearchForm extends Component {
     );
   }
 }
+
+SearchForm.propTypes = {
+  mapData: PropTypes.shape({
+    years: PropTypes.oneOfType([
+      PropTypes.array,
+      PropTypes.number, //null
+    ]),
+    zipcodes: PropTypes.oneOfType([
+      PropTypes.array,
+      PropTypes.number, //null
+    ]),
+  }).isRequired,
+  dispatch: PropTypes.func.isRequired,
+};
 
 const DownloadData = (props) => {
   return <div>Download Data (in development...)</div>;

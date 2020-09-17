@@ -257,7 +257,11 @@ class MapApp extends Component {
 }
 
 MapApp.propTypes = {
-  mapData: PropTypes.object.isRequired,
+  mapData: PropTypes.shape({
+    dataIsLoading: PropTypes.bool.isRequired,
+    ppraxis: PropTypes.object.isRequired,
+    zips: PropTypes.object.isRequired,
+  }).isRequired,
 };
 
 function App(props) {
