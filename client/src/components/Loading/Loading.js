@@ -10,23 +10,18 @@ const launchStyles = {
     alignItems: "center",
     height: "100vh",
     backgroundColor: "#343332",
-    color: "#ffffff"
-  }
+    color: "#ffffff",
+  },
 };
 
 class Loading extends React.Component {
-  static propTypes = {
-    text: PropTypes.string.isRequired,
-    speed: PropTypes.number.isRequired
-  };
-
   static defaultProps = {
     text: "Loading",
-    speed: 300
+    speed: 300,
   };
 
   state = {
-    text: this.props.text
+    text: this.props.text,
   };
 
   componentDidMount() {
@@ -36,7 +31,7 @@ class Loading extends React.Component {
     this.interval = window.setInterval(() => {
       this.state.text === stopper
         ? this.setState(() => ({ text: this.props.text }))
-        : this.setState(prevState => ({ text: prevState.text + "." }));
+        : this.setState((prevState) => ({ text: prevState.text + "." }));
     }, speed);
   }
 
@@ -48,5 +43,10 @@ class Loading extends React.Component {
     return <div style={launchStyles.content}>{this.state.text}</div>;
   }
 }
+
+Loading.propTypes = {
+  text: PropTypes.string.isRequired,
+  speed: PropTypes.number.isRequired,
+};
 
 export default Loading;

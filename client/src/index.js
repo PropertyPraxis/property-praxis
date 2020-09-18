@@ -8,7 +8,6 @@ import "mapbox-gl/dist/mapbox-gl.css"; //mapbox css
 import "mapillary-js/dist/mapillary.min.css"; //mapillary css
 import "./scss/index.scss";
 import App from "./components/App";
-import * as serviceWorker from "./serviceWorker";
 
 //redux store
 const store = createStore(reducer, middleware);
