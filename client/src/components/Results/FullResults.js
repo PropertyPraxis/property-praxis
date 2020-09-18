@@ -3,7 +3,12 @@ import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 import { CSVLink } from "react-csv";
 import { coordsFromWKT } from "../../utils/map";
-import { createAddressString, capitalizeFirstLetter } from "../../utils/helper";
+import {
+  createAddressString,
+  capitalizeFirstLetter,
+  createDateString,
+  addUnderscoreToString,
+} from "../../utils/helper";
 import {
   handleSearchPartialZipcode,
   handleSearchPartialAddress,
@@ -420,13 +425,11 @@ class FullResults extends Component {
     const { dataIsLoading } = this.props.mapData;
     const { downloadData } = this.props.results;
 
-    const filename = `${searchType}_${capitalizeFirstLetter(
-      searchTerm
-    )}_${new Date().toLocaleDateString()}.csv`
-      .split(" ")
-      .join("_")
-      .replace(/\//g, "_")
-      .replace(/,/g, "");
+    const filename = addUnderscoreToString(
+      `${searchType}_${capitalizeFirstLetter(
+        searchTerm
+      )}_${createDateString()}.csv`
+    );
 
     return (
       <section className="results-outer">

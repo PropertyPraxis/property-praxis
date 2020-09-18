@@ -7,10 +7,10 @@ export function setDocHeightOnWindow() {
       `${window.innerHeight / 100}px`
     );
   }
-  window.addEventListener("resize", function() {
+  window.addEventListener("resize", function () {
     setDocHeight();
   });
-  window.addEventListener("orientationchange", function() {
+  window.addEventListener("orientationchange", function () {
     setDocHeight();
   });
 
@@ -21,7 +21,7 @@ export function capitalizeFirstLetter(string) {
   if (string === null) return null;
   const lowerString = string.toLowerCase();
   const strArray = lowerString.split(" ");
-  const capitalizedStrArray = strArray.map(val => {
+  const capitalizedStrArray = strArray.map((val) => {
     return val.charAt(0).toUpperCase() + val.slice(1);
   });
 
@@ -42,30 +42,26 @@ export function pathnameToSearchType(path) {
       return "All";
   }
 }
-//function to build filter
-// export function createParcelLayerFilter(val){
-
-// }
 
 // function to find the single target address at distance 0
 export function findTargetAddress(features) {
   const targetAddress = features
-    .map(feature => {
+    .map((feature) => {
       if (feature.properties.distance === 0) {
         return feature;
       }
       return null;
     })
-    .filter(result => result !== null);
+    .filter((result) => result !== null);
 
   const nearbyAddresses = features
-    .map(feature => {
+    .map((feature) => {
       if (feature.properties.distance !== 0) {
         return feature;
       }
       return null;
     })
-    .filter(result => result !== null);
+    .filter((result) => result !== null);
 
   return { targetAddress, nearbyAddresses };
 }
@@ -85,7 +81,7 @@ export function createAddressString(propno, propdir, propstr, propzip) {
 export function createLayerFilter(arr) {
   let layerFilter = [];
 
-  const fullFilter = arr.map(item => {
+  const fullFilter = arr.map((item) => {
     if (item === "10-20") {
       return [...layerFilter, ...[["==", "own_group", 1]]];
     }
@@ -111,4 +107,12 @@ export function createLayerFilter(arr) {
   });
 
   return ["none", ...fullFilter.flat(1)];
+}
+
+export function createDateString() {
+  return new Date().toDateString().replace(/ /g, "_");
+}
+
+export function addUnderscoreToString(val) {
+  return val.replace(/ /g, "_");
 }
