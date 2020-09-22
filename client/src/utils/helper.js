@@ -116,3 +116,7 @@ export function createDateString() {
 export function addUnderscoreToString(val) {
   return val.replace(/ /g, "_");
 }
+
+export function getYearString() {
+  return new Date().getFullYear();
+}

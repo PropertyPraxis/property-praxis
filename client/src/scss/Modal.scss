@@ -1,176 +1,259 @@
 @import "./colors.scss";
 
-/* The Modal (background) */
-.modal {
-  // display: none; /* Hidden by default */
-  position: fixed; /* Stay in place */
-  z-index: 1000; /* Sit on top */
-  padding-top: 100px; /* Location of the box */
-  left: 0;
-  top: 0;
-  width: 100%; /* Full width */
-  height: 100%; /* Full height */
-  overflow: auto; /* Enable scroll if needed */
-  background-color: rgb(0, 0, 0); /* Fallback color */
-  background-color: rgba(0, 0, 0, 0.8); /* Black w/ opacity */
-}
-
-.modal-container {
-  background-color: #fefefe;
-  margin: auto;
-  padding: 10px 20px;
-
-  border: 3px solid $ui-black;
-  width: 80%;
-  max-width: 1000px;
-  border-radius: 4px;
-
-  h1 {
-    text-align: center;
-  }
-}
-
-.modal-container > div:nth-child(3) {
-  overflow-y: auto;
-  max-height: 400px;
-  line-height: 1.6;
-}
-
-// close button in modal
-.modal-close-button:first-child {
-  text-align: right;
-  font-size: 1.5rem;
-}
-
-.modal-close-button:first-child:hover {
-  color: $pp-rose;
-}
-
-.modal-close-button:active {
-  transform: translateY(+1px);
-}
-
-.modal-nav {
-  margin: 0 auto;
-  display: flex;
-  width: 80%;
-  justify-content: center;
-
-  div {
-    box-sizing: border-box;
-    font-size: 1.3rem;
-    font-weight: 600;
-    padding: 5px;
-    margin: 5px;
-    text-align: center;
-    border-bottom: 3px solid $ui-white;
-  }
-
-  div:hover {
-    color: $pp-rose;
-    border-bottom: 3px solid $pp-rose;
-  }
-}
-
-.modal-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  line-height: 1.6;
-  max-height: 250px;
-  overflow-y: auto;
-
-  h3 {
-    text-align: center;
-  }
-}
-
-.modal-form {
-  box-sizing: border-box;
-
-  div > label {
-    display: block;
-    width: 165px;
-    height: 30px;
-    font-weight: 500;
-    font-size: 1.3rem;
-  }
-
-  div > input {
-    width: 160px;
-  }
-
-
-  input:last-child {
-    display: block;
-    width: 150px;
-  }
-}
-
-.modal-footer {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-
-  div {
-    margin: 5px;
-    max-width: 225px;
-  }
-
-  a > img {
-    margin: 5px;
-    max-width: 225px;
-    max-height: 40px;
-  }
-}
-
-.small-text {
-  display: block;
-  font-size: small;
-  font-style: italic;
-  position: relative;
-  bottom: 5px;
-  margin-bottom: 10px;
-}
-@media screen and (max-width: 600px) {
-  .modal {
-    padding-top: 5px;
-  }
-
-  h1 {
-    font-size: 120%;
-  }
-
-  .modal-nav > div {
-    font-size: 0.8rem;
-  }
-}
-// .overlay {
-//   position: fixed;
-//   top: 0;
+// /* The Modal (background) */
+// .modal {
+//   // display: none; /* Hidden by default */
+//   position: fixed; /* Stay in place */
+//   z-index: 1000; /* Sit on top */
+//   padding-top: 100px; /* Location of the box */
 //   left: 0;
-//   right: 0;
-//   bottom: 0;
-//   background-color: $ui-dark-gray;
+//   top: 0;
+//   width: 100%; /* Full width */
+//   height: 100%; /* Full height */
+//   overflow: auto; /* Enable scroll if needed */
+//   background-color: rgb(0, 0, 0); /* Fallback color */
+//   background-color: rgba(0, 0, 0, 0.8); /* Black w/ opacity */
 // }
 
-// .modal {
-//   position: absolute;
-//   top: 50%;
-//   left: 50%;
-//   right: auto;
-//   bottom: auto;
-//   margin-right: -30%;
-//   transform: translate(-50%, -50%);
-//   z-index: 2000;
+// .modal-container {
+//   background-color: #fefefe;
+//   margin: auto;
+//   padding: 10px 20px;
 
-//   ///////////////
-//   padding: 30px;
-//   background-color: $ui-white;
+//   border: 3px solid $ui-black;
+//   width: 80%;
+//   max-width: 1000px;
 //   border-radius: 4px;
-//   border: 1px solid $ui-black;
 
-//   div > p {
-//     line-height: 1.6;
+//   h1 {
+//     text-align: center;
 //   }
 // }
+
+// .modal-container > div:nth-child(3) {
+//   overflow-y: auto;
+//   max-height: 400px;
+//   line-height: 1.6;
+// }
+
+// // close button in modal
+// .modal-close-button:first-child {
+//   text-align: right;
+//   font-size: 1.5rem;
+// }
+
+// .modal-close-button:first-child:hover {
+//   color: $pp-rose;
+// }
+
+// .modal-close-button:active {
+//   transform: translateY(+1px);
+// }
+
+// .modal-nav {
+//   margin: 0 auto;
+//   display: flex;
+//   width: 80%;
+//   justify-content: center;
+
+//   div {
+//     box-sizing: border-box;
+//     font-size: 1.3rem;
+//     font-weight: 600;
+//     padding: 5px;
+//     margin: 5px;
+//     text-align: center;
+//     border-bottom: 3px solid $ui-white;
+//   }
+
+//   div:hover {
+//     color: $pp-rose;
+//     border-bottom: 3px solid $pp-rose;
+//   }
+// }
+
+// .modal-content {
+//   display: flex;
+//   flex-direction: column;
+//   align-items: center;
+//   line-height: 1.6;
+//   max-height: 250px;
+//   overflow-y: auto;
+
+//   h3 {
+//     text-align: center;
+//   }
+// }
+
+// .modal-form {
+//   box-sizing: border-box;
+
+//   div > label {
+//     display: block;
+//     width: 165px;
+//     height: 30px;
+//     font-weight: 500;
+//     font-size: 1.3rem;
+//   }
+
+//   div > input {
+//     width: 160px;
+//   }
+
+//   input:last-child {
+//     display: block;
+//     width: 150px;
+//   }
+// }
+
+// .modal-footer {
+//   display: flex;
+//   justify-content: flex-end;
+//   align-items: center;
+
+//   div {
+//     margin: 5px;
+//     max-width: 225px;
+//   }
+
+//   a > img {
+//     margin: 5px;
+//     max-width: 225px;
+//     max-height: 40px;
+//   }
+// }
+
+// .small-text {
+//   display: block;
+//   font-size: small;
+//   font-style: italic;
+//   position: relative;
+//   bottom: 5px;
+//   margin-bottom: 10px;
+// }
+// @media screen and (max-width: 600px) {
+//   .modal {
+//     padding-top: 5px;
+//   }
+
+//   h1 {
+//     font-size: 120%;
+//   }
+
+//   .modal-nav > div {
+//     font-size: 0.8rem;
+//   }
+// }
+
+///////////////////////////////////////////
+// Praxis Modal Dev
+.home-container {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 100%;
+}
+
+.home-container > :nth-child(1) {
+  min-height: 40%;
+  min-width: 100%;
+  background-color: $ui-dark-gray;
+}
+.home-container > :nth-child(2) {
+  min-height: 50%;
+  max-height: 50%;
+  min-width: 100%;
+  background-color: $ui-black;
+}
+.home-container > :nth-child(3) {
+  min-height: 10%;
+  height: 10%;
+  min-width: 100%;
+  background-color: $pp-rose;
+}
+
+.header-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.home-logo-container{
+  display: flex;
+}
+
+header {
+  display: inline-block;
+  color: $pp-rose;
+  font-size: 3rem;
+}
+
+.home-logo {
+  display: inline-block;
+  width: 30%;
+  max-width: 200px;
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+.header-container {
+  display: flex;
+  align-items: center;
+}
+
+.home-search-container {
+  width: 100%;
+  max-width: 1000px;
+}
+
+.home-general-search-container {
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  max-width: 1000px;
+  justify-content: space-evenly;
+
+  aside {
+    padding: 20px 10px;
+    color: white;
+    width: 250px;
+  }
+}
+
+footer {
+  height: 100%;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  max-width: 1200px;
+}
+
+.footer-container {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  margin: 0 15px;
+
+  div {
+    color: $ui-white;
+  }
+
+  div:first-child,
+  div:nth-child(2) {
+    border: 1px solid black;
+    display: flex;
+    align-items: center;
+
+    a > img {
+      height: 50px;
+    }
+  }
+
+  div > li {
+    margin-top: 5px;
+  }
+}

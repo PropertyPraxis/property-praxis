@@ -104,10 +104,17 @@ class SearchBar extends Component {
   }
   render() {
     const { searchType, searchTerm } = this.props.searchState;
+    const { searchBarType } = this.props;
     const searchRoute = `/${searchType.toLowerCase()}`;
 
     return (
-      <section className="search-grid-item">
+      <section
+        className={
+          searchBarType === "grid-item"
+            ? "search-grid-item"
+            : "search-modal-item"
+        }
+      >
         <div className="search-container">
           <div className="search-options">
             {this._searchButons.map((button) => {
@@ -185,6 +192,7 @@ class SearchBar extends Component {
 }
 
 SearchBar.propTypes = {
+  searchBarType: PropTypes.string.isRequired,
   searchState: PropTypes.shape({
     searchType: PropTypes.string.isRequired,
     searchTerm: PropTypes.oneOfType([

@@ -5,7 +5,7 @@ import SearchBar from "./SearchBar";
 
 class SearchContainer extends Component {
   render() {
-    return <SearchBar {...this.props} />;
+    return <SearchBar searchBarType="grid-item" {...this.props} />;
   }
 }
 

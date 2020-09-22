@@ -31,6 +31,7 @@ import SearchContainer from "./Search/SearchContainer";
 import ResultsContainer from "./Results/ResultsContainer";
 import Loading from "./Loading/Loading";
 import PraxisModal from "./Modal/PraxisModal";
+import PraxisModalDev from "./Modal/PraxisModalDev";
 import PPLogo from "./Logo/Logo";
 import "../scss/App.scss";
 
@@ -274,7 +275,7 @@ function App(props) {
   const { isOpen } = props.modal;
 
   if (isOpen) {
-    return <PraxisModal {...props} />;
+    return <PraxisModalDev {...props} />;
   }
 
   return <MapApp {...props} />;
