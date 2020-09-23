@@ -16,7 +16,7 @@ const Home = (props) => {
               alt="Property Praxis logo"
             ></img>
           </div>
-          <header>Welcome to Property Praxis</header>
+          <header>Explore Yearly Speculation in Detroit</header>
         </div>
         <div className="home-search-container">
           <Router>
@@ -31,37 +31,43 @@ const Home = (props) => {
       <div>
         <div className="home-general-search-container">
           <aside>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus
-            eget eros sed augue porta aliquam non sit amet felis. Ut interdum
-            elit a tristique ornare. Curabitur elementum, nunc quis suscipit
-            porta, enim elit vulputate arcu, vel elementum orci turpis id est.
-            Ut facilisis neque quis imperdiet congue. Praesent vitae cursus
-            arcu. Suspendisse ut vulputate tortor, nec aliquam ante. Aenean sit
-            amet rutrum sapien. Sed non velit consectetur, malesuada dolor eget,
-            bibendum diam. Aliquam vel tincidunt dui. Vivamus ullamcorper
-            maximus dictum.
+            <h2>Who are the worst speculators?</h2>
+            <img
+              src="https://property-praxis-web.s3-us-west-2.amazonaws.com/noun_marketing_real+estate_2.svg"
+              alt="An illustration of an investor"
+            ></img>
+            <p>
+              Explore by zipcode or address to reveal who the top speculators in
+              your area are.
+            </p>
           </aside>
           <aside>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus
-            eget eros sed augue porta aliquam non sit amet felis. Ut interdum
-            elit a tristique ornare. Curabitur elementum, nunc quis suscipit
-            porta, enim elit vulputate arcu, vel elementum orci turpis id est.
-            Ut facilisis neque quis imperdiet congue. Praesent vitae cursus
-            arcu. Suspendisse ut vulputate tortor, nec aliquam ante. Aenean sit
-            amet rutrum sapien. Sed non velit consectetur, malesuada dolor eget,
-            bibendum diam. Aliquam vel tincidunt dui. Vivamus ullamcorper
-            maximus dictum.
+            <h2>What properties does a speculator own?</h2>
+            <img
+              src="https://property-praxis-web.s3-us-west-2.amazonaws.com/noun_marketing_real_estate.svg"
+              alt="An illustration of a speculator"
+            ></img>
+            <p>
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus
+              eget eros sed augue porta aliquam non sit amet felis. Ut interdum
+              elit a tristique ornare. Curabitur elementum, nunc quis suscipit
+              porta, enim elit vulputate arcu, vel elementum orci turpis id est.
+              Ut facilisis neque quis imperdiet congue.
+            </p>
           </aside>
           <aside>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus
-            eget eros sed augue porta aliquam non sit amet felis. Ut interdum
-            elit a tristique ornare. Curabitur elementum, nunc quis suscipit
-            porta, enim elit vulputate arcu, vel elementum orci turpis id est.
-            Ut facilisis neque quis imperdiet congue. Praesent vitae cursus
-            arcu. Suspendisse ut vulputate tortor, nec aliquam ante. Aenean sit
-            amet rutrum sapien. Sed non velit consectetur, malesuada dolor eget,
-            bibendum diam. Aliquam vel tincidunt dui. Vivamus ullamcorper
-            maximus dictum.
+            <h2>Does a speculator own my property?</h2>
+            <img
+              src="https://property-praxis-web.s3-us-west-2.amazonaws.com/noun_Landlord_Tenant.svg"
+              alt="An illustration of hands passing a key to another hand"
+            ></img>
+            <p>
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus
+              eget eros sed augue porta aliquam non sit amet felis. Ut interdum
+              elit a tristique ornare. Curabitur elementum, nunc quis suscipit
+              porta, enim elit vulputate arcu, vel elementum orci turpis id est.
+              Ut facilisis neque quis imperdiet congue.
+            </p>
           </aside>
         </div>
       </div>
