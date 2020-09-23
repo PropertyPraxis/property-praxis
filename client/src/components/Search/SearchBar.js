@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { DebounceInput } from "react-debounce-input";
 import PropTypes from "prop-types";
+import { handleGetYearsAction } from "../../actions/mapData";
 import {
   setSearchType,
   setSearchTerm,
@@ -18,7 +19,6 @@ import {
 import { setMarkerCoordsAction } from "../../actions/mapData";
 import PartialSearchResults from "./SearchResults";
 import * as searchIcon from "../../assets/img/search.png";
-import "../../scss/Search.scss";
 import styleVars from "../../scss/colors.scss";
 
 // use this object to reset to nothing
@@ -42,6 +42,8 @@ class SearchBar extends Component {
         return "Search Speculators...";
       case "Zipcode":
         return "Search Zipcodes...";
+      case "Home":
+        return "Search for an address, speculator, or zipcode...";
       default:
         return "Search Property Praxis...";
     }
@@ -94,8 +96,15 @@ class SearchBar extends Component {
     }
   };
 
+  componentDidMount() {
+    // load the available years
+    const yearsRoute = "/api/praxisyears";
+    this.props.dispatch(handleGetYearsAction(yearsRoute));
+  }
+
   componentDidUpdate(prevProps) {
     const { searchType } = this.props.searchState;
+
     // reset the text to '' when the search type changes
     if (prevProps.searchState.searchType !== searchType) {
       // this.props.dispatch(setSearchTerm(""));
@@ -104,95 +113,126 @@ class SearchBar extends Component {
   }
   render() {
     const { searchType, searchTerm } = this.props.searchState;
-    const { searchBarType } = this.props;
+    const { years } = this.props.mapData;
+    const { searchBarType, showSearchButtons } = this.props;
     const searchRoute = `/${searchType.toLowerCase()}`;
 
-    return (
-      <section
-        className={
-          searchBarType === "grid-item"
-            ? "search-grid-item"
-            : "search-modal-item"
-        }
-      >
-        <div className="search-container">
-          <div className="search-options">
-            {this._searchButons.map((button) => {
-              return (
+    if (years) {
+      return (
+        <section
+          className={
+            searchBarType === "grid-item"
+              ? "search-grid-item"
+              : "search-modal-item"
+          }
+        >
+          <div className="search-container">
+            {showSearchButtons ? (
+              <div className="search-options">
+                {this._searchButons.map((button) => {
+                  return (
+                    <div
+                      key={button}
+                      onClick={() => {
+                        this.props.dispatch(
+                          resetSearch({ ...resetSearchOptions })
+                        );
+                        this.props.dispatch(setSearchType(button));
+                        this.props.dispatch(toggleFullResultsAction(false));
+                        this.props.dispatch(setMarkerCoordsAction(null, null));
+                      }}
+                      style={
+                        button === searchType
+                          ? { color: styleVars.ppRose }
+                          : null
+                      }
+                    >
+                      {button}
+                    </div>
+                  );
+                })}
+              </div>
+            ) : null}
+
+            <div className="search-bar">
+              {/* /////////////////////////////////////////// */}
+              <div className="year-select">
+                {/* <label htmlFor="praxisYears">Select a year:</label> */}
+                <select id="years">
+                  {years.map((result) => (
+                    <option key={result.praxisyear}>{result.praxisyear}</option>
+                  ))}
+                </select>
+              </div>
+              {/* /////////////////////////////////////////// */}
+              <div
+                className={
+                  showSearchButtons ? "search-form" : "search-form-home"
+                }
+              >
                 <div
-                  key={button}
+                  className="clear-button"
                   onClick={() => {
                     this.props.dispatch(resetSearch({ ...resetSearchOptions }));
-                    this.props.dispatch(setSearchType(button));
-                    this.props.dispatch(toggleFullResultsAction(false));
                     this.props.dispatch(setMarkerCoordsAction(null, null));
                   }}
-                  style={
-                    button === searchType ? { color: styleVars.ppRose } : null
-                  }
                 >
-                  {button}
+                  &times;
                 </div>
-              );
-            })}
-          </div>
-          <div className="search-bar">
-            <div className="search-form">
-              <div
-                className="clear-button"
-                onClick={() => {
-                  this.props.dispatch(resetSearch({ ...resetSearchOptions }));
-                  this.props.dispatch(setMarkerCoordsAction(null, null));
-                }}
-              >
-                &times;
-              </div>
-              <DebounceInput
-                type="text"
-                placeholder={this._setSearchPlaceholderText(searchType)}
-                value={searchTerm} //controlled input
-                onChange={this._handleInputChange}
-                onKeyPress={(event) => {
-                  //need to update to action
-                  event.persist();
-                  this._handleKeyPress(event);
-                }}
-                onClick={() => {
-                  this.props.dispatch(toggleFullResultsAction(false));
-                }}
-                minLength={1}
-                debounceTimeout={300}
-                inputRef={(ref) => {
-                  //create a ref to the input
-                  this._textInput = ref;
-                }}
-                onFocus={() => {
-                  this.props.dispatch(togglePartialResultsAction(true));
-                }}
-              />
-              <div
-                className="search-button"
-                onClick={() => {
-                  console.log("clicked");
-                }}
-              >
-                <img src={searchIcon} alt="search button"></img>
+                <DebounceInput
+                  type="text"
+                  placeholder={
+                    showSearchButtons
+                      ? this._setSearchPlaceholderText(searchType)
+                      : this._setSearchPlaceholderText("Home")
+                  }
+                  value={searchTerm} //controlled input
+                  onChange={this._handleInputChange}
+                  onKeyPress={(event) => {
+                    //need to update to action
+                    event.persist();
+                    this._handleKeyPress(event);
+                  }}
+                  onClick={() => {
+                    this.props.dispatch(toggleFullResultsAction(false));
+                  }}
+                  minLength={1}
+                  debounceTimeout={300}
+                  inputRef={(ref) => {
+                    //create a ref to the input
+                    this._textInput = ref;
+                  }}
+                  onFocus={() => {
+                    this.props.dispatch(togglePartialResultsAction(true));
+                  }}
+                />
+                <div
+                  className="search-button"
+                  onClick={() => {
+                    console.log("clicked");
+                  }}
+                >
+                  <img src={searchIcon} alt="search button"></img>
+                </div>
               </div>
             </div>
+            <PartialSearchResults
+              // _textInput={this._textInput}
+              {...this.props}
+              // handleInputChange={this._handleInputChange}
+            />
           </div>
-          <PartialSearchResults
-            // _textInput={this._textInput}
-            {...this.props}
-            // handleInputChange={this._handleInputChange}
-          />
-        </div>
-      </section>
-    );
+        </section>
+      );
+    }
+
+    return null;
   }
 }
 
 SearchBar.propTypes = {
   searchBarType: PropTypes.string.isRequired,
+  showSearchButtons: PropTypes.bool.isRequired,
   searchState: PropTypes.shape({
     searchType: PropTypes.string.isRequired,
     searchTerm: PropTypes.oneOfType([

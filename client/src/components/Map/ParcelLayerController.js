@@ -7,7 +7,6 @@ import {
 } from "../../actions/controller";
 import "react-rangeslider/lib/index.css";
 import * as styleVars from "../../scss/colors.scss";
-import "../../scss/Controller.scss";
 
 class ParcelLayerController extends Component {
   _getColors = (styles) => {

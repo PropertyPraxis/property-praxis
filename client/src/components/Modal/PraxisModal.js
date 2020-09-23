@@ -21,7 +21,6 @@ import {
   toggleModalAction,
   toggleModalOptionsAction,
 } from "../../actions/modal";
-import "../../scss/Modal.scss";
 import * as styleVars from "../../scss/colors.scss";
 import * as urbanPraxisLogo from "../../assets/img/urban-praxis.jpg";
 import * as macLogo from "../../assets/img/mac-logo-no-map.png";

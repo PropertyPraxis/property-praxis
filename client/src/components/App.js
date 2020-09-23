@@ -33,7 +33,6 @@ import Loading from "./Loading/Loading";
 import PraxisModal from "./Modal/PraxisModal";
 import PraxisModalDev from "./Modal/PraxisModalDev";
 import PPLogo from "./Logo/Logo";
-import "../scss/App.scss";
 
 class MapApp extends Component {
   _setSearch = (searchTerm, searchType, year) => {

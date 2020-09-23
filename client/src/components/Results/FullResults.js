@@ -32,7 +32,6 @@ import MapViewer from "./MapViewer";
 import * as mapMarkerIcon from "../../assets/img/map-marker-transparent.png";
 import * as downloadIcon from "../../assets/img/download-icon.png";
 import * as infoIcon from "../../assets/img/info-icon.png";
-import "../../scss/Results.scss";
 
 const ResultsSwitcher = (props) => {
   const { searchDisplayType } = props.searchState;

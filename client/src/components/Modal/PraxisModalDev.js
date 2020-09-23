@@ -4,7 +4,6 @@ import { BrowserRouter as Router, Route } from "react-router-dom";
 import PropTypes from "prop-types";
 import SearchBar from "../Search/SearchBar";
 import { getYearString } from "../../utils/helper";
-import "../../scss/Modal.scss";
 
 const PraxisModalDev = (props) => {
   return (
@@ -21,7 +20,11 @@ const PraxisModalDev = (props) => {
         </div>
         <div className="home-search-container">
           <Router>
-            <SearchBar searchBarType="modal-item" {...props} />
+            <SearchBar
+              searchBarType="modal-item"
+              showSearchButtons={false}
+              {...props}
+            />
           </Router>
         </div>
       </div>

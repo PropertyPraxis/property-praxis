@@ -5,7 +5,6 @@ const initialData = require("./initialData");
 const searchParcels = require("./searchParcels");
 const searchPraxisYears = require("./searchPraxisYears");
 
-
 // depending on how nginx is set up in production,
 // the "/api will need to be removed"
 if (process.env.NODE_ENV === "development") {

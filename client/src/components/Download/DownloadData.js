@@ -1,5 +1,4 @@
-import React, { Component } from "react";
-import { CSVLink, CSVDownload } from "react-csv";
+import React from "react";
 import { AsyncParser } from "json2csv";
 
 const DownloadData = () => {

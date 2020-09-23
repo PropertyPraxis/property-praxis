@@ -5,7 +5,6 @@ import { CSSTransition } from "react-transition-group";
 import FullResults from "./FullResults";
 import { createNewViewport } from "../../utils/map";
 import { getMapStateAction } from "../../actions/mapState";
-import "../../scss/Results.scss";
 
 class ResultsContainer extends Component {
   _createNewViewport = (geojson) => {

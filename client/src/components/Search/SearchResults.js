@@ -27,7 +27,6 @@ import { capitalizeFirstLetter } from "../../utils/helper";
 import * as zipcodeIcon from "../../assets/img/zipcode-icon-transparent.png";
 import * as speculatorIcon from "../../assets/img/speculator-icon-transparent.png";
 import * as mapMarkerIcon from "../../assets/img/map-marker-transparent.png";
-import "../../scss/Search.scss";
 
 const PartialReturnResultSwitch = (props) => {
   const { searchType, partialResults } = props.searchState;

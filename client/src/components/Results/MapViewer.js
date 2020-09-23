@@ -1,9 +1,6 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import * as Mapillary from "mapillary-js";
-import { MapillaryViewer } from "react-mapillary";
-// import { handleGetViewerImageAction } from "../../actions/results";
-import "../../scss/Results.scss";
 
 class MapViewer extends Component {
   componentDidMount() {

@@ -33,9 +33,7 @@ import {
   zipsLabel,
 } from "./mapStyle";
 import Pin from "./Pin";
-// import { ReactComponent as ArrowIcon } from "../../assets/img/map-arrow-icon.svg";
 import * as styleVars from "../../scss/colors.scss";
-import "../../scss/Map.scss";
 
 //this token needs to be hidden
 // const MAPBOX_TOKEN = process.env.MAPBOX_TOKEN;

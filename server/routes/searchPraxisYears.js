@@ -4,7 +4,7 @@ const router = new Router();
 
 router.get("/", async (req, res) => {
   try {
-    const query = "SELECT DISTINCT praxisyear FROM year;";
+    const query = "SELECT DISTINCT praxisyear FROM year ORDER BY praxisyear;";
     const { rows } = await db.templateQuery(query);
 
     res.json(rows);
