@@ -181,6 +181,7 @@ class SearchBar extends Component {
                 </div>
                 <DebounceInput
                   type="text"
+                  size="1"
                   placeholder={
                     showSearchButtons
                       ? this._setSearchPlaceholderText(searchType)
