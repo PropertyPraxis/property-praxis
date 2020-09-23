@@ -92,25 +92,26 @@ input[type="text"] {
   display: flex;
   flex: 1;
   box-sizing: border-box;
-  border-top: 2px solid $ui-black;
-  border-right: 2px solid $ui-black;
-  border-bottom: 2px solid $ui-black;
-  border-left: 1px solid $ui-black;
+  border-top: 4px solid $ui-black;
+  border-right: 4px solid $ui-black;
+  border-bottom: 4px solid $ui-black;
+  border-left: 4px solid $ui-black;
 }
 
 .search-form:focus-within,
 .search-form-home:focus-within {
-  border-top: 2px solid $pp-rose;
-  border-right: 2px solid $pp-rose;
-  border-bottom: 2px solid $pp-rose;
-  border-left: 2px solid $pp-rose;
+  border-top: 4px solid $pp-rose;
+  border-right: 4px solid $pp-rose;
+  border-bottom: 4px solid $pp-rose;
+  border-left: 4px solid $pp-rose;
   box-sizing: border-box;
+  z-index: 200;
 }
 
 // search button
 .search-button {
   box-sizing: inherit;
-  background: white;
+  background: $ui-white;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -126,8 +127,9 @@ input[type="text"] {
 }
 
 .clear-button {
+  padding-left: 5px;
   box-sizing: inherit;
-  background: white;
+  background: $ui-white;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -137,6 +139,8 @@ input[type="text"] {
 }
 
 .year-select {
+  position: relative;
+  left: 4px;
   background-color: $ui-white;
   min-width: 60px;
 }
@@ -148,18 +152,18 @@ input[type="text"] {
   width: 100%;
   background-color: $ui-white;
   outline: 0px;
-  border-top: 2px solid $ui-black;
-  border-left: 2px solid $ui-black;
-  border-bottom: 2px solid $ui-black;
-  border-right: 1px solid $ui-black;
+  border-top: 4px solid $ui-black;
+  border-left: 4px solid $ui-black;
+  border-bottom: 4px solid $ui-black;
+  border-right: 4px solid $ui-black;
 }
 
 .year-select > select:focus,
 .year-select > select:active {
-  border-top: 2px solid $pp-rose;
-  border-left: 2px solid $pp-rose;
-  border-bottom: 2px solid $pp-rose;
-  border-right: 2px solid $pp-rose;
+  border-top: 4px solid $pp-rose;
+  border-left: 4px solid $pp-rose;
+  border-bottom: 4px solid $pp-rose;
+  border-right: 4px solid $pp-rose;
 }
 
 select > option {

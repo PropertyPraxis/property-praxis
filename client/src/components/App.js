@@ -30,8 +30,7 @@ import MapContainer from "./Map/MapContainer";
 import SearchContainer from "./Search/SearchContainer";
 import ResultsContainer from "./Results/ResultsContainer";
 import Loading from "./Loading/Loading";
-import PraxisModal from "./Modal/PraxisModal";
-import PraxisModalDev from "./Modal/PraxisModalDev";
+import Home from "./Home/Home";
 import PPLogo from "./Logo/Logo";
 
 class MapApp extends Component {
@@ -274,7 +273,7 @@ function App(props) {
   const { isOpen } = props.modal;
 
   if (isOpen) {
-    return <PraxisModalDev {...props} />;
+    return <Home {...props} />;
   }
 
   return <MapApp {...props} />;

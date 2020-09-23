@@ -5,7 +5,7 @@ import PropTypes from "prop-types";
 import SearchBar from "../Search/SearchBar";
 import { getYearString } from "../../utils/helper";
 
-const PraxisModalDev = (props) => {
+const Home = (props) => {
   return (
     <main className="home-container">
       <div className="header-container">
@@ -94,21 +94,10 @@ const PraxisModalDev = (props) => {
   );
 };
 
-PraxisModalDev.propTypes = {};
+Home.propTypes = {};
 
 function mapStateToProps({ searchState, mapData, mapState, results }) {
   return { searchState, mapData, mapState, results };
 }
 
-export default connect(mapStateToProps)(PraxisModalDev);
-
-/* <a
-href="https://urbanpraxis.org/"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <img
-                  src="https://property-praxis-web.s3-us-west-2.amazonaws.com/urban-praxis.jpg"
-                  alt="Urban Praxis Workshop Logo"
-                ></img>
-              </a> */
+export default connect(mapStateToProps)(Home);
