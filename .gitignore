@@ -2,7 +2,7 @@
 
 *.env
 
-/pg/*
+/pg/data
 
 node_modules
 
