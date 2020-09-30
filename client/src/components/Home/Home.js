@@ -1,6 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
-import { BrowserRouter as Router, Route } from "react-router-dom";
+import { BrowserRouter as Router, Link } from "react-router-dom";
 import PropTypes from "prop-types";
 import SearchBar from "../Search/SearchBar";
 import { getYearString } from "../../utils/helper";
@@ -74,24 +74,24 @@ const Home = (props) => {
       <div>
         <footer>
           <div className="footer-container">
-            <div>&#169; {getYearString()} | Urban Praxis Workshop</div>
+            <div>&#169; {getYearString()} | Urban Praxis</div>
             <div>
               A project in collaboration with
               <a
-                href="https://urbanpraxis.org/"
+                href="https://mappingaction.org"
                 target="_blank"
                 rel="noopener noreferrer"
               >
                 <img
-                  src="https://property-praxis-web.s3-us-west-2.amazonaws.com/mac-logo-no-map.png"
+                  src="https://property-praxis-web.s3-us-west-2.amazonaws.com/mac_logo_transparent.png"
                   alt="Mapping Action Collective Logo"
                 ></img>
               </a>
             </div>
-            <div>
+            <div className="footer-links">
               <li>Download Data</li>
               <li>Methodology</li>
-              <li>About</li>
+              <li>Disclaimer</li>
             </div>
           </div>
         </footer>
@@ -100,7 +100,13 @@ const Home = (props) => {
   );
 };
 
-Home.propTypes = {};
+Home.propTypes = {
+  searchState: PropTypes.object.isRequired,
+  mapData: PropTypes.object.isRequired,
+  mapState: PropTypes.object.isRequired,
+  results: PropTypes.object.isRequired,
+  dipatch: PropTypes.func.isRequired,
+};
 
 function mapStateToProps({ searchState, mapData, mapState, results }) {
   return { searchState, mapData, mapState, results };

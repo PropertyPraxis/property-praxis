@@ -103,8 +103,6 @@ header {
     width: 250px;
     display: flex;
     flex-direction: column;
-    text-align: justify;
-    text-justify: inter-word;
 
     h2 {
       text-align: center;
@@ -132,7 +130,6 @@ footer {
 
   div:first-child,
   div:nth-child(2) {
-    border: 1px solid black;
     display: flex;
     align-items: center;
 
@@ -141,7 +138,20 @@ footer {
     }
   }
 
-  div > li {
+  @media (max-width: $mobile) {
+    div:nth-child(2) {
+      display: none;
+    }
+  }
+}
+
+.footer-links {
+  li {
     margin-top: 5px;
+  }
+
+  li:hover {
+    color: $ui-dark-gray;
+    cursor: pointer;
   }
 }

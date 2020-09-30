@@ -272,9 +272,9 @@ MapApp.propTypes = {
 function App(props) {
   const { isOpen } = props.modal;
 
-  if (isOpen) {
-    return <Home {...props} />;
-  }
+  // if (isOpen) {
+  //   return <Home {...props} />;
+  // }
 
   return <MapApp {...props} />;
 }
