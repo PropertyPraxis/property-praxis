@@ -177,7 +177,7 @@ docker-compose up -d
 If you only want to run the web application without the RStudio service, run:
 
 ```
-docker-compose up api web postgres
+docker-compose up api client postgres
 ```
 
 ## Running a Production Environment
