@@ -46,24 +46,25 @@ for pages other than Home. */
   display: flex;
   align-items: center;
 
-  a {
-    height: 100%;
-  }
+  // a {
+  //   height: 100%;
+  // }
 
-  div {
+  div:nth-child(2) {
     flex: 1;
     text-align: center;
+    z-index: 1;
   }
 
   div > h1 {
     position: relative;
-    right: 100px;
+    right: 60px;
     color: $pp-rose;
     text-transform: uppercase;
     font-size: 2.9rem;
 
     @media (max-width: $desktop) {
-      position: static;
+      right: 40px;
       font-size: 2rem;
     }
 
@@ -78,11 +79,17 @@ for pages other than Home. */
   margin-left: 25px;
   height: 100%;
   width: 100px;
-  display: flex;
-  align-items: center;
 
-  img {
-    height: 90%;
+  a {
+    height: 100%;
+    display: flex;
+    align-items: center;
+  }
+
+  a > img {
+    height: 80px;
+    z-index: 2;
+    min-width: 80px;
   }
 }
 
@@ -128,6 +135,6 @@ li > a:visited {
 
 li > a:hover,
 li > a:active {
-  color: $ui-dark-gray;
+  color: $ui-light-gray;
   cursor: pointer;
 }
