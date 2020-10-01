@@ -25,11 +25,11 @@ const Footer = () => {
             <Link to={{ pathname: "/data" }}>
               <li>Download Data</li>
             </Link>
+            <Link to={{ pathname: "/about" }}>
+              <li>About the Project</li>
+            </Link>
             <Link to={{ pathname: "/methodology" }}>
               <li>Methodology</li>
-            </Link>
-            <Link to={{ pathname: "/disclaimer" }}>
-              <li>Disclaimer</li>
             </Link>
           </div>
         </div>

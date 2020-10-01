@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
-const TopContainer = () => {
+const TopContainer = (props) => {
   return (
     <div className="top-container">
       <Link to={{ pathname: "/" }}>
@@ -12,6 +12,9 @@ const TopContainer = () => {
           ></img>
         </div>
       </Link>
+      <div>
+        <h1>{props.title}</h1>
+      </div>
     </div>
   );
 };

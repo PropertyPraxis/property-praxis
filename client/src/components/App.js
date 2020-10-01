@@ -32,7 +32,7 @@ import ResultsContainer from "./Results/ResultsContainer";
 import Loading from "./Loading/Loading";
 import Home from "./pages/Home";
 import DownloadData from "./pages/DownloadData";
-import Disclaimer from "./pages/Disclaimer";
+import About from "./pages/About";
 import PPLogo from "./Logo/Logo";
 import Methodology from "./pages/Methodology";
 
@@ -289,7 +289,7 @@ function App(props) {
       ></Route>
       <Route path={"/data"} component={DownloadData} exact></Route>
       <Route path={"/methodology"} component={Methodology} exact></Route>
-      <Route path={"/disclaimer"} component={Disclaimer} exact></Route>
+      <Route path={"/about"} component={About} exact></Route>
     </Router>
   );
 }
