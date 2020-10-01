@@ -16,7 +16,9 @@ const Home = (props) => {
               alt="Property Praxis logo"
             ></img>
           </div>
-          <header>Explore Yearly Speculation in Detroit</header>
+          <header>
+            Explore Yearly Bulk Ownership & Speculation in Detroit
+          </header>
         </div>
         <div className="home-search-container">
           <Router>
