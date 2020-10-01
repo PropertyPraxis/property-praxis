@@ -116,7 +116,7 @@ class SearchBar extends Component {
     const { years } = this.props.mapData;
     const { searchBarType, showSearchButtons } = this.props;
     const searchRoute = `/${searchType.toLowerCase()}`;
-
+    
     if (years) {
       return (
         <section

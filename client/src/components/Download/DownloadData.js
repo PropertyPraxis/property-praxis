@@ -1,17 +1,21 @@
 import React from "react";
 import PropTypes from "prop-types";
-
-const DownloadData = (props) =>{
-
-  return(
-    <main>
-      <div className="home-container">
-        
+import Footer from "../Footer/Footer";
+const DownloadData = (props) => {
+  return (
+    <main className="main-container">
+      <div className="page-container">
+        <div></div>
+        <div></div>
+        <div>
+          <Footer />
+        </div>
       </div>
     </main>
-  )
-}
+  );
+};
 
+export default DownloadData;
 // import React from "react";
 // import { AsyncParser } from "json2csv";
 

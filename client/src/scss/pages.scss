@@ -1,0 +1,36 @@
+.page-container {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 100%;
+}
+
+.page-container > :nth-child(1) {
+  min-height: 40%;
+  min-width: 100%;
+  background-color: $ui-dark-gray;
+}
+.page-container > :nth-child(2) {
+  min-height: 50%;
+  min-width: 100%;
+  background-color: $ui-black;
+}
+.page-container > :nth-child(3) {
+  min-height: 10%;
+  height: 10%;
+  min-width: 100%;
+  background-color: $pp-rose;
+}
+
+.page-content-container {
+  display: unset;
+  position: absolute;
+  height: 90%;
+  margin: 0 auto;
+  width: 90%;
+  max-width: 1000px;
+  background-color: $ui-white;
+  opacity: 0.5;
+}

@@ -31,7 +31,10 @@ import SearchContainer from "./Search/SearchContainer";
 import ResultsContainer from "./Results/ResultsContainer";
 import Loading from "./Loading/Loading";
 import Home from "./Home/Home";
+import DownloadData from "./Download/DownloadData";
+import Disclaimer from "./Disclaimer/Disclaimer";
 import PPLogo from "./Logo/Logo";
+import Methodology from "./Methodology/Methodology";
 
 class MapApp extends Component {
   _setSearch = (searchTerm, searchType, year) => {
@@ -243,11 +246,9 @@ class MapApp extends Component {
     return (
       <main>
         <div className="app-container">
-          <Router>
-            <Route path="/" component={MapContainer}></Route>
-            <SearchContainer />
-            <ResultsContainer />
-          </Router>
+          <MapContainer />
+          <SearchContainer />
+          <ResultsContainer />
           <PPLogo />
         </div>
       </main>
@@ -272,11 +273,25 @@ MapApp.propTypes = {
 function App(props) {
   const { isOpen } = props.modal;
 
-  if (isOpen) {
-    return <Home {...props} />;
-  }
+  // if (isOpen) {
+  //   return <Home {...props} />;
+  // }
 
-  return <MapApp {...props} />;
+  // return <MapApp {...props} />;
+
+  return (
+    <Router>
+      <Route path={"/"} component={Home} exact></Route>
+      <Route
+        path={"/map"}
+        component={() => <MapApp {...props} />}
+        exact
+      ></Route>
+      <Route path={"/data"} component={DownloadData} exact></Route>
+      <Route path={"/methodology"} component={Methodology} exact></Route>
+      <Route path={"/disclaimer"} component={Disclaimer} exact></Route>
+    </Router>
+  );
 }
 
 App.propTypes = {

@@ -48,15 +48,15 @@ header {
   text-transform: uppercase;
   font-weight: bold;
   color: $pp-rose;
-  font-size: 3.5rem;
+  font-size: 3rem;
   text-align: center;
 
-  @media (max-width: $mobile) {
-    font-size: 2.5rem;
+  @media (max-width: $desktop) {
+    font-size: 2rem;
   }
 
   @media (max-width: $mobile-small) {
-    font-size: 2rem;
+    font-size: 1.5rem;
   }
 }
 
