@@ -88,22 +88,41 @@ for pages other than Home. */
 
   div {
     margin: 0 auto;
-    max-width: 800px;
-    font-size: 1.5rem;
+    max-width: 1000px;
+    font-size: 1.4rem;
 
     img {
-      margin-top: 20px;
+      margin-top: 15px;
       height: 200px;
     }
 
     p {
-      margin: 0;
-      padding: 20px;
+      padding: 0 30px;
       color: $ui-white;
+
+      a {
+        cursor: pointer;
+      }
     }
 
     @media (max-width: $mobile) {
       font-size: 1.2rem;
     }
   }
+}
+
+/*All links*/
+li {
+  margin-top: 5px;
+}
+
+li > a,
+li > a:visited {
+  color: $ui-white;
+}
+
+li > a:hover,
+li > a:active {
+  color: $ui-dark-gray;
+  cursor: pointer;
 }

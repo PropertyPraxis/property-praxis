@@ -37,15 +37,3 @@ footer {
   }
 }
 
-.footer-links {
-  li {
-    margin-top: 5px;
-    color: $ui-white;
-  }
-
-  li:hover,
-  li:active {
-    color: $ui-dark-gray;
-    cursor: pointer;
-  }
-}

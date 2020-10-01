@@ -2,7 +2,7 @@ import React from "react";
 import Footer from "./Footer";
 import TopContainer from "./TopContainer";
 
-const About = (props) => {
+const About = () => {
   return (
     <main>
       <div className="page-container">
@@ -43,8 +43,26 @@ const About = (props) => {
               role in shaping the places they live.
             </p>
             <p>
-              For further information: urbanpraxis@umich.edu Urbanpraxis.org
-              Detroitography.org
+              For further information:
+              <ul>
+                <li>
+                  <a href="mailto:urbanpraxis@umich.edu?subject=Property Praxis">
+                    urbanpraxis@umich.edu
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="https://urbanpraxis.org/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Urbanpraxis.org
+                  </a>
+                </li>
+                <li>
+                  <a href="">Detroitography.org</a>
+                </li>
+              </ul>
             </p>
           </div>
         </div>

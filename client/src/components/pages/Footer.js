@@ -22,15 +22,17 @@ const Footer = () => {
             </a>
           </div>
           <div className="footer-links">
-            <Link to={{ pathname: "/data" }}>
-              <li>Download Data</li>
-            </Link>
-            <Link to={{ pathname: "/about" }}>
-              <li>About the Project</li>
-            </Link>
-            <Link to={{ pathname: "/methodology" }}>
-              <li>Methodology</li>
-            </Link>
+            <li>
+              <Link to={{ pathname: "/data" }}>Download Data</Link>
+            </li>
+
+            <li>
+              <Link to={{ pathname: "/about" }}>About the Project</Link>
+            </li>
+
+            <li>
+              <Link to={{ pathname: "/methodology" }}>Methodology</Link>
+            </li>
           </div>
         </div>
       </footer>
