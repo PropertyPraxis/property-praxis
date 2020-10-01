@@ -1,13 +1,12 @@
 import React from "react";
-import PropTypes from "prop-types";
-import Footer from "../Footer/Footer";
+import Footer from "./Footer";
 
 const Disclaimer = (props) => {
   return (
     <main>
       <div className="page-container">
-        <div></div>
-        <div></div>
+      <div className="top-container"></div>
+        <div className="middle-container"></div>
         <div>
           <Footer />
         </div>

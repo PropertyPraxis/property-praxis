@@ -1,6 +1,5 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import PropTypes from "prop-types";
 import { getYearString } from "../../utils/helper";
 
 const Footer = () => {
@@ -9,7 +8,7 @@ const Footer = () => {
       <div className="footer-container">
         <div>&#169; {getYearString()} | Urban Praxis</div>
         <div>
-          A project in collaboration with
+          <div>A project in collaboration with</div>
           <a
             href="https://mappingaction.org"
             target="_blank"

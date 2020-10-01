@@ -26,7 +26,11 @@ footer {
     }
   }
 
-  @media (max-width: $mobile) {
+  div:nth-child(2) > div {
+    max-width: 150px;
+  }
+
+  @media (max-width: $desktop) {
     div:nth-child(2) {
       display: none;
     }
@@ -39,7 +43,8 @@ footer {
     color: $ui-white;
   }
 
-  li:hover, li:active {
+  li:hover,
+  li:active {
     color: $ui-dark-gray;
     cursor: pointer;
   }

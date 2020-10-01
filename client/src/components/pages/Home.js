@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import { BrowserRouter as Router, Link } from "react-router-dom";
 import PropTypes from "prop-types";
 import SearchBar from "../Search/SearchBar";
-import Footer from "../Footer/Footer";
+import Footer from "./Footer";
 
 const Home = (props) => {
   return (

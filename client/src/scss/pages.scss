@@ -1,3 +1,5 @@
+/*Styles for the non-map pages.*/
+
 .page-container {
   position: absolute;
   top: 0;
@@ -12,14 +14,15 @@
   min-width: 100%;
   background-color: $ui-dark-gray;
 }
+
 .page-container > :nth-child(2) {
   min-height: 50%;
   min-width: 100%;
   background-color: $ui-black;
 }
+
 .page-container > :nth-child(3) {
   min-height: 10%;
-  height: 10%;
   min-width: 100%;
   background-color: $pp-rose;
 }
@@ -33,4 +36,30 @@
   max-width: 1000px;
   background-color: $ui-white;
   opacity: 0.5;
+}
+
+/* Override the page content styles
+for pages other than Home. */
+.top-container {
+  height: 10%;
+  min-height: 10% !important;
+
+  a {
+    height: 100%;
+  }
+}
+
+.top-logo {
+  margin-left: 25px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+
+  img {
+    height: 90%;
+  }
+}
+
+.middle-container {
+  min-height: 80% !important;
 }
