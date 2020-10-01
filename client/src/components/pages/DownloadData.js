@@ -1,26 +1,14 @@
 import React from "react";
 import Footer from "./Footer";
-import { Link } from "react-router-dom";
+import TopContainer from "./TopContainer";
 
 const DownloadData = (props) => {
   return (
     <main className="main-container">
       <div className="page-container">
-        <div className="top-container">
-          <Link to={{ pathname: "/" }}>
-            <div className="top-logo">
-              <img
-                src="https://property-praxis-web.s3-us-west-2.amazonaws.com/pp_logo_transparent.png"
-                alt="Property Praxis logo"
-              ></img>
-            </div>
-          </Link>
-        </div>
-        <div className="middle-container">
-        </div>
-        <div>
-          <Footer />
-        </div>
+        <TopContainer />
+        <div className="middle-container"></div>
+        <Footer />
       </div>
     </main>
   );

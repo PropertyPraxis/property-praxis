@@ -1,15 +1,13 @@
 import React from "react";
 import Footer from "./Footer";
-
+import TopContainer from "./TopContainer";
 const Methodology = (props) => {
   return (
     <main>
       <div className="page-container">
-      <div className="top-container"></div>
+        <TopContainer />
         <div className="middle-container"></div>
-        <div>
-          <Footer />
-        </div>
+        <Footer />
       </div>
     </main>
   );

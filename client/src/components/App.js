@@ -30,11 +30,11 @@ import MapContainer from "./Map/MapContainer";
 import SearchContainer from "./Search/SearchContainer";
 import ResultsContainer from "./Results/ResultsContainer";
 import Loading from "./Loading/Loading";
-import Home from "./page_components/Home";
-import DownloadData from "./page_components/DownloadData";
-import Disclaimer from "./page_components/Disclaimer";
+import Home from "./pages/Home";
+import DownloadData from "./pages/DownloadData";
+import Disclaimer from "./pages/Disclaimer";
 import PPLogo from "./Logo/Logo";
-import Methodology from "./page_components/Methodology";
+import Methodology from "./pages/Methodology";
 
 class MapApp extends Component {
   _setSearch = (searchTerm, searchType, year) => {

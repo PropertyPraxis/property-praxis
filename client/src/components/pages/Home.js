@@ -1,6 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
-import { BrowserRouter as Router, Link } from "react-router-dom";
+import { BrowserRouter as Router } from "react-router-dom";
 import PropTypes from "prop-types";
 import SearchBar from "../Search/SearchBar";
 import Footer from "./Footer";
@@ -67,9 +67,7 @@ const Home = (props) => {
           </aside>
         </div>
       </div>
-      <div>
-        <Footer />
-      </div>
+      <Footer />
     </main>
   );
 };
