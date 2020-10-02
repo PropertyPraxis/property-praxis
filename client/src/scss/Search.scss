@@ -8,6 +8,8 @@
 
 /*--- visible only on home ---*/
 .search-modal-item {
+  position: absolute;
+  max-width: 1000px;
   z-index: 100;
   width: 95%;
   margin: 0 auto;
@@ -218,7 +220,17 @@ select > option {
 
   /////////////////////adds
   max-height: 300px;
-  position: absolute;
+  display: flex;
+  width: 100%;
+
+  .partial-results-combined {
+    flex: 1;
+  }
+
+  .partial-results-spacer {
+    min-width: 72px;
+  }
+  //////////////////////
 
   section > .partial-results-container {
     max-height: none !important;

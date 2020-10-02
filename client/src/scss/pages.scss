@@ -13,6 +13,11 @@
   min-height: 35%;
   min-width: 100%;
   background-color: $ui-dark-gray;
+
+  @media (max-width: $mobile-small) {
+    height: 35%;
+    min-height: 325px;
+  }
 }
 
 .page-container > :nth-child(2) {

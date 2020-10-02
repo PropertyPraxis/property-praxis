@@ -342,32 +342,36 @@ class PartialAllResults extends Component {
     const { partialResults } = this.props.searchState;
     return (
       <div className="partial-results-container-all">
-        {partialResults[0].length > 0 && partialResults[0][0].mb.length > 0 ? (
-          <div className="partial-results-all-title">Address Results</div>
-        ) : null}
-        {partialResults[0].length > 0 &&
-        partialResults[0][0].mb !== undefined ? (
-          <PartialAddressResults
+        <div className="partial-results-spacer"></div>
+        <div className="partial-results-combined">
+          {partialResults[0].length > 0 &&
+          partialResults[0][0].mb.length > 0 ? (
+            <div className="partial-results-all-title">Address Results</div>
+          ) : null}
+          {partialResults[0].length > 0 &&
+          partialResults[0][0].mb !== undefined ? (
+            <PartialAddressResults
+              {...this.props}
+              partialSearchResults={partialResults[0]}
+            />
+          ) : null}
+          {partialResults[1].length > 0 ? (
+            <div className="partial-results-all-title">Speculator Results</div>
+          ) : null}
+
+          <PartialSpeculatorResults
             {...this.props}
-            partialSearchResults={partialResults[0]}
+            partialSearchResults={partialResults[1]}
           />
-        ) : null}
-        {partialResults[1].length > 0 ? (
-          <div className="partial-results-all-title">Speculator Results</div>
-        ) : null}
 
-        <PartialSpeculatorResults
-          {...this.props}
-          partialSearchResults={partialResults[1]}
-        />
-
-        {partialResults[2].length > 0 ? (
-          <div className="partial-results-all-title">Zipcodes Results</div>
-        ) : null}
-        <PartialZipcodeResults
-          {...this.props}
-          partialSearchResults={partialResults[2]}
-        />
+          {partialResults[2].length > 0 ? (
+            <div className="partial-results-all-title">Zipcodes Results</div>
+          ) : null}
+          <PartialZipcodeResults
+            {...this.props}
+            partialSearchResults={partialResults[2]}
+          />
+        </div>
       </div>
     );
   }
