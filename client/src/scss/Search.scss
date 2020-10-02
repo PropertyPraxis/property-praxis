@@ -178,22 +178,20 @@ select > option {
   display: flex; /*added*/
   flex-direction: column;
   overflow: auto;
-  a > div {
+  a > li {
     display: flex;
     width: 100%;
     padding: 10px;
-    // border: 1px solid blue;
     box-sizing: border-box;
-    // background-color: white;
     align-items: center;
     color: $ui-black;
   }
 
-  a > div:hover {
+  a > li:hover {
     border: 1px solid $ui-black;
   }
 
-  a > div > img {
+  a > li > img {
     height: 30px;
     margin-right: 20px;
   }
@@ -203,7 +201,7 @@ select > option {
   }
 
   .list-item-even {
-    background-color: $ui-off-white;
+    background-color: $ui-light-gray;
   }
 }
 
@@ -215,8 +213,12 @@ select > option {
 }
 
 .partial-results-container-all {
-  max-height: 62vh;
+  // max-height: 62vh;
   overflow: auto;
+
+  /////////////////////adds
+  max-height: 300px;
+  position: absolute;
 
   section > .partial-results-container {
     max-height: none !important;

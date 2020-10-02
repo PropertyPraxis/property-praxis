@@ -128,18 +128,7 @@ for pages other than Home. */
   }
 }
 
-/*All links*/
-li {
+/*Footer links*/
+.footer-links > li {
   margin-top: 5px;
-}
-
-li > a,
-li > a:visited {
-  color: $ui-white;
-}
-
-li > a:hover,
-li > a:active {
-  color: $ui-light-gray;
-  cursor: pointer;
 }

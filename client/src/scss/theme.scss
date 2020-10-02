@@ -33,6 +33,7 @@ img {
 
 ul {
   padding: 0;
+  margin: 0;
 }
 
 li {
@@ -45,4 +46,15 @@ a {
 
 a:visited {
   text-decoration: none !important;
+}
+
+li > a,
+li > a:visited {
+  color: $ui-white;
+}
+
+li > a:hover,
+li > a:active {
+  color: $ui-light-gray;
+  cursor: pointer;
 }

@@ -115,7 +115,7 @@ class PartialZipcodeResults extends Component {
     const { year } = this.props.mapData;
     return (
       <section>
-        <div className="partial-results-container">
+        <ul className="partial-results-container">
           {partialSearchResults.map((result, index) => {
             return (
               <Link
@@ -128,14 +128,14 @@ class PartialZipcodeResults extends Component {
                   this._onResultClick(result);
                 }}
               >
-                <div className={index % 2 ? "list-item-odd" : "list-item-even"}>
-                  <img src={zipcodeIcon} alt="Zipcode Result" />{" "}
+                <li className={index % 2 ? "list-item-odd" : "list-item-even"}>
+                  <img src={zipcodeIcon} alt="Zipcode Result" />
                   {result.propzip}
-                </div>
+                </li>
               </Link>
             );
           })}
-        </div>
+        </ul>
       </section>
     );
   }
@@ -214,7 +214,7 @@ class PartialAddressResults extends Component {
     const { year } = this.props.mapData;
     return (
       <section>
-        <div className="partial-results-container">
+        <ul className="partial-results-container">
           {partialSearchResults[0].mb.map((result, index) => {
             const [longitude, latitude] = result.geometry.coordinates;
             const encodedCoords = encodeURI(
@@ -232,14 +232,14 @@ class PartialAddressResults extends Component {
                   this._onResultClick(result);
                 }}
               >
-                <div>
+                <li>
                   <img src={mapMarkerIcon} alt="Address Result" />
                   {result.place_name}
-                </div>
+                </li>
               </Link>
             );
           })}
-        </div>
+        </ul>
       </section>
     );
   }
@@ -303,7 +303,7 @@ class PartialSpeculatorResults extends Component {
     const { year } = this.props.mapData;
     return (
       <section>
-        <div className="partial-results-container">
+        <ul className="partial-results-container">
           {partialSearchResults.map((result, index) => {
             return (
               <Link
@@ -316,14 +316,14 @@ class PartialSpeculatorResults extends Component {
                   this._onResultClick(result);
                 }}
               >
-                <div className={index % 2 ? "list-item-odd" : "list-item-even"}>
+                <li className={index % 2 ? "list-item-odd" : "list-item-even"}>
                   <img src={speculatorIcon} alt="Speculator Result" />
                   {capitalizeFirstLetter(result.own_id)}
-                </div>
+                </li>
               </Link>
             );
           })}
-        </div>
+        </ul>
       </section>
     );
   }

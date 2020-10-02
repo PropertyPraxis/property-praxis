@@ -60,7 +60,9 @@ const About = () => {
                   </a>
                 </li>
                 <li>
-                  <a href="">Detroitography.org</a>
+                  <a href="#" target="_blank" rel="noopener noreferrer">
+                    Detroitography.org
+                  </a>
                 </li>
               </ul>
             </p>
