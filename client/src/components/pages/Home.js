@@ -67,6 +67,21 @@ const Home = (props) => {
               </p>
             </aside>
           </div>
+          <div className="home-description">
+            <aside>
+              {/* <p>
+                Blight and abandonment are active process. This site shows part
+                of that process. It maps bulk ownership and speculation in the
+                city. It identifies the owners and members of limited liability
+                companies holding multiple properties across the city. Over the
+                last decade speculation has further damaged Detroit’s struggling
+                neighborhoods and made life difficult for residents and tenants.
+                We hope you find this information useful in understanding your
+                landlord, your neighborhood, or part of the reason why some
+                Detroit neighborhoods look the way they do.
+              </p> */}
+            </aside>
+          </div>
         </div>
       </div>
       <Footer />

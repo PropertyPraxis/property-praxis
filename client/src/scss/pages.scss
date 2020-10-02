@@ -10,7 +10,7 @@
 }
 
 .page-container > :nth-child(1) {
-  min-height: 40%;
+  min-height: 35%;
   min-width: 100%;
   background-color: $ui-dark-gray;
 }
@@ -22,9 +22,13 @@
 }
 
 .page-container > :nth-child(3) {
-  min-height: 10%;
+  height: 15%;
+  min-height: 87px;
   min-width: 100%;
   background-color: $pp-rose;
+  display: flex;
+  align-items: center;
+  align-content: space-between;
 }
 
 .page-content-container {
@@ -45,10 +49,6 @@ for pages other than Home. */
   min-height: 10% !important;
   display: flex;
   align-items: center;
-
-  // a {
-  //   height: 100%;
-  // }
 
   div:nth-child(2) {
     flex: 1;
@@ -90,11 +90,16 @@ for pages other than Home. */
     height: 80px;
     z-index: 2;
     min-width: 80px;
+
+    @media (max-width: $mobile) {
+      height: 60px;
+      min-width: 60px;
+    }
   }
 }
 
 .middle-container {
-  min-height: 80% !important;
+  min-height: 75% !important;
   display: flex;
   flex-direction: column;
 
