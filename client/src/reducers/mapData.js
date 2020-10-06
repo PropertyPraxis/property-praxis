@@ -12,8 +12,8 @@ import {
 } from "../actions/mapData";
 
 const intialMapData = {
-  ppraxis: {},
-  zips: {},
+  ppraxis: null,
+  zips: null,
   year: "2017",
   years: null,
   zipcodes: null,

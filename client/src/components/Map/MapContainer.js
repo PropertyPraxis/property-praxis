@@ -2,6 +2,10 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
 import queryString from "query-string";
+// import {
+//   handleGetInitialZipcodeDataAction,
+//   handleGetParcelsByQueryAction,
+// } from "../../actions/mapData";
 import PraxisMap from "./Map";
 
 class MapContainer extends Component {
@@ -23,6 +27,25 @@ class MapContainer extends Component {
     },
   };
 
+  //TESTING
+  // componentDidMount() {
+  //   const { year } = this.props.mapData;
+  //   this.props
+  //     .dispatch(handleGetParcelsByQueryAction(`/api/geojson/parcels/${year}`))
+  //     .then((geojson) => {
+  //       // this._createNewViewport(geojson);
+  //       // this.props.dispatch(dataIsLoadingAction(false));
+  //     });
+  //   // }
+
+  //   //load zip data no matter what (this may change)
+  //   this.props
+  //     .dispatch(handleGetInitialZipcodeDataAction("/api/geojson/zipcodes"))
+  //     .then((geojson) => {
+  //       // this._createNewViewport(geojson);
+  //     });
+  // }
+
   componentDidUpdate(prevProps) {
     const queryParams = queryString.parse(this.props.location.search);
 
@@ -33,7 +56,11 @@ class MapContainer extends Component {
   }
 
   render() {
-    return <PraxisMap {...this.props} />;
+    const { ppraxis, zips } = this.props.mapData;
+    // if (ppraxis && zips) {
+      return <PraxisMap {...this.props} />;
+    // }
+    return null;
   }
 }
 
@@ -55,4 +82,5 @@ function mapStateToProps({
 }) {
   return { mapState, mapData, currentFeature, results, controller };
 }
+
 export default connect(mapStateToProps)(MapContainer);

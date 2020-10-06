@@ -150,21 +150,21 @@ class MapApp extends Component {
     setDocHeightOnWindow();
 
     //check to see what data is loaded
-    let { coordinates, search, year } = queryString.parse(
-      window.location.search
-    );
-    const { pathname } = window.location;
+    // let { coordinates, search, year } = queryString.parse(
+    //   window.location.search
+    // );
+    // const { pathname } = window.location;
 
-    //set the year
-    if (year) {
-      this.props.dispatch(getYearAction(year));
-    } else {
-      year = this.props.mapData.year;
-    }
+    // //set the year
+    // if (year) {
+    //   this.props.dispatch(getYearAction(year));
+    // } else {
+    //   year = this.props.mapData.year;
+    // }
 
-    // set the searchtype
-    const searchType = pathnameToSearchType(pathname);
-    this.props.dispatch(setSearchType(searchType));
+    // // set the searchtype
+    // const searchType = pathnameToSearchType(pathname);
+    // this.props.dispatch(setSearchType(searchType));
 
     // much logic here!!  may need to work on this a bit more to simplify the mount
     // if there is a search term dispatch the get parcels action
@@ -215,32 +215,32 @@ class MapApp extends Component {
     // if there is no search term then do a regular search for all parcels
     // if (search === undefined || pathname === "/") {
     // this.props.dispatch(dataIsLoadingAction(true));
-    this.props
-      .dispatch(handleGetParcelsByQueryAction(`/api/geojson/parcels/${year}`))
-      .then((geojson) => {
-        this._createNewViewport(geojson);
-        // this.props.dispatch(dataIsLoadingAction(false));
-      });
-    // }
-    //load zip data no matter what (this may change)
-    this.props
-      .dispatch(handleGetInitialZipcodeDataAction("/api/geojson/zipcodes"))
-      .then((geojson) => {
-        // this._createNewViewport(geojson);
-      });
+    // this.props
+    //   .dispatch(handleGetParcelsByQueryAction(`/api/geojson/parcels/${year}`))
+    //   .then((geojson) => {
+    //     this._createNewViewport(geojson);
+    //     // this.props.dispatch(dataIsLoadingAction(false));
+    //   });
+    // // }
+    // //load zip data no matter what (this may change)
+    // this.props
+    //   .dispatch(handleGetInitialZipcodeDataAction("/api/geojson/zipcodes"))
+    //   .then((geojson) => {
+    //     // this._createNewViewport(geojson);
+    //   });
   }
 
   render() {
     const { ppraxis, zips, dataIsLoading } = this.props.mapData;
     const { isOpen } = this.props.modal;
 
-    const loadingState =
-      Object.entries(ppraxis).length === 0 ||
-      ppraxis.features === null ||
-      Object.entries(zips).length === 0;
-    if (loadingState) {
-      return <Loading />;
-    }
+    // const loadingState =
+    //   Object.entries(ppraxis).length === 0 ||
+    //   ppraxis.features === null ||
+    //   Object.entries(zips).length === 0;
+    // if (loadingState) {
+    //   return <Loading />;
+    // }
     return (
       <main>
         <div className="app-container">

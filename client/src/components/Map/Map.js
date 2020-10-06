@@ -5,6 +5,10 @@ import ParcelLayerController from "./ParcelLayerController";
 import BasemapController from "./BasemapController";
 import { createNewViewport } from "../../utils/map";
 import { createAddressString, createLayerFilter } from "../../utils/helper";
+import {
+  handleGetInitialZipcodeDataAction,
+  handleGetParcelsByQueryAction,
+} from "../../actions/mapData";
 import { getMapStateAction } from "../../actions/mapState";
 import { getHoveredFeatureAction } from "../../actions/currentFeature";
 import {
@@ -18,7 +22,6 @@ import {
   setMarkerCoordsAction,
   dataIsLoadingAction,
 } from "../../actions/mapData";
-import { handleGetParcelsByQueryAction } from "../../actions/mapData";
 import {
   handleGetViewerImageAction,
   handleGetDownloadDataAction,
@@ -166,6 +169,24 @@ class PraxisMarker extends React.Component {
     // set the image viewer regardless
     this.props.dispatch(handleGetViewerImageAction(longitude, latitude));
   };
+  // TESTING
+  componentDidMount() {
+    const { year } = this.props.mapData;
+    this.props
+      .dispatch(handleGetParcelsByQueryAction(`/api/geojson/parcels/${year}`))
+      .then((geojson) => {
+        // this._createNewViewport(geojson);
+        // this.props.dispatch(dataIsLoadingAction(false));
+      });
+    // }
+
+    //load zip data no matter what (this may change)
+    this.props
+      .dispatch(handleGetInitialZipcodeDataAction("/api/geojson/zipcodes"))
+      .then((geojson) => {
+        // this._createNewViewport(geojson);
+      });
+  }
 
   render() {
     const { latitude, longitude } = this.props.mapData.marker;
@@ -320,7 +341,7 @@ class PraxisMap extends Component {
       );
       const state = null;
       const title = "";
-      const newUrl = `/address?search=${encodeURI(
+      const newUrl = `/map/address?search=${encodeURI(
         addressString
       )}&coordinates=${encodedCoords}&year=${year}`;
       //change the url
@@ -333,6 +354,25 @@ class PraxisMap extends Component {
       // this.props.dispatch(handleGetDownloadDataAction(downloadDataRoute));
     }
   }
+
+  componentDidMount() {
+    const { year } = this.props.mapData;
+    this.props
+      .dispatch(handleGetParcelsByQueryAction(`/api/geojson/parcels/${year}`))
+      .then((geojson) => {
+        this._createNewViewport(geojson);
+        // this.props.dispatch(dataIsLoadingAction(false));
+      });
+    // }
+
+    //load zip data no matter what (this may change)
+    this.props
+      .dispatch(handleGetInitialZipcodeDataAction("/api/geojson/zipcodes"))
+      .then((geojson) => {
+        // this._createNewViewport(geojson);
+      });
+  }
+
   render() {
     //create the new viewport before rendering
     const { latitude, longitude } = this.props.mapData.marker;

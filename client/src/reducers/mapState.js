@@ -8,7 +8,7 @@ const initialViewport = {
   pitch: 0
 };
 
-export default function mapState(state = {}, action) {
+export default function mapState(state = initialViewport, action) {
   switch (action.type) {
     case GET_MAP_STATE:
       return { ...state, ...action.payload };
