@@ -250,31 +250,17 @@ class PraxisMap extends Component {
     this.props.dispatch(getMapStateAction({ ...viewport }));
   };
 
-  _renderTooltip() {
-    const { hoveredFeature, x, y } = this.props.currentFeature;
-
-    return (
-      hoveredFeature && (
-        <div className="tooltip" style={{ left: x, top: y }}>
-          <div>Speculator: {hoveredFeature.properties.own_id}</div>
-          <div>Properties owned: {hoveredFeature.properties.count}</div>
-          <div>{hoveredFeature.properties.propaddr}</div>
-        </div>
-      )
-    );
-  }
-
   //THIS METHOD IS A DUPLICATE OF THE ONE IN APP
   // create new vieport dependent on current geojson bbox
   _createNewViewport = (geojson) => {
     //check to see what data is loaded
     const { year } = this.props.mapData;
     const features = geojson.features;
-    const { mapState } = this.props;
+    const { viewport } = this.props.mapState;
     //instantiate new viewport object
-    const { longitude, latitude, zoom } = createNewViewport(geojson, mapState);
+    const { longitude, latitude, zoom } = createNewViewport(geojson, viewport);
     const newViewport = {
-      ...mapState,
+      ...viewport,
       longitude,
       latitude,
       zoom,
@@ -355,7 +341,22 @@ class PraxisMap extends Component {
     }
   }
 
+  _renderTooltip() {
+    const { hoveredFeature, x, y } = this.props.currentFeature;
+
+    return (
+      hoveredFeature && (
+        <div className="tooltip" style={{ left: x, top: y }}>
+          <div>Speculator: {hoveredFeature.properties.own_id}</div>
+          <div>Properties owned: {hoveredFeature.properties.count}</div>
+          <div>{hoveredFeature.properties.propaddr}</div>
+        </div>
+      )
+    );
+  }
+
   componentDidMount() {
+    /////////////////////
     const { year } = this.props.mapData;
     this.props
       .dispatch(handleGetParcelsByQueryAction(`/api/geojson/parcels/${year}`))
@@ -388,7 +389,7 @@ class PraxisMap extends Component {
     return (
       <div className="map">
         <ReactMapGL
-          {...this.props.mapState}
+          {...this.props.mapState.viewport}
           mapOptions={{ attributionControl: false }}
           ref={(reactMap) => (this.reactMap = reactMap)}
           mapStyle={basemapLayer}
