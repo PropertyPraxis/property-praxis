@@ -129,7 +129,7 @@ class ParcelResults extends Component {
               return (
                 <Link
                   to={{
-                    pathname: "/address",
+                    pathname: "/map/address",
                     search: `search=${addressString}&coordinates=${encodedCoords}&year=${year}`,
                   }}
                   key={index}
@@ -257,7 +257,7 @@ class SingleAddressResults extends Component {
         //change the url
         const state = null;
         const title = "";
-        const newUrl = `/zipcode?search=${propzip}&year=${year}`;
+        const newUrl = `/map/zipcode?search=${propzip}&year=${year}`;
 
         //change the url
         window.history.pushState(state, title, newUrl);
@@ -306,7 +306,7 @@ class SingleAddressResults extends Component {
         //change the url
         const state = null;
         const title = "";
-        const newUrl = `/speculator?search=${own_id}&year=${year}`;
+        const newUrl = `/map/speculator?search=${own_id}&year=${year}`;
 
         //change the url
         window.history.pushState(state, title, newUrl);

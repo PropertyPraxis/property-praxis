@@ -26,6 +26,9 @@ import { handleGetViewerImageAction } from "./../actions/results";
 import { setDocHeightOnWindow, pathnameToSearchType } from "../utils/helper";
 import { createNewViewport } from "../utils/map";
 import Home from "./pages/Home";
+import DownloadData from "./pages/DownloadData";
+import About from "./pages/About";
+import Methodology from "./pages/Methodology";
 import MapContainer from "./Map/MapContainer";
 import SearchContainer from "./Search/SearchContainer";
 import ResultsContainer from "./Results/ResultsContainer";
@@ -34,7 +37,7 @@ import PraxisModal from "./Modal/PraxisModal";
 import PPLogo from "./Logo/Logo";
 import "../scss/App.scss";
 
-class MapApp extends Component {
+class App extends Component {
   _setSearch = (searchTerm, searchType, year) => {
     this.props.dispatch(setSearchDisplayType("partial"));
     this.props.dispatch(togglePartialResultsAction(false));
@@ -121,29 +124,29 @@ class MapApp extends Component {
 
   // Duplicated in PraxisMap!!
   // create new vieport dependent on current geojson bbox
-  _createNewViewport = (geojson) => {
-    //check to see what data is loaded
-    const { year } = this.props.mapData;
-    const features = geojson.features;
-    const { mapState } = this.props;
-    //instantiate new viewport object
-    const { longitude, latitude, zoom } = createNewViewport(geojson, mapState);
-    const newViewport = {
-      ...mapState,
-      longitude,
-      latitude,
-      zoom,
-      transitionDuration: 1000,
-    };
+  // _createNewViewport = (geojson) => {
+  //   //check to see what data is loaded
+  //   const { year } = this.props.mapData;
+  //   const features = geojson.features;
+  //   const { mapState } = this.props;
+  //   //instantiate new viewport object
+  //   const { longitude, latitude, zoom } = createNewViewport(geojson, mapState);
+  //   const newViewport = {
+  //     ...mapState,
+  //     longitude,
+  //     latitude,
+  //     zoom,
+  //     transitionDuration: 1000,
+  //   };
 
-    // if the return geojson has features aka the search term was
-    // valid then change the veiwport accordingly
-    features
-      ? this.props.dispatch(getMapStateAction(newViewport))
-      : this.props.dispatch(
-          handleGetParcelsByQueryAction(`/api/geojson/parcels/${year}`)
-        );
-  };
+  //   // if the return geojson has features aka the search term was
+  //   // valid then change the veiwport accordingly
+  //   features
+  //     ? this.props.dispatch(getMapStateAction(newViewport))
+  //     : this.props.dispatch(
+  //         handleGetParcelsByQueryAction(`/api/geojson/parcels/${year}`)
+  //       );
+  // };
 
   componentDidMount() {
     //set window height for mobile
@@ -231,8 +234,8 @@ class MapApp extends Component {
   }
 
   render() {
-    const { ppraxis, zips, dataIsLoading } = this.props.mapData;
-    const { isOpen } = this.props.modal;
+    // const { ppraxis, zips, dataIsLoading } = this.props.mapData;
+    // const { isOpen } = this.props.modal;
 
     // const loadingState =
     //   Object.entries(ppraxis).length === 0 ||
@@ -247,6 +250,9 @@ class MapApp extends Component {
           <Router>
             <Route path={"/"} component={Home} exact></Route>
             <Route path="/map" component={MapContainer}></Route>
+            <Route path={"/data"} component={DownloadData} exact></Route>
+            <Route path={"/methodology"} component={Methodology} exact></Route>
+            <Route path={"/about"} component={About} exact></Route>
             <SearchContainer />
             <ResultsContainer />
           </Router>
@@ -257,15 +263,15 @@ class MapApp extends Component {
   }
 }
 
-function App(props) {
-  const { isOpen } = props.modal; //this is currently set to false
+// function App(props) {
+//   const { isOpen } = props.modal; //this is currently set to false
 
-  if (isOpen) {
-    return <PraxisModal {...props} />;
-  }
+//   if (isOpen) {
+//     return <PraxisModal {...props} />;
+//   }
 
-  return <MapApp {...props} />;
-}
+//   return <MapApp {...props} />;
+// }
 
 function mapStateToProps({ mapData, modal, mapState }) {
   return { mapData, modal, mapState };

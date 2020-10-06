@@ -121,7 +121,7 @@ class PartialZipcodeResults extends Component {
               <Link
                 key={result.propzip}
                 to={{
-                  pathname: "/zipcode",
+                  pathname: "/map/zipcode",
                   search: `search=${result.propzip}&year=${year}`,
                 }}
                 onClick={() => {
@@ -224,7 +224,7 @@ class PartialAddressResults extends Component {
               <Link
                 key={result.place_name}
                 to={{
-                  pathname: "/address",
+                  pathname: "/map/address",
                   search: `search=${result.place_name}&coordinates=${encodedCoords}&year=${year}`,
                 }}
                 className={index % 2 ? "list-item-odd" : "list-item-even"}
@@ -309,7 +309,7 @@ class PartialSpeculatorResults extends Component {
               <Link
                 key={index}
                 to={{
-                  pathname: "/speculator",
+                  pathname: "/map/speculator",
                   search: `search=${result.own_id}&year=${year}`,
                 }}
                 onClick={() => {
