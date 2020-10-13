@@ -1,8 +1,7 @@
 import queryString from "query-string";
 
-export function createMapParams(searchQuery, pathname) {
-  const { search, coordinates, year } = queryString.parse(searchQuery);
-  const type = pathname.split("/")[2];
+export function createMapParams(searchQuery, pathName) {
+  const { type, search, coordinates, year } = queryString.parse(searchQuery);
 
   return { type, search, coordinates, year };
 }

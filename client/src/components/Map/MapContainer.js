@@ -6,33 +6,22 @@ import { getMapParamsAction } from "../../actions/mapState";
 import PraxisMap from "./Map";
 
 class MapContainer extends Component {
-  // zipcodeFillLayer = {
-  //   id: "zicode-fill",
-  //   type: "fill",
-  //   source: {
-  //     type: "geojson",
-  //     data: this.props.mapData,
-  //   },
-  // };
-
-  // zipcodeLineLayer = {
-  //   id: "zicode-fill",
-  //   type: "line",
-  //   source: {
-  //     type: "geojson",
-  //     data: this.props.mapData,
-  //   },
-  // };
 
   componentDidMount() {
     // parse URL and dispatch params
     const { search, pathname } = this.props.location;
     const mapParams = createMapParams(search, pathname);
     this.props.dispatch(getMapParamsAction(mapParams));
+
   }
 
   render() {
-    return <PraxisMap {...this.props} />;
+    const { params } = this.props.mapState;
+
+    if (params) {
+      return <PraxisMap {...this.props} mapParams={params} />;
+    }
+    return <div>LOADING...</div>; // this needs to be forther developed
   }
 }
 
@@ -43,6 +32,7 @@ MapContainer.propTypes = {
   results: PropTypes.object.isRequired,
   controller: PropTypes.object.isRequired,
   location: PropTypes.object.isRequired,
+  mapParams: PropTypes.object.isRequired,
 };
 
 function mapStateToProps({

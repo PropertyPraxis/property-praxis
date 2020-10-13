@@ -169,24 +169,6 @@ class PraxisMarker extends React.Component {
     // set the image viewer regardless
     this.props.dispatch(handleGetViewerImageAction(longitude, latitude));
   };
-  // TESTING
-  componentDidMount() {
-    const { year } = this.props.mapData;
-    this.props
-      .dispatch(handleGetParcelsByQueryAction(`/api/geojson/parcels/${year}`))
-      .then((geojson) => {
-        // this._createNewViewport(geojson);
-        // this.props.dispatch(dataIsLoadingAction(false));
-      });
-    // }
-
-    //load zip data no matter what (this may change)
-    this.props
-      .dispatch(handleGetInitialZipcodeDataAction("/api/geojson/zipcodes"))
-      .then((geojson) => {
-        // this._createNewViewport(geojson);
-      });
-  }
 
   render() {
     const { latitude, longitude } = this.props.mapData.marker;
@@ -355,23 +337,40 @@ class PraxisMap extends Component {
     );
   }
 
-  componentDidMount() {
-    /////////////////////
-    const { year } = this.props.mapData;
-    this.props
-      .dispatch(handleGetParcelsByQueryAction(`/api/geojson/parcels/${year}`))
-      .then((geojson) => {
-        this._createNewViewport(geojson);
-        // this.props.dispatch(dataIsLoadingAction(false));
-      });
-    // }
+  // returns a route dependent on URL search params
+  _routeSwitcher = (params) => {
+    const { type, search, coordinates, year } = params;
+    switch (type) {
+      case "zipcode":
+        return `/api/geojson/parcels/${type}/${search}/${year}`;
+      case "speculator":
+        return `/api/geojson/parcels/${type}/${search}/${year}`;
+      case "address":
+        return `/api/geojson/parcels/address/${coordinates}/${year}`;
+      default:
+        return `/api/geojson/parcels/${year}`;
+    }
+  };
 
-    //load zip data no matter what (this may change)
-    this.props
-      .dispatch(handleGetInitialZipcodeDataAction("/api/geojson/zipcodes"))
-      .then((geojson) => {
-        // this._createNewViewport(geojson);
-      });
+  async componentDidMount() {
+    // THIS NEEDS TO BE REWORKED EVERYWHERE
+    // year should come from mapParams
+    // const { year } = this.props.mapData;
+
+    //testing
+    const { mapParams } = this.props;
+    const route = this._routeSwitcher(mapParams);
+    
+    //////////////////////////////////////
+
+    const parcelsGeojson = await this.props.dispatch(
+      // handleGetParcelsByQueryAction(`/api/geojson/parcels/${year}`)
+      handleGetParcelsByQueryAction(route) // testing
+    );
+    this._createNewViewport(parcelsGeojson);
+    const zipsGeojson = await this.props.dispatch(
+      handleGetInitialZipcodeDataAction("/api/geojson/zipcodes")
+    );
   }
 
   render() {

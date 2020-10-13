@@ -8,12 +8,13 @@ const initialMapState = {
     bearing: 0,
     pitch: 0,
   },
-  params: {
-    type: undefined,
-    search: undefined,
-    coordinates: undefined,
-    year: undefined,
-  },
+  // params: {
+  //   type: undefined,
+  //   search: undefined,
+  //   coordinates: undefined,
+  //   year: undefined,
+  // },
+  params: null,
 };
 
 export default function mapState(state = initialMapState, action) {

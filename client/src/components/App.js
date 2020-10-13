@@ -53,74 +53,74 @@ class App extends Component {
     }
   };
 
-  // returns a route dependent on the window location
-  _routeSwitcher = (location, year) => {
-    const { pathname } = location;
-    const querySearchString = location.search;
-    const { coordinates, search } = queryString.parse(querySearchString);
-    const encodedCoords = encodeURI(coordinates);
+  // // returns a route dependent on the window location
+  // _routeSwitcher = (location, year) => {
+  //   const { pathname } = location;
+  //   const querySearchString = location.search;
+  //   const { coordinates, search } = queryString.parse(querySearchString);
+  //   const encodedCoords = encodeURI(coordinates);
 
-    switch (pathname) {
-      case "/zipcode":
-        return `/api/geojson/parcels${pathname}/${search}/${year}`;
-      case "/speculator":
-        return `/api/geojson/parcels${pathname}/${search}/${year}`;
-      case "/address":
-        return `/api/geojson/parcels/address/${encodedCoords}/${year}`;
-      default:
-        return `/api/geojson/parcels/${year}`;
-    }
-  };
+  //   switch (pathname) {
+  //     case "/zipcode":
+  //       return `/api/geojson/parcels${pathname}/${search}/${year}`;
+  //     case "/speculator":
+  //       return `/api/geojson/parcels${pathname}/${search}/${year}`;
+  //     case "/address":
+  //       return `/api/geojson/parcels/address/${encodedCoords}/${year}`;
+  //     default:
+  //       return `/api/geojson/parcels/${year}`;
+  //   }
+  // };
 
-  _resultSwitcher = (searchType, searchTerm, geojson, year) => {
-    if (searchType === "Speculator") {
-      this.props.dispatch(
-        resetSearch({
-          searchTerm,
-          searchDisplayType: "full-speculator",
-        })
-      );
-    }
+  // _resultSwitcher = (searchType, searchTerm, geojson, year) => {
+  //   if (searchType === "Speculator") {
+  //     this.props.dispatch(
+  //       resetSearch({
+  //         searchTerm,
+  //         searchDisplayType: "full-speculator",
+  //       })
+  //     );
+  //   }
 
-    if (searchType === "Zipcode") {
-      this.props.dispatch(
-        resetSearch({
-          searchTerm,
-          searchDisplayType: "full-zipcode",
-        })
-      );
-    }
+  //   if (searchType === "Zipcode") {
+  //     this.props.dispatch(
+  //       resetSearch({
+  //         searchTerm,
+  //         searchDisplayType: "full-zipcode",
+  //       })
+  //     );
+  //   }
 
-    if (searchType === "Address") {
-      if (
-        geojson.features &&
-        geojson.features.length === 1 &&
-        geojson.features[0].properties.distance === 0
-      ) {
-        this.props.dispatch(
-          resetSearch({
-            searchTerm,
-            searchType: "Address",
-            searchDisplayType: "single-address",
-          })
-        );
-      }
+  //   if (searchType === "Address") {
+  //     if (
+  //       geojson.features &&
+  //       geojson.features.length === 1 &&
+  //       geojson.features[0].properties.distance === 0
+  //     ) {
+  //       this.props.dispatch(
+  //         resetSearch({
+  //           searchTerm,
+  //           searchType: "Address",
+  //           searchDisplayType: "single-address",
+  //         })
+  //       );
+  //     }
 
-      /////
-      if (geojson.features && geojson.features.length > 1) {
-        this.props.dispatch(
-          resetSearch({
-            searchTerm,
-            searchType: "Address",
-            searchDisplayType: "multiple-parcels",
-          })
-        );
-      }
-    }
+  //     /////
+  //     if (geojson.features && geojson.features.length > 1) {
+  //       this.props.dispatch(
+  //         resetSearch({
+  //           searchTerm,
+  //           searchType: "Address",
+  //           searchDisplayType: "multiple-parcels",
+  //         })
+  //       );
+  //     }
+  //   }
 
-    //toggle the results pane
-    this.props.dispatch(toggleFullResultsAction(true));
-  };
+  //   //toggle the results pane
+  //   this.props.dispatch(toggleFullResultsAction(true));
+  // };
 
   // Duplicated in PraxisMap!!
   // create new vieport dependent on current geojson bbox
@@ -253,8 +253,8 @@ class App extends Component {
             <Route path={"/data"} component={DownloadData} exact></Route>
             <Route path={"/methodology"} component={Methodology} exact></Route>
             <Route path={"/about"} component={About} exact></Route>
-            <SearchContainer />
-            <ResultsContainer />
+            <SearchContainer /> {/*Component is here to receive router props*/}
+            <ResultsContainer /> {/*Component is here to receive router props*/}
           </Router>
           <PPLogo />
         </div>
