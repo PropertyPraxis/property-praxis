@@ -5,23 +5,30 @@ import { createMapParams } from "../../utils/parseURL";
 import { getMapParamsAction } from "../../actions/mapState";
 import PraxisMap from "./Map";
 
+/*The MapContainer is responsible for passing the params to the map*/
+
 class MapContainer extends Component {
+  _setMapParams = () => {
+    // parse URL and dispatch params
+    const { search } = this.props.location;
+    const mapParams = createMapParams(search);
+    this.props.dispatch(getMapParamsAction(mapParams));
+  };
 
   componentDidMount() {
-    // parse URL and dispatch params
-    const { search, pathname } = this.props.location;
-    const mapParams = createMapParams(search, pathname);
-    this.props.dispatch(getMapParamsAction(mapParams));
+    this._setMapParams();
+  }
 
+  async componentDidUpdate(prevProps) {
+    // if the location changes, set the map params
+    if (this.props.location.search !== prevProps.location.search) {
+      this._setMapParams();
+    }
   }
 
   render() {
     const { params } = this.props.mapState;
-
-    if (params) {
-      return <PraxisMap {...this.props} mapParams={params} />;
-    }
-    return <div>LOADING...</div>; // this needs to be forther developed
+    return <PraxisMap {...this.props} mapParams={params} />;
   }
 }
 

@@ -232,7 +232,6 @@ class PraxisMap extends Component {
     this.props.dispatch(getMapStateAction({ ...viewport }));
   };
 
-  //THIS METHOD IS A DUPLICATE OF THE ONE IN APP
   // create new vieport dependent on current geojson bbox
   _createNewViewport = (geojson) => {
     //check to see what data is loaded
@@ -352,25 +351,31 @@ class PraxisMap extends Component {
     }
   };
 
-  async componentDidMount() {
-    // THIS NEEDS TO BE REWORKED EVERYWHERE
-    // year should come from mapParams
-    // const { year } = this.props.mapData;
-
-    //testing
+  _getMapData = async () => {
     const { mapParams } = this.props;
     const route = this._routeSwitcher(mapParams);
-    
-    //////////////////////////////////////
 
+    // Get Data
     const parcelsGeojson = await this.props.dispatch(
-      // handleGetParcelsByQueryAction(`/api/geojson/parcels/${year}`)
-      handleGetParcelsByQueryAction(route) // testing
+      handleGetParcelsByQueryAction(route)
     );
-    this._createNewViewport(parcelsGeojson);
     const zipsGeojson = await this.props.dispatch(
       handleGetInitialZipcodeDataAction("/api/geojson/zipcodes")
     );
+
+    //Set viewport
+    this._createNewViewport(parcelsGeojson);
+  };
+
+  async componentDidMount() {
+    this._getMapData();
+  }
+
+  async componentDidUpdate(prevProps) {
+    // if the location changes, query for new data
+    if (this.props.mapParams.search !== prevProps.mapParams.search) {
+      this._getMapData();
+    }
   }
 
   render() {
@@ -398,10 +403,14 @@ class PraxisMap extends Component {
           maxZoom={18}
           mapboxApiAccessToken={MAPBOX_TOKEN}
           onViewportChange={this._onViewportChange}
-          onHover={this._onHover}
           interactiveLayerIds={["parcel-polygon"]}
+          onHover={this._onHover}
           onClick={(e) => {
             this._handleMapClick(e);
+          }}
+          onLoad={() => {
+            // add loading logic here
+            console.log("map loaded");
           }}
         >
           {latitude && longitude ? (

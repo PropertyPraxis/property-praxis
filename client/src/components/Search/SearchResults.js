@@ -1,19 +1,14 @@
 import React, { Component } from "react";
 import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
-import { createNewViewport } from "../../utils/map";
-import { getMapStateAction } from "../../actions/mapState";
 import {
   handleSearchPartialZipcode,
   handleSearchPartialAddress,
   handleSearchPartialSpeculator,
   handleSearchFullZipcode,
   resetSearch,
-  setSearchDisplayType,
-  setSearchType,
 } from "../../actions/search";
 import {
-  handleGetParcelsByQueryAction,
   setMarkerCoordsAction,
   dataIsLoadingAction,
 } from "../../actions/mapData";
@@ -68,49 +63,33 @@ PartialReturnResultSwitch.propTypes = {
 
 class PartialZipcodeResults extends Component {
   _onResultClick = (result) => {
-    const { year } = this.props.mapData;
-    //trigger data loading
-    this.props.dispatch(dataIsLoadingAction(true));
+    const { year } = this.props.mapState.params;
 
     // change the partial results
     this.props.dispatch(handleSearchPartialZipcode(result.propzip, year));
-
     this.props.dispatch(handleSearchFullZipcode(result.propzip, year));
-    // the route to parcels in zip
-    const geoJsonRoute = `/api/geojson/parcels/zipcode/${result.propzip}/${year}`;
-    //set map data and then create viewport
-    this.props
-      .dispatch(handleGetParcelsByQueryAction(geoJsonRoute))
-      .then((geojson) => {
-        //trigger new viewport pass down from PartialSearchResults
-        this.props.createNewViewport(geojson);
 
-        //trigger data loading off
-        this.props.dispatch(dataIsLoadingAction(false));
-      });
-    //fill in the text input
-    // this.props.dispatch(setSearchTerm(result.propzip));
+    // set the search params
     this.props.dispatch(
       resetSearch({
+        searchType: "Zipcode",
         searchTerm: result.propzip,
+        setSearchDisplayType: "full-zipcode",
       })
     );
-    // set the display type to full
-    this.props.dispatch(setSearchDisplayType("full-zipcode"));
 
-    //close the partial results after
+    // close the partial results after
     this.props.togglePartialResults(false);
 
-    // trigger the dowload data action
-    const downloadDataRoute = `/api/zipcode-search/download/${result.propzip}/${year}`;
-    this.props.dispatch(handleGetDownloadDataAction(downloadDataRoute));
-
-    //toggle the results pane
+    // //toggle the results pane
     this.props.dispatch(toggleFullResultsAction(true));
+
+    // trigger the dowload data action
+    // const downloadDataRoute = `/api/zipcode-search/download/${result.propzip}/${year}`;
+    // this.props.dispatch(handleGetDownloadDataAction(downloadDataRoute));
   };
 
   render() {
-    // const { partialResults } = this.props.searchState;
     const { partialSearchResults } = this.props;
     const { year } = this.props.mapData;
     return (
@@ -121,8 +100,8 @@ class PartialZipcodeResults extends Component {
               <Link
                 key={result.propzip}
                 to={{
-                  pathname: "/map/zipcode",
-                  search: `search=${result.propzip}&year=${year}`,
+                  pathname: "/map",
+                  search: `type=zipcode&search=${result.propzip}&year=${year}`,
                 }}
                 onClick={() => {
                   this._onResultClick(result);
@@ -151,11 +130,12 @@ PartialZipcodeResults.propTypes = {
 
 class PartialAddressResults extends Component {
   _onResultClick = (result) => {
-    const { year } = this.props.mapData;
+    const { year } = this.props.mapState.params;
     const [longitude, latitude] = result.geometry.coordinates;
     const encodedCoords = encodeURI(JSON.stringify({ longitude, latitude }));
+
     //trigger data loading
-    this.props.dispatch(dataIsLoadingAction(true));
+    // this.props.dispatch(dataIsLoadingAction(true));
 
     // change the partial results
     this.props.dispatch(handleSearchPartialAddress(result.place_name, year));
@@ -163,55 +143,64 @@ class PartialAddressResults extends Component {
     //add a point marker
     this.props.dispatch(setMarkerCoordsAction(latitude, longitude));
 
-    // get the download data for coords
-    const downloadRoute = `/api/address-search/download/${encodedCoords}/${year}`;
-    this.props.dispatch(handleGetDownloadDataAction(downloadRoute));
-
     //set new viewer in results
     this.props.dispatch(handleGetViewerImageAction(longitude, latitude));
 
-    //set map data and then create viewport
-    const geojsonRoute = `/api/geojson/parcels/address/${encodedCoords}/${year}`;
-    this.props
-      .dispatch(handleGetParcelsByQueryAction(geojsonRoute))
-      .then((geojson) => {
-        if (
-          geojson.features &&
-          geojson.features.length === 1 &&
-          geojson.features[0].properties.distance === 0
-        ) {
-          this.props.dispatch(
-            resetSearch({
-              searchTerm: result.place_name,
-              searchType: "Address",
-              searchDisplayType: "single-address",
-            })
-          );
-        }
+    // set the search params
+    this.props.dispatch(
+      resetSearch({
+        searchType: "Address",
+        searchTerm: result.place_name,
+        setSearchDisplayType: "single-address", // THIS CAN ALSO BE "multiple-parcels"
+      })
+    );
 
-        /////
-        if (geojson.features && geojson.features.length > 1) {
-          this.props.dispatch(
-            resetSearch({
-              searchTerm: result.place_name,
-              searchType: "Address",
-              searchDisplayType: "multiple-parcels",
-            })
-          );
-        }
-        //trigger new viewport pass down from PartialSearchResults
-        this.props.createNewViewport(geojson);
-        //trigger data loading off
-        this.props.dispatch(dataIsLoadingAction(false));
-      });
-
+    // toggle results
     this.props.dispatch(toggleFullResultsAction(true));
     this.props.togglePartialResults(false);
+
+    // get the download data for coords
+    // const downloadRoute = `/api/address-search/download/${encodedCoords}/${year}`;
+    // this.props.dispatch(handleGetDownloadDataAction(downloadRoute));
+
+    // this.props.dispatch(dataIsLoadingAction(false));
+
+    ///////////////////////////////////////////////////////////////////////////////////
+    //set map data and then create viewport
+    // const geojsonRoute = `/api/geojson/parcels/address/${encodedCoords}/${year}`;
+    // this.props
+    //   .dispatch(handleGetParcelsByQueryAction(geojsonRoute))
+    //   .then((geojson) => {
+    //     if (
+    //       geojson.features &&
+    //       geojson.features.length === 1 &&
+    //       geojson.features[0].properties.distance === 0
+    //     ) {
+    //       this.props.dispatch(
+    //         resetSearch({
+    //           searchTerm: result.place_name,
+    //           searchType: "Address",
+    //           searchDisplayType: "single-address",
+    //         })
+    //       );
+    //     }
+
+    //     /////
+    //     if (geojson.features && geojson.features.length > 1) {
+    //       this.props.dispatch(
+    //         resetSearch({
+    //           searchTerm: result.place_name,
+    //           searchType: "Address",
+    //           searchDisplayType: "multiple-parcels",
+    //         })
+    //       );
+    //     }
+    //   });
   };
 
   render() {
     const { partialSearchResults } = this.props;
-    const { year } = this.props.mapData;
+    const { year } = this.props.mapState.params;
     return (
       <section>
         <ul className="partial-results-container">
@@ -224,8 +213,8 @@ class PartialAddressResults extends Component {
               <Link
                 key={result.place_name}
                 to={{
-                  pathname: "/map/address",
-                  search: `search=${result.place_name}&coordinates=${encodedCoords}&year=${year}`,
+                  pathname: "/map",
+                  search: `type=address&search=${result.place_name}&coordinates=${encodedCoords}&year=${year}`,
                 }}
                 className={index % 2 ? "list-item-odd" : "list-item-even"}
                 onClick={() => {
@@ -255,11 +244,10 @@ PartialAddressResults.propTypes = {
 
 class PartialSpeculatorResults extends Component {
   _onResultClick = (result) => {
-    const { year } = this.props.mapData;
+    const { year } = this.props.mapState.params;
 
-    // const { mapState } = this.props;
     //trigger data loading
-    this.props.dispatch(dataIsLoadingAction(true));
+    // this.props.dispatch(dataIsLoadingAction(true));
 
     // change the partial results
     this.props.dispatch(handleSearchPartialSpeculator(result.own_id, year));
@@ -268,39 +256,24 @@ class PartialSpeculatorResults extends Component {
     const downloadDataRoute = `/api/speculator-search/download/${result.own_id}/${year}`;
     this.props.dispatch(handleGetDownloadDataAction(downloadDataRoute));
 
-    // the route to parcels in zip
-    const geoJsonRoute = `/api/geojson/parcels/speculator/${result.own_id}/${year}`;
-    //set map data and then create viewport
-    this.props
-      .dispatch(handleGetParcelsByQueryAction(geoJsonRoute))
-      .then((geojson) => {
-        //trigger new viewport
-        //Note this is creating a default because it is a point
-        this.props.createNewViewport(geojson);
-
-        //trigger data loading off
-        this.props.dispatch(dataIsLoadingAction(false));
-      });
-    //fill in the text input
-    // this.props.dispatch(setSearchTerm(result.propzip));
+    // set the search params
     this.props.dispatch(
       resetSearch({
+        searchType: "Speculator",
         searchTerm: result.own_id,
+        searchDisplayType: "full-speculator",
       })
     );
 
-    this.props.dispatch(setSearchType("Speculator"));
-    // set the display type to full
-    this.props.dispatch(setSearchDisplayType("full-speculator"));
+    // close the partial results after
+    this.props.togglePartialResults(false);
     //toggle the results pane
     this.props.dispatch(toggleFullResultsAction(true));
-    //close the partial results after
-    this.props.dispatch(togglePartialResultsAction(false));
   };
 
   render() {
     const { partialSearchResults } = this.props;
-    const { year } = this.props.mapData;
+    const { year } = this.props.mapState.params;
     return (
       <section>
         <ul className="partial-results-container">
@@ -388,21 +361,6 @@ class PartialSearchResults extends Component {
     this.props.dispatch(togglePartialResultsAction(isOpen));
   };
 
-  _createNewViewport = (geojson) => {
-    const { mapState } = this.props;
-    //trigger new viewport
-    const { longitude, latitude, zoom } = createNewViewport(geojson, mapState);
-    this.props.dispatch(
-      getMapStateAction({
-        ...mapState,
-        longitude,
-        latitude,
-        zoom,
-        transitionDuration: 1000,
-      })
-    );
-  };
-
   render() {
     const resultLength = this.props.searchState.partialResults.length;
     const { isPartialResultsOpen } = this.props.results;
@@ -411,7 +369,6 @@ class PartialSearchResults extends Component {
       return (
         <PartialReturnResultSwitch
           {...this.props}
-          createNewViewport={this._createNewViewport}
           togglePartialResults={this._togglePartialResults}
         />
       );
