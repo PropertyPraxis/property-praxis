@@ -28,10 +28,11 @@ class App extends Component {
             <Route path={"/data"} component={DownloadData} exact></Route>
             <Route path={"/methodology"} component={Methodology} exact></Route>
             <Route path={"/about"} component={About} exact></Route>
+            {/* The following components are inside Router to have access to Link */}
+            <ResultsContainer />
+            <SearchContainer />
+            <PPLogo />
           </Router>
-          <ResultsContainer />
-          <SearchContainer />
-          <PPLogo />
         </div>
       </main>
     );
