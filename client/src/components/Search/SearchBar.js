@@ -17,6 +17,7 @@ import {
   toggleFullResultsAction,
 } from "../../actions/results";
 import { setMarkerCoordsAction } from "../../actions/mapData";
+import { capitalizeFirstLetter } from "../../utils/helper";
 import PartialSearchResults from "./SearchResults";
 import * as searchIcon from "../../assets/img/search.png";
 import styleVars from "../../scss/colors.scss";
@@ -24,25 +25,25 @@ import styleVars from "../../scss/colors.scss";
 // use this object to reset to nothing
 const resetSearchOptions = {
   searchTerm: "",
-  searchDisplayType: null,
+  searchDisplayType: "all",
   partialResults: [],
   fullResults: [],
 };
 
 class SearchBar extends Component {
-  _searchButons = ["All", "Address", "Speculator", "Zipcode"];
+  _searchButons = ["all", "address", "speculator", "zipcode"];
 
   _setSearchPlaceholderText = (searchType) => {
     switch (searchType) {
-      case "All":
+      case "all":
         return "Search Property Praxis...";
-      case "Address":
+      case "address":
         return "Search Adresses...";
-      case "Speculator":
+      case "speculator":
         return "Search Speculators...";
-      case "Zipcode":
+      case "zipcode":
         return "Search Zipcodes...";
-      case "Home":
+      case "home":
         return "Search for an address, speculator, or zipcode...";
       default:
         return "Search Property Praxis...";
@@ -51,49 +52,51 @@ class SearchBar extends Component {
 
   _handleInputChange = async (e) => {
     const searchTerm = e.target.value;
-    const { searchType } = this.props.searchState;
-    const { year } = this.props.mapData;
+    const { searchType, searchYear } = this.props.searchState;
 
     this.props.dispatch(setSearchTerm(searchTerm));
     this.props.dispatch(setSearchDisplayType("partial"));
 
     //zipcode search
-    if (searchType === "Zipcode") {
-      this.props.dispatch(handleSearchPartialZipcode(searchTerm, year));
-    }
-    if (searchType === "Address") {
-      this.props.dispatch(handleSearchPartialAddress(searchTerm, year));
-    }
-    if (searchType === "Speculator") {
-      this.props.dispatch(handleSearchPartialSpeculator(searchTerm, year));
-    }
-    if (searchType === "All") {
-      this.props.dispatch(handleSearchPartialAll(searchTerm, year));
+    if (searchType === "zipcode") {
+      this.props.dispatch(handleSearchPartialZipcode(searchTerm, searchYear));
+    } else if (searchType === "address") {
+      this.props.dispatch(handleSearchPartialAddress(searchTerm, searchYear));
+    } else if (searchType === "speculator") {
+      this.props.dispatch(
+        handleSearchPartialSpeculator(searchTerm, searchYear)
+      );
+    } else if (searchType === "all") {
+      this.props.dispatch(handleSearchPartialAll(searchTerm, searchYear));
     }
   };
 
   // STILL WORKING ON THIS
   _handleKeyPress = async (e) => {
-    const { searchType, searchTerm } = this.props.searchState;
-    const { year } = this.props.mapData;
+    const { searchType, searchTerm, searchYear } = this.props.searchState;
+
     const { key } = e;
 
     // if it is an enter hit
     if (key === "Enter") {
       console.log("Enter press", this._textInput.value);
       // //zipcode search
-      // if (searchType === "Zipcode") {
-      //   this.props.dispatch(handleSearchPartialZipcode(searchTerm, year));
+      // if (searchType === "zipcode") {
+      //   this.props.dispatch(handleSearchPartialZipcode(searchTerm, searchYear));
       // }
-      // if (searchType === "Address") {
-      //   this.props.dispatch(handleSearchPartialAddress(searchTerm, year));
+      // if (searchType === "address") {
+      //   this.props.dispatch(handleSearchPartialAddress(searchTerm, searchYear));
       // }
-      // if (searchType === "Speculator") {
-      //   this.props.dispatch(handleSearchPartialSpeculator(searchTerm, year));
+      // if (searchType === "speculator") {
+      //   this.props.dispatch(handleSearchPartialSpeculator(searchTerm, searchYear));
       // }
       // if (searchType === "All") {
       // }
     }
+  };
+
+  _handleYearSelect = (e) => {
+    this.props.dispatch(resetSearch({ searchYear: e.target.value }));
   };
 
   componentDidMount() {
@@ -102,21 +105,11 @@ class SearchBar extends Component {
     this.props.dispatch(handleGetYearsAction(yearsRoute));
   }
 
-  componentDidUpdate(prevProps) {
-    const { searchType } = this.props.searchState;
-
-    // reset the text to '' when the search type changes
-    if (prevProps.searchState.searchType !== searchType) {
-      // this.props.dispatch(setSearchTerm(""));
-      this._textInput.value = "";
-    }
-  }
   render() {
-    const { searchType, searchTerm } = this.props.searchState;
+    const { searchType, searchTerm, searchYear } = this.props.searchState;
     const { years } = this.props.mapData;
     const { searchBarType, showSearchButtons } = this.props;
-    const searchRoute = `/${searchType.toLowerCase()}`;
-    
+
     if (years) {
       return (
         <section
@@ -147,7 +140,7 @@ class SearchBar extends Component {
                           : null
                       }
                     >
-                      {button}
+                      {capitalizeFirstLetter(button)}
                     </div>
                   );
                 })}
@@ -157,10 +150,14 @@ class SearchBar extends Component {
             <div className="search-bar">
               {/* /////////////////////////////////////////// */}
               <div className="year-select">
-                {/* <label htmlFor="praxisYears">Select a year:</label> */}
-                <select id="years">
+                <select id="years" onChange={this._handleYearSelect}>
                   {years.map((result) => (
-                    <option key={result.praxisyear}>{result.praxisyear}</option>
+                    <option
+                      key={result.praxisyear}
+                      selected={result.praxisyear.toString() === searchYear}
+                    >
+                      {result.praxisyear}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -185,7 +182,7 @@ class SearchBar extends Component {
                   placeholder={
                     showSearchButtons
                       ? this._setSearchPlaceholderText(searchType)
-                      : this._setSearchPlaceholderText("Home")
+                      : this._setSearchPlaceholderText("home")
                   }
                   value={searchTerm} //controlled input
                   onChange={this._handleInputChange}
@@ -217,11 +214,7 @@ class SearchBar extends Component {
                 </div>
               </div>
             </div>
-            <PartialSearchResults
-              // _textInput={this._textInput}
-              {...this.props}
-              // handleInputChange={this._handleInputChange}
-            />
+            <PartialSearchResults {...this.props} />
           </div>
         </section>
       );
@@ -240,9 +233,6 @@ SearchBar.propTypes = {
       PropTypes.string,
       PropTypes.oneOf([null]),
     ]),
-  }).isRequired,
-  mapData: PropTypes.shape({
-    year: PropTypes.string.isRequired,
   }).isRequired,
   dispatch: PropTypes.func.isRequired,
 };

@@ -1,40 +1,53 @@
 import React, { Component } from "react";
+import { withRouter } from "react-router-dom";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
-import { createMapParams } from "../../utils/parseURL";
+import { parseURLParams } from "../../utils/parseURL";
 import { getMapParamsAction } from "../../actions/mapState";
+import { resetSearch } from "../../actions/search";
 import PraxisMap from "./Map";
 
 /*The MapContainer is responsible for passing the params to the map*/
 
 class MapContainer extends Component {
-  _setMapParams = () => {
+  _setURLParams = () => {
     // parse URL and dispatch params
-    const { search } = this.props.location;
-    const mapParams = createMapParams(search);
-    this.props.dispatch(getMapParamsAction(mapParams));
+    const urlParams = parseURLParams(this.props.location.search);
+
+    //add to search state
+    const { type, search, coordinates, year } = urlParams;
+    this.props.dispatch(
+      resetSearch({
+        searchType: type,
+        searchTerm: search,
+        searchCoordinates: coordinates,
+        searchYear: year,
+      })
+    );
   };
 
   componentDidMount() {
-    this._setMapParams();
+    this._setURLParams();
   }
 
   async componentDidUpdate(prevProps) {
-    // if the location changes, set the map params
+    // if the location changes, set the params
     if (this.props.location.search !== prevProps.location.search) {
-      this._setMapParams();
+      this._setURLParams();
     }
   }
 
   render() {
-    const { params } = this.props.mapState;
-    return <PraxisMap {...this.props} mapParams={params} />;
+    console.log("map container props", this.props);
+    const urlParams = parseURLParams(this.props.location.search);
+    return <PraxisMap {...this.props} urlParams={urlParams} />;
   }
 }
 
 MapContainer.propTypes = {
   mapState: PropTypes.object.isRequired,
   mapData: PropTypes.object.isRequired,
+  searchState: PropTypes.object.isRequired,
   currentFeature: PropTypes.object.isRequired,
   results: PropTypes.object.isRequired,
   controller: PropTypes.object.isRequired,
@@ -45,11 +58,19 @@ MapContainer.propTypes = {
 function mapStateToProps({
   mapState,
   mapData,
+  searchState,
   currentFeature,
   results,
   controller,
 }) {
-  return { mapState, mapData, currentFeature, results, controller };
+  return {
+    mapState,
+    mapData,
+    searchState,
+    currentFeature,
+    results,
+    controller,
+  };
 }
 
-export default connect(mapStateToProps)(MapContainer);
+export default withRouter(connect(mapStateToProps)(MapContainer));

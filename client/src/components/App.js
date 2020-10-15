@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { BrowserRouter as Router, Route } from "react-router-dom";
+import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import { connect } from "react-redux";
 import { setDocHeightOnWindow } from "../utils/helper";
 import Home from "./pages/Home";
@@ -10,7 +10,6 @@ import MapContainer from "./Map/MapContainer";
 import SearchContainer from "./Search/SearchContainer";
 import ResultsContainer from "./Results/ResultsContainer";
 import PPLogo from "./Logo/Logo";
-import "../scss/App.scss";
 
 class App extends Component {
   componentDidMount() {
@@ -23,14 +22,16 @@ class App extends Component {
       <main>
         <div className="app-container">
           <Router>
-            <Route path={"/"} component={Home} exact></Route>
-            <Route path="/map" component={MapContainer}></Route>
-            <Route path={"/data"} component={DownloadData} exact></Route>
-            <Route path={"/methodology"} component={Methodology} exact></Route>
-            <Route path={"/about"} component={About} exact></Route>
+            <Switch>
+              <Route exact path={"/"} component={Home}></Route>
+              <Route path={"/map"} component={MapContainer}></Route>
+              <Route path={"/data"} component={DownloadData}></Route>
+              <Route path={"/methodology"} component={Methodology}></Route>
+              <Route path={"/about"} component={About}></Route>
+            </Switch>
             {/* The following components are inside Router to have access to Link */}
-            <ResultsContainer />
             <SearchContainer />
+            <ResultsContainer />
             <PPLogo />
           </Router>
         </div>

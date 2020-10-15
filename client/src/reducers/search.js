@@ -10,15 +10,18 @@ import {
   SEARCH_FULL_ADDRESS,
   SEARCH_PARTIAL_SPECULATOR,
   SEARCH_FULL_SPECULATOR,
-  SEARCH_PARTIAL_ALL
+  SEARCH_PARTIAL_ALL,
 } from "../actions/search";
 
 const initialSearchState = {
-  searchType: "All",
+  searchType: "all",
   searchTerm: null,
   searchDisplayType: null,
+  searchCoordinates: null,
+  searchYear: "2017",
+  searchQuery: null,
   partialResults: [],
-  fullResults: []
+  fullResults: [],
 };
 
 export default function searchState(state = initialSearchState, action) {

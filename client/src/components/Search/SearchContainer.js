@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
+import { withRouter } from "react-router-dom";
 import PropTypes from "prop-types";
 import {
   handleSearchPartialAddress,
@@ -8,16 +9,20 @@ import {
   resetSearch,
 } from "../../actions/search";
 import { togglePartialResultsAction } from "../../actions/results";
-import { createMapParams } from "../../utils/parseURL";
+import { parseURLParams } from "../../utils/parseURL";
 import SearchBar from "./SearchBar";
 
 class SearchContainer extends Component {
   _setSearch = () => {
     // parse URL and dispatch params
-    const { type, search, year } = createMapParams(window.location.search);
+
+    const { type, search, year } = parseURLParams(window.location.search);
     if (type && search && year) {
       this.props.dispatch(
         resetSearch({
+          searchType: type,
+          searchTerm: search,
+          searchYear: year,
           searchDisplayType: "partial",
         })
       );
@@ -38,12 +43,7 @@ class SearchContainer extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    const { type, search, year } = this.props.mapState.params;
-    if (
-      prevProps.mapState.params.type !== type ||
-      prevProps.mapState.params.search !== search ||
-      prevProps.mapState.params.year !== year
-    ) {
+    if (prevProps.location.search !== this.props.history.location.search) {
       this._setSearch();
     }
   }
@@ -72,4 +72,4 @@ function mapStateToProps({ searchState, mapData, mapState, results }) {
   return { searchState, mapData, mapState, results };
 }
 
-export default connect(mapStateToProps)(SearchContainer);
+export default withRouter(connect(mapStateToProps)(SearchContainer));

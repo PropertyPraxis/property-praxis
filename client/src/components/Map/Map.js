@@ -66,7 +66,7 @@ class PraxisMarker extends React.Component {
 
     //then do stuff with the new coords
     const [longitude, latitude] = event.lngLat;
-    const { year } = this.props.mapData;
+    const { searchYear } = this.props.searchState;
     const encodedCoords = encodeURI(
       JSON.stringify({
         longitude: longitude,
@@ -77,11 +77,11 @@ class PraxisMarker extends React.Component {
     //trigger a null display to set to loading
     // this.props.dispatch(setSearchDisplayType(null));
 
-    const route = `/api/geojson/parcels/address/${encodedCoords}/${year}`;
+    const route = `/api/geojson/parcels/address/${encodedCoords}/${searchYear}`;
 
     //start the download action
     this.props.dispatch(dataIsLoadingAction(true));
-    // const downloadDataRoute = `/api/address-search/download/${encodedCoords}/${year}`;
+    // const downloadDataRoute = `/api/address-search/download/${encodedCoords}/${searchYear }`;
     // this.props.dispatch(handleGetDownloadDataAction(downloadDataRoute));
 
     // query the parcels
@@ -115,7 +115,7 @@ class PraxisMarker extends React.Component {
           const title = "";
           const newUrl = `/address?search=${encodeURI(
             addressString
-          )}&coordinates=${encodedCoords}&year=${year}`;
+          )}&coordinates=${encodedCoords}&year=${searchYear}`;
 
           //change the url
           window.history.pushState(state, title, newUrl);
@@ -125,7 +125,7 @@ class PraxisMarker extends React.Component {
 
           // change the partial results
           this.props
-            .dispatch(handleSearchPartialAddress(addressString, year))
+            .dispatch(handleSearchPartialAddress(addressString, searchYear))
             .then((json) => {
               // set the search term to the first result of geocoder
               const proxySearchTerm = json[0].mb[0].place_name;
@@ -235,7 +235,7 @@ class PraxisMap extends Component {
   // create new vieport dependent on current geojson bbox
   _createNewViewport = (geojson) => {
     //check to see what data is loaded
-    const { year } = this.props.mapData;
+    const { searchYear } = this.props.searchState;
     const features = geojson.features;
     const { viewport } = this.props.mapState;
     //instantiate new viewport object
@@ -253,7 +253,7 @@ class PraxisMap extends Component {
     features
       ? this.props.dispatch(getMapStateAction(newViewport))
       : this.props.dispatch(
-          handleGetParcelsByQueryAction(`/api/geojson/parcels/${year}`)
+          handleGetParcelsByQueryAction(`/api/geojson/parcels/${searchYear}`)
         );
   };
 
@@ -270,11 +270,11 @@ class PraxisMap extends Component {
       this.props.dispatch(setMarkerCoordsAction(latitude, longitude));
       // this.props.dispatch(handleGetViewerImageAction(longitude, latitude));
       //set the parcels within buffer
-      const { year } = this.props.mapData;
+      const { searchYear } = this.props.searchState;
       const coordinates = { longitude: longitude, latitude: latitude };
       const encodedCoords = encodeURI(JSON.stringify(coordinates));
 
-      const route = `/api/geojson/parcels/address/${encodedCoords}/${year}`;
+      const route = `/api/geojson/parcels/address/${encodedCoords}/${searchYear}`;
       this.props
         .dispatch(handleGetParcelsByQueryAction(route))
         .then((geojson) => {
@@ -283,7 +283,7 @@ class PraxisMap extends Component {
 
           // change the partial results
           this.props
-            .dispatch(handleSearchPartialAddress(addressString, year))
+            .dispatch(handleSearchPartialAddress(addressString, searchYear))
             .then((json) => {
               // set the search term to the first result of geocoder
               const proxySearchTerm = json[0].mb[0].place_name;
@@ -310,14 +310,14 @@ class PraxisMap extends Component {
       const title = "";
       const newUrl = `/map/address?search=${encodeURI(
         addressString
-      )}&coordinates=${encodedCoords}&year=${year}`;
+      )}&coordinates=${encodedCoords}&year=${searchYear}`;
       //change the url
       window.history.pushState(state, title, newUrl);
       //get viewer image
       this.props.dispatch(handleGetViewerImageAction(longitude, latitude));
       //handle all the download data and setting search
       this.props.dispatch(dataIsLoadingAction(true));
-      // const downloadDataRoute = `/api/address-search/download/${encodedCoords}/${year}`;
+      // const downloadDataRoute = `/api/address-search/download/${encodedCoords}/${searchYear }`;
       // this.props.dispatch(handleGetDownloadDataAction(downloadDataRoute));
     }
   }
@@ -336,9 +336,8 @@ class PraxisMap extends Component {
     );
   }
 
-  // returns a route dependent on URL search params
-  _routeSwitcher = (params) => {
-    const { type, search, coordinates, year } = params;
+  // returns a route dependent on URL search params passed from MapContainer
+  _routeSwitcher = ({ type, search, coordinates, year }) => {
     switch (type) {
       case "zipcode":
         return `/api/geojson/parcels/${type}/${search}/${year}`;
@@ -352,8 +351,7 @@ class PraxisMap extends Component {
   };
 
   _getMapData = async () => {
-    const { mapParams } = this.props;
-    const route = this._routeSwitcher(mapParams);
+    const route = this._routeSwitcher(this.props.urlParams);
 
     // Get Data
     const parcelsGeojson = await this.props.dispatch(
@@ -373,7 +371,7 @@ class PraxisMap extends Component {
 
   async componentDidUpdate(prevProps) {
     // if the location changes, query for new data
-    if (this.props.mapParams.search !== prevProps.mapParams.search) {
+    if (this.props.location.search !== prevProps.location.search) {
       this._getMapData();
     }
   }
