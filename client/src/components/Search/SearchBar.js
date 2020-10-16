@@ -17,7 +17,10 @@ import {
   toggleFullResultsAction,
 } from "../../actions/results";
 import { setMarkerCoordsAction } from "../../actions/mapData";
-import { capitalizeFirstLetter } from "../../utils/helper";
+import {
+  capitalizeFirstLetter,
+  parseSearchResultsOnKeyPress,
+} from "../../utils/helper";
 import PartialSearchResults from "./SearchResults";
 import * as searchIcon from "../../assets/img/search.png";
 import styleVars from "../../scss/colors.scss";
@@ -73,25 +76,14 @@ class SearchBar extends Component {
 
   // STILL WORKING ON THIS
   _handleKeyPress = async (e) => {
-    const { searchType, searchTerm, searchYear } = this.props.searchState;
-
-    const { key } = e;
-
+    const { searchType, searchYear, partialResults } = this.props.searchState;
     // if it is an enter hit
-    if (key === "Enter") {
-      console.log("Enter press", this._textInput.value);
-      // //zipcode search
-      // if (searchType === "zipcode") {
-      //   this.props.dispatch(handleSearchPartialZipcode(searchTerm, searchYear));
-      // }
-      // if (searchType === "address") {
-      //   this.props.dispatch(handleSearchPartialAddress(searchTerm, searchYear));
-      // }
-      // if (searchType === "speculator") {
-      //   this.props.dispatch(handleSearchPartialSpeculator(searchTerm, searchYear));
-      // }
-      // if (searchType === "All") {
-      // }
+    if (e.key === "Enter") {
+      const route = `/map?type=${searchType}&${parseSearchResultsOnKeyPress(
+        partialResults[0],
+        searchType
+      )}&year=${searchYear}`;
+      this.props.history.push(route);
     }
   };
 

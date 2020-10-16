@@ -1,3 +1,5 @@
+import queryString from "query-string";
+
 //logic to render mobile properly
 
 export function setDocHeightOnWindow() {
@@ -119,4 +121,38 @@ export function addUnderscoreToString(val) {
 
 export function getYearString() {
   return new Date().getFullYear();
+}
+
+export function parseSearchResultsOnKeyPress(result, searchType) {
+  debugger;
+
+  if (searchType === "all") {
+    // logic to deal with "all" search types
+  } else {
+    const keys = Object.keys(result);
+    if (keys.includes("propzip")) {
+      const zipcodeQuery = {
+        search: result.propzip,
+      };
+      return queryString.stringify(zipcodeQuery);
+    } else if (keys.includes("own_id")) {
+      const speculatorQuery = {
+        search: result.own_id,
+      };
+      return queryString.stringify(speculatorQuery);
+    } else if (keys.includes("mb")) {
+      const [longitude, latitude] = result.mb[0].geometry.coordinates;
+      const encodedCoords = encodeURI(JSON.stringify({ longitude, latitude }));
+
+      const addressQuery = {
+        search: result.mb[0].place_name,
+        coordinates: encodedCoords,
+      };
+      return queryString.stringify(addressQuery);
+    } else {
+      throw new Error(
+        `Known key does not exist in object: ${JSON.stringify(result)}`
+      );
+    }
+  }
 }

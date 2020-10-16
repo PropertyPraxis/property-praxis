@@ -6,7 +6,6 @@ export function parseURLParams(searchQuery) {
   if (type === undefined) type = null;
   else if (search === undefined) search = null;
   else if (coordinates === undefined) coordinates = null;
-  else if (coordinates === undefined) coordinates = null;
 
   return { type, search, coordinates, year };
 }
