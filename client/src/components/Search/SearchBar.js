@@ -17,10 +17,7 @@ import {
   toggleFullResultsAction,
 } from "../../actions/results";
 import { setMarkerCoordsAction } from "../../actions/mapData";
-import {
-  capitalizeFirstLetter,
-  parseSearchResultsOnKeyPress,
-} from "../../utils/helper";
+import { capitalizeFirstLetter, parseSearchResults } from "../../utils/helper";
 import PartialSearchResults from "./SearchResults";
 import * as searchIcon from "../../assets/img/search.png";
 import styleVars from "../../scss/colors.scss";
@@ -74,17 +71,29 @@ class SearchBar extends Component {
     }
   };
 
-  // STILL WORKING ON THIS
-  _handleKeyPress = async (e) => {
-    const { searchType, searchYear, partialResults } = this.props.searchState;
-    // if it is an enter hit
-    if (e.key === "Enter") {
-      const route = `/map?type=${searchType}&${parseSearchResultsOnKeyPress(
-        partialResults[0],
-        searchType
-      )}&year=${searchYear}`;
+  _setSearchParams = (partialSearchResults) => {
+    const { searchType, searchYear } = this.props.searchState;
+    if (partialSearchResults.length > 0) {
+      const route = `/map?${parseSearchResults({
+        results: partialSearchResults,
+        type: searchType,
+        year: searchYear,
+      })}`;
       this.props.history.push(route);
     }
+  };
+
+  _handleKeyPress = (e) => {
+    const { partialResults } = this.props.searchState;
+    // if it is an enter key press
+    if (e.key === "Enter") {
+      this._setSearchParams(partialResults);
+    }
+  };
+
+  _handleSearchButtonClick = () => {
+    const { partialResults } = this.props.searchState;
+    this._setSearchParams(partialResults);
   };
 
   _handleYearSelect = (e) => {
@@ -140,7 +149,6 @@ class SearchBar extends Component {
             ) : null}
 
             <div className="search-bar">
-              {/* /////////////////////////////////////////// */}
               <div className="year-select">
                 <select id="years" onChange={this._handleYearSelect}>
                   {years.map((result) => (
@@ -153,7 +161,6 @@ class SearchBar extends Component {
                   ))}
                 </select>
               </div>
-              {/* /////////////////////////////////////////// */}
               <div
                 className={
                   showSearchButtons ? "search-form" : "search-form-home"
@@ -198,9 +205,7 @@ class SearchBar extends Component {
                 />
                 <div
                   className="search-button"
-                  onClick={() => {
-                    console.log("clicked");
-                  }}
+                  onClick={this._handleSearchButtonClick}
                 >
                   <img src={searchIcon} alt="search button"></img>
                 </div>

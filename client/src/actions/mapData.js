@@ -12,6 +12,7 @@ export const GET_PARCELS_BY_QUERY = "GET_PARCELS_BY_QUERY";
 export const GET_YEAR = "GET_YEAR";
 export const GET_YEARS = "GET_YEARS";
 export const GET_ZIPCODES = "GET_ZIPCODES";
+export const GET_REVERSE_GEOCODE = "GET_REVERSE_GEOCODE";
 export const LOG_MARKER_DRAG = "LOG_MARKER_DRAG";
 export const MARKER_DRAG_END = "MARKER_DRAG_END";
 export const SET_MARKER_COORDS = "SET_MARKER_COORDS";
@@ -59,6 +60,13 @@ export function getParcelsByQueryAction(data) {
   };
 }
 
+function getReverseGeocodeAction(reverseGeocode) {
+  return {
+    type: GET_REVERSE_GEOCODE,
+    payload: { reverseGeocode },
+  };
+}
+
 export function logMarkerDragEventAction(name, event) {
   return {
     type: LOG_MARKER_DRAG,
@@ -80,7 +88,7 @@ export function onMarkerDragEndAction(event) {
   };
 }
 
-export function setMarkerCoordsAction(latitude, longitude) {
+export function setMarkerCoordsAction(longitude, latitude) {
   return {
     type: MARKER_DRAG_END,
     payload: {
@@ -132,6 +140,19 @@ export function handleGetParcelsByQueryAction(route) {
     return getMapData(route)
       .then((json) => {
         dispatch(getParcelsByQueryAction(json));
+        return json;
+      })
+      .catch((err) => {
+        throw Error(`An error occured searching: ${err}`);
+      });
+  };
+}
+
+export function handleGetReverseGeocodeAction(route) {
+  return (dispatch) => {
+    return getMapData(route)
+      .then((json) => {
+        dispatch(getReverseGeocodeAction(json));
         return json;
       })
       .catch((err) => {

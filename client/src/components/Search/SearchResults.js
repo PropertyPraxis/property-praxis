@@ -208,7 +208,7 @@ class PartialAddressResults extends Component {
     return (
       <section>
         <ul className="partial-results-container">
-          {partialSearchResults[0].mb.map((result, index) => {
+          {partialSearchResults.map((result, index) => {
             const [longitude, latitude] = result.geometry.coordinates;
             const encodedCoords = encodeURI(
               JSON.stringify({ longitude, latitude })
@@ -325,17 +325,15 @@ class PartialAllResults extends Component {
       <div className="partial-results-container-all">
         <div className="partial-results-spacer"></div>
         <div className="partial-results-combined">
-          {partialResults[0].length > 0 &&
-          partialResults[0][0].mb.length > 0 ? (
+          {partialResults[0].length > 0 ? (
             <div className="partial-results-all-title">Address Results</div>
           ) : null}
-          {partialResults[0].length > 0 &&
-          partialResults[0][0].mb !== undefined ? (
-            <PartialAddressResults
-              {...this.props}
-              partialSearchResults={partialResults[0]}
-            />
-          ) : null}
+
+          <PartialAddressResults
+            {...this.props}
+            partialSearchResults={partialResults[0]}
+          />
+
           {partialResults[1].length > 0 ? (
             <div className="partial-results-all-title">Speculator Results</div>
           ) : null}

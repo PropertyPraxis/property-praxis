@@ -3,8 +3,8 @@ import { withRouter } from "react-router-dom";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
 import { parseURLParams } from "../../utils/parseURL";
-import { getMapParamsAction } from "../../actions/mapState";
 import { resetSearch } from "../../actions/search";
+import { handleGetMapboxAPIKeyAction } from "../../actions/mapData";
 import PraxisMap from "./Map";
 
 /*The MapContainer is responsible for passing the params to the map*/
@@ -26,7 +26,7 @@ class MapContainer extends Component {
     );
   };
 
-  componentDidMount() {
+  async componentDidMount() {
     this._setURLParams();
   }
 
@@ -38,7 +38,6 @@ class MapContainer extends Component {
   }
 
   render() {
-    console.log("map container props", this.props);
     const urlParams = parseURLParams(this.props.location.search);
     return <PraxisMap {...this.props} urlParams={urlParams} />;
   }
