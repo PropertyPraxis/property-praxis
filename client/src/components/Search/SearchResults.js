@@ -2,9 +2,9 @@ import React, { Component } from "react";
 import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 import {
-  handleSearchPartialZipcode,
-  handleSearchPartialAddress,
-  handleSearchPartialSpeculator,
+  // handleSearchPartialZipcode,
+  // handleSearchPartialAddress,
+  // handleSearchPartialSpeculator,
   handleSearchFullZipcode,
   resetSearch,
 } from "../../actions/search";
@@ -18,100 +18,76 @@ import {
   toggleFullResultsAction,
   handleGetDownloadDataAction,
 } from "../../actions/results";
-import { capitalizeFirstLetter } from "../../utils/helper";
+import {
+  capitalizeFirstLetter,
+  parseSearchResults,
+  sanitizeSearchResult,
+  createQueryStringFromSearch,
+} from "../../utils/helper";
 import * as zipcodeIcon from "../../assets/img/zipcode-icon-transparent.png";
 import * as speculatorIcon from "../../assets/img/speculator-icon-transparent.png";
 import * as mapMarkerIcon from "../../assets/img/map-marker-transparent.png";
 
-const PartialReturnResultSwitch = (props) => {
-  const { searchType, partialResults } = props.searchState;
-
-  switch (searchType) {
-    case "all":
-      return <PartialAllResults {...props} />;
-    case "address":
-      return (
-        <PartialAddressResults
-          {...props}
-          partialSearchResults={partialResults}
-        />
-      );
-    case "speculator":
-      return (
-        <PartialSpeculatorResults
-          {...props}
-          partialSearchResults={partialResults}
-        />
-      );
-    case "zipcode":
-      return (
-        <PartialZipcodeResults
-          {...props}
-          partialSearchResults={partialResults}
-        />
-      );
-    default:
-      return null;
-  }
+const primaryResultIcons = {
+  address: mapMarkerIcon,
+  speculator: speculatorIcon,
+  zipcode: zipcodeIcon,
 };
 
-PartialReturnResultSwitch.propTypes = {
-  searchState: PropTypes.shape({
-    search: PropTypes.object.isRequired,
-    partialResults: PropTypes.array.isRequired,
-  }).isRequired,
-};
+///////////////////////////////////////////
+//Partial Results refactor
 
-class PartialZipcodeResults extends Component {
-  _onResultClick = (result) => {
-    const { searchYear } = this.props.searchState;
-
-    // change the partial results
-    this.props.dispatch(handleSearchPartialZipcode(result.propzip, searchYear));
-    this.props.dispatch(handleSearchFullZipcode(result.propzip, searchYear));
+class PrimaryResults extends Component {
+  _onResultClick = (result, { inner }) => {
+    const {
+      searchType,
+      searchYear,
+      searchTerm,
+      searchDisplayType,
+    } = this.props.searchState;
 
     // set the search params
     this.props.dispatch(
       resetSearch({
-        searchType: "zipcode",
-        searchTerm: result.propzip,
-        searchDisplayType: "full-zipcode",
+        searchType,
+        searchTerm,
+        searchYear,
+        searchDisplayType,
       })
     );
-
-    // close the partial results after
-    this.props.togglePartialResults(false);
-
-    // //toggle the results pane
-    this.props.dispatch(toggleFullResultsAction(true));
-
-    // trigger the dowload data action
-    // const downloadDataRoute = `/api/zipcode-search/download/${result.propzip}/${year}`;
-    // this.props.dispatch(handleGetDownloadDataAction(downloadDataRoute));
+    this.props.setSearchLocationParams(result, { inner: inner, ...rest });
   };
 
   render() {
-    const { partialSearchResults } = this.props;
+    const { primaryResults } = this.props.searchState;
     const { searchYear } = this.props.searchState;
     return (
       <section>
         <ul className="partial-results-container">
-          {partialSearchResults.map((result, index) => {
-            const search = `type=zipcode&search=${result.propzip}&year=${searchYear}`;
+          {primaryResults.map((result, index) => {
+            const { type, search, coordinates, year } = sanitizeSearchResult(
+              result,
+              searchYear
+            );
+
+            const searchQueryRoute = createQueryStringFromSearch({
+              type,
+              search,
+              coordinates,
+              year,
+            });
+
             return (
               <Link
-                key={result.propzip}
-                to={{
-                  pathname: "/map",
-                  search,
-                }}
+                key={searchQueryRoute}
+                to={searchQueryRoute}
                 onClick={() => {
-                  this._onResultClick(result);
+                  this._onResultClick(result, { inner: index });
                 }}
               >
                 <li className={index % 2 ? "list-item-odd" : "list-item-even"}>
-                  <img src={zipcodeIcon} alt="Zipcode Result" />
-                  {result.propzip}
+                  <img src={primaryResultIcons[type]} alt={`Icon of ${type}`} />
+                  {search}
                 </li>
               </Link>
             );
@@ -122,278 +98,390 @@ class PartialZipcodeResults extends Component {
   }
 }
 
-PartialZipcodeResults.propTypes = {
-  searchState: PropTypes.shape({
-    searchYear: PropTypes.string.isRequired,
-  }).isRequired,
-  partialSearchResults: PropTypes.string.isRequired,
-  dispatch: PropTypes.func.isRequired,
-};
+export default PrimaryResults;
+//////////////////////////////////////////////
 
-class PartialAddressResults extends Component {
-  _onResultClick = (result) => {
-    const { searchYear } = this.props.searchState;
-    const [longitude, latitude] = result.geometry.coordinates;
-    const encodedCoords = encodeURI(JSON.stringify({ longitude, latitude }));
+// class PrimaryResult {
+//   constructor() {}
 
-    //trigger data loading
-    // this.props.dispatch(dataIsLoadingAction(true));
+//   buildRoute = (searchType) => {
+//     switch (searchType) {
 
-    // change the partial results
-    this.props.dispatch(
-      handleSearchPartialAddress(result.place_name, searchYear)
-    );
+//     }
+//   };
+// }
 
-    //add a point marker
-    this.props.dispatch(setMarkerCoordsAction(latitude, longitude));
+// const PartialReturnResultSwitch = (props) => {
+//   const { searchType, primaryResults } = props.searchState;
 
-    //set new viewer in results
-    this.props.dispatch(handleGetViewerImageAction(longitude, latitude));
+//   switch (searchType) {
+//     case "all":
+//       return <PartialAllResults {...props} />;
+//     case "address":
+//       return (
+//         <PartialAddressResults
+//           {...props}
+//           partialSearchResults={primaryResults}
+//         />
+//       );
+//     case "speculator":
+//       return (
+//         <PartialSpeculatorResults
+//           {...props}
+//           partialSearchResults={primaryResults}
+//         />
+//       );
+//     case "zipcode":
+//       return (
+//         <PartialZipcodeResults
+//           {...props}
+//           partialSearchResults={primaryResults}
+//         />
+//       );
+//     default:
+//       return null;
+//   }
+// };
 
-    // set the search params
-    this.props.dispatch(
-      resetSearch({
-        searchType: "address",
-        searchTerm: result.place_name,
-        setSearchDisplayType: "single-address", // THIS CAN ALSO BE "multiple-parcels"
-      })
-    );
+// PartialReturnResultSwitch.propTypes = {
+//   searchState: PropTypes.shape({
+//     search: PropTypes.object.isRequired,
+//     primaryResults: PropTypes.array.isRequired,
+//   }).isRequired,
+// };
 
-    // toggle results
-    this.props.dispatch(toggleFullResultsAction(true));
-    this.props.togglePartialResults(false);
+// class PartialZipcodeResults extends Component {
+//   _onResultClick = (result) => {
+//     const { searchYear } = this.props.searchState;
 
-    // get the download data for coords
-    // const downloadRoute = `/api/address-search/download/${encodedCoords}/${searchYear }`;
-    // this.props.dispatch(handleGetDownloadDataAction(downloadRoute));
+//     // change the partial results
+//     // this.props.dispatch(handleSearchPartialZipcode(result.propzip, searchYear));
+//     this.props.dispatch(handleSearchFullZipcode(result.propzip, searchYear));
 
-    // this.props.dispatch(dataIsLoadingAction(false));
+//     // set the search params
+//     this.props.dispatch(
+//       resetSearch({
+//         searchType: "zipcode",
+//         searchTerm: result.propzip,
+//         searchDisplayType: "full-zipcode",
+//       })
+//     );
 
-    ///////////////////////////////////////////////////////////////////////////////////
-    //set map data and then create viewport
-    // const geojsonRoute = `/api/geojson/parcels/address/${encodedCoords}/${searchYear }`;
-    // this.props
-    //   .dispatch(handleGetParcelsByQueryAction(geojsonRoute))
-    //   .then((geojson) => {
-    //     if (
-    //       geojson.features &&
-    //       geojson.features.length === 1 &&
-    //       geojson.features[0].properties.distance === 0
-    //     ) {
-    //       this.props.dispatch(
-    //         resetSearch({
-    //           searchTerm: result.place_name,
-    //           searchType: "address",
-    //           searchDisplayType: "single-address",
-    //         })
-    //       );
-    //     }
+//     // close the partial results after
+//     this.props.togglePartialResults(false);
 
-    //     /////
-    //     if (geojson.features && geojson.features.length > 1) {
-    //       this.props.dispatch(
-    //         resetSearch({
-    //           searchTerm: result.place_name,
-    //           searchType: "address",
-    //           searchDisplayType: "multiple-parcels",
-    //         })
-    //       );
-    //     }
-    //   });
-  };
+//     // //toggle the results pane
+//     this.props.dispatch(toggleFullResultsAction(true));
 
-  render() {
-    const { partialSearchResults } = this.props;
-    const { searchYear } = this.props.searchState;
-    return (
-      <section>
-        <ul className="partial-results-container">
-          {partialSearchResults.map((result, index) => {
-            const [longitude, latitude] = result.geometry.coordinates;
-            const encodedCoords = encodeURI(
-              JSON.stringify({ longitude, latitude })
-            );
-            const search = `type=address&search=${result.place_name}&coordinates=${encodedCoords}&year=${searchYear}`;
-            return (
-              <Link
-                key={result.place_name}
-                to={{
-                  pathname: "/map",
-                  search,
-                }}
-                className={index % 2 ? "list-item-odd" : "list-item-even"}
-                onClick={() => {
-                  this._onResultClick(result);
-                }}
-              >
-                <li>
-                  <img src={mapMarkerIcon} alt="Address Result" />
-                  {result.place_name}
-                </li>
-              </Link>
-            );
-          })}
-        </ul>
-      </section>
-    );
-  }
-}
+//     // trigger the dowload data action
+//     // const downloadDataRoute = `/api/zipcode-search/download/${result.propzip}/${year}`;
+//     // this.props.dispatch(handleGetDownloadDataAction(downloadDataRoute));
+//   };
 
-PartialAddressResults.propTypes = {
-  searchState: PropTypes.shape({
-    searchYear: PropTypes.string.isRequired,
-  }).isRequired,
-  partialSearchResults: PropTypes.string.isRequired,
-  dispatch: PropTypes.func.isRequired,
-};
+//   render() {
+//     const { partialSearchResults } = this.props;
+//     const { searchYear } = this.props.searchState;
+//     return (
+//       <section>
+//         <ul className="partial-results-container">
+//           {partialSearchResults.map((result, index) => {
+//             const search = `type=zipcode&search=${result.propzip}&year=${searchYear}`;
+//             return (
+//               <Link
+//                 key={result.propzip}
+//                 to={{
+//                   pathname: "/map",
+//                   search,
+//                 }}
+//                 onClick={() => {
+//                   this._onResultClick(result);
+//                 }}
+//               >
+//                 <li className={index % 2 ? "list-item-odd" : "list-item-even"}>
+//                   <img src={zipcodeIcon} alt="Zipcode Result" />
+//                   {result.propzip}
+//                 </li>
+//               </Link>
+//             );
+//           })}
+//         </ul>
+//       </section>
+//     );
+//   }
+// }
 
-class PartialSpeculatorResults extends Component {
-  _onResultClick = (result) => {
-    const { searchYear } = this.props.searchState;
+// PartialZipcodeResults.propTypes = {
+//   searchState: PropTypes.shape({
+//     searchYear: PropTypes.string.isRequired,
+//   }).isRequired,
+//   partialSearchResults: PropTypes.string.isRequired,
+//   dispatch: PropTypes.func.isRequired,
+// };
 
-    //trigger data loading
-    // this.props.dispatch(dataIsLoadingAction(true));
+// class PartialAddressResults extends Component {
+//   _onResultClick = (result) => {
+//     const { searchYear } = this.props.searchState;
+//     const [longitude, latitude] = result.geometry.coordinates;
+//     const encodedCoords = encodeURI(JSON.stringify({ longitude, latitude }));
 
-    // change the partial results
-    this.props.dispatch(
-      handleSearchPartialSpeculator(result.own_id, searchYear)
-    );
+//     //trigger data loading
+//     // this.props.dispatch(dataIsLoadingAction(true));
 
-    // trigger the dowload data action
-    const downloadDataRoute = `/api/speculator-search/download/${result.own_id}/${searchYear}`;
-    this.props.dispatch(handleGetDownloadDataAction(downloadDataRoute));
+//     // change the partial results
+//     // this.props.dispatch(
+//     //   handleSearchPartialAddress(result.place_name, searchYear)
+//     // );
 
-    // set the search params
-    this.props.dispatch(
-      resetSearch({
-        searchType: "speculator",
-        searchTerm: result.own_id,
-        searchDisplayType: "full-speculator",
-      })
-    );
+//     //add a point marker
+//     this.props.dispatch(setMarkerCoordsAction(latitude, longitude));
 
-    // close the partial results after
-    this.props.togglePartialResults(false);
-    //toggle the results pane
-    this.props.dispatch(toggleFullResultsAction(true));
-  };
+//     //set new viewer in results
+//     this.props.dispatch(handleGetViewerImageAction(longitude, latitude));
 
-  render() {
-    const { partialSearchResults } = this.props;
-    const { searchYear } = this.props.searchState;
-    return (
-      <section>
-        <ul className="partial-results-container">
-          {partialSearchResults.map((result, index) => {
-            const search = `type=speculator&search=${result.own_id}&year=${searchYear}`;
-            return (
-              <Link
-                key={index}
-                to={{
-                  pathname: "/map",
-                  search,
-                }}
-                onClick={() => {
-                  this._onResultClick(result);
-                }}
-              >
-                <li className={index % 2 ? "list-item-odd" : "list-item-even"}>
-                  <img src={speculatorIcon} alt="Speculator Result" />
-                  {capitalizeFirstLetter(result.own_id)}
-                </li>
-              </Link>
-            );
-          })}
-        </ul>
-      </section>
-    );
-  }
-}
+//     // set the search params
+//     this.props.dispatch(
+//       resetSearch({
+//         searchType: "address",
+//         searchTerm: result.place_name,
+//         setSearchDisplayType: "single-address", // THIS CAN ALSO BE "multiple-parcels"
+//       })
+//     );
 
-PartialSpeculatorResults.propTypes = {
-  searchState: PropTypes.shape({
-    searchYear: PropTypes.string.isRequired,
-  }).isRequired,
-  partialSearchResults: PropTypes.string.isRequired,
-  dispatch: PropTypes.func.isRequired,
-};
+//     // toggle results
+//     this.props.dispatch(toggleFullResultsAction(true));
+//     this.props.togglePartialResults(false);
 
-class PartialAllResults extends Component {
-  render() {
-    const { partialResults } = this.props.searchState;
-    return (
-      <div className="partial-results-container-all">
-        <div className="partial-results-spacer"></div>
-        <div className="partial-results-combined">
-          {partialResults[0].length > 0 ? (
-            <div className="partial-results-all-title">Address Results</div>
-          ) : null}
+//     // get the download data for coords
+//     // const downloadRoute = `/api/address-search/download/${encodedCoords}/${searchYear }`;
+//     // this.props.dispatch(handleGetDownloadDataAction(downloadRoute));
 
-          <PartialAddressResults
-            {...this.props}
-            partialSearchResults={partialResults[0]}
-          />
+//     // this.props.dispatch(dataIsLoadingAction(false));
 
-          {partialResults[1].length > 0 ? (
-            <div className="partial-results-all-title">Speculator Results</div>
-          ) : null}
+//     ///////////////////////////////////////////////////////////////////////////////////
+//     //set map data and then create viewport
+//     // const geojsonRoute = `/api/geojson/parcels/address/${encodedCoords}/${searchYear }`;
+//     // this.props
+//     //   .dispatch(handleGetParcelsByQueryAction(geojsonRoute))
+//     //   .then((geojson) => {
+//     //     if (
+//     //       geojson.features &&
+//     //       geojson.features.length === 1 &&
+//     //       geojson.features[0].properties.distance === 0
+//     //     ) {
+//     //       this.props.dispatch(
+//     //         resetSearch({
+//     //           searchTerm: result.place_name,
+//     //           searchType: "address",
+//     //           searchDisplayType: "single-address",
+//     //         })
+//     //       );
+//     //     }
 
-          <PartialSpeculatorResults
-            {...this.props}
-            partialSearchResults={partialResults[1]}
-          />
+//     //     /////
+//     //     if (geojson.features && geojson.features.length > 1) {
+//     //       this.props.dispatch(
+//     //         resetSearch({
+//     //           searchTerm: result.place_name,
+//     //           searchType: "address",
+//     //           searchDisplayType: "multiple-parcels",
+//     //         })
+//     //       );
+//     //     }
+//     //   });
+//   };
 
-          {partialResults[2].length > 0 ? (
-            <div className="partial-results-all-title">Zipcodes Results</div>
-          ) : null}
-          <PartialZipcodeResults
-            {...this.props}
-            partialSearchResults={partialResults[2]}
-          />
-        </div>
-      </div>
-    );
-  }
-}
+//   render() {
+//     const { partialSearchResults } = this.props;
+//     const { searchYear } = this.props.searchState;
+//     return (
+//       <section>
+//         <ul className="partial-results-container">
+//           {partialSearchResults.map((result, index) => {
+//             const [longitude, latitude] = result.geometry.coordinates;
+//             const encodedCoords = encodeURI(
+//               JSON.stringify({ longitude, latitude })
+//             );
+//             const search = `type=address&search=${result.place_name}&coordinates=${encodedCoords}&year=${searchYear}`;
+//             return (
+//               <Link
+//                 key={result.place_name}
+//                 to={{
+//                   pathname: "/map",
+//                   search,
+//                 }}
+//                 className={index % 2 ? "list-item-odd" : "list-item-even"}
+//                 onClick={() => {
+//                   this._onResultClick(result);
+//                 }}
+//               >
+//                 <li>
+//                   <img src={mapMarkerIcon} alt="Address Result" />
+//                   {result.place_name}
+//                 </li>
+//               </Link>
+//             );
+//           })}
+//         </ul>
+//       </section>
+//     );
+//   }
+// }
 
-PartialAllResults.propTypes = {
-  searchState: PropTypes.shape({ partialResults: PropTypes.array.isRequired })
-    .isRequired,
-};
+// PartialAddressResults.propTypes = {
+//   searchState: PropTypes.shape({
+//     searchYear: PropTypes.string.isRequired,
+//   }).isRequired,
+//   partialSearchResults: PropTypes.string.isRequired,
+//   dispatch: PropTypes.func.isRequired,
+// };
 
-class PartialSearchResults extends Component {
-  // when user clicks on a result the partial results disappear
-  _togglePartialResults = (isOpen) => {
-    this.props.dispatch(togglePartialResultsAction(isOpen));
-  };
+// class PartialSpeculatorResults extends Component {
+//   _onResultClick = (result) => {
+//     const { searchYear } = this.props.searchState;
 
-  render() {
-    const resultLength = this.props.searchState.partialResults.length;
-    const { isPartialResultsOpen } = this.props.results;
+//     //trigger data loading
+//     // this.props.dispatch(dataIsLoadingAction(true));
 
-    if (resultLength > 0 && isPartialResultsOpen) {
-      return (
-        <PartialReturnResultSwitch
-          {...this.props}
-          togglePartialResults={this._togglePartialResults}
-        />
-      );
-    }
-    return null;
-  }
-}
+//     // change the partial results
+//     // this.props.dispatch(
+//     //   handleSearchPartialSpeculator(result.own_id, searchYear)
+//     // );
 
-PartialSearchResults.propTypes = {
-  searchState: PropTypes.shape({
-    partialResults: PropTypes.array.isRequired,
-  }),
-  results: PropTypes.shape({
-    isPartialResultsOpen: PropTypes.bool.isRequired,
-  }),
-  dispatch: PropTypes.func.isRequired,
-};
+//     // trigger the dowload data action
+//     const downloadDataRoute = `/api/speculator-search/download/${result.own_id}/${searchYear}`;
+//     this.props.dispatch(handleGetDownloadDataAction(downloadDataRoute));
 
-export default PartialSearchResults;
+//     // set the search params
+//     this.props.dispatch(
+//       resetSearch({
+//         searchType: "speculator",
+//         searchTerm: result.own_id,
+//         searchDisplayType: "full-speculator",
+//       })
+//     );
+
+//     // close the partial results after
+//     this.props.togglePartialResults(false);
+//     //toggle the results pane
+//     this.props.dispatch(toggleFullResultsAction(true));
+//   };
+
+//   render() {
+//     const { partialSearchResults } = this.props;
+//     const { searchYear } = this.props.searchState;
+//     return (
+//       <section>
+//         <ul className="partial-results-container">
+//           {partialSearchResults.map((result, index) => {
+//             const search = `type=speculator&search=${result.own_id}&year=${searchYear}`;
+//             return (
+//               <Link
+//                 key={index}
+//                 to={{
+//                   pathname: "/map",
+//                   search,
+//                 }}
+//                 onClick={() => {
+//                   this._onResultClick(result);
+//                 }}
+//               >
+//                 <li className={index % 2 ? "list-item-odd" : "list-item-even"}>
+//                   <img src={speculatorIcon} alt="Speculator Result" />
+//                   {capitalizeFirstLetter(result.own_id)}
+//                 </li>
+//               </Link>
+//             );
+//           })}
+//         </ul>
+//       </section>
+//     );
+//   }
+// }
+
+// PartialSpeculatorResults.propTypes = {
+//   searchState: PropTypes.shape({
+//     searchYear: PropTypes.string.isRequired,
+//   }).isRequired,
+//   partialSearchResults: PropTypes.string.isRequired,
+//   dispatch: PropTypes.func.isRequired,
+// };
+
+// class PartialAllResults extends Component {
+//   render() {
+//     const { primaryResults } = this.props.searchState;
+//     return (
+//       <div className="partial-results-container-all">
+//         <div className="partial-results-spacer"></div>
+//         <div className="partial-results-combined">
+//           {primaryResults[0].length > 0 ? (
+//             <div className="partial-results-all-title">Address Results</div>
+//           ) : null}
+
+//           <PartialAddressResults
+//             {...this.props}
+//             partialSearchResults={primaryResults[0]}
+//           />
+
+//           {primaryResults[1].length > 0 ? (
+//             <div className="partial-results-all-title">Speculator Results</div>
+//           ) : null}
+
+//           <PartialSpeculatorResults
+//             {...this.props}
+//             partialSearchResults={primaryResults[1]}
+//           />
+
+//           {primaryResults[2].length > 0 ? (
+//             <div className="partial-results-all-title">Zipcodes Results</div>
+//           ) : null}
+//           <PartialZipcodeResults
+//             {...this.props}
+//             partialSearchResults={primaryResults[2]}
+//           />
+//         </div>
+//       </div>
+//     );
+//   }
+// }
+
+// PartialAllResults.propTypes = {
+//   searchState: PropTypes.shape({ primaryResults: PropTypes.array.isRequired })
+//     .isRequired,
+// };
+
+// class PartialSearchResults extends Component {
+//   // when user clicks on a result the partial results disappear
+//   _togglePartialResults = (isOpen) => {
+//     this.props.dispatch(togglePartialResultsAction(isOpen));
+//   };
+
+//   render() {
+//     const resultLength = this.props.searchState.partialResults.length;
+//     const { isPartialResultsOpen } = this.props.results;
+
+//     if (resultLength > 0 && isPartialResultsOpen) {
+//       return (
+//         <PartialReturnResultSwitch
+//           {...this.props}
+//           togglePartialResults={this._togglePartialResults}
+//         />
+//       );
+//     }
+//     return null;
+//   }
+// }
+
+// PartialSearchResults.propTypes = {
+//   searchState: PropTypes.shape({
+//     partialResults: PropTypes.array.isRequired,
+//   }),
+//   results: PropTypes.shape({
+//     isPartialResultsOpen: PropTypes.bool.isRequired,
+//   }),
+//   dispatch: PropTypes.func.isRequired,
+// };
+
+// export default PartialSearchResults;
 
 // TEST ADDRESS
 // 17451 ST LOUIS, Detroit, Michigan 48212

@@ -138,17 +138,17 @@ class ParcelResults extends Component {
                     this.props.dispatch(dataIsLoadingAction(true));
 
                     // change the partial results
-                    this.props
-                      .dispatch(handleSearchPartialAddress(addressString, year))
-                      .then((json) => {
-                        // set the search term to the first result of geocoder
-                        const proxySearchTerm = json[0].mb[0].place_name;
-                        this.props.dispatch(
-                          resetSearch({
-                            searchTerm: proxySearchTerm,
-                          })
-                        );
-                      });
+                    // this.props
+                    //   .dispatch(handleSearchPartialAddress(addressString, year))
+                    //   .then((json) => {
+                    //     // set the search term to the first result of geocoder
+                    //     const proxySearchTerm = json[0].mb[0].place_name;
+                    //     this.props.dispatch(
+                    //       resetSearch({
+                    //         searchTerm: proxySearchTerm,
+                    //       })
+                    //     );
+                    //   });
 
                     //add a point marker
                     this.props.dispatch(
@@ -225,7 +225,7 @@ class SingleAddressResults extends Component {
     this.props.dispatch(setMarkerCoordsAction(null, null));
 
     // change the partial results
-    this.props.dispatch(handleSearchPartialZipcode(propzip, year));
+    // this.props.dispatch(handleSearchPartialZipcode(propzip, year));
 
     //trigger data loading
     this.props.dispatch(dataIsLoadingAction(true));
@@ -273,7 +273,7 @@ class SingleAddressResults extends Component {
     this.props.dispatch(setMarkerCoordsAction(null, null));
 
     // change the partial results
-    this.props.dispatch(handleSearchPartialSpeculator(own_id, year));
+    // this.props.dispatch(handleSearchPartialSpeculator(own_id, year));
 
     //set loading
     this.props.dispatch(dataIsLoadingAction(true));

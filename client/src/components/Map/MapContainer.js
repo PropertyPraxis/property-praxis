@@ -3,43 +3,14 @@ import { withRouter } from "react-router-dom";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
 import { parseURLParams } from "../../utils/parseURL";
-import { resetSearch } from "../../actions/search";
-import { handleGetMapboxAPIKeyAction } from "../../actions/mapData";
 import PraxisMap from "./Map";
 
-/*The MapContainer is responsible for passing the params to the map*/
-
+/*The MapContainer is responsible for passing 
+the search params to the map*/
 class MapContainer extends Component {
-  _setURLParams = () => {
-    // parse URL and dispatch params
-    const urlParams = parseURLParams(this.props.location.search);
-
-    //add to search state
-    const { type, search, coordinates, year } = urlParams;
-    this.props.dispatch(
-      resetSearch({
-        searchType: type,
-        searchTerm: search,
-        searchCoordinates: coordinates,
-        searchYear: year,
-      })
-    );
-  };
-
-  async componentDidMount() {
-    this._setURLParams();
-  }
-
-  async componentDidUpdate(prevProps) {
-    // if the location changes, set the params
-    if (this.props.location.search !== prevProps.location.search) {
-      this._setURLParams();
-    }
-  }
-
   render() {
-    const urlParams = parseURLParams(this.props.location.search);
-    return <PraxisMap {...this.props} urlParams={urlParams} />;
+    const searchQueryParams = parseURLParams(this.props.location.search);
+    return <PraxisMap {...this.props} searchQueryParams={searchQueryParams} />;
   }
 }
 
@@ -73,3 +44,56 @@ function mapStateToProps({
 }
 
 export default withRouter(connect(mapStateToProps)(MapContainer));
+
+// _setSearchParams = ({
+//   searchType,
+//   searchTerm,
+//   searchYear,
+//   searchCoordinates,
+// }) => {
+//   this.props.dispatch(
+//     resetSearch({
+//       searchType,
+//       searchTerm,
+//       searchCoordinates,
+//       searchYear,
+//     })
+//   );
+// };
+
+// componentDidMount() {
+//   const { search: searchQuery } = this.props.location;
+//   const {
+//     searchType,
+//     searchTerm,
+//     searchCoordinates,
+//     searchYear,
+//   } = parseURLParams(searchQuery);
+
+//   this._setSearchParams({
+//     searchType,
+//     searchTerm,
+//     searchCoordinates,
+//     searchYear,
+//   });
+// }
+
+// componentDidUpdate(prevProps) {
+//   // if the location changes, set the params
+//   if (this.props.location.search !== prevProps.location.search) {
+//     const { search: searchQuery } = this.props.location;
+//     const {
+//       searchType,
+//       searchTerm,
+//       searchCoordinates,
+//       searchYear,
+//     } = parseURLParams(searchQuery);
+
+//     this._setSearchParams({
+//       searchType,
+//       searchTerm,
+//       searchCoordinates,
+//       searchYear,
+//     });
+//   }
+// }

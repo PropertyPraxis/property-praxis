@@ -125,17 +125,25 @@ export function getYearString() {
 
 /* function to parse search 
 result and return query string */
-export function parseSearchResults({ results, type, year }) {
+export function parseSearchResults({
+  results,
+  index,
+  searchType: type,
+  searchYear: year,
+}) {
   let result;
 
   if (type === "all") {
-    /* the order of all results will 
+    /* This loop selects the first list in the all 
+    arrary with elements. Then uses the index to 
+    select a result from that list.
+    The order of all results will 
     always be address, speculator, zip */
     for (let i = 0; i < results.length; i++) {
       if (results[i].length === 0) {
         continue;
       } else {
-        result = results[i][0];
+        result = results[i][index.inner];
         break;
       }
     }
@@ -144,25 +152,31 @@ export function parseSearchResults({ results, type, year }) {
     type === "speculator" ||
     type === "zipcode"
   ) {
-    result = results[0];
+    result = results[index.inner];
   }
 
-  //depending on result return proper query string
+  return sanitizeSearchResult(result, year);
+}
+
+export function sanitizeSearchResult(result, year) {
+  // result return sanitized result object
   const keys = Object.keys(result);
   if (keys.includes("propzip")) {
     const zipcodeQuery = {
       type: "zipcode",
       search: result.propzip,
+      coordinates: null,
       year,
     };
-    return queryString.stringify(zipcodeQuery, { sort: false });
+    return zipcodeQuery;
   } else if (keys.includes("own_id")) {
     const speculatorQuery = {
       type: "speculator",
       search: result.own_id,
+      coordinates: null,
       year,
     };
-    return queryString.stringify(speculatorQuery, { sort: false });
+    return speculatorQuery;
   } else if (keys.includes("place_name")) {
     const [longitude, latitude] = result.geometry.coordinates;
     const encodedCoords = encodeURI(JSON.stringify({ longitude, latitude }));
@@ -172,10 +186,24 @@ export function parseSearchResults({ results, type, year }) {
       coordinates: encodedCoords,
       year,
     };
-    return queryString.stringify(addressQuery, { sort: false });
+    return addressQuery;
   } else {
     throw new Error(
       `Known key does not exist in object: ${JSON.stringify(result)}`
     );
   }
+}
+
+export function createQueryStringFromSearch({
+  type,
+  search,
+  coordinates,
+  year,
+}) {
+  const query = `/map?${queryString.stringify(
+    { type, search, coordinates, year },
+    { sort: false }
+  )}`;
+
+  return query;
 }

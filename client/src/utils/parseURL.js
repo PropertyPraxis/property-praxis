@@ -1,11 +1,21 @@
 import queryString from "query-string";
 
 export function parseURLParams(searchQuery) {
-  let { type, search, coordinates, year } = queryString.parse(searchQuery);
+  let {
+    type: searchType,
+    search: searchTerm,
+    coordinates: searchCoordinates,
+    year: searchYear,
+  } = queryString.parse(searchQuery);
 
-  if (type === undefined) type = null;
-  else if (search === undefined) search = null;
-  else if (coordinates === undefined) coordinates = null;
+  if (searchType === undefined) searchType = null;
+  else if (searchTerm === undefined) searchTerm = null;
+  else if (searchCoordinates === undefined) searchCoordinates = null;
 
-  return { type, search, coordinates, year };
+  return {
+    searchType,
+    searchTerm,
+    searchCoordinates,
+    searchYear,
+  };
 }

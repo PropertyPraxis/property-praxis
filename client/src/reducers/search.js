@@ -11,17 +11,21 @@ import {
   SEARCH_PARTIAL_SPECULATOR,
   SEARCH_FULL_SPECULATOR,
   SEARCH_PARTIAL_ALL,
+  PRIMARY_SEARCH_QUERY,
 } from "../actions/search";
 
 const initialSearchState = {
   searchType: "all",
   searchTerm: null,
-  searchDisplayType: null,
   searchCoordinates: null,
   searchYear: "2017",
-  searchQuery: null,
   partialResults: [],
+  primaryResults: [],
   fullResults: [],
+  downloadData: null,
+  searchDisplayType: null,
+  isFullResultsOpen: false,
+  isPartialResultsOpen: false,
 };
 
 export default function searchState(state = initialSearchState, action) {
@@ -35,6 +39,8 @@ export default function searchState(state = initialSearchState, action) {
     case RESET_SEARCH:
       return { ...state, ...action.payload };
     case SET_SEARCH_DISPLAY_TYPE:
+      return { ...state, ...action.payload };
+    case PRIMARY_SEARCH_QUERY:
       return { ...state, ...action.payload };
     case SEARCH_PARTIAL_ZIPCODE:
       return { ...state, ...action.payload };

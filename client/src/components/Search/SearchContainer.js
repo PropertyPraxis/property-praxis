@@ -2,50 +2,16 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 import PropTypes from "prop-types";
-import {
-  handleSearchPartialAddress,
-  handleSearchPartialSpeculator,
-  handleSearchPartialZipcode,
-  resetSearch,
-} from "../../actions/search";
-import { togglePartialResultsAction } from "../../actions/results";
-import { parseURLParams } from "../../utils/parseURL";
+import { handleGetYearsAction } from "../../actions/mapData";
 import SearchBar from "./SearchBar";
 
+/* The SearchContainer passes the avaialble years
+for selection to SearchBar */
 class SearchContainer extends Component {
-  _setSearch = () => {
-    // parse URL and dispatch params
-
-    const { type, search, year } = parseURLParams(window.location.search);
-    if (type && search && year) {
-      this.props.dispatch(
-        resetSearch({
-          searchType: type,
-          searchTerm: search,
-          searchYear: year,
-          searchDisplayType: "partial",
-        })
-      );
-      this.props.dispatch(togglePartialResultsAction(false));
-      //zipcode search
-      if (type === "zipcode") {
-        this.props.dispatch(handleSearchPartialZipcode(search, year));
-      } else if (type === "address") {
-        this.props.dispatch(handleSearchPartialAddress(search, year));
-      } else if (type === "speculator") {
-        this.props.dispatch(handleSearchPartialSpeculator(search, year));
-      }
-    }
-  };
-
   componentDidMount() {
-    this._setSearch();
-  }
-
-  componentDidUpdate(prevProps) {
-    if (prevProps.location.search !== this.props.history.location.search) {
-      this._setSearch();
-    }
+    // load the available years
+    const yearsRoute = "/api/praxisyears";
+    this.props.dispatch(handleGetYearsAction(yearsRoute));
   }
 
   render() {

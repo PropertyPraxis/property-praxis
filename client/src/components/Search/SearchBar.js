@@ -1,24 +1,23 @@
 import React, { Component } from "react";
 import { DebounceInput } from "react-debounce-input";
 import PropTypes from "prop-types";
-import { handleGetYearsAction } from "../../actions/mapData";
 import {
   setSearchType,
-  setSearchTerm,
   resetSearch,
-  setSearchDisplayType,
-  handleSearchPartialZipcode,
-  handleSearchPartialAddress,
-  handleSearchPartialSpeculator,
-  handleSearchPartialAll,
-} from "../../actions/search";
-import {
+  handlePrimarySearchQuery,
+  handlePrimarySearchAll,
   togglePartialResultsAction,
   toggleFullResultsAction,
-} from "../../actions/results";
+} from "../../actions/search";
 import { setMarkerCoordsAction } from "../../actions/mapData";
-import { capitalizeFirstLetter, parseSearchResults } from "../../utils/helper";
+import { parseURLParams } from "../../utils/parseURL";
+import {
+  capitalizeFirstLetter,
+  parseSearchResults,
+  createQueryStringFromSearch,
+} from "../../utils/helper";
 import PartialSearchResults from "./SearchResults";
+import PrimaryResults from "./SearchResults";
 import * as searchIcon from "../../assets/img/search.png";
 import styleVars from "../../scss/colors.scss";
 
@@ -26,12 +25,36 @@ import styleVars from "../../scss/colors.scss";
 const resetSearchOptions = {
   searchTerm: "",
   searchDisplayType: "all",
-  partialResults: [],
+  primaryResults: [],
   fullResults: [],
+};
+
+const primarySearchRoutes = {
+  addressRoute: `/api/address-search/partial/`,
+  speculatorRoute: `/api/speculator-search/partial/`,
+  zipcodeRoute: `/api/zipcode-search/partial/`,
 };
 
 class SearchBar extends Component {
   _searchButons = ["all", "address", "speculator", "zipcode"];
+
+  /*optional index can be supplied, passed down to Search Results*/
+  _setSearchLocationParams = (results, index = { outer: 0, inner: 0 }) => {
+    const { searchType, searchYear } = this.props.searchState;
+
+    debugger;
+    if (results.length > 0) {
+      const route = createQueryStringFromSearch(
+        parseSearchResults({
+          results,
+          searchType,
+          searchYear,
+          index, // this is where a result can be targerted from a list
+        })
+      );
+      this.props.history.push(route);
+    }
+  };
 
   _setSearchPlaceholderText = (searchType) => {
     switch (searchType) {
@@ -50,50 +73,85 @@ class SearchBar extends Component {
     }
   };
 
+  _setSearchStateParams = ({
+    searchType,
+    searchTerm,
+    searchYear,
+    searchCoordinates,
+  }) => {
+    this.props.dispatch(
+      resetSearch({
+        searchType,
+        searchTerm,
+        searchYear,
+        searchCoordinates, //only set when type==="address"
+      })
+    );
+  };
+
+  _handleQueryPrimaryResults = ({ searchType, searchTerm, searchYear }) => {
+    const { addressRoute, speculatorRoute, zipcodeRoute } = primarySearchRoutes;
+
+    if (searchType && searchTerm && searchYear) {
+      if (searchType === "address") {
+        this.props.dispatch(
+          handlePrimarySearchQuery({
+            searchTerm,
+            searchYear,
+            route: addressRoute,
+          })
+        );
+      } else if (searchType === "speculator") {
+        this.props.dispatch(
+          handlePrimarySearchQuery({
+            searchTerm,
+            searchYear,
+            route: speculatorRoute,
+          })
+        );
+      } else if (searchType === "zipcode") {
+        this.props.dispatch(
+          handlePrimarySearchQuery({
+            searchTerm,
+            searchYear,
+            route: zipcodeRoute,
+          })
+        );
+      } else if (searchType === "all") {
+        this.props.dispatch(
+          handlePrimarySearchAll(searchTerm, searchYear, [
+            addressRoute,
+            speculatorRoute,
+            zipcodeRoute,
+          ])
+        );
+      } else {
+        throw new Error("This searchtype does not exit.");
+      }
+    }
+  };
+
   _handleInputChange = async (e) => {
     const searchTerm = e.target.value;
     const { searchType, searchYear } = this.props.searchState;
-
-    this.props.dispatch(setSearchTerm(searchTerm));
-    this.props.dispatch(setSearchDisplayType("partial"));
-
-    //zipcode search
-    if (searchType === "zipcode") {
-      this.props.dispatch(handleSearchPartialZipcode(searchTerm, searchYear));
-    } else if (searchType === "address") {
-      this.props.dispatch(handleSearchPartialAddress(searchTerm, searchYear));
-    } else if (searchType === "speculator") {
-      this.props.dispatch(
-        handleSearchPartialSpeculator(searchTerm, searchYear)
-      );
-    } else if (searchType === "all") {
-      this.props.dispatch(handleSearchPartialAll(searchTerm, searchYear));
-    }
-  };
-
-  _setSearchParams = (partialSearchResults) => {
-    const { searchType, searchYear } = this.props.searchState;
-    if (partialSearchResults.length > 0) {
-      const route = `/map?${parseSearchResults({
-        results: partialSearchResults,
-        type: searchType,
-        year: searchYear,
-      })}`;
-      this.props.history.push(route);
-    }
+    this._handleQueryPrimaryResults({
+      searchType,
+      searchTerm,
+      searchYear,
+    });
   };
 
   _handleKeyPress = (e) => {
-    const { partialResults } = this.props.searchState;
+    const { primaryResults } = this.props.searchState;
     // if it is an enter key press
     if (e.key === "Enter") {
-      this._setSearchParams(partialResults);
+      this._setSearchLocationParams(primaryResults);
     }
   };
 
   _handleSearchButtonClick = () => {
-    const { partialResults } = this.props.searchState;
-    this._setSearchParams(partialResults);
+    const { primaryResults } = this.props.searchState;
+    this._setSearchLocationParams(primaryResults);
   };
 
   _handleYearSelect = (e) => {
@@ -101,9 +159,32 @@ class SearchBar extends Component {
   };
 
   componentDidMount() {
-    // load the available years
-    const yearsRoute = "/api/praxisyears";
-    this.props.dispatch(handleGetYearsAction(yearsRoute));
+    // parse URL and dispatch params
+    const { search: searchQuery } = this.props.history.location;
+    const {
+      searchType,
+      searchTerm,
+      searchCoordinates,
+      searchYear,
+    } = parseURLParams(searchQuery);
+    this._setSearchStateParams({
+      searchType,
+      searchTerm,
+      searchCoordinates,
+      searchYear,
+    });
+  }
+
+  componentDidUpdate(prevProps) {
+    // set search if the full query string changes
+    const { search: searchQuery } = this.props.history.location;
+    if (prevProps.location.search !== searchQuery) {
+      // parse URL and dispatch params
+      const { searchType, searchTerm, searchYear } = parseURLParams(
+        searchQuery
+      );
+      this._setSearchStateParams({ searchType, searchTerm, searchYear });
+    }
   }
 
   render() {
@@ -211,7 +292,10 @@ class SearchBar extends Component {
                 </div>
               </div>
             </div>
-            <PartialSearchResults {...this.props} />
+            <PrimaryResults
+              {...this.props}
+              setSearchLocationParams={this._setSearchLocationParams}
+            />
           </div>
         </section>
       );
