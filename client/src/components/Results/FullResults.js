@@ -171,8 +171,13 @@ class ParcelResults extends Component {
                       });
 
                     //set the display type to address
-                    this.props.dispatch(setSearchType("Address"));
-                    this.props.dispatch(setSearchDisplayType("single-address"));
+                    this.props.dispatch(
+                      resetSearch({
+                        searchType: "address",
+                        searchDisplayType: "single-address",
+                      })
+                    );
+                    // this.props.dispatch(setSearchDisplayType("single-address"));
                     this.props.dispatch(toggleFullResultsAction(true));
                     // //close the partial results after
                     this.props.dispatch(togglePartialResultsAction(false));

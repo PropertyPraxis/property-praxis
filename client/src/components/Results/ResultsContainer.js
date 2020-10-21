@@ -33,10 +33,11 @@ class ResultsContainer extends Component {
           timeout={300}
           classNames="results-container"
         >
-          <FullResults
+          <div>FULL RESULTS</div>
+          {/* <FullResults
             {...this.props}
             createNewViewport={this._createNewViewport}
-          />
+          /> */}
         </CSSTransition>
       );
     }

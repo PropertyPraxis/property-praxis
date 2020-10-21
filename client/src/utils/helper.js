@@ -123,42 +123,9 @@ export function getYearString() {
   return new Date().getFullYear();
 }
 
-/* function to parse search 
-result and return query string */
-export function parseSearchResults({
-  results,
-  index,
-  searchType: type,
-  searchYear: year,
-}) {
-  let result;
-
-  if (type === "all") {
-    /* This loop selects the first list in the all 
-    arrary with elements. Then uses the index to 
-    select a result from that list.
-    The order of all results will 
-    always be address, speculator, zip */
-    for (let i = 0; i < results.length; i++) {
-      if (results[i].length === 0) {
-        continue;
-      } else {
-        result = results[i][index.inner];
-        break;
-      }
-    }
-  } else if (
-    type === "address" ||
-    type === "speculator" ||
-    type === "zipcode"
-  ) {
-    result = results[index.inner];
-  }
-
-  return sanitizeSearchResult(result, year);
-}
-
-export function sanitizeSearchResult(result, year) {
+/* result return sanitized result object with keys that 
+can be used to map through primary results*/
+export function sanitizeSearchResult({ result, year }) {
   // result return sanitized result object
   const keys = Object.keys(result);
   if (keys.includes("propzip")) {
