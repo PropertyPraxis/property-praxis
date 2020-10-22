@@ -8,4 +8,8 @@
   img:hover {
     cursor: pointer;
   }
+
+  @media (max-width: $mobile) {
+    display: none;
+  }
 }

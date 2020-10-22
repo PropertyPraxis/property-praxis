@@ -19,7 +19,7 @@
   }
 }
 
-@media (max-width: 700px) {
+@media (max-width: $mobile) {
   .search-grid-item {
     // grid-row: 1;
     grid-column: 1 / span 3;
