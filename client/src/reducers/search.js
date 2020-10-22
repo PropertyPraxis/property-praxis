@@ -9,7 +9,7 @@ import {
 
 const initialSearchState = {
   searchType: "all",
-  searchTerm: null,
+  searchTerm: "",
   searchCoordinates: null,
   searchDisplayType: null,
   searchYear: "2017",

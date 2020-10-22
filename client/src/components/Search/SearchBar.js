@@ -49,7 +49,6 @@ class SearchBar extends Component {
           year: searchYear,
         })
       );
-
       this.props.history.push(route);
     }
   };
@@ -67,6 +66,7 @@ class SearchBar extends Component {
         searchYear,
         searchCoordinates, //only set when type==="address"
         primaryResults: [],
+        primaryIndex: 0,
       })
     );
   };
@@ -134,6 +134,8 @@ class SearchBar extends Component {
     const searchTerm = e.target.value;
     const { searchType, searchYear } = this.props.searchState;
 
+    this.props.dispatch(resetSearch({ searchTerm }));
+
     this._handleQueryPrimaryResults({
       searchType,
       searchTerm,
@@ -151,11 +153,7 @@ class SearchBar extends Component {
   };
 
   _handleOnBlur = () => {
-    // this.props.dispatch(
-    //   resetSearch({
-    //     primaryResults: [],
-    //   })
-    // );
+    // logic needed
   };
 
   _handleSearchTypeButtonClick = (buttonType) => {
@@ -198,8 +196,12 @@ class SearchBar extends Component {
   };
 
   _handleSearchButtonClick = () => {
-    const { primaryResults } = this.props.searchState;
-    this._setSearchLocationParams(primaryResults);
+    const { primaryResults, primaryIndex } = this.props.searchState;
+    this._setSearchLocationParams(primaryResults[primaryIndex]);
+  };
+
+  _handleClearButtonClick = () => {
+    this.props.dispatch(resetSearch(resetSearchOptions));
   };
 
   _handleYearSelect = (e) => {
@@ -300,9 +302,7 @@ class SearchBar extends Component {
               >
                 <div
                   className="clear-button"
-                  onClick={() => {
-                    this.props.dispatch(resetSearch({ ...resetSearchOptions }));
-                  }}
+                  onClick={this._handleClearButtonClick}
                 >
                   &times;
                 </div>
@@ -317,10 +317,10 @@ class SearchBar extends Component {
                   value={searchTerm} //controlled input
                   minLength={1}
                   debounceTimeout={300}
-                  inputRef={(ref) => {
-                    //create a ref to the input
-                    this._textInput = ref;
-                  }}
+                  // inputRef={(ref) => {
+                  //   //create a ref to the input
+                  //   this._textInput = ref;
+                  // }}
                   onChange={this._handleOnChange}
                   onKeyPress={(event) => {
                     event.persist();
@@ -329,7 +329,7 @@ class SearchBar extends Component {
                   onKeyDown={this._handleOnKeyDown}
                   onKeyUp={this._handleOnKeyUp}
                   onFocus={this._handleOnFocus}
-                  // onBlur={this._handleOnBlur}
+                  onBlur={this._handleOnBlur}
                 />
                 <div
                   className="search-button"
@@ -339,10 +339,7 @@ class SearchBar extends Component {
                 </div>
               </div>
             </div>
-            <PrimaryResultsContainer
-              {...this.props}
-              setSearchLocationParams={this._setSearchLocationParams}
-            />
+            <PrimaryResultsContainer {...this.props} />
           </div>
         </section>
       );
