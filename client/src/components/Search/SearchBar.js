@@ -12,7 +12,6 @@ import {
   capitalizeFirstLetter,
   sanitizeSearchResult,
   createQueryStringFromSearch,
-  flattenPrimaryResults,
 } from "../../utils/helper";
 import PrimaryResultsContainer from "./SearchResults";
 import * as searchIcon from "../../assets/img/search.png";
@@ -135,7 +134,6 @@ class SearchBar extends Component {
     const { searchType, searchYear } = this.props.searchState;
 
     this.props.dispatch(resetSearch({ searchTerm }));
-
     this._handleQueryPrimaryResults({
       searchType,
       searchTerm,
@@ -195,12 +193,12 @@ class SearchBar extends Component {
     }
   };
 
-  _handleSearchButtonClick = () => {
+  _handleSearchIconClick = () => {
     const { primaryResults, primaryIndex } = this.props.searchState;
     this._setSearchLocationParams(primaryResults[primaryIndex]);
   };
 
-  _handleClearButtonClick = () => {
+  _handleClearIconClick = () => {
     this.props.dispatch(resetSearch(resetSearchOptions));
   };
 
@@ -208,27 +206,33 @@ class SearchBar extends Component {
     this.props.dispatch(resetSearch({ searchYear: e.target.value }));
   };
 
+  _handleYearSelectFocus = () => {
+    this.props.dispatch(resetSearch({ primaryResults: [] }));
+  };
   componentDidMount() {
     // parse URL and dispatch params
-    const { search: searchQuery } = this.props.history.location;
-    const {
-      searchType,
-      searchTerm,
-      searchCoordinates,
-      searchYear,
-    } = parseURLParams(searchQuery);
-    this._setSearchStateParams({
-      searchType,
-      searchTerm,
-      searchCoordinates,
-      searchYear,
-    });
+    const { search: searchQuery, pathname } = this.props.history.location;
+
+    if (pathname === "/map") {
+      const {
+        searchType,
+        searchTerm,
+        searchCoordinates,
+        searchYear,
+      } = parseURLParams(searchQuery);
+      this._setSearchStateParams({
+        searchType,
+        searchTerm,
+        searchCoordinates,
+        searchYear,
+      });
+    }
   }
 
   componentDidUpdate(prevProps) {
     // set search if the full query string changes
-    const { search: searchQuery } = this.props.history.location;
-    if (prevProps.location.search !== searchQuery) {
+    const { search: searchQuery, pathname } = this.props.history.location;
+    if (prevProps.location.search !== searchQuery && pathname === "/map") {
       // parse URL and dispatch params
       const {
         searchType,
@@ -284,7 +288,11 @@ class SearchBar extends Component {
 
             <div className="search-bar">
               <div className="year-select">
-                <select id="years" onChange={this._handleYearSelect}>
+                <select
+                  id="years"
+                  onChange={this._handleYearSelect}
+                  onFocus={this._handleYearSelectFocus}
+                >
                   {years.map((result) => (
                     <option
                       key={result.praxisyear}
@@ -302,7 +310,7 @@ class SearchBar extends Component {
               >
                 <div
                   className="clear-button"
-                  onClick={this._handleClearButtonClick}
+                  onClick={this._handleClearIconClick}
                 >
                   &times;
                 </div>
@@ -317,10 +325,6 @@ class SearchBar extends Component {
                   value={searchTerm} //controlled input
                   minLength={1}
                   debounceTimeout={300}
-                  // inputRef={(ref) => {
-                  //   //create a ref to the input
-                  //   this._textInput = ref;
-                  // }}
                   onChange={this._handleOnChange}
                   onKeyPress={(event) => {
                     event.persist();
@@ -333,7 +337,7 @@ class SearchBar extends Component {
                 />
                 <div
                   className="search-button"
-                  onClick={this._handleSearchButtonClick}
+                  onClick={this._handleSearchIconClick}
                 >
                   <img src={searchIcon} alt="search button"></img>
                 </div>

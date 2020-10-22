@@ -16,12 +16,12 @@ const primaryResultIcons = {
 };
 
 const PrimaryResults = (props) => {
-  const { searchYear } = props.searchState;
+  const { searchYear, primaryIndex } = props.searchState;
   const { results } = props;
 
   return (
-    <section>
-      <ul className="partial-results-container">
+    <section className="partial-results-container">
+      <ul>
         {results.map((result, index) => {
           const { type, search, coordinates, year } = sanitizeSearchResult({
             result,
@@ -37,7 +37,12 @@ const PrimaryResults = (props) => {
 
           return (
             <Link key={searchQueryRoute} to={searchQueryRoute}>
-              <li className={index % 2 ? "list-item-odd" : "list-item-even"}>
+              <li
+                className={index % 2 ? "list-item-odd" : "list-item-even"}
+                style={
+                  index === primaryIndex ? { border: "1px solid red" } : null
+                }
+              >
                 <img src={primaryResultIcons[type]} alt={`Icon of ${type}`} />
                 {search}
               </li>

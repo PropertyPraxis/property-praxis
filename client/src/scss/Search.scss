@@ -8,7 +8,6 @@
 
 /*--- visible only on home ---*/
 .search-modal-item {
-  position: absolute;
   max-width: 1000px;
   z-index: 100;
   width: 95%;
@@ -85,9 +84,10 @@ input[type="text"] {
   flex: 1;
   width: 100%;
   box-sizing: border-box;
-  border-bottom: 3px solid $ui-black;
-  border-left: 3px solid $ui-black;
-  border-right: 3px solid $ui-black;
+  border-top: 4px solid $ui-black;
+  border-bottom: 4px solid $ui-black;
+  border-left: 2px solid $ui-black;
+  border-right: 4px solid $ui-black;
 }
 
 // styles for the home search button
@@ -98,7 +98,7 @@ input[type="text"] {
   border-top: 4px solid $ui-black;
   border-right: 4px solid $ui-black;
   border-bottom: 4px solid $ui-black;
-  border-left: 4px solid $ui-black;
+  border-left: 2px solid $ui-black;
 }
 
 .search-form:focus-within,
@@ -142,8 +142,8 @@ input[type="text"] {
 }
 
 .year-select {
-  position: relative;
-  left: 4px;
+  // position: relative;
+  // left: 4px;
   background-color: $ui-white;
   min-width: 60px;
 }
@@ -158,7 +158,7 @@ input[type="text"] {
   border-top: 4px solid $ui-black;
   border-left: 4px solid $ui-black;
   border-bottom: 4px solid $ui-black;
-  border-right: 4px solid $ui-black;
+  border-right: 2px solid $ui-black;
 }
 
 .year-select > select:focus,
@@ -176,11 +176,14 @@ select > option {
 //search results
 //part of CSS Transition
 .partial-results-container {
-  max-height: 62vh;
+  max-height: 40vh;
   display: flex; /*added*/
   flex-direction: column;
   overflow: auto;
-  a > li {
+  border-left: 4px solid $ui-black;
+  border-right: 4px solid $ui-black;
+  border-bottom: 4px solid $ui-black;
+  ul > a > li {
     display: flex;
     width: 100%;
     padding: 10px;
@@ -189,22 +192,22 @@ select > option {
     color: $ui-black;
   }
 
-  a > li:hover {
+  ul > a > li:hover {
     border: 1px solid $ui-black;
   }
 
-  a > li > img {
+  ul > a > li > img {
     height: 30px;
     margin-right: 20px;
   }
+}
 
-  .list-item-odd {
-    background-color: $ui-white;
-  }
+.list-item-odd {
+  background-color: $ui-white;
+}
 
-  .list-item-even {
-    background-color: $ui-light-gray;
-  }
+.list-item-even {
+  background-color: $ui-light-gray;
 }
 
 .full-results-container {
