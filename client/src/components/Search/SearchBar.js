@@ -5,12 +5,14 @@ import {
   resetSearch,
   handlePrimarySearchQuery,
   handlePrimarySearchAll,
+  updatePrimaryIndex,
 } from "../../actions/search";
 import { parseURLParams } from "../../utils/parseURL";
 import {
   capitalizeFirstLetter,
   sanitizeSearchResult,
   createQueryStringFromSearch,
+  flattenPrimaryResults,
 } from "../../utils/helper";
 import PrimaryResultsContainer from "./SearchResults";
 import * as searchIcon from "../../assets/img/search.png";
@@ -22,6 +24,7 @@ const resetSearchOptions = {
   searchType: "all",
   searchCoordinates: null,
   primaryResults: [],
+  primaryIndex: 0,
   fullResults: [],
   searchDisplayType: null,
 };
@@ -168,15 +171,29 @@ class SearchBar extends Component {
   };
 
   _handleKeyPress = (e) => {
-    const { primaryResults } = this.props.searchState;
+    const { primaryResults, primaryIndex } = this.props.searchState;
     // if it is an enter key press
     if (e.key === "Enter") {
       // the index value here will need to be changed to be more dynamic
-      this._setSearchLocationParams(primaryResults[0]);
+      this._setSearchLocationParams(primaryResults[primaryIndex]);
     }
+  };
 
-    if (e.key /*=== down or up*/) {
-      //logic here
+  _handleOnKeyDown = (e) => {
+    const { primaryIndex, primaryResults } = this.props.searchState;
+    if (e.key === "ArrowDown") {
+      if (primaryIndex < primaryResults.length - 1) {
+        this.props.dispatch(updatePrimaryIndex(primaryIndex + 1));
+      }
+    }
+  };
+
+  _handleOnKeyUp = (e) => {
+    const { primaryIndex } = this.props.searchState;
+    if (e.key === "ArrowUp") {
+      if (primaryIndex > 0) {
+        this.props.dispatch(updatePrimaryIndex(primaryIndex - 1));
+      }
     }
   };
 
@@ -309,7 +326,9 @@ class SearchBar extends Component {
                     event.persist();
                     this._handleKeyPress(event);
                   }}
-                  // onFocus={this._handleOnFocus}
+                  onKeyDown={this._handleOnKeyDown}
+                  onKeyUp={this._handleOnKeyUp}
+                  onFocus={this._handleOnFocus}
                   // onBlur={this._handleOnBlur}
                 />
                 <div

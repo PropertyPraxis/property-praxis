@@ -1,11 +1,11 @@
-import { populateSearchByYear } from "../utils/api";
+import { populateSearchByYear, getDownloadData } from "../utils/api";
 import { getImageKey } from "../utils/viewer";
-import { getDownloadData } from "../utils/api";
-
+import { flattenPrimaryResults } from "../utils/helper";
 
 export const RESET_SEARCH = "RESET_SEARCH";
 export const PRIMARY_SEARCH_QUERY = "PRIMARY_SEARCH_QUERY";
 export const SECONDARY_SEARCH_QUERY = "SECONDARY_SEARCH_QUERY";
+export const UPDATE_PRIMARY_INDEX = "UPDATE_PRIMARY_INDEX";
 export const SEARCH_FULL_ZIPCODE = "SEARCH_FULL_ZIPCODE";
 export const SEARCH_FULL_SPECULATOR = "SEARCH_FULL_SPECULATOR";
 export const SEARCH_FULL_ADDRESS = "SEARCH_FULL_ADDRESS";
@@ -13,7 +13,6 @@ export const GET_VIEWER_IMAGE = "GET_VIEWER_IMAGE";
 export const GET_DOWNLOAD_DATA = "GET_DOWNLOAD_DATA";
 export const TOGGLE_PARTIAL_RESULTS = "TOGGLE_PARTIAL_RESULTS";
 export const TOGGLE_FULL_RESULTS = "TOGGLE_FULL_RESULTS";
-
 
 export function resetSearch(searchState) {
   return {
@@ -31,6 +30,15 @@ function primarySearchQuery(primaryResults) {
   };
 }
 
+export function updatePrimaryIndex(primaryIndex) {
+  return {
+    type: UPDATE_PRIMARY_INDEX,
+    payload: {
+      primaryIndex,
+    },
+  };
+}
+
 function searchFullZipcode(fullResults) {
   return {
     type: SEARCH_FULL_ZIPCODE,
@@ -39,7 +47,6 @@ function searchFullZipcode(fullResults) {
     },
   };
 }
-
 
 function searchFullSpeculator(fullResults) {
   return {
@@ -93,8 +100,9 @@ export function handlePrimarySearchQuery({ searchTerm, searchYear, route }) {
   return async (dispatch) => {
     return populateSearchByYear(searchTerm, searchYear, route)
       .then((json) => {
-        dispatch(primarySearchQuery(json));
-        return json;
+        const flattendResults = flattenPrimaryResults(json);
+        dispatch(primarySearchQuery(flattendResults));
+        return flattendResults;
       })
       .catch((err) => {
         //need to add some more error hadling
@@ -160,14 +168,13 @@ export function handlePrimarySearchAll(searchTerm, year, routes) {
         return await populateSearchByYear(searchTerm, year, route);
       })
     );
+    const flattendResults = flattenPrimaryResults([
+      partialAddressResults,
+      partialSpeculatorResults,
+      partialZipcodeResults,
+    ]);
 
-    dispatch(
-      primarySearchQuery([
-        partialAddressResults,
-        partialSpeculatorResults,
-        partialZipcodeResults,
-      ])
-    );
+    dispatch(primarySearchQuery(flattendResults));
   };
 }
 

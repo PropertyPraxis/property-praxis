@@ -1,5 +1,4 @@
 import queryString from "query-string";
-
 //logic to render mobile properly
 
 export function setDocHeightOnWindow() {
@@ -173,4 +172,8 @@ export function createQueryStringFromSearch({
   )}`;
 
   return query;
+}
+
+export function flattenPrimaryResults(primaryResults) {
+  return primaryResults.reduce((acc, val) => acc.concat(val), []);
 }

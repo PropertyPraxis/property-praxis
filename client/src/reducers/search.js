@@ -4,6 +4,7 @@ import {
   SEARCH_FULL_ADDRESS,
   SEARCH_FULL_SPECULATOR,
   PRIMARY_SEARCH_QUERY,
+  UPDATE_PRIMARY_INDEX,
 } from "../actions/search";
 
 const initialSearchState = {
@@ -14,6 +15,7 @@ const initialSearchState = {
   searchYear: "2017",
   primaryResults: [],
   fullResults: [],
+  primaryIndex: 0,
   downloadData: null,
   isFullResultsOpen: false,
   isPartialResultsOpen: false,
@@ -24,6 +26,8 @@ export default function searchState(state = initialSearchState, action) {
     case RESET_SEARCH:
       return { ...state, ...action.payload };
     case PRIMARY_SEARCH_QUERY:
+      return { ...state, ...action.payload };
+    case UPDATE_PRIMARY_INDEX:
       return { ...state, ...action.payload };
     case SEARCH_FULL_ZIPCODE:
       return { ...state, ...action.payload };
