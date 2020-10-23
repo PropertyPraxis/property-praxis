@@ -2,7 +2,6 @@ import {
   getInitialMapData,
   getInitialZipcodeData,
   getMapData,
-  getPraxisYears,
   getPraxisZipcodes,
 } from "../utils/api";
 
@@ -10,7 +9,6 @@ export const GET_INITIAL_MAP_DATA = "GET_INITIAL_MAP_DATA";
 export const GET_INITIAL_ZIPCODE_DATA = "GET_INITIAL_ZIPCODE_DATA";
 export const GET_PARCELS_BY_QUERY = "GET_PARCELS_BY_QUERY";
 export const GET_YEAR = "GET_YEAR";
-export const GET_YEARS = "GET_YEARS";
 export const GET_ZIPCODES = "GET_ZIPCODES";
 export const GET_REVERSE_GEOCODE = "GET_REVERSE_GEOCODE";
 export const LOG_MARKER_DRAG = "LOG_MARKER_DRAG";
@@ -36,13 +34,6 @@ export function getYearAction(year) {
   return {
     type: GET_YEAR,
     payload: { year },
-  };
-}
-
-function getYearsAction(years) {
-  return {
-    type: GET_YEARS,
-    payload: { years },
   };
 }
 
@@ -153,19 +144,6 @@ export function handleGetReverseGeocodeAction(route) {
     return getMapData(route)
       .then((json) => {
         dispatch(getReverseGeocodeAction(json));
-        return json;
-      })
-      .catch((err) => {
-        throw Error(`An error occured searching: ${err}`);
-      });
-  };
-}
-
-export function handleGetYearsAction(route) {
-  return (dispatch) => {
-    return getPraxisYears(route)
-      .then((json) => {
-        dispatch(getYearsAction(json));
         return json;
       })
       .catch((err) => {

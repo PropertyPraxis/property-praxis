@@ -8,6 +8,7 @@ import {
 import * as zipcodeIcon from "../../assets/img/zipcode-icon-transparent.png";
 import * as speculatorIcon from "../../assets/img/speculator-icon-transparent.png";
 import * as mapMarkerIcon from "../../assets/img/map-marker-transparent.png";
+import * as styleVars from "../../scss/colors.scss";
 
 const primaryResultIcons = {
   address: mapMarkerIcon,
@@ -40,7 +41,9 @@ const PrimaryResults = (props) => {
               <li
                 className={index % 2 ? "list-item-odd" : "list-item-even"}
                 style={
-                  index === primaryIndex ? { border: "1px solid red" } : null
+                  index === primaryIndex
+                    ? { backgroundColor: styleVars.uiMedGray }
+                    : null
                 }
               >
                 <img src={primaryResultIcons[type]} alt={`Icon of ${type}`} />
@@ -54,6 +57,14 @@ const PrimaryResults = (props) => {
   );
 };
 
+PrimaryResults.propTypes = {
+  results: PropTypes.array.isRequired,
+  searchState: PropTypes.shape({
+    searchYear: PropTypes.string.isRequired,
+    primaryIndex: PropTypes.number.isRequired,
+  }),
+};
+
 const PrimaryResultsContainer = (props) => {
   const { primaryResults } = props.searchState;
 
@@ -64,7 +75,10 @@ const PrimaryResultsContainer = (props) => {
   return null;
 };
 
-export default PrimaryResultsContainer;
+PrimaryResultsContainer.propTypes = {
+  searchState: PropTypes.shape({
+    primaryResults: PropTypes.array.isRequired,
+  }).isRequired,
+};
 
-// TEST ADDRESS
-// 17451 ST LOUIS, Detroit, Michigan 48212
+export default PrimaryResultsContainer;

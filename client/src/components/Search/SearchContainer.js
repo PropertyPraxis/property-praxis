@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 import PropTypes from "prop-types";
-import { handleGetYearsAction } from "../../actions/mapData";
+import { handleGetYearsAction } from "../../actions/search";
 import SearchBar from "./SearchBar";
 
 /* The SearchContainer passes the avaialble years
@@ -27,11 +27,6 @@ class SearchContainer extends Component {
 
 SearchContainer.propTypes = {
   searchState: PropTypes.object.isRequired,
-  mapData: PropTypes.object.isRequired,
-  mapState: PropTypes.object.isRequired,
-  results: PropTypes.object.isRequired,
-  location: PropTypes.object.isRequired,
-  dispatch: PropTypes.func.isRequired,
 };
 
 function mapStateToProps({ searchState, mapData, mapState, results }) {

@@ -1,4 +1,8 @@
-import { populateSearchByYear, getDownloadData } from "../utils/api";
+import {
+  populateSearchByYear,
+  getDownloadData,
+  getPraxisYears,
+} from "../utils/api";
 import { getImageKey } from "../utils/viewer";
 import { flattenPrimaryResults } from "../utils/helper";
 
@@ -9,6 +13,7 @@ export const UPDATE_PRIMARY_INDEX = "UPDATE_PRIMARY_INDEX";
 export const SEARCH_FULL_ZIPCODE = "SEARCH_FULL_ZIPCODE";
 export const SEARCH_FULL_SPECULATOR = "SEARCH_FULL_SPECULATOR";
 export const SEARCH_FULL_ADDRESS = "SEARCH_FULL_ADDRESS";
+export const GET_SEARCH_YEARS = "GET_SEARCH_YEARS";
 export const GET_VIEWER_IMAGE = "GET_VIEWER_IMAGE";
 export const GET_DOWNLOAD_DATA = "GET_DOWNLOAD_DATA";
 export const TOGGLE_PARTIAL_RESULTS = "TOGGLE_PARTIAL_RESULTS";
@@ -70,6 +75,13 @@ export function toggleFullResultsAction(isOpen) {
   return {
     type: TOGGLE_FULL_RESULTS,
     payload: { isFullResultsOpen: isOpen },
+  };
+}
+
+function getYearsAction(searchYears) {
+  return {
+    type: GET_SEARCH_YEARS,
+    payload: { searchYears },
   };
 }
 
@@ -175,6 +187,19 @@ export function handlePrimarySearchAll(searchTerm, year, routes) {
     ]);
 
     dispatch(primarySearchQuery(flattendResults));
+  };
+}
+
+export function handleGetYearsAction(route) {
+  return (dispatch) => {
+    return getPraxisYears(route)
+      .then((json) => {
+        dispatch(getYearsAction(json));
+        return json;
+      })
+      .catch((err) => {
+        throw Error(`An error occured searching: ${err}`);
+      });
   };
 }
 

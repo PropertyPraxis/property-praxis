@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { DebounceInput } from "react-debounce-input";
-import PropTypes from "prop-types";
+import PropTypes, { array } from "prop-types";
 import {
   resetSearch,
   handlePrimarySearchQuery,
@@ -250,11 +250,15 @@ class SearchBar extends Component {
   }
 
   render() {
-    const { searchType, searchTerm, searchYear } = this.props.searchState;
-    const { years } = this.props.mapData;
+    const {
+      searchType,
+      searchTerm,
+      searchYear,
+      searchYears,
+    } = this.props.searchState;
     const { searchBarType, showSearchButtons } = this.props;
 
-    if (years) {
+    if (searchYears) {
       return (
         <section
           className={
@@ -293,7 +297,7 @@ class SearchBar extends Component {
                   onChange={this._handleYearSelect}
                   onFocus={this._handleYearSelectFocus}
                 >
-                  {years.map((result) => (
+                  {searchYears.map((result) => (
                     <option
                       key={result.praxisyear}
                       selected={result.praxisyear.toString() === searchYear}
@@ -358,11 +362,10 @@ SearchBar.propTypes = {
   showSearchButtons: PropTypes.bool.isRequired,
   searchState: PropTypes.shape({
     searchType: PropTypes.string.isRequired,
-    searchTerm: PropTypes.oneOfType([
-      PropTypes.string,
-      PropTypes.oneOf([null]),
-    ]),
-  }).isRequired,
+    searchTerm: PropTypes.string.isRequired,
+    searchYear: PropTypes.string.isRequired,
+    searchYears: PropTypes.oneOf([null, PropTypes.array]).isRequired,
+  }),
   dispatch: PropTypes.func.isRequired,
 };
 

@@ -4,7 +4,6 @@ import {
   GET_PARCELS_BY_QUERY,
   GET_REVERSE_GEOCODE,
   GET_YEAR,
-  GET_YEARS,
   GET_ZIPCODES,
   LOG_MARKER_DRAG,
   MARKER_DRAG_END,
@@ -16,7 +15,6 @@ const intialMapData = {
   ppraxis: null,
   zips: null,
   year: "2017",
-  years: null,
   zipcodes: null,
   events: {},
   marker: { longitude: null, latitude: null },
@@ -34,8 +32,6 @@ export default function mapData(state = intialMapData, action) {
     case GET_REVERSE_GEOCODE:
       return { ...state, ...action.payload };
     case GET_YEAR:
-      return { ...state, ...action.payload };
-    case GET_YEARS:
       return { ...state, ...action.payload };
     case GET_ZIPCODES:
       return { ...state, ...action.payload };

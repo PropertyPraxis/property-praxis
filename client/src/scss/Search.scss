@@ -21,7 +21,6 @@
 
 @media (max-width: $mobile) {
   .search-grid-item {
-    // grid-row: 1;
     grid-column: 1 / span 3;
     margin: auto 0;
     position: absolute;
@@ -42,16 +41,20 @@
   justify-content: space-evenly;
   flex-flow: row nowrap;
   width: 100%;
+  border-top: $ui-black solid 2px;
+  border-right: $ui-black solid 2px;
+  border-left: $ui-black solid 2px;
 
   div {
-    border: $ui-black solid 2px;
     color: $ui-white;
     background-color: $ui-dark-gray;
     padding: 5px;
-    border-radius: 5px 5px 0 0;
     width: 25%;
     text-align: center;
     cursor: pointer;
+    border-top: $ui-black solid 2px;
+    border-right: $ui-black solid 2px;
+    border-left: $ui-black solid 2px;
   }
 
   div:hover {

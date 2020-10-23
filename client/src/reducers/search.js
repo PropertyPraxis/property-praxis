@@ -5,6 +5,7 @@ import {
   SEARCH_FULL_SPECULATOR,
   PRIMARY_SEARCH_QUERY,
   UPDATE_PRIMARY_INDEX,
+  GET_SEARCH_YEARS
 } from "../actions/search";
 
 const initialSearchState = {
@@ -13,6 +14,7 @@ const initialSearchState = {
   searchCoordinates: null,
   searchDisplayType: null,
   searchYear: "2017",
+  searchYears: null,
   primaryResults: [],
   fullResults: [],
   primaryIndex: 0,
@@ -28,6 +30,8 @@ export default function searchState(state = initialSearchState, action) {
     case PRIMARY_SEARCH_QUERY:
       return { ...state, ...action.payload };
     case UPDATE_PRIMARY_INDEX:
+      return { ...state, ...action.payload };
+      case GET_SEARCH_YEARS:
       return { ...state, ...action.payload };
     case SEARCH_FULL_ZIPCODE:
       return { ...state, ...action.payload };

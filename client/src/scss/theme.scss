@@ -22,7 +22,7 @@ body {
 *,
 *:before,
 *:after {
-  box-sizing: content-box;
+  box-sizing: border-box;
 }
 
 /* set max width for images
