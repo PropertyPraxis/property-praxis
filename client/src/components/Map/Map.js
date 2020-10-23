@@ -102,7 +102,6 @@ PraxisMarker.propTypes = {
         longitude: PropTypes.number.isRequired,
       }.isRequired
     ),
-    year: PropTypes.string.isRequired,
   }).isRequired,
   createNewViewport: PropTypes.func.isRequired,
   dispatch: PropTypes.func.isRequired,
@@ -357,7 +356,6 @@ PraxisMap.propTypes = {
         longitude: PropTypes.number.isRequired,
       }.isRequired
     ),
-    year: PropTypes.string.isRequired,
     ppraxis: PropTypes.object.isRequired,
     zips: PropTypes.object.isRequired,
   }).isRequired,
