@@ -1,5 +1,13 @@
 import queryString from "query-string";
 
+/*Default search params */
+const defaultParams = {
+  type: "zicode",
+  search: "48209",
+  coordinates: null,
+  year: "2020",
+};
+
 export function parseURLParams(searchQuery) {
   let {
     type: searchType,
@@ -8,9 +16,18 @@ export function parseURLParams(searchQuery) {
     year: searchYear,
   } = queryString.parse(searchQuery);
 
-  if (searchType === undefined) searchType = null;
-  else if (searchTerm === undefined) searchTerm = null;
-  else if (searchCoordinates === undefined) searchCoordinates = null;
+  if (searchType === undefined) {
+    searchType = defaultParams.type;
+  }
+  if (searchTerm === undefined) {
+    searchTerm = defaultParams.search;
+  }
+  if (searchCoordinates === undefined) {
+    searchCoordinates = defaultParams.searchCoordinates;
+  }
+  if (searchYear === undefined) {
+    searchYear = defaultParams.searchYear;
+  }
 
   return {
     searchType,

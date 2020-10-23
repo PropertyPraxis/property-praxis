@@ -13,7 +13,7 @@ import {
   sanitizeSearchResult,
   createQueryStringFromSearch,
 } from "../../utils/helper";
-import PrimaryResultsContainer from "./SearchResults";
+import PrimaryResultsContainer from "./PrimarySearchResults";
 import * as searchIcon from "../../assets/img/search.png";
 import styleVars from "../../scss/colors.scss";
 

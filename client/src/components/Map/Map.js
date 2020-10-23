@@ -1,11 +1,14 @@
-import React, { Component } from "react";
+import React, { Component, useRef } from "react";
 import PropTypes from "prop-types";
 import ReactMapGL, { Source, Layer, Marker } from "react-map-gl";
 import ParcelLayerController from "./ParcelLayerController";
 import BasemapController from "./BasemapController";
 import { createNewViewport } from "../../utils/map";
 import { createAddressString, createLayerFilter } from "../../utils/helper";
-import { getMapStateAction } from "../../actions/mapState";
+import {
+  getMapStateAction,
+  toggleLoadingIndicatorAction,
+} from "../../actions/mapState";
 import { getHoveredFeatureAction } from "../../actions/currentFeature";
 import {
   logMarkerDragEventAction,
@@ -107,6 +110,14 @@ PraxisMarker.propTypes = {
   dispatch: PropTypes.func.isRequired,
 };
 
+class PraxisMapWrapper extends Component {
+  mapRef = React.createRef();
+
+  render() {
+    return;
+  }
+}
+
 class PraxisMap extends Component {
   _stops = [
     [1, styleVars.parcelStop1],
@@ -138,15 +149,25 @@ class PraxisMap extends Component {
   };
 
   _getMapData = async () => {
+    // Toggle loading on (will be togled off on map load)
+    this.props.dispatch(toggleLoadingIndicatorAction(true));
+
+    // Build route and get data
     const route = this._routeSwitcher(this.props.searchQueryParams);
 
     // Get Data
     const parcelsGeojson = await this.props.dispatch(
       handleGetParcelsByQueryAction(route)
     );
-    this.props.dispatch(
+
+    const zipsGeojson = await this.props.dispatch(
       handleGetInitialZipcodeDataAction("/api/geojson/zipcodes")
     );
+    // toggle indicator (need refactor to hook in)
+    if (parcelsGeojson && zipsGeojson) {
+      this.props.dispatch(toggleLoadingIndicatorAction(false));
+    }
+
     //Set viewport
     this._createNewViewport(parcelsGeojson);
 
@@ -247,6 +268,10 @@ class PraxisMap extends Component {
     }
   };
 
+  _handleToggleLoadingIndicator = (isLoading) => {
+    this.props.dispatch(toggleLoadingIndicatorAction(isLoading));
+  };
+
   componentDidMount() {
     this._getMapData();
   }
@@ -275,7 +300,6 @@ class PraxisMap extends Component {
         <ReactMapGL
           {...this.props.mapState.viewport}
           mapOptions={{ attributionControl: false }}
-          ref={(reactMap) => (this.reactMap = reactMap)}
           mapStyle={basemapLayer}
           width="100vw"
           height="100vh"
@@ -289,8 +313,7 @@ class PraxisMap extends Component {
             this._handleMapClick(e);
           }}
           onLoad={() => {
-            // add loading logic here
-            console.log("map loaded");
+            this._handleToggleLoadingIndicator(false);
           }}
         >
           {latitude && longitude ? (

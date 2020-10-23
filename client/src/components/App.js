@@ -8,7 +8,8 @@ import About from "./pages/About";
 import Methodology from "./pages/Methodology";
 import MapContainer from "./Map/MapContainer";
 import SearchContainer from "./Search/SearchContainer";
-import ResultsContainer from "./Results/ResultsContainer";
+import ResultsContainer from "./Search/DetailedResultsContainer";
+import LoadingIndicator from "./LoadingIndicator/LoadingIndicator";
 import PPLogo from "./Logo/Logo";
 
 class App extends Component {
@@ -33,6 +34,7 @@ class App extends Component {
             <SearchContainer />
             <ResultsContainer />
             <PPLogo />
+            <LoadingIndicator {...this.props} />
           </Router>
         </div>
       </main>

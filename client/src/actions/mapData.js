@@ -14,19 +14,18 @@ export const GET_REVERSE_GEOCODE = "GET_REVERSE_GEOCODE";
 export const LOG_MARKER_DRAG = "LOG_MARKER_DRAG";
 export const MARKER_DRAG_END = "MARKER_DRAG_END";
 export const SET_MARKER_COORDS = "SET_MARKER_COORDS";
-export const DATA_IS_LOADING = "DATA_IS_LOADING";
 
-function getInitialMapDataAction(data) {
+function getInitialMapDataAction(ppraxis) {
   return {
     type: GET_INITIAL_MAP_DATA,
-    payload: { ppraxis: data },
+    payload: { ppraxis },
   };
 }
 
-function getInitialZipcodeDataAction(data) {
+function getInitialZipcodeDataAction(zips) {
   return {
     type: GET_INITIAL_ZIPCODE_DATA,
-    payload: { zips: data },
+    payload: { zips },
   };
 }
 
@@ -44,10 +43,10 @@ function getZipcodesAction(zipcodes) {
   };
 }
 
-export function getParcelsByQueryAction(data) {
+export function getParcelsByQueryAction(ppraxis) {
   return {
     type: GET_PARCELS_BY_QUERY,
-    payload: { ppraxis: data },
+    payload: { ppraxis },
   };
 }
 
@@ -88,13 +87,6 @@ export function setMarkerCoordsAction(longitude, latitude) {
         latitude,
       },
     },
-  };
-}
-
-export function dataIsLoadingAction(dataIsLoading) {
-  return {
-    type: DATA_IS_LOADING,
-    payload: { dataIsLoading },
   };
 }
 

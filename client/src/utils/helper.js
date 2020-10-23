@@ -168,7 +168,7 @@ export function createQueryStringFromSearch({
 }) {
   const query = `/map?${queryString.stringify(
     { type, search, coordinates, year },
-    { sort: false }
+    { sort: false, skipNull: true }
   )}`;
 
   return query;

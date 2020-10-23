@@ -16,8 +16,8 @@ export const SEARCH_FULL_ADDRESS = "SEARCH_FULL_ADDRESS";
 export const GET_SEARCH_YEARS = "GET_SEARCH_YEARS";
 export const GET_VIEWER_IMAGE = "GET_VIEWER_IMAGE";
 export const GET_DOWNLOAD_DATA = "GET_DOWNLOAD_DATA";
-export const TOGGLE_PARTIAL_RESULTS = "TOGGLE_PARTIAL_RESULTS";
-export const TOGGLE_FULL_RESULTS = "TOGGLE_FULL_RESULTS";
+// export const TOGGLE_PARTIAL_RESULTS = "TOGGLE_PARTIAL_RESULTS";
+export const TOGGLE_DETAILED_RESULTS = "TOGGLE_DETAILED_RESULTS";
 
 export function resetSearch(searchState) {
   return {
@@ -71,12 +71,6 @@ function searchFullAddress(fullResults) {
   };
 }
 
-export function toggleFullResultsAction(isOpen) {
-  return {
-    type: TOGGLE_FULL_RESULTS,
-    payload: { isFullResultsOpen: isOpen },
-  };
-}
 
 function getYearsAction(searchYears) {
   return {
@@ -99,12 +93,10 @@ function getDownloadDataAction(downloadData) {
   };
 }
 
-export function togglePartialResultsAction(isOpen) {
+export function toggleDetailedResultsAction(isOpen) {
   return {
-    type: TOGGLE_PARTIAL_RESULTS,
-    payload: {
-      isPartialResultsOpen: isOpen,
-    },
+    type: TOGGLE_DETAILED_RESULTS,
+    payload: { isDetailedResultsOpen: isOpen },
   };
 }
 

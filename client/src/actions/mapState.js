@@ -1,5 +1,5 @@
 export const GET_MAP_STATE = "GET_MAP_STATE";
-// export const GET_MAP_PARAMS = "GET_MAP_PARAMS";
+export const TOGGLE_LOADING_INDICATOR = "TOGGLE_LOADING_INDICATOR";
 
 export function getMapStateAction(viewport) {
   return {
@@ -8,9 +8,9 @@ export function getMapStateAction(viewport) {
   };
 }
 
-// export function getMapParamsAction(params) {
-//   return {
-//     type: GET_MAP_PARAMS,
-//     payload: { params },
-//   };
-// }
+export function toggleLoadingIndicatorAction(loadingIsOpen) {
+  return {
+    type: TOGGLE_LOADING_INDICATOR,
+    payload: { loadingIsOpen },
+  };
+}

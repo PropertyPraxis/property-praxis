@@ -1,16 +1,22 @@
 import React from "react";
 import PropTypes from "prop-types";
+import * as styleVars from "../../scss/colors.scss";
 
 const launchStyles = {
   content: {
+    zIndex: 1000,
+    position: "absolute",
+    top: 0,
+    bottom: 0,
+    right: 0,
+    left: 0,
     texAlign: "center",
     fontSize: "40px",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    height: "100vh",
-    backgroundColor: "#343332",
-    color: "#ffffff",
+    backgroundColor: styleVars.uiTransparent,
+    color: styleVars.uiWhite,
   },
 };
 
@@ -40,7 +46,12 @@ class Loading extends React.Component {
   }
 
   render() {
-    return <div style={launchStyles.content}>{this.state.text}</div>;
+    const { loadingIsOpen } = this.props.mapState;
+
+    if (loadingIsOpen) {
+      return <div style={launchStyles.content}>{this.state.text}</div>;
+    }
+    return null;
   }
 }
 
