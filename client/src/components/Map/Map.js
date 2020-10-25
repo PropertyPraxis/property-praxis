@@ -110,14 +110,6 @@ PraxisMarker.propTypes = {
   dispatch: PropTypes.func.isRequired,
 };
 
-class PraxisMapWrapper extends Component {
-  mapRef = React.createRef();
-
-  render() {
-    return;
-  }
-}
-
 class PraxisMap extends Component {
   _stops = [
     [1, styleVars.parcelStop1],
@@ -146,6 +138,29 @@ class PraxisMap extends Component {
       default:
         return `/api/geojson/parcels/${searchYear}`;
     }
+  };
+
+  // create new vieport dependent on geojson bbox
+  _createNewViewport = (geojson) => {
+    const { searchYear } = this.props.searchState;
+    const features = geojson.features;
+    const { viewport } = this.props.mapState;
+    const { longitude, latitude, zoom } = createNewViewport(geojson, viewport);
+    const newViewport = {
+      ...viewport,
+      longitude,
+      latitude,
+      zoom,
+      transitionDuration: 1000,
+    };
+
+    // if the return geojson has features aka the search term was
+    // valid then change the veiwport accordingly
+    features
+      ? this.props.dispatch(getMapStateAction(newViewport))
+      : this.props.dispatch(
+          handleGetParcelsByQueryAction(`/api/geojson/parcels/${searchYear}`) //default return
+        );
   };
 
   _getMapData = async () => {
@@ -183,29 +198,6 @@ class PraxisMap extends Component {
 
   _onViewportChange = (viewport) => {
     this.props.dispatch(getMapStateAction({ ...viewport }));
-  };
-
-  // create new vieport dependent on geojson bbox
-  _createNewViewport = (geojson) => {
-    const { searchYear } = this.props.searchState;
-    const features = geojson.features;
-    const { viewport } = this.props.mapState;
-    const { longitude, latitude, zoom } = createNewViewport(geojson, viewport);
-    const newViewport = {
-      ...viewport,
-      longitude,
-      latitude,
-      zoom,
-      transitionDuration: 1000,
-    };
-
-    // if the return geojson has features aka the search term was
-    // valid then change the veiwport accordingly
-    features
-      ? this.props.dispatch(getMapStateAction(newViewport))
-      : this.props.dispatch(
-          handleGetParcelsByQueryAction(`/api/geojson/parcels/${searchYear}`) //default return
-        );
   };
 
   _onHover = (event) => {

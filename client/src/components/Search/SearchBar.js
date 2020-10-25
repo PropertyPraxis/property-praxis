@@ -129,11 +129,14 @@ class SearchBar extends Component {
 
   _handleOnFocus = () => {
     const { searchTerm, searchType, searchYear } = this.props.searchState;
-    this._handleQueryPrimaryResults({
-      searchType,
-      searchTerm,
-      searchYear,
-    });
+
+    if (searchTerm && searchType && searchYear) {
+      this._handleQueryPrimaryResults({
+        searchType,
+        searchTerm,
+        searchYear,
+      });
+    }
   };
 
   _handleOnBlur = () => {
@@ -232,6 +235,8 @@ class SearchBar extends Component {
         searchYear,
         searchCoordinates,
       });
+    } else if (prevProps.location.pathname !== pathname) {
+      this._setSearchStateParams(resetSearchOptions);
     }
   }
 

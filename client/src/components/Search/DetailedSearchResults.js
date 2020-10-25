@@ -1,30 +1,20 @@
 import React, { Component } from "react";
-import {
-  toggleDetailedResultsAction,
-  updateDetailedResults,
-} from "../../actions/search";
 import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 import { CSVLink } from "react-csv";
+import {
+  toggleDetailedResultsAction,
+  updateDetailedResults,
+  handleGetDownloadDataAction,
+  resetSearch,
+} from "../../actions/search";
 import { coordsFromWKT } from "../../utils/map";
-import { parseURLParams } from "../../utils/parseURL";
 import {
   createAddressString,
   capitalizeFirstLetter,
   createDateString,
   addUnderscoreToString,
 } from "../../utils/helper";
-import {
-  handleDetailedSearchQuery,
-  handleGetViewerImageAction,
-  handleGetDownloadDataAction,
-  resetSearch,
-} from "../../actions/search";
-import {
-  handleGetParcelsByQueryAction,
-  setMarkerCoordsAction,
-  // dataIsLoadingAction,
-} from "../../actions/mapData";
 import MapViewer from "./MapViewer";
 import * as mapMarkerIcon from "../../assets/img/map-marker-transparent.png";
 import * as downloadIcon from "../../assets/img/download-icon.png";
@@ -48,14 +38,8 @@ class DetailedSearchResults extends Component {
     this.props.dispatch(updateDetailedResults(details));
   };
 
-  _getViewerImage = ({ longitude, latitude }) => {
-    this.props.dispatch(handleGetViewerImageAction(longitude, latitude));
-  };
-
   componentDidMount() {
-    const { searchCoordinates } = this.props.searchState;
     this._getDetailedResultsFromGeoJSON(this.props.details);
-    // this._getViewerImage(JSON.parse(searchCoordinates));
   }
 
   render() {
@@ -78,6 +62,7 @@ class DetailedSearchResults extends Component {
         totacres,
       } = detailedResults[0].properties;
       return (
+        // <div>HELLO</div>
         <section className="result-drawer-static">
           <div
             className={
