@@ -14,7 +14,6 @@ class DetailedResultsContainer extends Component {
     data properties and ids are. */
     const { ppraxis } = this.props.mapData;
     const details = getPropertiesFromMapData(ppraxis);
-
     if (details) {
       return (
         <CSSTransition

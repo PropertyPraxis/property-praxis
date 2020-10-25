@@ -55,7 +55,7 @@ class DetailedSearchResults extends Component {
   componentDidMount() {
     const { searchCoordinates } = this.props.searchState;
     this._getDetailedResultsFromGeoJSON(this.props.details);
-    this._getViewerImage(JSON.parse(searchCoordinates));
+    // this._getViewerImage(JSON.parse(searchCoordinates));
   }
 
   render() {
