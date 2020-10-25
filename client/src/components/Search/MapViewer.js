@@ -4,8 +4,9 @@ import * as Mapillary from "mapillary-js";
 
 class MapViewer extends Component {
   componentDidMount() {
-    const { key } = this.props.results.viewer;
-    const { longitude, latitude } = this.props.mapData.marker;
+    const { viewer, searchCoordinates } = this.props.searchState;
+
+    const { longitude, latitude } = JSON.parse(searchCoordinates);
 
     // Enable marker component when setting up viewer
     const mly = new Mapillary.Viewer(
@@ -19,7 +20,6 @@ class MapViewer extends Component {
         },
       }
     );
-
     // Create a non interactive simple marker with default options
     const defaultMarker = new Mapillary.MarkerComponent.SimpleMarker(
       "default-id",
@@ -36,7 +36,7 @@ class MapViewer extends Component {
       },
       function (error) {
         console.error("move close to error: ", error);
-        mly.moveToKey(key).catch(function (e) {
+        mly.moveToKey(viewer.key).catch(function (e) {
           console.error(e);
         });
       }
@@ -59,33 +59,3 @@ MapViewer.propTypes = {
 };
 
 export default MapViewer;
-
-//////REACT MAPILLARY VIEWER
-// class MapViewer extends Component {
-
-//   render() {
-//     const { key } = this.props.results.viewer;
-//     if (key) {
-//       // this logic will need to move up
-//       return (
-//         <div
-//           // onKeyDown={handleKeyDown}
-//           role="button"
-//           tabIndex="-1"
-//           className="map-viewer"
-//         >
-//           <MapillaryViewer
-//             clientId="S3NrdE1uVHdoRVhQeFN6WUZCTzItUTo5MGFlYTRiNjg3ODAxNTNi"
-//             imageKey={key}
-//             //   filter={["==", "userKey", "2PiRXqdqbY47WzG6CRzEIA"]}
-//             // onTiltChanged={tilt => console.log(`Tilt: ${tilt}`)}
-//             // onFovChanged={fov => console.log(`FoV: ${fov}`)}
-//             // onNodeChanged={node => console.log("node:", node)}
-//             // onBearingChanged={bearing => console.log(`Bearing: ${bearing}`)}
-//           />
-//         </div>
-//       );
-//     }
-//     return <div>Loading Image...</div>;
-//   }
-// }

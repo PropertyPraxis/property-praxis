@@ -14,7 +14,7 @@ import {
   logMarkerDragEventAction,
   onMarkerDragEndAction,
   setMarkerCoordsAction,
-  handleGetInitialZipcodeDataAction,
+  handleGetZipcodesDataAction,
   handleGetParcelsByQueryAction,
   handleGetReverseGeocodeAction,
 } from "../../actions/mapData";
@@ -161,7 +161,7 @@ class PraxisMap extends Component {
     );
 
     const zipsGeojson = await this.props.dispatch(
-      handleGetInitialZipcodeDataAction("/api/geojson/zipcodes")
+      handleGetZipcodesDataAction("/api/geojson/zipcodes")
     );
     // toggle indicator (need refactor to hook in)
     if (parcelsGeojson && zipsGeojson) {

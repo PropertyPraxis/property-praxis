@@ -59,9 +59,11 @@ router.get("/full/:coords/:year", async (req, res) => {
     WHERE y.praxisyear = $1 AND
     ST_Intersects(ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326), ppg.geom_${year})`;
 
+    console.log(query);
+
     const { rows } = await db.query(query, [`${year}`]);
 
-    res.json({ rows });
+    res.json(rows);
   } catch (err) {
     res.json(err);
   }

@@ -1,9 +1,6 @@
 import {
-  GET_INITIAL_MAP_DATA,
-  GET_INITIAL_ZIPCODE_DATA,
   GET_PARCELS_BY_QUERY,
   GET_REVERSE_GEOCODE,
-  GET_YEAR,
   GET_ZIPCODES,
   LOG_MARKER_DRAG,
   MARKER_DRAG_END,
@@ -20,15 +17,9 @@ const intialMapData = {
 
 export default function mapData(state = intialMapData, action) {
   switch (action.type) {
-    case GET_INITIAL_MAP_DATA:
-      return { ...state, ...action.payload };
-    case GET_INITIAL_ZIPCODE_DATA:
-      return { ...state, ...action.payload };
     case GET_PARCELS_BY_QUERY:
       return { ...state, ...action.payload };
     case GET_REVERSE_GEOCODE:
-      return { ...state, ...action.payload };
-    case GET_YEAR:
       return { ...state, ...action.payload };
     case GET_ZIPCODES:
       return { ...state, ...action.payload };

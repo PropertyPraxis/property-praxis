@@ -1,61 +1,164 @@
 import React, { Component } from "react";
-import { toggleDetailedResultsAction } from "../../actions/search";
-
+import {
+  toggleDetailedResultsAction,
+  updateDetailedResults,
+} from "../../actions/search";
 import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 import { CSVLink } from "react-csv";
 import { coordsFromWKT } from "../../utils/map";
+import { parseURLParams } from "../../utils/parseURL";
 import {
   createAddressString,
   capitalizeFirstLetter,
   createDateString,
   addUnderscoreToString,
 } from "../../utils/helper";
-// import {
-//   handleSearchPartialZipcode,
-//   handleSearchPartialAddress,
-//   handleSearchPartialSpeculator,
-//   resetSearch,
-//   setSearchType,
-//   setSearchDisplayType,
-// } from "../../actions/search";
+import {
+  handleDetailedSearchQuery,
+  handleGetViewerImageAction,
+  handleGetDownloadDataAction,
+  resetSearch,
+} from "../../actions/search";
 import {
   handleGetParcelsByQueryAction,
   setMarkerCoordsAction,
   // dataIsLoadingAction,
 } from "../../actions/mapData";
-import {
-  handleGetViewerImageAction,
-  toggleFullResultsAction,
-  togglePartialResultsAction,
-  handleGetDownloadDataAction,
-} from "../../actions/results";
 import MapViewer from "./MapViewer";
 import * as mapMarkerIcon from "../../assets/img/map-marker-transparent.png";
 import * as downloadIcon from "../../assets/img/download-icon.png";
 import * as infoIcon from "../../assets/img/info-icon.png";
+
+// const detailedResultsRoutes = {
+//   address: `/api/address-search/full/`, // <coords>/<year>
+//   speculator: `/api/speculator-search/full/`, // <id>/<year>
+//   zipcode: `/api/zipcode-search/full/`, //<id>/<year>
+// };
+
+const DetailsContent = (props) => {};
 
 class DetailedSearchResults extends Component {
   _toggleDetailedResultsDrawer = () => {
     const { isDetailedResultsOpen } = this.props.searchState;
     this.props.dispatch(toggleDetailedResultsAction(!isDetailedResultsOpen));
   };
+
+  _getDetailedResultsFromGeoJSON = (details) => {
+    this.props.dispatch(updateDetailedResults(details));
+  };
+
+  _getViewerImage = ({ longitude, latitude }) => {
+    this.props.dispatch(handleGetViewerImageAction(longitude, latitude));
+  };
+
+  componentDidMount() {
+    const { searchCoordinates } = this.props.searchState;
+    this._getDetailedResultsFromGeoJSON(this.props.details);
+    this._getViewerImage(JSON.parse(searchCoordinates));
+  }
+
   render() {
-    const { isDetailedResultsOpen } = this.props.searchState;
-    return (
-      <section className="result-drawer-static">
-        <div
-          className={
-            isDetailedResultsOpen
-              ? "results-hamburger-button drawer-open"
-              : "results-hamburger-button drawer-closed"
-          }
-          onClick={this._toggleDetailedResultsDrawer}
-        >
-          &#9776;
-        </div>
-      </section>
-    );
+    const {
+      isDetailedResultsOpen,
+      detailedResults,
+      searchType,
+    } = this.props.searchState;
+
+    if (detailedResults) {
+      const {
+        own_id,
+        count,
+        parcelno,
+        resyrbuilt,
+        saledate,
+        saleprice,
+        taxpayer1,
+        totsqft,
+        totacres,
+      } = detailedResults[0].properties;
+      return (
+        <section className="result-drawer-static">
+          <div
+            className={
+              isDetailedResultsOpen
+                ? "results-hamburger-button drawer-open"
+                : "results-hamburger-button drawer-closed"
+            }
+            onClick={this._toggleDetailedResultsDrawer}
+          >
+            &#9776;
+          </div>
+          <div
+            className="results-inner"
+            style={
+              isDetailedResultsOpen
+                ? { visibility: "visible" }
+                : { visibility: "hidden" }
+            }
+          >
+            <MapViewer {...this.props} />
+            <div className="address-title">
+              <span>
+                <img src={mapMarkerIcon} alt="Address Result" />
+                LIST
+              </span>
+            </div>
+            <span
+              className="address-context"
+              onClick={() => {
+                // this._onZipcodeClick();
+              }}
+            >
+              CONTEXT
+              <img src={infoIcon} alt="More Information"></img>
+            </span>
+            <hr></hr>
+            <div className="address-properties">
+              <div
+                onClick={() => {
+                  // this._onSpeculatorClick();
+                }}
+              >
+                Speculator:
+                <span>
+                  {capitalizeFirstLetter(own_id)}
+                  <img src={infoIcon} alt="More Information"></img>
+                </span>
+              </div>
+
+              <div>
+                Properties owned: <span>{count}</span>
+              </div>
+              <div>
+                Parcel Number: <span>{parcelno}</span>
+              </div>
+              {resyrbuilt === 0 || resyrbuilt === null ? null : (
+                <div>
+                  Year built: <span>{resyrbuilt}</span>
+                </div>
+              )}
+              <div>
+                Last sale date: <span>{saledate}</span>
+              </div>
+              <div>
+                Last sale price: <span>{saleprice}</span>
+              </div>
+              <div>
+                Associated taxpayer: <span>{taxpayer1}</span>
+              </div>
+              <div>
+                Square footage: <span>{totsqft}</span>
+              </div>
+              <div>
+                Acres: <span>{totacres}</span>
+              </div>
+            </div>
+          </div>
+        </section>
+      );
+    }
+    return null; // could add loading info
   }
 }
 

@@ -1,12 +1,5 @@
-import {
-  getInitialMapData,
-  getInitialZipcodeData,
-  getMapData,
-  getPraxisZipcodes,
-} from "../utils/api";
+import { APISearchQueryFromRoute } from "../utils/api";
 
-export const GET_INITIAL_MAP_DATA = "GET_INITIAL_MAP_DATA";
-export const GET_INITIAL_ZIPCODE_DATA = "GET_INITIAL_ZIPCODE_DATA";
 export const GET_PARCELS_BY_QUERY = "GET_PARCELS_BY_QUERY";
 export const GET_YEAR = "GET_YEAR";
 export const GET_ZIPCODES = "GET_ZIPCODES";
@@ -15,20 +8,6 @@ export const LOG_MARKER_DRAG = "LOG_MARKER_DRAG";
 export const MARKER_DRAG_END = "MARKER_DRAG_END";
 export const SET_MARKER_COORDS = "SET_MARKER_COORDS";
 
-function getInitialMapDataAction(ppraxis) {
-  return {
-    type: GET_INITIAL_MAP_DATA,
-    payload: { ppraxis },
-  };
-}
-
-function getInitialZipcodeDataAction(zips) {
-  return {
-    type: GET_INITIAL_ZIPCODE_DATA,
-    payload: { zips },
-  };
-}
-
 export function getYearAction(year) {
   return {
     type: GET_YEAR,
@@ -36,10 +15,10 @@ export function getYearAction(year) {
   };
 }
 
-function getZipcodesAction(zipcodes) {
+function getZipcodesDataAction(zips) {
   return {
     type: GET_ZIPCODES,
-    payload: { zipcodes },
+    payload: { zips },
   };
 }
 
@@ -90,69 +69,43 @@ export function setMarkerCoordsAction(longitude, latitude) {
   };
 }
 
-export function handleGetInitialMapDataAction(route) {
-  return (dispatch) => {
-    return getInitialMapData(route)
-      .then((json) => {
-        dispatch(getInitialMapDataAction({}));
-        dispatch(getInitialMapDataAction(json));
-        return json;
-      })
-      .catch((err) => {
-        throw Error(`An error occured searching: ${err}`);
-      });
-  };
-}
-
-export function handleGetInitialZipcodeDataAction(route) {
-  return (dispatch) => {
-    return getInitialZipcodeData(route)
-      .then((json) => {
-        dispatch(getInitialZipcodeDataAction({}));
-        dispatch(getInitialZipcodeDataAction(json));
-        return json;
-      })
-      .catch((err) => {
-        throw Error(`An error occured searching: ${err}`);
-      });
-  };
-}
-
 export function handleGetParcelsByQueryAction(route) {
   return (dispatch) => {
-    return getMapData(route)
+    dispatch(getParcelsByQueryAction(null));
+    return APISearchQueryFromRoute(route)
       .then((json) => {
         dispatch(getParcelsByQueryAction(json));
         return json;
       })
       .catch((err) => {
-        throw Error(`An error occured searching: ${err}`);
+        throw Error(`An error occured searching parcels: ${err}`);
       });
   };
 }
 
 export function handleGetReverseGeocodeAction(route) {
   return (dispatch) => {
-    return getMapData(route)
+    return APISearchQueryFromRoute(route)
       .then((json) => {
         dispatch(getReverseGeocodeAction(json));
         return json;
       })
       .catch((err) => {
-        throw Error(`An error occured searching: ${err}`);
+        throw Error(`An error occured reverse geocoding: ${err}`);
       });
   };
 }
 
-export function handleGetZipcodesAction(route) {
+export function handleGetZipcodesDataAction(route) {
   return (dispatch) => {
-    return getPraxisZipcodes(route)
+    dispatch(getZipcodesDataAction(null));
+    return APISearchQueryFromRoute(route)
       .then((json) => {
-        dispatch(getZipcodesAction(json));
+        dispatch(getZipcodesDataAction(json));
         return json;
       })
       .catch((err) => {
-        throw Error(`An error occured searching: ${err}`);
+        throw Error(`An error occured fetching zipcodes: ${err}`);
       });
   };
 }

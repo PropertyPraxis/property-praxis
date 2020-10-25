@@ -1,22 +1,17 @@
 import {
-  populateSearchByYear,
-  getDownloadData,
-  getPraxisYears,
+  APISearchQueryFromParams,
+  APISearchQueryFromRoute,
 } from "../utils/api";
 import { getImageKey } from "../utils/viewer";
 import { flattenPrimaryResults } from "../utils/helper";
 
 export const RESET_SEARCH = "RESET_SEARCH";
 export const PRIMARY_SEARCH_QUERY = "PRIMARY_SEARCH_QUERY";
-export const SECONDARY_SEARCH_QUERY = "SECONDARY_SEARCH_QUERY";
+export const UPDATE_DETAILED_RESULTS = "UPDATE_DETAILED_RESULTS";
 export const UPDATE_PRIMARY_INDEX = "UPDATE_PRIMARY_INDEX";
-export const SEARCH_FULL_ZIPCODE = "SEARCH_FULL_ZIPCODE";
-export const SEARCH_FULL_SPECULATOR = "SEARCH_FULL_SPECULATOR";
-export const SEARCH_FULL_ADDRESS = "SEARCH_FULL_ADDRESS";
 export const GET_SEARCH_YEARS = "GET_SEARCH_YEARS";
 export const GET_VIEWER_IMAGE = "GET_VIEWER_IMAGE";
-export const GET_DOWNLOAD_DATA = "GET_DOWNLOAD_DATA";
-// export const TOGGLE_PARTIAL_RESULTS = "TOGGLE_PARTIAL_RESULTS";
+// export const GET_DOWNLOAD_DATA = "GET_DOWNLOAD_DATA";
 export const TOGGLE_DETAILED_RESULTS = "TOGGLE_DETAILED_RESULTS";
 
 export function resetSearch(searchState) {
@@ -44,33 +39,14 @@ export function updatePrimaryIndex(primaryIndex) {
   };
 }
 
-function searchFullZipcode(fullResults) {
+export function updateDetailedResults(detailedResults) {
   return {
-    type: SEARCH_FULL_ZIPCODE,
+    type: UPDATE_DETAILED_RESULTS,
     payload: {
-      fullResults,
+      detailedResults,
     },
   };
 }
-
-function searchFullSpeculator(fullResults) {
-  return {
-    type: SEARCH_FULL_SPECULATOR,
-    payload: {
-      fullResults,
-    },
-  };
-}
-
-function searchFullAddress(fullResults) {
-  return {
-    type: SEARCH_FULL_ADDRESS,
-    payload: {
-      fullResults,
-    },
-  };
-}
-
 
 function getYearsAction(searchYears) {
   return {
@@ -86,13 +62,6 @@ function getViewerImageAction(viewer) {
   };
 }
 
-function getDownloadDataAction(downloadData) {
-  return {
-    type: GET_DOWNLOAD_DATA,
-    payload: { downloadData },
-  };
-}
-
 export function toggleDetailedResultsAction(isOpen) {
   return {
     type: TOGGLE_DETAILED_RESULTS,
@@ -100,9 +69,15 @@ export function toggleDetailedResultsAction(isOpen) {
   };
 }
 
-export function handlePrimarySearchQuery({ searchTerm, searchYear, route }) {
+export function handlePrimarySearchQuery(
+  { searchType, searchTerm, searchCoordinates, searchYear },
+  route
+) {
   return async (dispatch) => {
-    return populateSearchByYear(searchTerm, searchYear, route)
+    return APISearchQueryFromParams(
+      { searchType, searchTerm, searchCoordinates, searchYear },
+      route
+    )
       .then((json) => {
         const flattendResults = flattenPrimaryResults(json);
         dispatch(primarySearchQuery(flattendResults));
@@ -115,61 +90,20 @@ export function handlePrimarySearchQuery({ searchTerm, searchYear, route }) {
   };
 }
 
-export function handleSearchFullZipcode(searchTerm, year) {
+export function handlePrimarySearchAll({ searchTerm, searchYear }, routes) {
   return async (dispatch) => {
-    return populateSearchByYear(searchTerm, year, `/api/zipcode-search/full/`)
-      .then((json) => {
-        dispatch(searchFullZipcode(json));
-        return json;
-      })
-      .catch((err) => {
-        //need to add some more error hadling
-        throw Error(`An error occured searching: ${err}`);
-      });
-  };
-}
+    const types = ["address", "speculator", "zipcode"];
 
-export function handleSearchFullAddress(searchTerm, year) {
-  return async (dispatch) => {
-    return populateSearchByYear(searchTerm, year, `/api/address-search/full/`)
-      .then((json) => {
-        dispatch(searchFullAddress(json));
-        return json;
-      })
-      .catch((err) => {
-        //need to add some more error hadling
-        throw Error(`An error occured searching: ${err}`);
-      });
-  };
-}
-
-export function handleSearchFullSpeculator(searchTerm, year) {
-  return async (dispatch) => {
-    return populateSearchByYear(
-      searchTerm,
-      year,
-      `/api/speculator-search/full/`
-    )
-      .then((json) => {
-        dispatch(searchFullSpeculator(json));
-        return json;
-      })
-      .catch((err) => {
-        //need to add some more error hadling
-        throw Error(`An error occured searching: ${err}`);
-      });
-  };
-}
-
-export function handlePrimarySearchAll(searchTerm, year, routes) {
-  return async (dispatch) => {
     const [
       partialAddressResults,
       partialSpeculatorResults,
       partialZipcodeResults,
     ] = await Promise.all(
-      routes.map(async (route) => {
-        return await populateSearchByYear(searchTerm, year, route);
+      routes.map(async (route, index) => {
+        return await APISearchQueryFromParams(
+          { searchType: types[index], searchTerm, searchYear },
+          route
+        );
       })
     );
     const flattendResults = flattenPrimaryResults([
@@ -182,9 +116,29 @@ export function handlePrimarySearchAll(searchTerm, year, routes) {
   };
 }
 
+export function handleDetailedSearchQuery(
+  { searchType, searchTerm, searchYear, searchCoordinates = null },
+  route
+) {
+  return async (dispatch) => {
+    return APISearchQueryFromParams(
+      { searchType, searchTerm, searchCoordinates, searchYear },
+      route
+    )
+      .then((json) => {
+        dispatch(updateDetailedResults(json));
+        return json;
+      })
+      .catch((err) => {
+        //need to add some more error hadling
+        throw Error(`An error occured searching: ${err}`);
+      });
+  };
+}
+
 export function handleGetYearsAction(route) {
   return (dispatch) => {
-    return getPraxisYears(route)
+    return APISearchQueryFromRoute(route)
       .then((json) => {
         dispatch(getYearsAction(json));
         return json;
@@ -215,16 +169,23 @@ export function handleGetViewerImageAction(longitude, latitude) {
   };
 }
 
-export function handleGetDownloadDataAction(route) {
-  return (dispatch) => {
-    dispatch(getDownloadDataAction(null));
-    return getDownloadData(route)
-      .then((data) => {
-        dispatch(getDownloadDataAction(data));
-        return data;
-      })
-      .catch((err) => {
-        throw Error(`An error occured searching: ${err}`);
-      });
-  };
-}
+// export function handleGetDownloadDataAction(route) {
+//   return (dispatch) => {
+//     dispatch(getDownloadDataAction(null));
+//     return getDownloadData(route)
+//       .then((data) => {
+//         dispatch(getDownloadDataAction(data));
+//         return data;
+//       })
+//       .catch((err) => {
+//         throw Error(`An error occured searching: ${err}`);
+//       });
+//   };
+// }
+
+// function getDownloadDataAction(downloadData) {
+//   return {
+//     type: GET_DOWNLOAD_DATA,
+//     payload: { downloadData },
+//   };
+// }

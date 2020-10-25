@@ -1,3 +1,4 @@
+import { feature } from "@turf/turf";
 import queryString from "query-string";
 //logic to render mobile properly
 
@@ -176,4 +177,16 @@ export function createQueryStringFromSearch({
 
 export function flattenPrimaryResults(primaryResults) {
   return primaryResults.reduce((acc, val) => acc.concat(val), []);
+}
+
+export function getPropertiesFromMapData(geojson) {
+  if (geojson) {
+    const details = geojson.features.map((feature) => {
+      const { id, properties } = feature;
+      return { id, properties };
+    });
+    return details;
+  } else {
+    return null;
+  }
 }

@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { DebounceInput } from "react-debounce-input";
-import PropTypes, { array } from "prop-types";
+import PropTypes from "prop-types";
 import {
   resetSearch,
   handlePrimarySearchQuery,
@@ -22,21 +22,19 @@ const resetSearchOptions = {
   searchTerm: "",
   searchType: "all",
   searchCoordinates: null,
-  primaryResults: [],
+  primaryResults: null,
   primaryIndex: 0,
-  fullResults: [],
+  detailedResults: null,
   searchDisplayType: null,
 };
 
 const primarySearchRoutes = {
-  addressRoute: `/api/address-search/partial/`,
-  speculatorRoute: `/api/speculator-search/partial/`,
-  zipcodeRoute: `/api/zipcode-search/partial/`,
+  address: `/api/address-search/partial/`,
+  speculator: `/api/speculator-search/partial/`,
+  zipcode: `/api/zipcode-search/partial/`,
 };
 
 class SearchBar extends Component {
-  _searchButons = ["all", "address", "speculator", "zipcode"];
-
   /*Passed down to Search Results.
   Changes the URL query*/
   _setSearchLocationParams = (result) => {
@@ -64,7 +62,7 @@ class SearchBar extends Component {
         searchTerm,
         searchYear,
         searchCoordinates, //only set when type==="address"
-        primaryResults: [],
+        primaryResults: null,
         primaryIndex: 0,
       })
     );
@@ -88,50 +86,38 @@ class SearchBar extends Component {
   };
 
   _handleQueryPrimaryResults = ({ searchType, searchTerm, searchYear }) => {
-    const { addressRoute, speculatorRoute, zipcodeRoute } = primarySearchRoutes;
+    const { address, speculator, zipcode } = primarySearchRoutes;
 
-    if (searchType && searchTerm && searchYear) {
-      if (searchType === "address") {
-        this.props.dispatch(
-          handlePrimarySearchQuery({
+    if (searchType === "all") {
+      this.props.dispatch(
+        handlePrimarySearchAll({ searchTerm, searchYear }, [
+          address,
+          speculator,
+          zipcode,
+        ])
+      );
+    } else {
+      // search type address, speculator, or zipcode
+      this.props.dispatch(
+        handlePrimarySearchQuery(
+          {
+            searchType,
             searchTerm,
             searchYear,
-            route: addressRoute,
-          })
-        );
-      } else if (searchType === "speculator") {
-        this.props.dispatch(
-          handlePrimarySearchQuery({
-            searchTerm,
-            searchYear,
-            route: speculatorRoute,
-          })
-        );
-      } else if (searchType === "zipcode") {
-        this.props.dispatch(
-          handlePrimarySearchQuery({
-            searchTerm,
-            searchYear,
-            route: zipcodeRoute,
-          })
-        );
-      } else if (searchType === "all") {
-        this.props.dispatch(
-          handlePrimarySearchAll(searchTerm, searchYear, [
-            addressRoute,
-            speculatorRoute,
-            zipcodeRoute,
-          ])
-        );
-      } else {
-        throw new Error("This searchtype does not exit.");
-      }
+          },
+          primarySearchRoutes[searchType]
+        )
+      );
     }
   };
 
   _handleOnChange = async (e) => {
     const searchTerm = e.target.value;
-    const { searchType, searchYear } = this.props.searchState;
+    const {
+      searchType,
+      searchCoordinates,
+      searchYear,
+    } = this.props.searchState;
 
     this.props.dispatch(resetSearch({ searchTerm }));
     this._handleQueryPrimaryResults({
@@ -160,8 +146,8 @@ class SearchBar extends Component {
         searchTerm: "",
         searchType: buttonType,
         searchCoordinates: null,
-        primaryResults: [],
-        fullResults: [],
+        primaryResults: null,
+        detailedResults: null,
       })
     );
   };
@@ -207,7 +193,7 @@ class SearchBar extends Component {
   };
 
   _handleYearSelectFocus = () => {
-    this.props.dispatch(resetSearch({ primaryResults: [] }));
+    this.props.dispatch(resetSearch({ primaryResults: null }));
   };
   componentDidMount() {
     // parse URL and dispatch params
@@ -270,7 +256,7 @@ class SearchBar extends Component {
           <div className="search-container">
             {showSearchButtons ? (
               <div className="search-options">
-                {this._searchButons.map((button) => {
+                {["all", "address", "speculator", "zipcode"].map((button) => {
                   return (
                     <div
                       key={button}

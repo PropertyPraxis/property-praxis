@@ -8,7 +8,7 @@ import About from "./pages/About";
 import Methodology from "./pages/Methodology";
 import MapContainer from "./Map/MapContainer";
 import SearchContainer from "./Search/SearchContainer";
-import ResultsContainer from "./Search/DetailedResultsContainer";
+import DetailedResultsContainer from "./Search/DetailedResultsContainer";
 import LoadingIndicator from "./LoadingIndicator/LoadingIndicator";
 import PPLogo from "./Logo/Logo";
 
@@ -32,7 +32,7 @@ class App extends Component {
             </Switch>
             {/* The following components are inside Router to have access to Link */}
             <SearchContainer />
-            <ResultsContainer />
+            <DetailedResultsContainer />
             <PPLogo />
             <LoadingIndicator {...this.props} />
           </Router>

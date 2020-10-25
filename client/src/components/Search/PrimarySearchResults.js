@@ -68,7 +68,7 @@ PrimaryResults.propTypes = {
 const PrimaryResultsContainer = (props) => {
   const { primaryResults } = props.searchState;
 
-  if (primaryResults.length > 0) {
+  if (primaryResults) {
     return <PrimaryResults {...props} results={primaryResults} />;
   }
 
