@@ -47,6 +47,14 @@
   overflow: auto;
 }
 
+.results-inner {
+  padding: 120px 10px 0px 10px;
+
+  @media (max-width: $mobile) {
+    padding: 5px 0 10px 0;
+  }
+}
+
 @media (max-width: $mobile) {
   .result-drawer-static {
     position: absolute;
@@ -84,16 +92,6 @@
     transition: height 300ms;
     overflow: hidden;
   }
-
-  // .results-outer {
-  //   border-radius: 5px 5px 0 0;
-
-  //   .results-inner {
-  //     margin: 15px;
-  //     width: calc(100% - 30px);
-  //     max-width: calc(100% - 30px);
-  //   }
-  // }
 
   .results-hamburger-button {
     position: sticky;
@@ -169,7 +167,7 @@
   margin: 0 0 10px 45px;
   display: flex;
   align-items: center;
-
+  color: $ui-black;
   img {
     height: 20px;
     width: 20px;

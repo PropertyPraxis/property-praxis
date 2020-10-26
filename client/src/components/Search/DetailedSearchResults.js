@@ -8,12 +8,14 @@ import {
   handleGetDownloadDataAction,
   resetSearch,
 } from "../../actions/search";
-import { coordsFromWKT } from "../../utils/map";
+// import { coordsFromWKT } from "../../utils/map";
 import {
   createAddressString,
   capitalizeFirstLetter,
   createDateString,
   addUnderscoreToString,
+  createQueryStringFromSearch,
+  currencyFormatter,
 } from "../../utils/helper";
 import MapViewer from "./MapViewer";
 import * as mapMarkerIcon from "../../assets/img/map-marker-transparent.png";
@@ -26,7 +28,99 @@ import * as infoIcon from "../../assets/img/info-icon.png";
 //   zipcode: `/api/zipcode-search/full/`, //<id>/<year>
 // };
 
-const DetailsContent = (props) => {};
+const AddressDetails = (props) => {
+  debugger;
+  const {
+    searchType,
+    searchTerm,
+    searchYear,
+    isDetailedResultsOpen,
+  } = props.searchState;
+  const {
+    own_id,
+    count,
+    parcelno,
+    resyrbuilt,
+    saledate,
+    saleprice,
+    taxpayer1,
+    totsqft,
+    totacres,
+    propzip,
+  } = props.result.properties;
+
+  return (
+    <div className="results-inner">
+      <MapViewer {...props} />
+      <div
+        style={
+          isDetailedResultsOpen ? { display: "block" } : { display: "none" }
+        }
+      >
+        <div className="address-title">
+          <span>
+            <img src={mapMarkerIcon} alt="Address Result" />
+            {searchTerm}
+          </span>
+        </div>
+        <Link
+          to={createQueryStringFromSearch({
+            type: "zipcode",
+            search: propzip,
+            coordinates: null,
+            year: searchYear,
+          })}
+        >
+          <span className="address-context">
+            View more properties in this zipcode.
+            <img src={infoIcon} alt="More Information"></img>
+          </span>
+        </Link>
+        <hr></hr>
+        <div className="address-properties">
+          <div
+            onClick={() => {
+              // this._onSpeculatorClick();
+            }}
+          >
+            Speculator:
+            <span>
+              {capitalizeFirstLetter(own_id)}
+              <img src={infoIcon} alt="More Information"></img>
+            </span>
+          </div>
+
+          <div>
+            Properties owned: <span>{count}</span>
+          </div>
+          <div>
+            Parcel Number: <span>{parcelno}</span>
+          </div>
+          {resyrbuilt === 0 || resyrbuilt === null ? null : (
+            <div>
+              Year built: <span>{resyrbuilt}</span>
+            </div>
+          )}
+          <div>
+            Last sale date: <span>{saledate}</span>
+          </div>
+          <div>
+            Last sale price: <span>{currencyFormatter.format(saleprice)}</span>
+          </div>
+          <div>
+            Associated taxpayer: <span>{taxpayer1}</span>
+          </div>
+          <div>
+            Square footage: <span>{totsqft}</span>
+          </div>
+          <div>
+            Acres: <span>{totacres}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 class DetailedSearchResults extends Component {
   _toggleDetailedResultsDrawer = () => {
@@ -43,26 +137,10 @@ class DetailedSearchResults extends Component {
   }
 
   render() {
-    const {
-      isDetailedResultsOpen,
-      detailedResults,
-      searchType,
-    } = this.props.searchState;
+    const { isDetailedResultsOpen, detailedResults } = this.props.searchState;
 
     if (detailedResults) {
-      const {
-        own_id,
-        count,
-        parcelno,
-        resyrbuilt,
-        saledate,
-        saleprice,
-        taxpayer1,
-        totsqft,
-        totacres,
-      } = detailedResults[0].properties;
       return (
-        // <div>HELLO</div>
         <section className="result-drawer-static">
           <div
             className={
@@ -74,72 +152,7 @@ class DetailedSearchResults extends Component {
           >
             &#9776;
           </div>
-          <div
-            className="results-inner"
-            style={
-              isDetailedResultsOpen
-                ? { visibility: "visible" }
-                : { visibility: "hidden" }
-            }
-          >
-            <MapViewer {...this.props} />
-            <div className="address-title">
-              <span>
-                <img src={mapMarkerIcon} alt="Address Result" />
-                LIST
-              </span>
-            </div>
-            <span
-              className="address-context"
-              onClick={() => {
-                // this._onZipcodeClick();
-              }}
-            >
-              CONTEXT
-              <img src={infoIcon} alt="More Information"></img>
-            </span>
-            <hr></hr>
-            <div className="address-properties">
-              <div
-                onClick={() => {
-                  // this._onSpeculatorClick();
-                }}
-              >
-                Speculator:
-                <span>
-                  {capitalizeFirstLetter(own_id)}
-                  <img src={infoIcon} alt="More Information"></img>
-                </span>
-              </div>
-
-              <div>
-                Properties owned: <span>{count}</span>
-              </div>
-              <div>
-                Parcel Number: <span>{parcelno}</span>
-              </div>
-              {resyrbuilt === 0 || resyrbuilt === null ? null : (
-                <div>
-                  Year built: <span>{resyrbuilt}</span>
-                </div>
-              )}
-              <div>
-                Last sale date: <span>{saledate}</span>
-              </div>
-              <div>
-                Last sale price: <span>{saleprice}</span>
-              </div>
-              <div>
-                Associated taxpayer: <span>{taxpayer1}</span>
-              </div>
-              <div>
-                Square footage: <span>{totsqft}</span>
-              </div>
-              <div>
-                Acres: <span>{totacres}</span>
-              </div>
-            </div>
-          </div>
+          <AddressDetails {...this.props} result={detailedResults[0]} />
         </section>
       );
     }
