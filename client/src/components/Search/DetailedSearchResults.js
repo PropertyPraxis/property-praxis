@@ -28,14 +28,141 @@ import * as infoIcon from "../../assets/img/info-icon.png";
 //   zipcode: `/api/zipcode-search/full/`, //<id>/<year>
 // };
 
+function calculateResultsType(searchType, results) {
+  if (results.length === 1 && searchType === "address") {
+    return "address-single";
+  } else if (results.length > 1 && searchType === "address") {
+    return "address-multiple";
+  } else if (searchType === "speculator") {
+    return "speculator-multiple";
+  } else if (searchType === "zipcode") {
+    return "zipcode-multiple";
+  } else {
+    throw new Error(`No results type found for ${searchType}.`);
+  }
+}
+
+// resultsType zipcode-results, speculator-results
+// class ParcelResults extends Component {
+//   render() {
+//     // const { features } = this.props.mapData.ppraxis;
+//     // const { year } = this.props.mapData;
+//     const { searchTerm, searchType } = this.props.searchState;
+//     const { resultsType } = this.props;
+
+//     return (
+//       <div>
+//         <div className="results-title">
+//           <span className="number-circle">{features.length}</span>
+//           {resultsType === "zipcode-results"
+//             ? " properties in "
+//             : resultsType === "speculator-results"
+//             ? " properties for "
+//             : resultsType === "multiple-parcels"
+//             ? " properties within 1km"
+//             : null}
+//           <div>
+//             {resultsType === "zipcode-results" ||
+//             resultsType === "speculator-results"
+//               ? capitalizeFirstLetter(searchTerm)
+//               : null}
+//           </div>
+//         </div>
+
+//         <div className="partial-results-container partial-results-mobile">
+//           {features.map((feature, index) => {
+//             const { propno, propstr, propdir, propzip } = feature.properties;
+
+//             //create coords from the centroid string
+//             const coords = coordsFromWKT(feature.centroid);
+
+//             //return only options that are not null
+//             if (coords) {
+//               const latitude = coords.latitude;
+//               const longitude = coords.longitude;
+//               const encodedCoords = encodeURI(JSON.stringify(coords));
+
+//               //build the address string
+//               const addressString = createAddressString(
+//                 propno,
+//                 propdir,
+//                 propstr,
+//                 propzip
+//               );
+//               return (
+//                 <Link
+//                   to={{
+//                     pathname: "/map/address",
+//                     search: `search=${addressString}&coordinates=${encodedCoords}&year=${year}`,
+//                   }}
+//                   key={index}
+//                   className={index % 2 ? "list-item-odd" : "list-item-even"}
+//                   onClick={() => {
+//                     // this.props.dispatch(dataIsLoadingAction(true));
+
+//                     // change the partial results
+//                     // this.props
+//                     //   .dispatch(handleSearchPartialAddress(addressString, year))
+//                     //   .then((json) => {
+//                     //     // set the search term to the first result of geocoder
+//                     //     const proxySearchTerm = json[0].mb[0].place_name;
+//                     //     this.props.dispatch(
+//                     //       resetSearch({
+//                     //         searchTerm: proxySearchTerm,
+//                     //       })
+//                     //     );
+//                     //   });
+
+//                     //add a point marker
+//                     this.props.dispatch(
+//                       setMarkerCoordsAction(latitude, longitude)
+//                     );
+
+//                     //set new viewer in results
+//                     this.props.dispatch(
+//                       handleGetViewerImageAction(longitude, latitude)
+//                     );
+//                     //set map data and then create viewport
+//                     const geojsonRoute = `/api/geojson/parcels/address/${encodedCoords}/${year}`;
+//                     this.props
+//                       .dispatch(handleGetParcelsByQueryAction(geojsonRoute))
+//                       .then((geojson) => {
+//                         //trigger new viewport pass down from PartialSearchResults
+//                         this.props.createNewViewport(geojson);
+//                         //loading
+//                         // this.props.dispatch(dataIsLoadingAction(false));
+//                       });
+
+//                     //set the display type to address
+//                     this.props.dispatch(
+//                       resetSearch({
+//                         searchType: "address",
+//                         searchDisplayType: "single-address",
+//                       })
+//                     );
+//                     // this.props.dispatch(setSearchDisplayType("single-address"));
+//                     this.props.dispatch(toggleFullResultsAction(true));
+//                     // //close the partial results after
+//                     this.props.dispatch(togglePartialResultsAction(false));
+//                   }}
+//                 >
+//                   <div>
+//                     <img src={mapMarkerIcon} alt="Address Result" />
+//                     {addressString}
+//                   </div>
+//                 </Link>
+//               );
+//             }
+//             return null;
+//           })}
+//         </div>
+//       </div>
+//     );
+//   }
+// }
+
 const AddressDetails = (props) => {
-  debugger;
-  const {
-    searchType,
-    searchTerm,
-    searchYear,
-    isDetailedResultsOpen,
-  } = props.searchState;
+  const { searchTerm, searchYear, isDetailedResultsOpen } = props.searchState;
   const {
     own_id,
     count,

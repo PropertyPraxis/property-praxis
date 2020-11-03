@@ -1,10 +1,7 @@
 import React, { Component } from "react";
 import PropTypes, { string } from "prop-types";
 import { handleGetViewerImageAction } from "../../actions/search";
-import {
-  calculateDesiredBearing,
-  bearingToBasic,
-} from "../../utils/viewer";
+import { calculateDesiredBearing, bearingToBasic } from "../../utils/viewer";
 import * as Mapillary from "mapillary-js";
 
 class MapViewer extends Component {
@@ -43,44 +40,48 @@ class MapViewer extends Component {
         handleGetViewerImageAction(longitude, latitude)
       );
 
-      // Enable marker component when setting up viewer
-      const mly = new Mapillary.Viewer(
-        "mly",
-        "S3NrdE1uVHdoRVhQeFN6WUZCTzItUTo5MGFlYTRiNjg3ODAxNTNi",
-        null,
-        {
-          component: {
-            cover: false,
-            marker: true,
-          },
+      // if a viewer object is returned with params then 
+      // create a Viewer instance
+      if (viewer.key) {
+        // Enable marker component when setting up viewer
+        const mly = new Mapillary.Viewer(
+          "mly",
+          "S3NrdE1uVHdoRVhQeFN6WUZCTzItUTo5MGFlYTRiNjg3ODAxNTNi",
+          null,
+          {
+            component: {
+              cover: false,
+              marker: true,
+            },
+          }
+        );
+
+        // Create a non interactive simple marker with default options
+        const defaultMarker = new Mapillary.MarkerComponent.SimpleMarker(
+          "default-id",
+          { lat: latitude, lon: longitude }
+        );
+
+        // Add markers to component
+        const markerComponent = mly.getComponent("marker");
+        markerComponent.add([defaultMarker]); //interactiveMarker,
+
+        // Adjust the viwer after moving to close coords
+        try {
+          const node = await mly.moveCloseTo(latitude, longitude);
+          // setBearing(node);
+          this._setBearing(node, mly);
+        } catch (err) {
+          console.error("move close to error: ", err);
+          mly.moveToKey(viewer.key).catch(function (e) {
+            console.error(e);
+          });
         }
-      );
-
-      // Create a non interactive simple marker with default options
-      const defaultMarker = new Mapillary.MarkerComponent.SimpleMarker(
-        "default-id",
-        { lat: latitude, lon: longitude }
-      );
-
-      // Add markers to component
-      const markerComponent = mly.getComponent("marker");
-      markerComponent.add([defaultMarker]); //interactiveMarker,
-
-      // Adjust the viwer after moving to close coords
-      try {
-        const node = await mly.moveCloseTo(latitude, longitude);
-        // setBearing(node);
-        this._setBearing(node, mly);
-      } catch (err) {
-        console.error("move close to error: ", err);
-        mly.moveToKey(viewer.key).catch(function (e) {
-          console.error(e);
+        // Viewer size is dynamic so resize should be called every time the window size changes
+        window.addEventListener("resize", function () {
+          mly.resize();
         });
       }
-      // Viewer size is dynamic so resize should be called every time the window size changes
-      window.addEventListener("resize", function () {
-        mly.resize();
-      });
     }
   }
 

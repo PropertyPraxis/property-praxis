@@ -12,7 +12,8 @@ router.get("/partial/:id/:year", async (req, res) => {
                 WHERE own_id LIKE $1
                 AND praxisyear = $2
                 AND count > 9
-                ORDER BY count DESC;`;
+                ORDER BY count DESC
+                LIMIT 5;`;
 
     const { rows } = await db.query(query, [`%${decodeId}%`, year]);
     res.json(rows);
