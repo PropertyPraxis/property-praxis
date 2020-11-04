@@ -1,47 +1,99 @@
 import React, { Component } from "react";
+import { withRouter } from "react-router-dom";
 import { connect } from "react-redux";
-import queryString from "query-string";
+import PropTypes from "prop-types";
+import { parseURLParams } from "../../utils/parseURL";
 import PraxisMap from "./Map";
 
+/*The MapContainer is responsible for passing 
+the search params to the map*/
 class MapContainer extends Component {
-  zipcodeFillLayer = {
-    id: "zicode-fill",
-    type: "fill",
-    source: {
-      type: "geojson",
-      data: this.props.mapData
-    }
-  };
-
-  zipcodeLineLayer = {
-    id: "zicode-fill",
-    type: "line",
-    source: {
-      type: "geojson",
-      data: this.props.mapData
-    }
-  };
-
-  componentDidUpdate(prevProps) {
-    const queryParams = queryString.parse(this.props.location.search);
-
-    // Typical usage (don't forget to compare props):
-    if (this.props.location.search !== prevProps.location.search) {
-      console.log("location changed");
-    }
-  }
-
   render() {
-    return <PraxisMap {...this.props} />;
+    const searchQueryParams = parseURLParams(this.props.location.search);
+    return <PraxisMap {...this.props} searchQueryParams={searchQueryParams} />;
   }
 }
+
+MapContainer.propTypes = {
+  mapState: PropTypes.object.isRequired,
+  mapData: PropTypes.object.isRequired,
+  searchState: PropTypes.object.isRequired,
+  currentFeature: PropTypes.object.isRequired,
+  results: PropTypes.object.isRequired,
+  controller: PropTypes.object.isRequired,
+  location: PropTypes.object.isRequired,
+  mapParams: PropTypes.object.isRequired,
+};
+
 function mapStateToProps({
   mapState,
   mapData,
+  searchState,
   currentFeature,
   results,
-  controller
+  controller,
 }) {
-  return { mapState, mapData, currentFeature, results, controller };
+  return {
+    mapState,
+    mapData,
+    searchState,
+    currentFeature,
+    results,
+    controller,
+  };
 }
-export default connect(mapStateToProps)(MapContainer);
+
+export default withRouter(connect(mapStateToProps)(MapContainer));
+
+// _setSearchParams = ({
+//   searchType,
+//   searchTerm,
+//   searchYear,
+//   searchCoordinates,
+// }) => {
+//   this.props.dispatch(
+//     resetSearch({
+//       searchType,
+//       searchTerm,
+//       searchCoordinates,
+//       searchYear,
+//     })
+//   );
+// };
+
+// componentDidMount() {
+//   const { search: searchQuery } = this.props.location;
+//   const {
+//     searchType,
+//     searchTerm,
+//     searchCoordinates,
+//     searchYear,
+//   } = parseURLParams(searchQuery);
+
+//   this._setSearchParams({
+//     searchType,
+//     searchTerm,
+//     searchCoordinates,
+//     searchYear,
+//   });
+// }
+
+// componentDidUpdate(prevProps) {
+//   // if the location changes, set the params
+//   if (this.props.location.search !== prevProps.location.search) {
+//     const { search: searchQuery } = this.props.location;
+//     const {
+//       searchType,
+//       searchTerm,
+//       searchCoordinates,
+//       searchYear,
+//     } = parseURLParams(searchQuery);
+
+//     this._setSearchParams({
+//       searchType,
+//       searchTerm,
+//       searchCoordinates,
+//       searchYear,
+//     });
+//   }
+// }

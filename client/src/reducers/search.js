@@ -1,51 +1,52 @@
 import {
-  SET_SEARCH_TYPE,
-  RESET_SEARCH_TYPE,
-  SET_SEARCH_TERM,
   RESET_SEARCH,
-  SET_SEARCH_DISPLAY_TYPE,
-  SEARCH_PARTIAL_ZIPCODE,
-  SEARCH_FULL_ZIPCODE,
-  SEARCH_PARTIAL_ADDRESS,
-  SEARCH_FULL_ADDRESS,
-  SEARCH_PARTIAL_SPECULATOR,
-  SEARCH_FULL_SPECULATOR,
-  SEARCH_PARTIAL_ALL
+  PRIMARY_SEARCH_QUERY,
+  UPDATE_DETAILED_RESULTS,
+  UPDATE_PRIMARY_INDEX,
+  GET_SEARCH_YEARS,
+  GET_PRAXIS_SEARCH_YEARS,
+  GET_VIEWER_IMAGE,
+  TOGGLE_DETAILED_RESULTS,
 } from "../actions/search";
 
 const initialSearchState = {
-  searchType: "All",
-  searchTerm: null,
+  searchType: "all",
+  searchTerm: "",
+  searchCoordinates: null,
   searchDisplayType: null,
-  partialResults: [],
-  fullResults: []
+  searchYear: "2017",
+  searchYears: null,
+  praxisSearchYears:null,
+  primaryResults: null,
+  detailedResults: null,
+  primaryIndex: 0,
+  downloadData: null,
+  isDetailedResultsOpen: false,
+  isPartialResultsOpen: false,
+  viewer: {
+    bearing: null,
+    key: null,
+    viewerMarker: null,
+  },
 };
 
 export default function searchState(state = initialSearchState, action) {
   switch (action.type) {
-    case SET_SEARCH_TYPE:
-      return { ...state, ...action.payload };
-    case RESET_SEARCH_TYPE:
-      return { ...state, ...action.payload };
-    case SET_SEARCH_TERM:
-      return { ...state, ...action.payload };
     case RESET_SEARCH:
       return { ...state, ...action.payload };
-    case SET_SEARCH_DISPLAY_TYPE:
+    case PRIMARY_SEARCH_QUERY:
       return { ...state, ...action.payload };
-    case SEARCH_PARTIAL_ZIPCODE:
+    case UPDATE_DETAILED_RESULTS:
       return { ...state, ...action.payload };
-    case SEARCH_FULL_ZIPCODE:
+    case UPDATE_PRIMARY_INDEX:
       return { ...state, ...action.payload };
-    case SEARCH_PARTIAL_ADDRESS:
+    case GET_SEARCH_YEARS:
       return { ...state, ...action.payload };
-    case SEARCH_FULL_ADDRESS:
+    case GET_PRAXIS_SEARCH_YEARS:
       return { ...state, ...action.payload };
-    case SEARCH_PARTIAL_SPECULATOR:
+    case GET_VIEWER_IMAGE:
       return { ...state, ...action.payload };
-    case SEARCH_FULL_SPECULATOR:
-      return { ...state, ...action.payload };
-    case SEARCH_PARTIAL_ALL:
+    case TOGGLE_DETAILED_RESULTS:
       return { ...state, ...action.payload };
     default:
       return state;

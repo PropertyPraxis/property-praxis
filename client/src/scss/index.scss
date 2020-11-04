@@ -1,45 +1,12 @@
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
-}
-
-/* This is to make sure that 
-embedded components behave in 
-the content box way.
- */
- *,
- *:before,
- *:after {
-   box-sizing: content-box;
- }
- 
- /* set max width for images
-  so they are never wider than page*/
- img {
-   max-width: 100%;
- }
- 
- ul {
-   padding: 0;
- }
- 
- li {
-   list-style-type: none;
- }
- 
- a {
-   text-decoration: none !important;
- }
- 
- a:visited {
-   text-decoration: none !important;
- }
+@import "colors";
+@import "theme";
+@import "pages";
+@import "App";
+@import "Controller";
+@import "Logo";
+@import "Map";
+@import "Home";
+@import "Results";
+@import "Search";
+@import "SearchContainer";
+@import "Footer";

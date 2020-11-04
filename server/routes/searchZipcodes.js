@@ -11,11 +11,6 @@ router.get("/full/:id/:year", async (req, res) => {
   const { id, year } = req.params;
 
   try {
-    // const query = `SELECT DISTINCT p.* FROM property as p
-    // INNER JOIN taxpayer_property AS tpp ON p.prop_id = tpp.prop_id
-    // INNER JOIN year AS y ON tpp.taxparprop_id = y.taxparprop_id
-    // WHERE p.propzip LIKE $1 AND y.praxisyear = $2`;
-
     const query = `SELECT jsonb_build_object(
       'type',     'FeatureCollection',
       'features', jsonb_agg(feature)
@@ -48,10 +43,18 @@ router.get("/partial/:id/:year", async (req, res) => {
   const { id, year } = req.params;
 
   try {
-    const query = `SELECT DISTINCT p.propzip FROM property as p
-    INNER JOIN taxpayer_property AS tpp ON p.prop_id = tpp.prop_id
-    INNER JOIN year AS y ON tpp.taxparprop_id = y.taxparprop_id
-    WHERE p.propzip LIKE $1 AND y.praxisyear = $2`;
+    const query = `SELECT DISTINCT p.propzip, AVG(oc.count) as avg_count
+  FROM property as p
+  INNER JOIN taxpayer_property AS tpp ON p.prop_id = tpp.prop_id
+  INNER JOIN year AS y ON tpp.taxparprop_id = y.taxparprop_id
+  INNER JOIN taxpayer as tp ON tpp.tp_id = tp.tp_id
+  INNER JOIN owner_taxpayer AS otp ON tp.owntax_id = otp.owntax_id
+  INNER JOIN owner_count as OC ON otp.own_id = oc.own_id
+  WHERE p.propzip LIKE $1 AND y.praxisyear = $2
+  GROUP BY  p.propzip
+  ORDER BY avg_count DESC
+  LIMIT 5;
+  `;
 
     const { rows } = await db.query(query, [`${id}%`, `${year}`]);
     res.json(rows);

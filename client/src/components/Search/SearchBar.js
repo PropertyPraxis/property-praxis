@@ -1,186 +1,363 @@
 import React, { Component } from "react";
 import { DebounceInput } from "react-debounce-input";
+import PropTypes from "prop-types";
 import {
-  setSearchType,
-  setSearchTerm,
   resetSearch,
-  setSearchDisplayType,
-  handleSearchPartialZipcode,
-  handleSearchPartialAddress,
-  handleSearchPartialSpeculator,
-  handleSearchPartialAll
+  handlePrimarySearchQuery,
+  handlePrimarySearchAll,
+  updatePrimaryIndex,
 } from "../../actions/search";
+import { parseURLParams } from "../../utils/parseURL";
 import {
-  togglePartialResultsAction,
-  toggleFullResultsAction
-} from "../../actions/results";
-import { setMarkerCoordsAction } from "../../actions/mapData";
-import PartialSearchResults from "./SearchResults";
+  capitalizeFirstLetter,
+  sanitizeSearchResult,
+  createQueryStringFromSearch,
+} from "../../utils/helper";
+import PrimaryResultsContainer from "./PrimarySearchResults";
 import * as searchIcon from "../../assets/img/search.png";
-import "../../scss/Search.scss";
 import styleVars from "../../scss/colors.scss";
 
-// use this object to reset to nothing
+// use this object to reset
 const resetSearchOptions = {
   searchTerm: "",
+  searchType: "all",
+  searchCoordinates: null,
+  primaryResults: null,
+  primaryIndex: 0,
+  detailedResults: null,
   searchDisplayType: null,
-  partialResults: [],
-  fullResults: []
+};
+
+const primarySearchRoutes = {
+  address: `/api/address-search/partial/`,
+  speculator: `/api/speculator-search/partial/`,
+  zipcode: `/api/zipcode-search/partial/`,
 };
 
 class SearchBar extends Component {
-  _searchButons = ["All", "Address", "Speculator", "Zipcode"];
+  /*Passed down to Search Results.
+  Changes the URL query*/
+  _setSearchLocationParams = (result) => {
+    const { searchYear } = this.props.searchState;
+    if (result) {
+      const route = createQueryStringFromSearch(
+        sanitizeSearchResult({
+          result,
+          year: searchYear,
+        })
+      );
+      this.props.history.push(route);
+    }
+  };
 
-  _setSearchPlaceholderText = searchType => {
+  _setSearchStateParams = ({
+    searchType,
+    searchTerm,
+    searchYear,
+    searchCoordinates,
+  }) => {
+    this.props.dispatch(
+      resetSearch({
+        searchType,
+        searchTerm,
+        searchYear,
+        searchCoordinates, //only set when type==="address"
+        primaryResults: null,
+        primaryIndex: 0,
+      })
+    );
+  };
+
+  _setSearchPlaceholderText = (searchType) => {
     switch (searchType) {
-      case "All":
+      case "all":
         return "Search Property Praxis...";
-      case "Address":
+      case "address":
         return "Search Adresses...";
-      case "Speculator":
+      case "speculator":
         return "Search Speculators...";
-      case "Zipcode":
+      case "zipcode":
         return "Search Zipcodes...";
+      case "home":
+        return "Search for an address, speculator, or zipcode...";
       default:
         return "Search Property Praxis...";
     }
   };
 
-  _handleInputChange = async e => {
+  _handleQueryPrimaryResults = ({ searchType, searchTerm, searchYear }) => {
+    const { address, speculator, zipcode } = primarySearchRoutes;
+
+    if (searchType === "all") {
+      this.props.dispatch(
+        handlePrimarySearchAll({ searchTerm, searchYear }, [
+          address,
+          speculator,
+          zipcode,
+        ])
+      );
+    } else {
+      // search type address, speculator, or zipcode
+      this.props.dispatch(
+        handlePrimarySearchQuery(
+          {
+            searchType,
+            searchTerm,
+            searchYear,
+          },
+          primarySearchRoutes[searchType]
+        )
+      );
+    }
+  };
+
+  _handleOnChange = async (e) => {
     const searchTerm = e.target.value;
-    const { searchType } = this.props.searchState;
-    const { year } = this.props.mapData;
+    const {
+      searchType,
+      searchCoordinates,
+      searchYear,
+    } = this.props.searchState;
 
-    this.props.dispatch(setSearchTerm(searchTerm));
-    this.props.dispatch(setSearchDisplayType("partial"));
+    this.props.dispatch(resetSearch({ searchTerm }));
+    this._handleQueryPrimaryResults({
+      searchType,
+      searchTerm,
+      searchYear,
+    });
+  };
 
-    //zipcode search
-    if (searchType === "Zipcode") {
-      this.props.dispatch(handleSearchPartialZipcode(searchTerm, year));
-    }
-    if (searchType === "Address") {
-      this.props.dispatch(handleSearchPartialAddress(searchTerm, year));
-    }
-    if (searchType === "Speculator") {
-      this.props.dispatch(handleSearchPartialSpeculator(searchTerm, year));
-    }
-    if (searchType === "All") {
-      this.props.dispatch(handleSearchPartialAll(searchTerm, year));
+  _handleOnFocus = () => {
+    const { searchTerm, searchType, searchYear } = this.props.searchState;
+
+    if (searchTerm && searchType && searchYear) {
+      this._handleQueryPrimaryResults({
+        searchType,
+        searchTerm,
+        searchYear,
+      });
     }
   };
 
-  // STILL WORKING ON THIS
-  _handleKeyPress = async e => {
-    const { searchType, searchTerm } = this.props.searchState;
-    const { year } = this.props.mapData;
-    const { key } = e;
+  _handleOnBlur = () => {
+    // logic needed
+  };
 
-    // if it is an enter hit
-    if (key === "Enter") {
-      console.log("Enter press", this._textInput.value);
-      // //zipcode search
-      // if (searchType === "Zipcode") {
-      //   this.props.dispatch(handleSearchPartialZipcode(searchTerm, year));
-      // }
-      // if (searchType === "Address") {
-      //   this.props.dispatch(handleSearchPartialAddress(searchTerm, year));
-      // }
-      // if (searchType === "Speculator") {
-      //   this.props.dispatch(handleSearchPartialSpeculator(searchTerm, year));
-      // }
-      // if (searchType === "All") {
-      // }
+  _handleSearchTypeButtonClick = (buttonType) => {
+    this.props.dispatch(
+      resetSearch({
+        searchTerm: "",
+        searchType: buttonType,
+        searchCoordinates: null,
+        primaryResults: null,
+        detailedResults: null,
+      })
+    );
+  };
+
+  _handleKeyPress = (e) => {
+    const { primaryResults, primaryIndex } = this.props.searchState;
+    // if it is an enter key press
+    if (e.key === "Enter") {
+      // the index value here will need to be changed to be more dynamic
+      this._setSearchLocationParams(primaryResults[primaryIndex]);
     }
   };
+
+  _handleOnKeyDown = (e) => {
+    const { primaryIndex, primaryResults } = this.props.searchState;
+    if (e.key === "ArrowDown") {
+      if (primaryIndex < primaryResults.length - 1) {
+        this.props.dispatch(updatePrimaryIndex(primaryIndex + 1));
+      }
+    }
+  };
+
+  _handleOnKeyUp = (e) => {
+    const { primaryIndex } = this.props.searchState;
+    if (e.key === "ArrowUp") {
+      if (primaryIndex > 0) {
+        this.props.dispatch(updatePrimaryIndex(primaryIndex - 1));
+      }
+    }
+  };
+
+  _handleSearchIconClick = () => {
+    const { primaryResults, primaryIndex } = this.props.searchState;
+    this._setSearchLocationParams(primaryResults[primaryIndex]);
+  };
+
+  _handleClearIconClick = () => {
+    this.props.dispatch(resetSearch(resetSearchOptions));
+  };
+
+  _handleYearSelect = (e) => {
+    this.props.dispatch(resetSearch({ searchYear: e.target.value }));
+  };
+
+  _handleYearSelectFocus = () => {
+    this.props.dispatch(resetSearch({ primaryResults: null }));
+  };
+  componentDidMount() {
+    // parse URL and dispatch params
+    const { search: searchQuery, pathname } = this.props.history.location;
+
+    if (pathname === "/map") {
+      const {
+        searchType,
+        searchTerm,
+        searchCoordinates,
+        searchYear,
+      } = parseURLParams(searchQuery);
+      this._setSearchStateParams({
+        searchType,
+        searchTerm,
+        searchCoordinates,
+        searchYear,
+      });
+    }
+  }
 
   componentDidUpdate(prevProps) {
-    const { searchType } = this.props.searchState;
-    // reset the text to '' when the search type changes
-    if (prevProps.searchState.searchType !== searchType) {
-      // this.props.dispatch(setSearchTerm(""));
-      this._textInput.value = "";
+    // set search if the full query string changes
+    const { search: searchQuery, pathname } = this.props.history.location;
+    if (prevProps.location.search !== searchQuery && pathname === "/map") {
+      // parse URL and dispatch params
+      const {
+        searchType,
+        searchTerm,
+        searchYear,
+        searchCoordinates,
+      } = parseURLParams(searchQuery);
+      this._setSearchStateParams({
+        searchType,
+        searchTerm,
+        searchYear,
+        searchCoordinates,
+      });
+    } else if (prevProps.location.pathname !== pathname) {
+      this._setSearchStateParams(resetSearchOptions);
     }
   }
-  render() {
-    const { searchType, searchTerm } = this.props.searchState;
-    const searchRoute = `/${searchType.toLowerCase()}`;
 
-    return (
-      <section className="search-grid-item">
-        <div className="search-container">
-          <div className="search-options">
-            {this._searchButons.map(button => {
-              return (
-                <div
-                  key={button}
-                  onClick={() => {
-                    this.props.dispatch(resetSearch({ ...resetSearchOptions }));
-                    this.props.dispatch(setSearchType(button));
-                    this.props.dispatch(toggleFullResultsAction(false));
-                    this.props.dispatch(setMarkerCoordsAction(null, null));
-                  }}
-                  style={
-                    button === searchType ? { color: styleVars.ppRose } : null
-                  }
-                >
-                  {button}
-                </div>
-              );
-            })}
-          </div>
-          <div className="search-bar">
-            <div className="search-form">
-              <div
-                className="clear-button"
-                onClick={() => {
-                  this.props.dispatch(resetSearch({ ...resetSearchOptions }));
-                  this.props.dispatch(setMarkerCoordsAction(null, null));
-                }}
-              >
-                &times;
+  render() {
+    const {
+      searchType,
+      searchTerm,
+      searchYear,
+      searchYears,
+    } = this.props.searchState;
+    const { searchBarType, showSearchButtons } = this.props;
+
+    if (searchYears) {
+      return (
+        <section
+          className={
+            searchBarType === "grid-item"
+              ? "search-grid-item"
+              : "search-modal-item"
+          }
+        >
+          <div className="search-container">
+            {showSearchButtons ? (
+              <div className="search-options">
+                {["all", "address", "speculator", "zipcode"].map((button) => {
+                  return (
+                    <div
+                      key={button}
+                      onClick={() => {
+                        this._handleSearchTypeButtonClick(button);
+                      }}
+                      style={
+                        button === searchType
+                          ? { color: styleVars.ppRose }
+                          : null
+                      }
+                    >
+                      {capitalizeFirstLetter(button)}
+                    </div>
+                  );
+                })}
               </div>
-              <DebounceInput
-                type="text"
-                placeholder={this._setSearchPlaceholderText(searchType)}
-                value={searchTerm} //controlled input
-                onChange={this._handleInputChange}
-                onKeyPress={event => {
-                  //need to update to action
-                  event.persist();
-                  this._handleKeyPress(event);
-                }}
-                onClick={() => {
-                  this.props.dispatch(toggleFullResultsAction(false));
-                }}
-                minLength={1}
-                debounceTimeout={300}
-                inputRef={ref => {
-                  //create a ref to the input
-                  this._textInput = ref;
-                }}
-                onFocus={() => {
-                  this.props.dispatch(togglePartialResultsAction(true));
-                }}
-              />
+            ) : null}
+
+            <div className="search-bar">
+              <div className="year-select">
+                <select
+                  id="years"
+                  onChange={this._handleYearSelect}
+                  onFocus={this._handleYearSelectFocus}
+                >
+                  {searchYears.map((result) => (
+                    <option
+                      key={result.praxisyear}
+                      selected={result.praxisyear.toString() === searchYear}
+                    >
+                      {result.praxisyear}
+                    </option>
+                  ))}
+                </select>
+              </div>
               <div
-                className="search-button"
-                onClick={() => {
-                  console.log("clicked");
-                }}
+                className={
+                  showSearchButtons ? "search-form" : "search-form-home"
+                }
               >
-                <img src={searchIcon} alt="search button"></img>
+                <div
+                  className="clear-button"
+                  onClick={this._handleClearIconClick}
+                >
+                  &times;
+                </div>
+                <DebounceInput
+                  type="text"
+                  size="1"
+                  placeholder={
+                    showSearchButtons
+                      ? this._setSearchPlaceholderText(searchType)
+                      : this._setSearchPlaceholderText("home")
+                  }
+                  value={searchTerm} //controlled input
+                  minLength={1}
+                  debounceTimeout={300}
+                  onChange={this._handleOnChange}
+                  onKeyPress={(event) => {
+                    event.persist();
+                    this._handleKeyPress(event);
+                  }}
+                  onKeyDown={this._handleOnKeyDown}
+                  onKeyUp={this._handleOnKeyUp}
+                  onFocus={this._handleOnFocus}
+                  onBlur={this._handleOnBlur}
+                />
+                <div
+                  className="search-button"
+                  onClick={this._handleSearchIconClick}
+                >
+                  <img src={searchIcon} alt="search button"></img>
+                </div>
               </div>
             </div>
+            <PrimaryResultsContainer {...this.props} />
           </div>
-          <PartialSearchResults
-            // _textInput={this._textInput}
-            {...this.props}
-            // handleInputChange={this._handleInputChange}
-          />
-        </div>
-      </section>
-    );
+        </section>
+      );
+    }
+
+    return null;
   }
 }
+
+SearchBar.propTypes = {
+  searchBarType: PropTypes.string.isRequired,
+  showSearchButtons: PropTypes.bool.isRequired,
+  searchState: PropTypes.shape({
+    searchType: PropTypes.string.isRequired,
+    searchTerm: PropTypes.string.isRequired,
+    searchYear: PropTypes.string.isRequired,
+    searchYears: PropTypes.oneOf([null, PropTypes.array]).isRequired,
+  }),
+  dispatch: PropTypes.func.isRequired,
+};
 
 export default SearchBar;

@@ -50,7 +50,7 @@ router.get("/parcels/:year", async (req, res) => {
         'taxpayer1' - 'totacres' - 'totsqft' - 'centroid'
     ) AS feature
     FROM (
-      SELECT * FROM parcels_${year}
+      SELECT * FROM parcels_${year} LIMIT 1000
     ) inputs
   ) features;`;
 

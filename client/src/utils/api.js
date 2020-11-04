@@ -1,66 +1,44 @@
-// import pDebounce from "p-debounce";
-
-//function to get data on map load
-export async function getInitialMapData(route) {
-  const mapDataResponse = await fetch(route);
-  if (mapDataResponse.status === 200) {
-    const mapDataJson = await mapDataResponse.json();
-    return mapDataJson;
-  }
-  throw new Error(mapDataResponse.status);
-}
-
-export async function getInitialZipcodeData(route) {
-  const mapDataResponse = await fetch(route);
-  if (mapDataResponse.status === 200) {
-    const mapDataJson = await mapDataResponse.json();
-    return mapDataJson;
-  }
-  throw new Error(mapDataResponse.status);
-}
-
-export async function getMapData(route) {
+// function to build routes depending on search params
+export async function APISearchQueryFromParams(
+  { searchType, searchTerm, searchCoordinates = null, searchYear },
+  route
+) {
   try {
-    const mapDataResponse = await fetch(route);
-    const mapDataJson = await mapDataResponse.json();
-    return mapDataJson;
+    let response;
+    if (searchTerm === "") {
+      return [];
+    } else if (searchType && searchTerm && searchYear) {
+      if (searchType === "address" && !searchCoordinates) {
+        response = await fetch(
+          `${route}${encodeURIComponent(searchTerm)}/${searchYear}`
+        );
+      } else if (searchType === "address" && searchCoordinates) {
+        response = await fetch(
+          `${route}${encodeURIComponent(searchCoordinates)}/${searchYear}`
+        );
+      } else if (["speculator", "zipcode"].includes(searchType)) {
+        response = await fetch(
+          `${route}${encodeURIComponent(searchTerm)}/${searchYear}`
+        );
+      } else {
+        throw new Error(`An error occured creating search route.`);
+      }
+      return await response.json();
+    }
   } catch (err) {
-    throw new Error(err);
+    throw Error(`An error occured querying API from params: ${err}`);
   }
 }
 
-//debouncing for searches
-export const populateSearch = async function (searchTerm, route) {
-  //route can be either <host>/api/zipcode-search/ or <host>/api/address-search/ or <host>/api/speculator-search/
-  if (searchTerm === "") {
-    return [];
-  } else {
-    const response = await fetch(`${route}${encodeURIComponent(searchTerm)}`);
-    const json = await response.json();
-    if (response.status !== 200) {
-      throw Error(`An error occured searching: ${json.message}`);
-    }
+export async function APISearchQueryFromRoute(route) {
+  try {
+    const respose = await fetch(route);
+    const json = await respose.json();
     return json;
+  } catch (err) {
+    throw new Error(`An error occurred querying API from route: ${err}`);
   }
-};
-
-export const populateSearchByYear = async function (searchTerm, year, route) {
-  //route can be either <host>/api/zipcode-search/ or <host>/api/address-search/ or <host>/api/speculator-search/
-  if (searchTerm === "") {
-    return [];
-  } else {
-    try {
-      const response = await fetch(
-        `${route}${encodeURIComponent(searchTerm)}/${year}`
-      );
-      const json = await response.json();
-      return json;
-    } catch (err) {
-      throw Error(`An error occured searching: ${err}`);
-    }
-  }
-};
-
+}
 //function helper for downloading data
 export async function getDownloadData(route) {
   try {
@@ -71,61 +49,3 @@ export async function getDownloadData(route) {
     throw Error(`An error occured searching: ${err}`);
   }
 }
-
-export async function getPraxisYears(route) {
-  try {
-    const response = await fetch(route);
-    const json = await response.json();
-    return json;
-  } catch (err) {
-    throw Error(`An error occured searching: ${err}`);
-  }
-}
-
-export async function getPraxisZipcodes(route) {
-  try {
-    const response = await fetch(route);
-    const json = await response.json();
-    return json;
-  } catch (err) {
-    throw Error(`An error occured searching: ${err}`);
-  }
-}
-
-//debounce the search
-// export const debouncedPopulateSearch = pDebounce(populateSearch, 500);
-
-// export async function getZipcodeData(route, searchTerm) {
-//   const uri = `${route}${encodeURIComponent(searchTerm)}`;
-//   const response = await fetch(uri);
-//   const json = await response.json();
-
-//   if (!response.ok || response.status !== 200) {
-//     window.alert(`An error occurred:
-//     ${json.message}`);
-//     throw Error(response.statusText);
-//   }
-//   return json;
-// }
-
-// returns geojson
-// export async function getParcelsByZipcode(route) {
-//   try {
-//     const mapDataResponse = await fetch(route);
-//     const mapDataJson = await mapDataResponse.json();
-//     return mapDataJson;
-//   } catch (err) {
-//     throw new Error(err);
-//   }
-// }
-
-// // returns geojson
-// export async function getParcelsBySpeculator(route) {
-//   try {
-//     const mapDataResponse = await fetch(route);
-//     const mapDataJson = await mapDataResponse.json();
-//     return mapDataJson;
-//   } catch (err) {
-//     throw new Error(err);
-//   }
-// }

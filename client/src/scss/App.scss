@@ -9,18 +9,18 @@
   background-color: $ui-dark-gray;
   height: vh(100);
   display: grid;
-  grid-template-columns: 340px 1fr 1fr;
+  grid-template-columns: 400px 1fr 1fr;
   grid-template-rows: 115px 1fr 1fr;
 }
 
-@media (max-width: 700px) {
+@media (max-width: $desktop) {
   .app-container {
-    grid-template-columns: 340px 1fr 1fr;
+    grid-template-columns: 400px 1fr 1fr;
     grid-template-rows: 1fr 1fr 1fr;
   }
 }
 
-@media (max-width: 350px) {
+@media (max-width: $mobile-small) {
   .app-container {
     grid-template-columns: 1fr 1fr 1fr;
     grid-template-rows: 1fr 1fr 1fr;

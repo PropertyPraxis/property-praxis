@@ -2,11 +2,11 @@ version: "3"
 services:
   postgres:
     image: mdillon/postgis:11 #this may affect drivers for rstudio!
-    # volumes:
-    #   - ./db-data:/var/lib/postgresql/data
     ports:
       - "35432:5432"
     env_file: ./envs/db.env
+    volumes:
+      - ./pg/data:/var/lib/postgresql/data
 
   rstudio:
     build:

@@ -1,15 +1,16 @@
 const express = require("express");
 const app = express();
+const cors = require("cors");
 const mountRoutes = require("./routes"); //index.js
 const morgan = require("morgan");
 const helmet = require("helmet");
-const cors = require("cors");
+
 //cors
 app.use(cors());
 
 //general security
 app.use(helmet());
-app.disable("x-powered-by");
+app.disable("X-powered-by");
 
 //logging
 app.use(morgan("combined"));

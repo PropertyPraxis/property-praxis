@@ -5,9 +5,27 @@ const keys = require("../config/keys");
 
 const router = new Router();
 
+router.get("/reverse-geocode/:coords", async (req, res) => {
+  const { coords } = req.params;
+  const { longitude, latitude } = JSON.parse(decodeURI(coords));
+
+  try {
+    const mbResponse = await fetch(
+      `https://api.mapbox.com/geocoding/v5/mapbox.places/${longitude},${latitude}.json?access_token=${keys.MAPBOX_ACCESS_TOKEN}`
+    );
+    const mbJson = await mbResponse.json();
+    const mbFeature = mbJson.features[0];
+    const { place_name, geometry } = mbFeature;
+
+    res.json({ place_name, geometry });
+  } catch (err) {
+    res.json(err);
+  }
+});
+
 router.get("/partial/:id/:year", async (req, res) => {
-  const { id, year } = req.params;
-  const decodeId = decodeURI(id).toUpperCase();
+  const { id } = req.params;
+  // const decodeId = decodeURI(id).toUpperCase();
 
   try {
     //   query the MB Geocoder API
@@ -16,7 +34,11 @@ router.get("/partial/:id/:year", async (req, res) => {
     );
     const mbJson = await mbResponse.json();
     const mbFeatures = mbJson.features;
-    res.json([{ mb: mbFeatures }]);
+    const mb = mbFeatures.map(({ place_name, geometry }) => ({
+      place_name,
+      geometry, //contains the coordinates
+    }));
+    res.json(mb);
   } catch (err) {
     res.json(err);
   }
@@ -37,9 +59,11 @@ router.get("/full/:coords/:year", async (req, res) => {
     WHERE y.praxisyear = $1 AND
     ST_Intersects(ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326), ppg.geom_${year})`;
 
+    console.log(query);
+
     const { rows } = await db.query(query, [`${year}`]);
 
-    res.json({ rows });
+    res.json(rows);
   } catch (err) {
     res.json(err);
   }
@@ -58,7 +82,7 @@ router.get("/download/:coords/:year", async (req, res) => {
 
     const { rows } = await db.query(query);
 
-    // query again if the result is 0 
+    // query again if the result is 0
     if (rows.length === 0) {
       const query = `SELECT DISTINCT ROW_NUMBER() OVER (ORDER BY 1) as id, ST_X(centroid) as longitude,
       own_id, count as property_count, parcelno, propaddr, propno, propdir, propstr, propzip,

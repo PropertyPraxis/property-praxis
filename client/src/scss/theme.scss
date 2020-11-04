@@ -1,0 +1,60 @@
+/* ------- breakpoints ------- */
+$mobile-small: 400px;
+$mobile: 600px;
+$desktop: 768px;
+$desktop-medium: 1000px;
+$desktop-large: 1200px;
+
+/*----- General Styling ----- */
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* This is to make sure that 
+  embedded components behave in 
+  the content box way.
+   */
+*,
+*:before,
+*:after {
+  box-sizing: content-box;
+}
+
+/* set max width for images
+    so they are never wider than page*/
+img {
+  max-width: 100%;
+}
+
+ul {
+  padding: 0;
+  margin: 0;
+}
+
+li {
+  list-style-type: none;
+}
+
+a {
+  text-decoration: none !important;
+}
+
+a:visited {
+  text-decoration: none !important;
+}
+
+li > a,
+li > a:visited {
+  color: $ui-white;
+}
+
+li > a:hover,
+li > a:active {
+  color: $ui-light-gray;
+  cursor: pointer;
+}

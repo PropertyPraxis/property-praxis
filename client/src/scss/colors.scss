@@ -2,9 +2,11 @@ $ui-black: #000000;
 $ui-white: #ffffff;
 $ui-off-white: #f8f8f0;
 $ui-dark-gray: #343332;
-$ui-light-gray: #e1e0e0;
+$ui-med-gray: #a9a9a9;
+$ui-light-gray: #dddddd;
+$ui-trasparent: rgba(0, 0, 0, 0.5);
 $pp-green: #9ac0a2;
-$pp-rose: #f85e5c;
+$pp-rose: #e4002c; // to match logo
 
 $parcel-stop-1: #3288bd;
 $parcel-stop-2: #99d594;
@@ -17,7 +19,10 @@ $parcel-stop-7: #d53e4f;
 :export {
   ppGreen: $pp-green;
   ppRose: $pp-rose;
+  uiWhite: $ui-white;
   uiLightGray: $ui-light-gray;
+  uiMedGray: $ui-med-gray;
+  uiTransparent: $ui-trasparent;
   parcelStop1: $parcel-stop-1;
   parcelStop2: $parcel-stop-2;
   parcelStop3: $parcel-stop-3;

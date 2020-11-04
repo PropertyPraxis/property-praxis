@@ -1,247 +1,212 @@
-import { populateSearch, populateSearchByYear } from "../utils/api";
+import {
+  APISearchQueryFromParams,
+  APISearchQueryFromRoute,
+} from "../utils/api";
+import { getImageKey } from "../utils/viewer";
+import { flattenPrimaryResults } from "../utils/helper";
 
-export const SET_SEARCH_TYPE = "SET_SEARCH_TYPE";
-export const RESET_SEARCH_TYPE = "RESET_SEARCH_TYPE";
-export const SET_SEARCH_TERM = "SET_SEARCH_TERM";
 export const RESET_SEARCH = "RESET_SEARCH";
-export const SET_SEARCH_DISPLAY_TYPE = "SET_SEARCH_DISPLAY_TYPE";
-export const SEARCH_ALL = "SEARCH_ALL";
-export const SEARCH_PARTIAL_ZIPCODE = "SEARCH_PARTIAL_ZIPCODE";
-export const SEARCH_FULL_ZIPCODE = "SEARCH_FULL_ZIPCODE";
-export const SEARCH_FULL_SPECULATOR = "SEARCH_FULL_SPECULATOR";
-export const SEARCH_PARTIAL_SPECULATOR = "SEARCH_PARTIAL_SPECULATOR";
-export const SEARCH_PARTIAL_ADDRESS = "SEARCH_PARTIAL_ADDRESS";
-export const SEARCH_FULL_ADDRESS = "SEARCH_FULL_ADDRESS";
-export const SEARCH_PARTIAL_ALL = "SEARCH_PARTIAL_ALL";
-
-export function setSearchType(type) {
-  return {
-    type: SET_SEARCH_TYPE,
-    payload: {
-      searchType: type
-    }
-  };
-}
-
-export function resetSearchType() {
-  return {
-    type: RESET_SEARCH_TYPE,
-    payload: {
-      searchType: "All"
-    }
-  };
-}
-
-export function setSearchTerm(searchTerm) {
-  return {
-    type: SET_SEARCH_TERM,
-    payload: { searchTerm }
-  };
-}
+export const PRIMARY_SEARCH_QUERY = "PRIMARY_SEARCH_QUERY";
+export const UPDATE_DETAILED_RESULTS = "UPDATE_DETAILED_RESULTS";
+export const UPDATE_PRIMARY_INDEX = "UPDATE_PRIMARY_INDEX";
+export const GET_SEARCH_YEARS = "GET_SEARCH_YEARS";
+export const GET_PRAXIS_SEARCH_YEARS = "GET_PRAXIS_SEARCH_YEARS";
+export const GET_VIEWER_IMAGE = "GET_VIEWER_IMAGE";
+// export const GET_DOWNLOAD_DATA = "GET_DOWNLOAD_DATA";
+export const TOGGLE_DETAILED_RESULTS = "TOGGLE_DETAILED_RESULTS";
 
 export function resetSearch(searchState) {
   return {
     type: RESET_SEARCH,
-    payload: { ...searchState }
+    payload: { ...searchState },
   };
 }
 
-export function setSearchDisplayType(searchDisplayType) {
+function primarySearchQuery(primaryResults) {
   return {
-    type: SET_SEARCH_DISPLAY_TYPE,
-    payload: { searchDisplayType }
-  };
-}
-
-export function searchPartialZipcode(partialResults) {
-  return {
-    type: SEARCH_PARTIAL_ZIPCODE,
+    type: PRIMARY_SEARCH_QUERY,
     payload: {
-      partialResults
-    }
+      primaryResults,
+    },
   };
 }
 
-function searchFullZipcode(fullResults) {
+export function updatePrimaryIndex(primaryIndex) {
   return {
-    type: SEARCH_FULL_ZIPCODE,
+    type: UPDATE_PRIMARY_INDEX,
     payload: {
-      fullResults
-    }
+      primaryIndex,
+    },
   };
 }
 
-function searchPartialSpeculator(partialResults) {
+export function updateDetailedResults(detailedResults) {
   return {
-    type: SEARCH_PARTIAL_SPECULATOR,
+    type: UPDATE_DETAILED_RESULTS,
     payload: {
-      partialResults
-    }
+      detailedResults,
+    },
   };
 }
 
-function searchFullSpeculator(fullResults) {
+function getYearsAction(searchYears) {
   return {
-    type: SEARCH_FULL_SPECULATOR,
-    payload: {
-      fullResults
-    }
+    type: GET_SEARCH_YEARS,
+    payload: { searchYears },
   };
 }
 
-function searchPartialAddress(partialResults) {
+function getPraxisYearsAction(praxisSearchYears) {
   return {
-    type: SEARCH_PARTIAL_ADDRESS,
-    payload: {
-      partialResults
-    }
+    type: GET_SEARCH_YEARS,
+    payload: { praxisSearchYears },
   };
 }
 
-function searchPartialAll(partialResults) {
+function getViewerImageAction(viewer) {
   return {
-    type: SEARCH_PARTIAL_ALL,
-    payload: {
-      partialResults
-    }
+    type: GET_VIEWER_IMAGE,
+    payload: { viewer },
   };
 }
 
-function searchFullAddress(fullResults) {
+export function toggleDetailedResultsAction(isOpen) {
   return {
-    type: SEARCH_PARTIAL_ADDRESS,
-    payload: {
-      fullResults
-    }
+    type: TOGGLE_DETAILED_RESULTS,
+    payload: { isDetailedResultsOpen: isOpen },
   };
 }
 
-export function handleSearchPartialZipcode(searchTerm, year) {
-  return async dispatch => {
-    return populateSearchByYear(
-      searchTerm,
-      year,
-      `/api/zipcode-search/partial/`
+export function handlePrimarySearchQuery(
+  { searchType, searchTerm, searchCoordinates, searchYear },
+  route
+) {
+  return async (dispatch) => {
+    return APISearchQueryFromParams(
+      { searchType, searchTerm, searchCoordinates, searchYear },
+      route
     )
-      .then(json => {
-        dispatch(searchPartialZipcode(json));
-        return json;
+      .then((json) => {
+        const flattendResults = flattenPrimaryResults(json);
+        dispatch(primarySearchQuery(flattendResults));
+        return flattendResults;
       })
-      .catch(err => {
+      .catch((err) => {
         //need to add some more error hadling
         throw Error(`An error occured searching: ${err}`);
       });
   };
 }
 
-export function handleSearchFullZipcode(searchTerm, year) {
-  return async dispatch => {
-    return populateSearchByYear(searchTerm, year, `/api/zipcode-search/full/`)
-      .then(json => {
-        dispatch(searchFullZipcode(json));
-        return json;
+export function handlePrimarySearchAll({ searchTerm, searchYear }, routes) {
+  return async (dispatch) => {
+    const types = ["address", "speculator", "zipcode"];
+
+    const [
+      partialAddressResults,
+      partialSpeculatorResults,
+      partialZipcodeResults,
+    ] = await Promise.all(
+      routes.map(async (route, index) => {
+        return await APISearchQueryFromParams(
+          { searchType: types[index], searchTerm, searchYear },
+          route
+        );
       })
-      .catch(err => {
-        //need to add some more error hadling
-        throw Error(`An error occured searching: ${err}`);
-      });
+    );
+    const flattendResults = flattenPrimaryResults([
+      partialAddressResults,
+      partialSpeculatorResults,
+      partialZipcodeResults,
+    ]);
+
+    dispatch(primarySearchQuery(flattendResults));
   };
 }
 
-export function handleSearchPartialAddress(searchTerm, year) {
-  return async dispatch => {
-    return populateSearchByYear(
-      searchTerm,
-      year,
-      `/api/address-search/partial/`
+export function handleDetailedSearchQuery(
+  { searchType, searchTerm, searchYear, searchCoordinates = null },
+  route
+) {
+  return async (dispatch) => {
+    return APISearchQueryFromParams(
+      { searchType, searchTerm, searchCoordinates, searchYear },
+      route
     )
-      .then(json => {
-        dispatch(searchPartialAddress(json));
+      .then((json) => {
+        dispatch(updateDetailedResults(json));
         return json;
       })
-      .catch(err => {
+      .catch((err) => {
         //need to add some more error hadling
         throw Error(`An error occured searching: ${err}`);
       });
   };
 }
 
-export function handleSearchFullAddress(searchTerm, year) {
-  return async dispatch => {
-    return populateSearchByYear(searchTerm, year, `/api/address-search/full/`)
-      .then(json => {
-        dispatch(searchFullAddress(json));
+export function handleGetYearsAction(route) {
+  return (dispatch) => {
+    return APISearchQueryFromRoute(route)
+      .then((json) => {
+        dispatch(getYearsAction(json));
         return json;
       })
-      .catch(err => {
-        //need to add some more error hadling
+      .catch((err) => {
+        throw Error(`An error occured searching search years: ${err}`);
+      });
+  };
+}
+
+export function handleGetPraxisYearsAction(route) {
+  return (dispatch) => {
+    return APISearchQueryFromRoute(route)
+      .then((json) => {
+        dispatch(getPraxisYearsAction(json));
+        return json;
+      })
+      .catch((err) => {
+        throw Error(`An error occured searching praxis years: ${err}`);
+      });
+  };
+}
+
+export function handleGetViewerImageAction(longitude, latitude) {
+  return (dispatch) => {
+    return getImageKey(longitude, latitude)
+      .then((viewer) => {
+        dispatch(
+          getViewerImageAction({
+            bearing: null,
+            key: null,
+            viewerMarker: null,
+          })
+        );
+        dispatch(getViewerImageAction(viewer));
+        return viewer;
+      })
+      .catch((err) => {
         throw Error(`An error occured searching: ${err}`);
       });
   };
 }
 
-export function handleSearchPartialSpeculator(searchTerm, year) {
-  return async dispatch => {
-    return populateSearchByYear(
-      searchTerm,
-      year,
-      `/api/speculator-search/partial/`
-    )
-      .then(json => {
-        dispatch(searchPartialSpeculator(json));
-        return json;
-      })
-      .catch(err => {
-        //need to add some more error hadling
-        throw Error(`An error occured searching: ${err}`);
-      });
-  };
-}
+// export function handleGetDownloadDataAction(route) {
+//   return (dispatch) => {
+//     dispatch(getDownloadDataAction(null));
+//     return getDownloadData(route)
+//       .then((data) => {
+//         dispatch(getDownloadDataAction(data));
+//         return data;
+//       })
+//       .catch((err) => {
+//         throw Error(`An error occured searching: ${err}`);
+//       });
+//   };
+// }
 
-export function handleSearchFullSpeculator(searchTerm, year) {
-  return async dispatch => {
-    return populateSearchByYear(
-      searchTerm,
-      year,
-      `/api/speculator-search/full/`
-    )
-      .then(json => {
-        dispatch(searchFullSpeculator(json));
-        return json;
-      })
-      .catch(err => {
-        //need to add some more error hadling
-        throw Error(`An error occured searching: ${err}`);
-      });
-  };
-}
-
-export function handleSearchPartialAll(searchTerm, year) {
-  return async dispatch => {
-    const partialAddressResults = await populateSearchByYear(
-      searchTerm,
-      year,
-      `/api/address-search/partial/`
-    );
-
-    const partialSpeculatorResults = await populateSearchByYear(
-      searchTerm,
-      year,
-      `/api/speculator-search/partial/`
-    );
-
-    const partialZipcodeResults = await populateSearchByYear(
-      searchTerm,
-      year,
-      `/api/zipcode-search/partial/`
-    );
-
-    dispatch(
-      searchPartialAll([
-        partialAddressResults,
-        partialSpeculatorResults,
-        partialZipcodeResults
-      ])
-    );
-  };
-}
+// function getDownloadDataAction(downloadData) {
+//   return {
+//     type: GET_DOWNLOAD_DATA,
+//     payload: { downloadData },
+//   };
+// }

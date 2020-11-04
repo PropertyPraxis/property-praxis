@@ -1,29 +1,23 @@
-import React, { Component } from "react";
+import React, { Component, useRef } from "react";
+import PropTypes from "prop-types";
 import ReactMapGL, { Source, Layer, Marker } from "react-map-gl";
 import ParcelLayerController from "./ParcelLayerController";
 import BasemapController from "./BasemapController";
 import { createNewViewport } from "../../utils/map";
 import { createAddressString, createLayerFilter } from "../../utils/helper";
-import { getMapStateAction } from "../../actions/mapState";
-import { getHoveredFeatureAction } from "../../actions/currentFeature";
 import {
-  handleSearchPartialAddress,
-  resetSearch,
-  setSearchDisplayType,
-} from "../../actions/search";
+  getMapStateAction,
+  toggleLoadingIndicatorAction,
+} from "../../actions/mapState";
+import { getHoveredFeatureAction } from "../../actions/currentFeature";
 import {
   logMarkerDragEventAction,
   onMarkerDragEndAction,
   setMarkerCoordsAction,
-  dataIsLoadingAction,
+  handleGetZipcodesDataAction,
+  handleGetParcelsByQueryAction,
+  handleGetReverseGeocodeAction,
 } from "../../actions/mapData";
-import { handleGetParcelsByQueryAction } from "../../actions/mapData";
-import {
-  handleGetViewerImageAction,
-  handleGetDownloadDataAction,
-  toggleFullResultsAction,
-  togglePartialResultsAction,
-} from "../../actions/results";
 import {
   parcelLayer,
   parcelHighlightLayer,
@@ -32,17 +26,12 @@ import {
   zipsLabel,
 } from "./mapStyle";
 import Pin from "./Pin";
-// import { ReactComponent as ArrowIcon } from "../../assets/img/map-arrow-icon.svg";
 import * as styleVars from "../../scss/colors.scss";
-import "../../scss/Map.scss";
 
-//this token needs to be hidden
-// const MAPBOX_TOKEN = process.env.MAPBOX_TOKEN;
+/*This API token works for propertypraxis.org  */
 const MAPBOX_TOKEN =
   "pk.eyJ1IjoibWFwcGluZ2FjdGlvbiIsImEiOiJjazZrMTQ4bW4wMXpxM251cnllYnR6NjMzIn0.9KhQIoSfLvYrGCl3Hf_9Bw";
 // "pk.eyJ1IjoidGltLWhpdGNoaW5zIiwiYSI6ImNqdmNzODZ0dDBkdXIzeW9kbWRtczV3dDUifQ.29F1kg9koRwGRwjg-vpD6A";
-// GeoJSON Data source used in vector tiles, documented at
-// https://gist.github.com/ryanbaumann/a7d970386ce59d11c16278b90dde094d
 
 class PraxisMarker extends React.Component {
   _logDragEvent(name, event) {
@@ -57,115 +46,36 @@ class PraxisMarker extends React.Component {
     this._logDragEvent("onDrag", event);
   };
 
-  _onMarkerDragEnd = (event) => {
+  _onMarkerDragEnd = async (event) => {
     this._logDragEvent("onDragEnd", event);
     this.props.dispatch(onMarkerDragEndAction(event));
-    //change the window url
 
-    //then do stuff with the new coords
-    const [longitude, latitude] = event.lngLat;
-    const { year } = this.props.mapData;
+    // get the marker coords
+    const [markerLongitude, markerLatitude] = event.lngLat;
     const encodedCoords = encodeURI(
       JSON.stringify({
-        longitude: longitude,
-        latitude: latitude,
+        longitude: markerLongitude,
+        latitude: markerLatitude,
       })
     );
 
-    //trigger a null display to set to loading
-    // this.props.dispatch(setSearchDisplayType(null));
+    // query mapbox api based on those coords
+    const apiReverseGeocodeRoute = `/api/address-search/reverse-geocode/${encodedCoords}`;
+    const { place_name, geometry } = await this.props.dispatch(
+      handleGetReverseGeocodeAction(apiReverseGeocodeRoute)
+    );
+    const [reverseGCLongitude, reverseGCLatitude] = geometry.coordinates;
+    const { searchYear } = this.props.searchState;
+    const reverseGCEncodedCoords = encodeURI(
+      JSON.stringify({
+        longitude: reverseGCLongitude,
+        latitude: reverseGCLatitude,
+      })
+    );
 
-    const route = `/api/geojson/parcels/address/${encodedCoords}/${year}`;
-
-    //start the download action
-    this.props.dispatch(dataIsLoadingAction(true));
-    // const downloadDataRoute = `/api/address-search/download/${encodedCoords}/${year}`;
-    // this.props.dispatch(handleGetDownloadDataAction(downloadDataRoute));
-
-    // query the parcels
-    this.props
-      .dispatch(handleGetParcelsByQueryAction(route))
-      .then((geojson) => {
-        //from praxis map
-        this.props.createNewViewport(geojson);
-
-        // a single address with marker on it
-        if (
-          geojson.features &&
-          geojson.features.length === 1 &&
-          geojson.features[0].properties.distance === 0
-        ) {
-          const {
-            propno,
-            propstr,
-            propdir,
-            propzip,
-          } = geojson.features[0].properties;
-
-          //build the address string
-          const addressString = createAddressString(
-            propno,
-            propdir,
-            propstr,
-            propzip
-          );
-          const state = null;
-          const title = "";
-          const newUrl = `/address?search=${encodeURI(
-            addressString
-          )}&coordinates=${encodedCoords}&year=${year}`;
-
-          //change the url
-          window.history.pushState(state, title, newUrl);
-
-          // trigger the new search display
-          this.props.dispatch(setSearchDisplayType("single-address"));
-
-          // change the partial results
-          this.props
-            .dispatch(handleSearchPartialAddress(addressString, year))
-            .then((json) => {
-              // set the search term to the first result of geocoder
-              const proxySearchTerm = json[0].mb[0].place_name;
-              this.props.dispatch(
-                resetSearch({
-                  searchTerm: proxySearchTerm,
-                  searchType: "Address",
-                })
-              );
-            });
-        }
-
-        if (geojson.features && geojson.features.length > 1) {
-          this.props.dispatch(
-            resetSearch({
-              searchTerm: "",
-              searchType: "All",
-              partialResults: [],
-              searchDisplayType: "multiple-parcels",
-            })
-          );
-        }
-
-        //empty geojson
-        if (geojson.features[0].properties.id === -1) {
-          this.props.dispatch(
-            resetSearch({
-              searchTerm: "",
-              searchType: "All",
-              partialResults: [],
-              searchDisplayType: "out-of-bounds",
-            })
-          );
-        }
-        //handle all the download data and setting search
-        this.props.dispatch(toggleFullResultsAction(true));
-        this.props.dispatch(togglePartialResultsAction(false));
-        this.props.dispatch(dataIsLoadingAction(false));
-      });
-
-    // set the image viewer regardless
-    this.props.dispatch(handleGetViewerImageAction(longitude, latitude));
+    // create a new route using the api return data
+    const clientRoute = `/map?type=address&search=${place_name}&coordinates=${reverseGCEncodedCoords}&year=${searchYear}`;
+    this.props.history.push(clientRoute);
   };
 
   render() {
@@ -187,6 +97,19 @@ class PraxisMarker extends React.Component {
   }
 }
 
+PraxisMarker.propTypes = {
+  mapData: PropTypes.shape({
+    marker: PropTypes.shape(
+      {
+        latitude: PropTypes.number.isRequired,
+        longitude: PropTypes.number.isRequired,
+      }.isRequired
+    ),
+  }).isRequired,
+  createNewViewport: PropTypes.func.isRequired,
+  dispatch: PropTypes.func.isRequired,
+};
+
 class PraxisMap extends Component {
   _stops = [
     [1, styleVars.parcelStop1],
@@ -197,6 +120,85 @@ class PraxisMap extends Component {
     [6, styleVars.parcelStop6],
     [7, styleVars.parcelStop7],
   ];
+
+  // returns a route dependent on URL search params passed from MapContainer
+  _routeSwitcher = ({
+    searchType,
+    searchTerm,
+    searchCoordinates,
+    searchYear,
+  }) => {
+    switch (searchType) {
+      case "zipcode":
+        return `/api/geojson/parcels/${searchType}/${searchTerm}/${searchYear}`;
+      case "speculator":
+        return `/api/geojson/parcels/${searchType}/${searchTerm}/${searchYear}`;
+      case "address":
+        return `/api/geojson/parcels/address/${searchCoordinates}/${searchYear}`;
+      default:
+        return `/api/geojson/parcels/${searchYear}`;
+    }
+  };
+
+  // create new vieport dependent on geojson bbox
+  _createNewViewport = (geojson) => {
+    const { searchYear } = this.props.searchState;
+    const features = geojson.features;
+    const { viewport } = this.props.mapState;
+    const { longitude, latitude, zoom } = createNewViewport(geojson, viewport);
+    const newViewport = {
+      ...viewport,
+      longitude,
+      latitude,
+      zoom,
+      transitionDuration: 1000,
+    };
+
+    // if the return geojson has features aka the search term was
+    // valid then change the veiwport accordingly
+    features
+      ? this.props.dispatch(getMapStateAction(newViewport))
+      : this.props.dispatch(
+          handleGetParcelsByQueryAction(`/api/geojson/parcels/${searchYear}`) //default return
+        );
+  };
+
+  _getMapData = async () => {
+    // Toggle loading on (will be togled off on map load)
+    this.props.dispatch(toggleLoadingIndicatorAction(true));
+
+    // Build route and get data
+    const route = this._routeSwitcher(this.props.searchQueryParams);
+
+    // Get Data
+    const parcelsGeojson = await this.props.dispatch(
+      handleGetParcelsByQueryAction(route)
+    );
+
+    const zipsGeojson = await this.props.dispatch(
+      handleGetZipcodesDataAction("/api/geojson/zipcodes")
+    );
+    // toggle indicator (need refactor to hook in)
+    if (parcelsGeojson && zipsGeojson) {
+      this.props.dispatch(toggleLoadingIndicatorAction(false));
+    }
+
+    //Set viewport
+    this._createNewViewport(parcelsGeojson);
+
+    // set marker not undefined or null
+    const { searchCoordinates } = this.props.searchQueryParams;
+    if (searchCoordinates) {
+      const { longitude, latitude } = JSON.parse(decodeURI(searchCoordinates));
+      this.props.dispatch(setMarkerCoordsAction(longitude, latitude));
+    } else {
+      this.props.dispatch(setMarkerCoordsAction(null, null));
+    }
+  };
+
+  _onViewportChange = (viewport) => {
+    this.props.dispatch(getMapStateAction({ ...viewport }));
+  };
 
   _onHover = (event) => {
     const {
@@ -212,114 +214,67 @@ class PraxisMap extends Component {
     );
   };
 
-  _onViewportChange = (viewport) => {
-    this.props.dispatch(getMapStateAction({ ...viewport }));
-  };
-
   _renderTooltip() {
     const { hoveredFeature, x, y } = this.props.currentFeature;
 
     return (
       hoveredFeature && (
         <div className="tooltip" style={{ left: x, top: y }}>
+          <div>{hoveredFeature.properties.propaddr}</div>
           <div>Speculator: {hoveredFeature.properties.own_id}</div>
           <div>Properties owned: {hoveredFeature.properties.count}</div>
-          <div>{hoveredFeature.properties.propaddr}</div>
         </div>
       )
     );
   }
 
-  //THIS METHOD IS A DUPLICATE OF THE ONE IN APP
-  // create new vieport dependent on current geojson bbox
-  _createNewViewport = (geojson) => {
-    //check to see what data is loaded
-    const { year } = this.props.mapData;
-    const features = geojson.features;
-    const { mapState } = this.props;
-    //instantiate new viewport object
-    const { longitude, latitude, zoom } = createNewViewport(geojson, mapState);
-    const newViewport = {
-      ...mapState,
-      longitude,
-      latitude,
-      zoom,
-      transitionDuration: 1000,
-    };
-
-    // if the return geojson has features aka the search term was
-    // valid then change the veiwport accordingly
-    features
-      ? this.props.dispatch(getMapStateAction(newViewport))
-      : this.props.dispatch(
-          handleGetParcelsByQueryAction(`/api/geojson/parcels/${year}`)
-        );
-  };
-
-  // add a new marker if user clicks on a parcel features
+  // add a new marker if user clicks on a parcel feature
   // nothing happens if there is no feature
-  _handleMapClick(event) {
+  _handleMapClick = async (event) => {
     const { hoveredFeature } = this.props.currentFeature;
-
     if (hoveredFeature) {
+      const [markerLongitude, markerLatitude] = event.lngLat;
+
+      // set the marker based on event feature coords
+      this.props.dispatch(
+        setMarkerCoordsAction(markerLongitude, markerLatitude)
+      );
+      const { searchYear } = this.props.searchState;
+      const coordinates = {
+        longitude: markerLongitude,
+        latitude: markerLatitude,
+      };
+
+      // build route using feature properties
       const { propno, propstr, propdir, propzip } = hoveredFeature.properties;
-
-      const [longitude, latitude] = event.lngLat;
-      // set the marker
-      this.props.dispatch(setMarkerCoordsAction(latitude, longitude));
-      // this.props.dispatch(handleGetViewerImageAction(longitude, latitude));
-      //set the parcels within buffer
-      const { year } = this.props.mapData;
-      const coordinates = { longitude: longitude, latitude: latitude };
       const encodedCoords = encodeURI(JSON.stringify(coordinates));
-
-      const route = `/api/geojson/parcels/address/${encodedCoords}/${year}`;
-      this.props
-        .dispatch(handleGetParcelsByQueryAction(route))
-        .then((geojson) => {
-          this._createNewViewport(geojson);
-          this.props.dispatch(setSearchDisplayType("single-address"));
-
-          // change the partial results
-          this.props
-            .dispatch(handleSearchPartialAddress(addressString, year))
-            .then((json) => {
-              // set the search term to the first result of geocoder
-              const proxySearchTerm = json[0].mb[0].place_name;
-              this.props.dispatch(
-                resetSearch({
-                  searchTerm: proxySearchTerm,
-                  searchType: "Address",
-                })
-              );
-            });
-          this.props.dispatch(dataIsLoadingAction(false));
-          this.props.dispatch(toggleFullResultsAction(true));
-          this.props.dispatch(togglePartialResultsAction(false));
-        });
-
-      //build the address string
-      const addressString = createAddressString(
+      const addressString = createAddressString({
         propno,
         propdir,
         propstr,
-        propzip
-      );
-      const state = null;
-      const title = "";
-      const newUrl = `/address?search=${encodeURI(
-        addressString
-      )}&coordinates=${encodedCoords}&year=${year}`;
-      //change the url
-      window.history.pushState(state, title, newUrl);
-      //get viewer image
-      this.props.dispatch(handleGetViewerImageAction(longitude, latitude));
-      //handle all the download data and setting search
-      this.props.dispatch(dataIsLoadingAction(true));
-      // const downloadDataRoute = `/api/address-search/download/${encodedCoords}/${year}`;
-      // this.props.dispatch(handleGetDownloadDataAction(downloadDataRoute));
+        propzip,
+      });
+
+      const clientRoute = `/map?type=address&search=${addressString}&coordinates=${encodedCoords}&year=${searchYear}`;
+      this.props.history.push(clientRoute);
+    }
+  };
+
+  _handleToggleLoadingIndicator = (isLoading) => {
+    this.props.dispatch(toggleLoadingIndicatorAction(isLoading));
+  };
+
+  componentDidMount() {
+    this._getMapData();
+  }
+
+  componentDidUpdate(prevProps) {
+    // if the location changes, query for new data
+    if (this.props.location.search !== prevProps.location.search) {
+      this._getMapData();
     }
   }
+
   render() {
     //create the new viewport before rendering
     const { latitude, longitude } = this.props.mapData.marker;
@@ -335,9 +290,8 @@ class PraxisMap extends Component {
     return (
       <div className="map">
         <ReactMapGL
-          {...this.props.mapState}
+          {...this.props.mapState.viewport}
           mapOptions={{ attributionControl: false }}
-          ref={(reactMap) => (this.reactMap = reactMap)}
           mapStyle={basemapLayer}
           width="100vw"
           height="100vh"
@@ -345,10 +299,13 @@ class PraxisMap extends Component {
           maxZoom={18}
           mapboxApiAccessToken={MAPBOX_TOKEN}
           onViewportChange={this._onViewportChange}
-          onHover={this._onHover}
           interactiveLayerIds={["parcel-polygon"]}
+          onHover={this._onHover}
           onClick={(e) => {
             this._handleMapClick(e);
+          }}
+          onLoad={() => {
+            this._handleToggleLoadingIndicator(false);
           }}
         >
           {latitude && longitude ? (
@@ -405,6 +362,32 @@ class PraxisMap extends Component {
     );
   }
 }
+
+PraxisMap.propTypes = {
+  mapData: PropTypes.shape({
+    marker: PropTypes.shape(
+      {
+        latitude: PropTypes.number.isRequired,
+        longitude: PropTypes.number.isRequired,
+      }.isRequired
+    ),
+    ppraxis: PropTypes.object.isRequired,
+    zips: PropTypes.object.isRequired,
+  }).isRequired,
+  currentFeature: PropTypes.shape({
+    hoveredFeature: PropTypes.oneOfType([
+      PropTypes.object.isRequired,
+      PropTypes.oneOf([undefined]),
+    ]),
+  }).isRequired,
+  controller: PropTypes.shape({
+    filter: PropTypes.array.isRequired,
+    sliderValue: PropTypes.number.isRequired,
+    basemapLayer: PropTypes.string.isRequired,
+  }).isRequired,
+  mapState: PropTypes.object.isRequired,
+  dispatch: PropTypes.func.isRequired,
+};
 
 export default PraxisMap;
 /* <Marker

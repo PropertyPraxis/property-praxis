@@ -132,20 +132,39 @@ To disable this behavior, use disable instead.
 sudo systemctl disable docker
 ```
 
-## Running a Dev Environment
+## Clone the repository
 
-Make a new directory and clone this repo.
+Create the directory to clone the repo
 
 ```
-mkdir property-praxis && cd property-praxis
+mkdir -p ~/propertypraxis && cd ~/propertypraxis
 git clone <repo link>
 ```
+
+## Run RStudio with PostGIS DB to populate DB
+
+It is necessary to populate the Postgres DB with the data that will 
+be consumeded by the application.
+
+Run a detached environment.  If you haven't already built the images,
+this command will also build them. Navigate to the root directory and run:
+
+```
+docker-compose up -d postgres rstudio
+```
+
+Load the initial PG DB by running this R script.
+
+```
+docker-compose exec rstudio Rscript /home/rstudio/pp-pipeline/scripts/s3-data-load.R
+```
+
+## Running a Dev Environment
 
 To run this stack in development, navigate to the
 root directory of the repo and run:
 
 ```
-docker-compose up --build
 docker-compose up
 ```
 
@@ -153,29 +172,34 @@ or detach terminal with -d flag
 
 ```
 docker-compose up -d
+```
+
+If you only want to run the web application without the RStudio service, run:
+
+```
+docker-compose up api client postgres
 ```
 
 ## Running a Production Environment
 
-Make a new directory and clone this repo.
-
-```
-mkdir property-praxis && cd property-praxis
-git clone <repo link>
-```
-
-To run this stack in development, navigate to the
+To run the full stack in production, navigate to the
 root directory of the repo and run:
 
 ```
-docker-compose up --build
-docker-compose up
+docker-compose -f docker-compose.yml -f docker-compose.production.yml up
 ```
 
 or detach terminal with -d flag
 
 ```
-docker-compose up -d
+docker-compose -f docker-compose.yml -f docker-compose.production.yml up -d
+```
+
+Note that the above commands will start all the services.  You can also start only the 
+web application services by running the command:
+
+```
+docker-compose -f docker-compose.yml -f docker-compose.production.yml up -d nginx api client postgres
 ```
 
 ## Include Required Environment Variables
@@ -187,38 +211,29 @@ the `./envs` directory:
 - `api.env`
 - `db.env`
 - `rstudio.env`
-- `web.env`
+- `client.env`
 
 And in the `./rstudio/scripts/` directory include:
 
 - `rstudio.env`
 
+Contact the maintainer of this repository for required credentials.
+
+## Stopping the Services
+
+To stop the application, run
+
+```
+docker-compose down
+```
+
 ## Connecting to the PostGIS Database
 
-While running a dev or prod environement, you can connect to the PostGIS DB via the host terminal using the following command:
+While running a dev or prod environment, you can connect to the PostGIS DB 
+(assuming is it running) via the host terminal using the following command:
 
 ```
 psql postgres://<username>:<databasepassword>@localhost:35432/db
-```
-
-## Run RStudio with PostGIS DB
-
-Create the directory to clone the repo
-
-```
-mkdir -p ~/propertypraxis && cd ~/propertypraxis
-git clone <repo link>
-```
-
-Start the containers.
-
-```
-docker-compose up -d postgres rstudio 
-```
-
-Load the initial PG DB by running this R script.
-```
-docker-compose exec rstudio Rscript /home/rstudio/pp-pipeline/scripts/s3-data-load.R
 ```
 
 ## Troubleshooting

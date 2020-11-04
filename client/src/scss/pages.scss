@@ -1,0 +1,141 @@
+/*Styles for the non-map pages.*/
+
+.page-container {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 100%;
+  z-index: 500;
+}
+
+.page-container > :nth-child(1) {
+  min-height: 310px;
+  height: 35%;
+  min-width: 100%;
+  background-color: $ui-dark-gray;
+
+  @media (max-width: $mobile-small) {
+    height: 35%;
+    min-height: 325px;
+  }
+}
+
+.page-container > :nth-child(2) {
+  min-height: 50%;
+  min-width: 100%;
+  background-color: $ui-black;
+}
+
+.page-container > :nth-child(3) {
+  height: 15%;
+  min-height: 87px;
+  min-width: 100%;
+  background-color: $pp-rose;
+  display: flex;
+  align-items: center;
+  align-content: space-between;
+}
+
+.page-content-container {
+  display: unset;
+  position: absolute;
+  height: 90%;
+  margin: 0 auto;
+  width: 90%;
+  max-width: 1000px;
+  background-color: $ui-white;
+  opacity: 0.5;
+}
+
+/* Override the page content styles
+for pages other than Home. */
+.top-container {
+  height: 10% !important;
+  min-height: 10% !important;
+  display: flex;
+  align-items: center;
+
+  div:nth-child(2) {
+    flex: 1;
+    text-align: center;
+    z-index: 1;
+  }
+
+  div > h1 {
+    position: relative;
+    right: 60px;
+    color: $pp-rose;
+    text-transform: uppercase;
+    font-size: 2.9rem;
+
+    @media (max-width: $desktop) {
+      right: 40px;
+      font-size: 2rem;
+    }
+
+    @media (max-width: $mobile) {
+      position: static;
+      font-size: 1.5rem;
+    }
+  }
+}
+
+.top-logo {
+  margin-left: 25px;
+  height: 100%;
+  width: 100px;
+
+  a {
+    height: 100%;
+    display: flex;
+    align-items: center;
+  }
+
+  a > img {
+    height: 80px;
+    z-index: 2;
+    min-width: 80px;
+
+    @media (max-width: $mobile) {
+      height: 60px;
+      min-width: 60px;
+    }
+  }
+}
+
+.middle-container {
+  min-height: 75% !important;
+  display: flex;
+  flex-direction: column;
+
+  div {
+    margin: 0 auto;
+    max-width: 1000px;
+    font-size: 1.4rem;
+
+    img {
+      margin-top: 15px;
+      height: 200px;
+    }
+
+    p {
+      padding: 0 30px;
+      color: $ui-white;
+
+      a {
+        cursor: pointer;
+      }
+    }
+
+    @media (max-width: $mobile) {
+      font-size: 1.2rem;
+    }
+  }
+}
+
+/*Footer links*/
+.footer-links > li {
+  margin-top: 5px;
+}

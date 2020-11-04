@@ -1,15 +1,26 @@
-@import "./colors.scss";
-
+/*----- visible only on map -----*/
 .search-grid-item {
   grid-row: 1;
   grid-column: 1;
   z-index: 100;
-  margin: 20px 20px 0 20px;
+  margin: 20px 10px 0 10px;
 }
 
-@media (max-width: 700px) {
+/*--- visible only on home ---*/
+.search-modal-item {
+  max-width: 1000px;
+  z-index: 100;
+  width: 95%;
+  margin: 0 auto;
+
+  @media (max-width: $mobile) {
+    width: 98%;
+    margin-bottom: 10px;
+  }
+}
+
+@media (max-width: $mobile) {
   .search-grid-item {
-    // grid-row: 1;
     grid-column: 1 / span 3;
     margin: auto 0;
     position: absolute;
@@ -19,25 +30,32 @@
 }
 
 .search-container {
-  box-shadow: 8px 8px 10px 0 rgba(0, 0, 0, 0.3);
+  width: 100%;
+  // box-shadow: 8px 8px 10px 0 rgba(0, 0, 0, 0.3);
+  margin: 0 auto;
 }
 
-//search options
+// search options
 .search-options {
   display: flex;
   justify-content: space-evenly;
   flex-flow: row nowrap;
   width: 100%;
+  border-top: $ui-black solid 2px;
+  border-right: $ui-black solid 2px;
+  border-left: $ui-black solid 2px;
+  box-sizing: border-box;
 
   div {
-    border: $ui-black solid 2px;
     color: $ui-white;
     background-color: $ui-dark-gray;
     padding: 5px;
-    border-radius: 5px 5px 0 0;
     width: 25%;
     text-align: center;
     cursor: pointer;
+    border-top: $ui-black solid 2px;
+    border-right: $ui-black solid 2px;
+    border-left: $ui-black solid 2px;
   }
 
   div:hover {
@@ -49,110 +67,151 @@
   }
 }
 
-//search bar
+// search bar
 .search-bar {
   width: 100%;
+  display: flex;
 }
 
 input[type="text"] {
-  width: 80%;
+  flex: 1;
   padding: 12px 20px;
   box-sizing: inherit;
-  border: 3px solid yellow;
   border: none;
   -webkit-transition: 0.2s;
   transition: 0.2s;
   outline: none;
 }
 
-// input[type="text"]:focus {
-//   border: 3px solid #555;
-// }
-
 .search-form {
   display: flex;
-  height: 50px;
+  flex: 1;
   width: 100%;
   box-sizing: border-box;
-  border-bottom: 3px solid $ui-black;
-  border-left: 3px solid $ui-black;
-  border-right: 3px solid $ui-black;
+  border-top: 4px solid $ui-black;
+  border-bottom: 4px solid $ui-black;
+  border-left: 2px solid $ui-black;
+  border-right: 4px solid $ui-black;
 }
 
-.search-form:focus-within {
-  border-bottom: 3px solid $pp-rose;
-  border-left: 3px solid $pp-rose;
-  border-right: 3px solid $pp-rose;
+// styles for the home search button
+.search-form-home {
+  display: flex;
+  flex: 1;
   box-sizing: border-box;
+  border-top: 4px solid $ui-black;
+  border-right: 4px solid $ui-black;
+  border-bottom: 4px solid $ui-black;
+  border-left: 2px solid $ui-black;
 }
 
-//search button
+.search-form:focus-within,
+.search-form-home:focus-within {
+  border-top: 4px solid $pp-rose;
+  border-right: 4px solid $pp-rose;
+  border-bottom: 4px solid $pp-rose;
+  border-left: 4px solid $pp-rose;
+  box-sizing: border-box;
+  z-index: 200;
+}
+
+// search button
 .search-button {
   box-sizing: inherit;
-  width: 20%;
-  height: 100%;
-  background: white;
+  background: $ui-white;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
 
   img {
-    height: 40px;
+    min-width: 40px;
+    min-height: 40px;
     width: 40px;
+    height: 40px;
     border: none;
   }
 }
 
 .clear-button {
+  padding-left: 5px;
   box-sizing: inherit;
-  width: 10%;
-  height: 100%;
-  background: white;
+  background: $ui-white;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  font-size: 25px;
+  font-size: 45px;
   color: $ui-dark-gray;
-  // border-right: 1px solid $ui-dark-gray;
+}
+
+.year-select {
+  // position: relative;
+  // left: 4px;
+  background-color: $ui-white;
+  min-width: 60px;
+}
+
+.year-select > select {
+  padding: 0 5px;
+  box-sizing: border-box;
+  height: 100%;
+  width: 100%;
+  background-color: $ui-white;
+  outline: 0px;
+  border-top: 4px solid $ui-black;
+  border-left: 4px solid $ui-black;
+  border-bottom: 4px solid $ui-black;
+  border-right: 2px solid $ui-black;
+}
+
+.year-select > select:focus,
+.year-select > select:active {
+  border-top: 4px solid $pp-rose;
+  border-left: 4px solid $pp-rose;
+  border-bottom: 4px solid $pp-rose;
+  border-right: 4px solid $pp-rose;
+}
+
+select > option {
+  background-color: $ui-white;
 }
 
 //search results
 //part of CSS Transition
-
 .partial-results-container {
-  max-height: 62vh;
+  max-height: 40vh;
   display: flex; /*added*/
   flex-direction: column;
   overflow: auto;
-  a > div {
+  border-left: 4px solid $ui-black;
+  border-right: 4px solid $ui-black;
+  border-bottom: 4px solid $ui-black;
+  ul > a > li {
     display: flex;
     width: 100%;
     padding: 10px;
-    // border: 1px solid blue;
     box-sizing: border-box;
-    // background-color: white;
     align-items: center;
     color: $ui-black;
   }
 
-  a > div:hover {
+  ul > a > li:hover {
     border: 1px solid $ui-black;
   }
 
-  a > div > img {
+  ul > a > li > img {
     height: 30px;
     margin-right: 20px;
   }
+}
 
-  .list-item-odd {
-    background-color: $ui-white;
-  }
+.list-item-odd {
+  background-color: $ui-white;
+}
 
-  .list-item-even {
-    background-color: $ui-off-white;
-  }
+.list-item-even {
+  background-color: $ui-light-gray;
 }
 
 .full-results-container {
@@ -163,8 +222,22 @@ input[type="text"] {
 }
 
 .partial-results-container-all {
-  max-height: 62vh;
+  // max-height: 62vh;
   overflow: auto;
+
+  /////////////////////adds
+  max-height: 300px;
+  display: flex;
+  width: 100%;
+
+  .partial-results-combined {
+    flex: 1;
+  }
+
+  .partial-results-spacer {
+    min-width: 72px;
+  }
+  //////////////////////
 
   section > .partial-results-container {
     max-height: none !important;
