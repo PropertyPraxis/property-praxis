@@ -197,3 +197,14 @@ export const currencyFormatter = new Intl.NumberFormat("en-US", {
   minimumFractionDigits: 0,
   maximumFractionDigits: 0,
 });
+
+export function availablePraxisYears(praxisYears, currentYear) {
+  if (praxisYears && currentYear) {
+    const availableYears = praxisYears
+      .map(({ praxisyear }) => praxisyear)
+      .filter((year) => year !== Number(currentYear));
+    return availableYears;
+  } else {
+    return null;
+  }
+}

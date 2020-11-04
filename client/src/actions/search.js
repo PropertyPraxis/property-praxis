@@ -10,6 +10,7 @@ export const PRIMARY_SEARCH_QUERY = "PRIMARY_SEARCH_QUERY";
 export const UPDATE_DETAILED_RESULTS = "UPDATE_DETAILED_RESULTS";
 export const UPDATE_PRIMARY_INDEX = "UPDATE_PRIMARY_INDEX";
 export const GET_SEARCH_YEARS = "GET_SEARCH_YEARS";
+export const GET_PRAXIS_SEARCH_YEARS = "GET_PRAXIS_SEARCH_YEARS";
 export const GET_VIEWER_IMAGE = "GET_VIEWER_IMAGE";
 // export const GET_DOWNLOAD_DATA = "GET_DOWNLOAD_DATA";
 export const TOGGLE_DETAILED_RESULTS = "TOGGLE_DETAILED_RESULTS";
@@ -52,6 +53,13 @@ function getYearsAction(searchYears) {
   return {
     type: GET_SEARCH_YEARS,
     payload: { searchYears },
+  };
+}
+
+function getPraxisYearsAction(praxisSearchYears) {
+  return {
+    type: GET_SEARCH_YEARS,
+    payload: { praxisSearchYears },
   };
 }
 
@@ -144,7 +152,20 @@ export function handleGetYearsAction(route) {
         return json;
       })
       .catch((err) => {
-        throw Error(`An error occured searching: ${err}`);
+        throw Error(`An error occured searching search years: ${err}`);
+      });
+  };
+}
+
+export function handleGetPraxisYearsAction(route) {
+  return (dispatch) => {
+    return APISearchQueryFromRoute(route)
+      .then((json) => {
+        dispatch(getPraxisYearsAction(json));
+        return json;
+      })
+      .catch((err) => {
+        throw Error(`An error occured searching praxis years: ${err}`);
       });
   };
 }

@@ -220,9 +220,9 @@ class PraxisMap extends Component {
     return (
       hoveredFeature && (
         <div className="tooltip" style={{ left: x, top: y }}>
+          <div>{hoveredFeature.properties.propaddr}</div>
           <div>Speculator: {hoveredFeature.properties.own_id}</div>
           <div>Properties owned: {hoveredFeature.properties.count}</div>
-          <div>{hoveredFeature.properties.propaddr}</div>
         </div>
       )
     );

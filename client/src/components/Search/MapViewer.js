@@ -40,7 +40,7 @@ class MapViewer extends Component {
         handleGetViewerImageAction(longitude, latitude)
       );
 
-      // if a viewer object is returned with params then 
+      // if a viewer object is returned with params then
       // create a Viewer instance
       if (viewer.key) {
         // Enable marker component when setting up viewer
@@ -59,7 +59,8 @@ class MapViewer extends Component {
         // Create a non interactive simple marker with default options
         const defaultMarker = new Mapillary.MarkerComponent.SimpleMarker(
           "default-id",
-          { lat: latitude, lon: longitude }
+          { lat: latitude, lon: longitude },
+          { color: "#e4002c" }
         );
 
         // Add markers to component
@@ -104,7 +105,25 @@ class MapViewer extends Component {
         ></div>
       );
     }
-    return null;
+    return (
+      <div
+        className="map-viewer"
+        style={
+          isDetailedResultsOpen ? { display: "block" } : { display: "none" }
+        }
+      >
+        <div className="no-viewer-image">
+          <img
+            src="https://property-praxis-web.s3-us-west-2.amazonaws.com/no_image_icon.svg"
+            alt="An illustration to indicate no image returned"
+          ></img>
+          <span>
+            We did not find an image for this exact location. Try moving the map
+            marker.
+          </span>
+        </div>
+      </div>
+    );
   }
 }
 
