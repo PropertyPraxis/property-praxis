@@ -1,7 +1,10 @@
 import React, { Component } from "react";
 import { Link, withRouter } from "react-router-dom";
 import PropTypes from "prop-types";
-import { resetSearch } from "../../actions/search";
+import {
+  togglePrimaryResultsAction,
+  togglePrimaryActiveAction,
+} from "../../actions/search";
 import {
   sanitizeSearchResult,
   createQueryStringFromSearch,
@@ -18,13 +21,22 @@ const primaryResultIcons = {
 };
 
 class PrimaryResults extends Component {
+  _handleOnMouseOver = () => {
+    // turn active state to true
+    this.props.dispatch(togglePrimaryActiveAction(true));
+  };
+
+  _handleOnMouseOut = () => {
+    this.props.dispatch(togglePrimaryActiveAction(false));
+  };
+
+  _handleOnClick = () => {
+    this.props.dispatch(togglePrimaryResultsAction(false));
+  };
+
   componentWillUnmount() {
     // turn active state to true
-    this.props.dispatch(
-      resetSearch({
-        isPrimaryResultsActive: false,
-      })
-    );
+    this.props.dispatch(togglePrimaryActiveAction(false));
   }
 
   render() {
@@ -34,22 +46,8 @@ class PrimaryResults extends Component {
     return (
       <section
         className="partial-results-container"
-        onMouseOver={() => {
-          // turn active state to true
-          this.props.dispatch(
-            resetSearch({
-              isPrimaryResultsActive: true,
-            })
-          );
-        }}
-        onMouseOut={() => {
-          // turn active state to true
-          this.props.dispatch(
-            resetSearch({
-              isPrimaryResultsActive: false,
-            })
-          );
-        }}
+        onMouseOver={this._handleOnMouseOver}
+        onMouseOut={this._handleOnMouseOut}
       >
         <ul>
           {results.map((result, index) => {
@@ -74,11 +72,7 @@ class PrimaryResults extends Component {
                       ? { backgroundColor: styleVars.uiMedGray }
                       : null
                   }
-                  onClick={() => {
-                    this.props.dispatch(
-                      resetSearch({ isPrimaryResultsOpen: false })
-                    );
-                  }}
+                  onClick={this._handleOnClick}
                 >
                   <img src={primaryResultIcons[type]} alt={`Icon of ${type}`} />
                   {search}

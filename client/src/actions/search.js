@@ -5,14 +5,16 @@ import {
 import { getImageKey } from "../utils/viewer";
 import { flattenPrimaryResults } from "../utils/helper";
 
-export const RESET_SEARCH = "RESET_SEARCH";
+export const RESET_SEARCH = "RESET_SEARCH"; // general shortcut
 export const PRIMARY_SEARCH_QUERY = "PRIMARY_SEARCH_QUERY"; // search bar
 export const TOGGLE_DETAILED_RESULTS = "TOGGLE_DETAILED_RESULTS"; // search state
 export const UPDATE_DETAILED_RESULTS = "UPDATE_DETAILED_RESULTS"; //
 export const TOGGLE_PRIMARY_RESULTS = "TOGGLE_PRIMARY_RESULTS";
+export const UPDATE_PRIMARY_RESULTS = "UPDATE_PRIMARY_RESULTS";
+export const TOGGLE_PRIMARY_ACTIVE = "TOGGLE_PRIMARY_ACTIVE";
 export const UPDATE_PRIMARY_INDEX = "UPDATE_PRIMARY_INDEX";
 export const GET_SEARCH_YEARS = "GET_SEARCH_YEARS";
-export const GET_PRAXIS_SEARCH_YEARS = "GET_PRAXIS_SEARCH_YEARS";
+export const GET_PRAXIS_SEARCH_YEARS = "GET_PRAXIS_SEARCH_YEARS"; // should be DB Years
 export const GET_VIEWER_IMAGE = "GET_VIEWER_IMAGE";
 // export const GET_DOWNLOAD_DATA = "GET_DOWNLOAD_DATA";
 
@@ -38,6 +40,15 @@ export function updatePrimaryIndex(primaryIndex) {
     type: UPDATE_PRIMARY_INDEX,
     payload: {
       primaryIndex,
+    },
+  };
+}
+
+export function updatePrimaryResults(primaryResults) {
+  return {
+    type: UPDATE_PRIMARY_RESULTS,
+    payload: {
+      primaryResults,
     },
   };
 }
@@ -76,6 +87,13 @@ export function togglePrimaryResultsAction(isOpen) {
   return {
     type: TOGGLE_PRIMARY_RESULTS,
     payload: { isPrimaryResultsOpen: isOpen },
+  };
+}
+
+export function togglePrimaryActiveAction(isActive) {
+  return {
+    type: TOGGLE_PRIMARY_ACTIVE,
+    payload: { isPrimaryResultsActive: isActive },
   };
 }
 

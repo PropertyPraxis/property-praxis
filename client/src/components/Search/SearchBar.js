@@ -6,6 +6,7 @@ import {
   handlePrimarySearchQuery,
   handlePrimarySearchAll,
   updatePrimaryIndex,
+  togglePrimaryResultsAction,
 } from "../../actions/search";
 import { parseURLParams } from "../../utils/parseURL";
 import {
@@ -130,21 +131,13 @@ class SearchBar extends Component {
   };
 
   _handleOnFocus = () => {
-    this.props.dispatch(
-      resetSearch({
-        isPrimaryResultsOpen: true,
-      })
-    );
+    this.props.dispatch(togglePrimaryResultsAction(true));
   };
 
   _handleOnBlur = () => {
     const { isPrimaryResultsActive } = this.props.searchState;
     if (!isPrimaryResultsActive) {
-      this.props.dispatch(
-        resetSearch({
-          isPrimaryResultsOpen: false,
-        })
-      );
+      this.props.dispatch(togglePrimaryResultsAction(false));
     }
   };
 
