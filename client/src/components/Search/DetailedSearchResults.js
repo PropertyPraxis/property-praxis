@@ -217,6 +217,12 @@ class AddressDetails extends Component {
               <span>Speculator</span>
               <span>{capitalizeFirstLetter(own_id)}</span>
             </div>
+            {propzip === 0 || propzip === null ? null : (
+              <div>
+                <span>Zip Code</span>
+                <span>{propzip}</span>
+              </div>
+            )}
             {resyrbuilt === 0 || resyrbuilt === null ? null : (
               <div>
                 <span>Year Built</span> <span>{resyrbuilt}</span>

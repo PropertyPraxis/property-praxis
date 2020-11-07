@@ -35,6 +35,8 @@ const primarySearchRoutes = {
 };
 
 class SearchBar extends Component {
+  _inputRef = React.createRef();
+
   /*Passed down to Search Results.
   Changes the URL query*/
   _setSearchLocationParams = (result) => {
@@ -128,19 +130,22 @@ class SearchBar extends Component {
   };
 
   _handleOnFocus = () => {
-    const { searchTerm, searchType, searchYear } = this.props.searchState;
-
-    if (searchTerm && searchType && searchYear) {
-      this._handleQueryPrimaryResults({
-        searchType,
-        searchTerm,
-        searchYear,
-      });
-    }
+    this.props.dispatch(
+      resetSearch({
+        isPrimaryResultsOpen: true,
+      })
+    );
   };
 
   _handleOnBlur = () => {
-    // logic needed
+    const { isPrimaryResultsActive } = this.props.searchState;
+    if (!isPrimaryResultsActive) {
+      this.props.dispatch(
+        resetSearch({
+          isPrimaryResultsOpen: false,
+        })
+      );
+    }
   };
 
   _handleSearchTypeButtonClick = (buttonType) => {
@@ -161,6 +166,16 @@ class SearchBar extends Component {
     if (e.key === "Enter") {
       // the index value here will need to be changed to be more dynamic
       this._setSearchLocationParams(primaryResults[primaryIndex]);
+
+      // close the primary search results
+      this.props.dispatch(
+        resetSearch({
+          isPrimaryResultsOpen: false,
+        })
+      );
+
+      // blur the input
+      this._inputRef.current.blur();
     }
   };
 
@@ -184,7 +199,12 @@ class SearchBar extends Component {
 
   _handleSearchIconClick = () => {
     const { primaryResults, primaryIndex } = this.props.searchState;
-    this._setSearchLocationParams(primaryResults[primaryIndex]);
+
+    if (primaryResults) {
+      this._setSearchLocationParams(primaryResults[primaryIndex]);
+    } else {
+      this._inputRef.current.focus();
+    }
   };
 
   _handleClearIconClick = () => {
@@ -196,7 +216,7 @@ class SearchBar extends Component {
   };
 
   _handleYearSelectFocus = () => {
-    this.props.dispatch(resetSearch({ primaryResults: null }));
+    // this.props.dispatch(resetSearch({ primaryResults: null }));
   };
   componentDidMount() {
     // parse URL and dispatch params
@@ -213,6 +233,12 @@ class SearchBar extends Component {
         searchType,
         searchTerm,
         searchCoordinates,
+        searchYear,
+      });
+
+      this._handleQueryPrimaryResults({
+        searchType,
+        searchTerm,
         searchYear,
       });
     }
@@ -234,6 +260,12 @@ class SearchBar extends Component {
         searchTerm,
         searchYear,
         searchCoordinates,
+      });
+
+      this._handleQueryPrimaryResults({
+        searchType,
+        searchTerm,
+        searchYear,
       });
     } else if (prevProps.location.pathname !== pathname) {
       this._setSearchStateParams(resetSearchOptions);
@@ -310,6 +342,7 @@ class SearchBar extends Component {
                   &times;
                 </div>
                 <DebounceInput
+                  inputRef={this._inputRef}
                   type="text"
                   size="1"
                   placeholder={

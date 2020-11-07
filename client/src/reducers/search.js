@@ -1,3 +1,4 @@
+import { coordAll } from "@turf/turf";
 import {
   RESET_SEARCH,
   PRIMARY_SEARCH_QUERY,
@@ -10,19 +11,30 @@ import {
 } from "../actions/search";
 
 const initialSearchState = {
+  // searchBar: {
+  //   searchYears: null,
+  // },
+  // searchParams: {
+  //   searchType: "all",
+  //   searchYear: "2017",
+  //   searchTerm: "",
+  //   searchCoordinates: null,
+  // },
+  // primarySearch: { results: null, index: 0, isOpen: false, isActive: false },
+  // detailedSearch: {results: null, isOpen: false, type: null, },
   searchType: "all",
   searchTerm: "",
   searchCoordinates: null,
-  searchDisplayType: null,
   searchYear: "2017",
   searchYears: null,
-  praxisSearchYears:null,
+  praxisSearchYears: null,
   primaryResults: null,
   detailedResults: null,
   primaryIndex: 0,
   downloadData: null,
   isDetailedResultsOpen: false,
-  isPartialResultsOpen: false,
+  isPrimaryResultsOpen: false,
+  isPrimaryResultsActive: false,
   viewer: {
     bearing: null,
     key: null,

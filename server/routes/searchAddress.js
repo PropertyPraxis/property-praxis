@@ -16,7 +16,7 @@ router.get("/reverse-geocode/:coords", async (req, res) => {
     const mbJson = await mbResponse.json();
     const mbFeature = mbJson.features[0];
     const { place_name, geometry } = mbFeature;
-
+    console.log(mbFeature);
     res.json({ place_name, geometry });
   } catch (err) {
     res.json(err);

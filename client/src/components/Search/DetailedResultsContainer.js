@@ -7,6 +7,7 @@ import { getPropertiesFromMapData } from "../../utils/helper";
 import DetailedSearchResults from "./DetailedSearchResults";
 
 class DetailedResultsContainer extends Component {
+  
   render() {
     const { isDetailedResultsOpen } = this.props.searchState;
 

@@ -68,16 +68,19 @@ export function findTargetAddress(features) {
   return { targetAddress, nearbyAddresses };
 }
 
-export function createAddressString({ propno, propdir, propstr, propzip }) {
-  const addressString = `${propno} ${
-    propdir !== "0" && propdir !== null && propdir !== "null" ? propdir : ""
-  } ${propstr}${
-    propzip !== "0" && propzip !== null && propzip !== "null"
-      ? ", " + propzip
+export function createAddressString({ propno, propdir, propstr }) {
+  const addressString = `${propno.toString().trim()} ${
+    propdir !== "0" && propdir !== null && propdir !== "null"
+      ? propdir.trim()
       : ""
-  }`;
+  } ${propstr}`;
 
-  return addressString;
+  return capitalizeFirstLetter(addressString).replace(/  /g, " ");
+}
+
+export function parseMBAddressString(addressString) {
+  const strAddress = addressString.split(",");
+  return strAddress[0].trim();
 }
 
 export function createLayerFilter(arr) {
@@ -139,7 +142,7 @@ export function sanitizeSearchResult({ result, year }) {
   } else if (keys.includes("own_id")) {
     const speculatorQuery = {
       type: "speculator",
-      search: result.own_id,
+      search: capitalizeFirstLetter(result.own_id),
       coordinates: null,
       year,
     };
@@ -167,8 +170,15 @@ export function createQueryStringFromSearch({
   coordinates,
   year,
 }) {
+  let parsedSearch;
+  if (type === "address") {
+    parsedSearch = parseMBAddressString(search);
+  } else {
+    parsedSearch = search;
+  }
+
   const query = `/map?${queryString.stringify(
-    { type, search, coordinates, year },
+    { type, search: parsedSearch, coordinates, year },
     { sort: false, skipNull: true }
   )}`;
 

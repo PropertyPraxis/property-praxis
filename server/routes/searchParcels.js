@@ -42,7 +42,7 @@ router.get("/speculator/:id/:year", async (req, res) => {
       'centroid',   ST_AsText(centroid)
     ) AS feature
     FROM (
-      SELECT * FROM parcels_${year} WHERE own_id LIKE '%${id}%'
+      SELECT * FROM parcels_${year} WHERE own_id LIKE '%${id.toUpperCase()}%'
     ) inputs
   ) features;`;
 
@@ -88,8 +88,8 @@ router.get("/address/:coords/:year", async (req, res) => {
       {
         type: "Feature",
         properties: { id: -1 },
-        geometry: { type: "GeometryCollection", geometries: [] }
-      }
+        geometry: { type: "GeometryCollection", geometries: [] },
+      },
     ]);
   }
   if (targetAddress.length > 0) {

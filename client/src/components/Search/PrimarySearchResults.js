@@ -1,6 +1,7 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { Component } from "react";
+import { Link, withRouter } from "react-router-dom";
 import PropTypes from "prop-types";
+import { resetSearch } from "../../actions/search";
 import {
   sanitizeSearchResult,
   createQueryStringFromSearch,
@@ -16,46 +17,80 @@ const primaryResultIcons = {
   zipcode: zipcodeIcon,
 };
 
-const PrimaryResults = (props) => {
-  const { searchYear, primaryIndex } = props.searchState;
-  const { results } = props;
+class PrimaryResults extends Component {
+  componentWillUnmount() {
+    // turn active state to true
+    this.props.dispatch(
+      resetSearch({
+        isPrimaryResultsActive: false,
+      })
+    );
+  }
 
-  return (
-    <section className="partial-results-container">
-      <ul>
-        {results.map((result, index) => {
-          const { type, search, coordinates, year } = sanitizeSearchResult({
-            result,
-            year: searchYear,
-          });
+  render() {
+    const { searchYear, primaryIndex } = this.props.searchState;
+    const { results } = this.props;
 
-          const searchQueryRoute = createQueryStringFromSearch({
-            type,
-            search,
-            coordinates,
-            year,
-          });
-
-          return (
-            <Link key={searchQueryRoute} to={searchQueryRoute}>
-              <li
-                className={index % 2 ? "list-item-odd" : "list-item-even"}
-                style={
-                  index === primaryIndex
-                    ? { backgroundColor: styleVars.uiMedGray }
-                    : null
-                }
-              >
-                <img src={primaryResultIcons[type]} alt={`Icon of ${type}`} />
-                {search}
-              </li>
-            </Link>
+    return (
+      <section
+        className="partial-results-container"
+        onMouseOver={() => {
+          // turn active state to true
+          this.props.dispatch(
+            resetSearch({
+              isPrimaryResultsActive: true,
+            })
           );
-        })}
-      </ul>
-    </section>
-  );
-};
+        }}
+        onMouseOut={() => {
+          // turn active state to true
+          this.props.dispatch(
+            resetSearch({
+              isPrimaryResultsActive: false,
+            })
+          );
+        }}
+      >
+        <ul>
+          {results.map((result, index) => {
+            const { type, search, coordinates, year } = sanitizeSearchResult({
+              result,
+              year: searchYear,
+            });
+
+            const searchQueryRoute = createQueryStringFromSearch({
+              type,
+              search,
+              coordinates,
+              year,
+            });
+
+            return (
+              <Link key={searchQueryRoute} to={searchQueryRoute}>
+                <li
+                  className={index % 2 ? "list-item-odd" : "list-item-even"}
+                  style={
+                    index === primaryIndex
+                      ? { backgroundColor: styleVars.uiMedGray }
+                      : null
+                  }
+                  onClick={() => {
+                    this.props.dispatch(
+                      resetSearch({ isPrimaryResultsOpen: false })
+                    );
+                  }}
+                >
+                  <img src={primaryResultIcons[type]} alt={`Icon of ${type}`} />
+                  {search}
+                </li>
+              </Link>
+            );
+          })}
+        </ul>
+      </section>
+    );
+  }
+}
 
 PrimaryResults.propTypes = {
   results: PropTypes.array.isRequired,
@@ -66,9 +101,9 @@ PrimaryResults.propTypes = {
 };
 
 const PrimaryResultsContainer = (props) => {
-  const { primaryResults } = props.searchState;
+  const { isPrimaryResultsOpen, primaryResults } = props.searchState;
 
-  if (primaryResults && primaryResults.length > 0) {
+  if (isPrimaryResultsOpen && primaryResults && primaryResults.length > 0) {
     return <PrimaryResults {...props} results={primaryResults} />;
   }
 
@@ -81,4 +116,4 @@ PrimaryResultsContainer.propTypes = {
   }).isRequired,
 };
 
-export default PrimaryResultsContainer;
+export default withRouter(PrimaryResultsContainer);

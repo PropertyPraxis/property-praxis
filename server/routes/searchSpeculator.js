@@ -5,7 +5,7 @@ const router = new Router();
 
 router.get("/partial/:id/:year", async (req, res) => {
   const { id, year } = req.params;
-  const decodeId = decodeURI(id).toUpperCase();
+  const decodeId = decodeURI(id);
   try {
     //   WHERE levenshtein(own_id, $1) <= 2
     const query = `SELECT * FROM owner_count
@@ -15,7 +15,10 @@ router.get("/partial/:id/:year", async (req, res) => {
                 ORDER BY count DESC
                 LIMIT 5;`;
 
-    const { rows } = await db.query(query, [`%${decodeId}%`, year]);
+    const { rows } = await db.query(query, [
+      `%${decodeId.toUpperCase()}%`,
+      year,
+    ]);
     res.json(rows);
   } catch (err) {
     res.json(err);
@@ -33,7 +36,7 @@ router.get("/full/:id/:year", async (req, res) => {
     INNER JOIN owner_taxpayer as otp ON tp.owntax_id = otp.owntax_id
     WHERE otp.own_id LIKE $1 AND y.praxisyear = $2`;
 
-    const { rows } = await db.query(query, [`${id}%`, `${year}`]);
+    const { rows } = await db.query(query, [`${id.toUpperCase()}%`, `${year}`]);
     res.json(rows);
   } catch (err) {
     //could use some better error handling
@@ -49,7 +52,7 @@ router.get("/download/:id/:year", async (req, res) => {
     resyrbuilt, saledate, saleprice, taxpayer1, totacres, totsqft, ST_Y(centroid) as latitude
     FROM parcels_${year} WHERE own_id LIKE $1;`;
 
-    const { rows } = await db.query(query, [`%${id}%`]);
+    const { rows } = await db.query(query, [`%${id.toUpperCase()}%`]);
     res.json(rows);
   } catch (err) {
     //could use some better error handling
