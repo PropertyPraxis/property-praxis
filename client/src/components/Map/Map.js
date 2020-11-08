@@ -38,33 +38,33 @@ const MAPBOX_TOKEN =
 // "pk.eyJ1IjoidGltLWhpdGNoaW5zIiwiYSI6ImNqdmNzODZ0dDBkdXIzeW9kbWRtczV3dDUifQ.29F1kg9koRwGRwjg-vpD6A";
 
 // HOC wrapper to reuse reverse geocode logic
-function withMapboxAPI(WrappedComponent) {
-  return class extends Component {
-    _reverseGeocode = async (inCoords) => {
-      const apiReverseGeocodeRoute = `/api/address-search/reverse-geocode/${inCoords}`;
+// function withMapboxAPI(WrappedComponent) {
+//   return class extends Component {
+//     _reverseGeocode = async (inCoords) => {
+//       const apiReverseGeocodeRoute = `/api/address-search/reverse-geocode/${inCoords}`;
 
-      const { place_name, geometry } = await this.props.dispatch(
-        handleGetReverseGeocodeAction(apiReverseGeocodeRoute)
-      );
-      const [reverseGCLongitude, reverseGCLatitude] = geometry.coordinates;
-      const reverseGCEncodedCoords = encodeURI(
-        JSON.stringify({
-          longitude: reverseGCLongitude,
-          latitude: reverseGCLatitude,
-        })
-      );
-      return { place_name, reverseGCEncodedCoords };
-    };
-    render() {
-      return (
-        <WrappedComponent
-          {...this.props}
-          _reverseGeocode={this._reverseGeocode}
-        />
-      );
-    }
-  };
-}
+//       const { place_name, geometry } = await this.props.dispatch(
+//         handleGetReverseGeocodeAction(apiReverseGeocodeRoute)
+//       );
+//       const [reverseGCLongitude, reverseGCLatitude] = geometry.coordinates;
+//       const reverseGCEncodedCoords = encodeURI(
+//         JSON.stringify({
+//           longitude: reverseGCLongitude,
+//           latitude: reverseGCLatitude,
+//         })
+//       );
+//       return { place_name, reverseGCEncodedCoords };
+//     };
+//     render() {
+//       return (
+//         <WrappedComponent
+//           {...this.props}
+//           _reverseGeocode={this._reverseGeocode}
+//         />
+//       );
+//     }
+//   };
+// }
 
 class PraxisMarker extends React.Component {
   _logDragEvent(name, event) {
@@ -93,12 +93,12 @@ class PraxisMarker extends React.Component {
     );
 
     // query mapbox api based on those coords
+
     const apiReverseGeocodeRoute = `/api/address-search/reverse-geocode/${encodedCoords}`;
     const { place_name, geometry } = await this.props.dispatch(
       handleGetReverseGeocodeAction(apiReverseGeocodeRoute)
     );
     const [reverseGCLongitude, reverseGCLatitude] = geometry.coordinates;
-    const { searchYear } = this.props.searchState;
     const reverseGCEncodedCoords = encodeURI(
       JSON.stringify({
         longitude: reverseGCLongitude,
@@ -106,9 +106,9 @@ class PraxisMarker extends React.Component {
       })
     );
 
-    const parsedPlaceName = parseMBAddressString(place_name);
-
     // create a new route using the api return data
+    const parsedPlaceName = parseMBAddressString(place_name);
+    const { searchYear } = this.props.searchState.searchParams;
     const clientRoute = `/map?type=address&search=${parsedPlaceName}&coordinates=${reverseGCEncodedCoords}&year=${searchYear}`;
     this.props.history.push(clientRoute);
   };
@@ -177,7 +177,7 @@ class PraxisMap extends Component {
 
   // create new vieport dependent on geojson bbox
   _createNewViewport = (geojson) => {
-    const { searchYear } = this.props.searchState;
+    const { searchYear } = this.props.searchState.searchParams;
     const features = geojson.features;
     const { viewport } = this.props.mapState;
     const { longitude, latitude, zoom } = createNewViewport(geojson, viewport);
@@ -289,7 +289,7 @@ class PraxisMap extends Component {
         propstr,
       });
 
-      const { searchYear } = this.props.searchState;
+      const { searchYear } = this.props.searchState.searchParams;
       const clientRoute = `/map?type=address&search=${addressString}&coordinates=${encodedCoords}&year=${searchYear}`;
       this.props.history.push(clientRoute);
     }
@@ -424,12 +424,4 @@ PraxisMap.propTypes = {
   dispatch: PropTypes.func.isRequired,
 };
 
-export default withMapboxAPI(PraxisMap);
-/* <Marker
-  latitude={42.35554476757099}
-  longitude={-82.9895677109488}
-  // offsetLeft={-20}
-  // offsetTop={-10}
->
-  <ArrowIcon style={{ transform: "rotate(350deg)" }} />
-</Marker>; */
+export default PraxisMap;

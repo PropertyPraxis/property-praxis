@@ -1,10 +1,7 @@
 import React, { Component } from "react";
 import { Link, withRouter } from "react-router-dom";
 import PropTypes from "prop-types";
-import {
-  togglePrimaryResultsAction,
-  togglePrimaryActiveAction,
-} from "../../actions/search";
+import { updatePrimarySearch } from "../../actions/search";
 import {
   sanitizeSearchResult,
   createQueryStringFromSearch,
@@ -23,24 +20,25 @@ const primaryResultIcons = {
 class PrimaryResults extends Component {
   _handleOnMouseOver = () => {
     // turn active state to true
-    this.props.dispatch(togglePrimaryActiveAction(true));
+    this.props.dispatch(updatePrimarySearch({ isActive: true }));
   };
 
   _handleOnMouseOut = () => {
-    this.props.dispatch(togglePrimaryActiveAction(false));
+    this.props.dispatch(updatePrimarySearch({ isActive: false }));
   };
 
   _handleOnClick = () => {
-    this.props.dispatch(togglePrimaryResultsAction(false));
+    this.props.dispatch(updatePrimarySearch({ isOpen: false }));
   };
 
   componentWillUnmount() {
     // turn active state to true
-    this.props.dispatch(togglePrimaryActiveAction(false));
+    this.props.dispatch(updatePrimarySearch({ isActive: false }));
   }
 
   render() {
-    const { searchYear, primaryIndex } = this.props.searchState;
+    const { searchYear } = this.props.searchState.searchParams;
+    const { index } = this.props.searchState.primarySearch;
     const { results } = this.props;
 
     return (
@@ -50,7 +48,7 @@ class PrimaryResults extends Component {
         onMouseOut={this._handleOnMouseOut}
       >
         <ul>
-          {results.map((result, index) => {
+          {results.map((result, i) => {
             const { type, search, coordinates, year } = sanitizeSearchResult({
               result,
               year: searchYear,
@@ -66,9 +64,9 @@ class PrimaryResults extends Component {
             return (
               <Link key={searchQueryRoute} to={searchQueryRoute}>
                 <li
-                  className={index % 2 ? "list-item-odd" : "list-item-even"}
+                  className={i % 2 ? "list-item-odd" : "list-item-even"}
                   style={
-                    index === primaryIndex
+                    i === index
                       ? { backgroundColor: styleVars.uiMedGray }
                       : null
                   }
@@ -95,12 +93,11 @@ PrimaryResults.propTypes = {
 };
 
 const PrimaryResultsContainer = (props) => {
-  const { isPrimaryResultsOpen, primaryResults } = props.searchState;
+  const { isOpen, results } = props.searchState.primarySearch;
 
-  if (isPrimaryResultsOpen && primaryResults && primaryResults.length > 0) {
-    return <PrimaryResults {...props} results={primaryResults} />;
+  if (isOpen && results && results.length > 0) {
+    return <PrimaryResults {...props} results={results} />;
   }
-
   return null;
 };
 

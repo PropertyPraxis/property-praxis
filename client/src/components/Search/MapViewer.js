@@ -1,16 +1,16 @@
 import React, { Component } from "react";
 import PropTypes, { string } from "prop-types";
-import { handleGetViewerImageAction } from "../../actions/search";
+import { handleGetViewerImage } from "../../actions/search";
 import { calculateDesiredBearing, bearingToBasic } from "../../utils/viewer";
 import * as Mapillary from "mapillary-js";
 
 class MapViewer extends Component {
   _getViewerImage = ({ longitude, latitude }) => {
-    this.props.dispatch(handleGetViewerImageAction(longitude, latitude));
+    this.props.dispatch(handleGetViewerImage(longitude, latitude));
   };
 
   _setBearing = (node, mly) => {
-    const { searchCoordinates } = this.props.searchState;
+    const { searchCoordinates } = this.props.searchState.searchParams;
     const { longitude, latitude } = JSON.parse(decodeURI(searchCoordinates));
     if (!node.fullPano) {
       // We are only interested in setting the bearing for full 360 panoramas.
@@ -32,14 +32,16 @@ class MapViewer extends Component {
   };
 
   async componentDidMount() {
-    const { searchCoordinates } = this.props.searchState;
+    const { searchCoordinates } = this.props.searchState.searchParams;
+
     if (searchCoordinates) {
       const { longitude, latitude } = JSON.parse(decodeURI(searchCoordinates));
 
       const viewer = await this.props.dispatch(
-        handleGetViewerImageAction(longitude, latitude)
+        handleGetViewerImage(longitude, latitude)
       );
 
+      debugger;
       // if a viewer object is returned with params then
       // create a Viewer instance
       if (viewer.key) {
@@ -73,10 +75,7 @@ class MapViewer extends Component {
           // setBearing(node);
           this._setBearing(node, mly);
         } catch (err) {
-          console.error("move close to error: ", err);
-          mly.moveToKey(viewer.key).catch(function (e) {
-            console.error(e);
-          });
+          mly.moveToKey(viewer.key).catch(function (e) {});
         }
         // Viewer size is dynamic so resize should be called every time the window size changes
         window.addEventListener("resize", function () {
@@ -87,20 +86,16 @@ class MapViewer extends Component {
   }
 
   render() {
-    const {
-      viewer,
-      searchCoordinates,
-      isDetailedResultsOpen,
-    } = this.props.searchState;
+    const { viewer } = this.props.searchState;
+
+    const { searchCoordinates } = this.props.searchState.searchParams;
+    const { isOpen } = this.props.searchState.detailedSearch;
+
     if (viewer.key && searchCoordinates) {
       return (
         <div
           className="map-viewer"
-          style={
-            isDetailedResultsOpen
-              ? { visibility: "visible" }
-              : { visibility: "hidden" }
-          }
+          style={isOpen ? { visibility: "visible" } : { visibility: "hidden" }}
           id="mly"
         ></div>
       );
@@ -108,9 +103,7 @@ class MapViewer extends Component {
     return (
       <div
         className="map-viewer"
-        style={
-          isDetailedResultsOpen ? { display: "block" } : { display: "none" }
-        }
+        style={isOpen ? { display: "block" } : { display: "none" }}
       >
         <div className="no-viewer-image">
           <img

@@ -5,102 +5,51 @@ import {
 import { getImageKey } from "../utils/viewer";
 import { flattenPrimaryResults } from "../utils/helper";
 
-export const RESET_SEARCH = "RESET_SEARCH"; // general shortcut
-export const PRIMARY_SEARCH_QUERY = "PRIMARY_SEARCH_QUERY"; // search bar
-export const TOGGLE_DETAILED_RESULTS = "TOGGLE_DETAILED_RESULTS"; // search state
-export const UPDATE_DETAILED_RESULTS = "UPDATE_DETAILED_RESULTS"; //
-export const TOGGLE_PRIMARY_RESULTS = "TOGGLE_PRIMARY_RESULTS";
-export const UPDATE_PRIMARY_RESULTS = "UPDATE_PRIMARY_RESULTS";
-export const TOGGLE_PRIMARY_ACTIVE = "TOGGLE_PRIMARY_ACTIVE";
-export const UPDATE_PRIMARY_INDEX = "UPDATE_PRIMARY_INDEX";
-export const GET_SEARCH_YEARS = "GET_SEARCH_YEARS";
-export const GET_PRAXIS_SEARCH_YEARS = "GET_PRAXIS_SEARCH_YEARS"; // should be DB Years
-export const GET_VIEWER_IMAGE = "GET_VIEWER_IMAGE";
-// export const GET_DOWNLOAD_DATA = "GET_DOWNLOAD_DATA";
+export const UPDATE_GENERAL_SEARCH = "UPDATE_GENERAL_SEARCH"; // general shortcut
+export const UPDATE_SEARCH_PARAMS = "UPDATE_SEARCH_PARAMS";
+export const UPDATE_PRIMARY_SEARCH = "UPDATE_PRIMARY_SEARCH";
+export const UPDATE_DETAILED_SEARCH = "UPDATE_DETAILED_SEARCH";
+export const UPDATE_SEARCH_BAR = "UPDATE_SEARCH_BAR";
+export const UPDATE_VIEWER_IMAGE = "UPDATE_VIEWER_IMAGE";
+export const GET_DOWNLOAD_DATA = "GET_DOWNLOAD_DATA";
 
 // General action to set search state
-export function resetSearch(searchState) {
+export function updateGeneralSearch(searchState) {
   return {
-    type: RESET_SEARCH,
+    type: UPDATE_GENERAL_SEARCH,
     payload: { ...searchState },
   };
 }
-
-function primarySearchQuery(primaryResults) {
+export function updateSearchParams(searchParams) {
   return {
-    type: PRIMARY_SEARCH_QUERY,
-    payload: {
-      primaryResults,
-    },
+    type: UPDATE_SEARCH_PARAMS,
+    payload: { ...searchParams },
+  };
+}
+export function updatePrimarySearch(primarySearch) {
+  return {
+    type: UPDATE_PRIMARY_SEARCH,
+    payload: { ...primarySearch },
+  };
+}
+export function updateDetailedSearch(detailedSearch) {
+  return {
+    type: UPDATE_DETAILED_SEARCH,
+    payload: { ...detailedSearch },
   };
 }
 
-export function updatePrimaryIndex(primaryIndex) {
+function updateSearchBar(searchBar) {
   return {
-    type: UPDATE_PRIMARY_INDEX,
-    payload: {
-      primaryIndex,
-    },
+    type: UPDATE_SEARCH_BAR,
+    payload: { ...searchBar },
   };
 }
 
-export function updatePrimaryResults(primaryResults) {
+function getViewerImage(viewer) {
   return {
-    type: UPDATE_PRIMARY_RESULTS,
-    payload: {
-      primaryResults,
-    },
-  };
-}
-
-export function updateDetailedResults(detailedResults) {
-  return {
-    type: UPDATE_DETAILED_RESULTS,
-    payload: {
-      detailedResults,
-    },
-  };
-}
-
-function getYearsAction(searchYears) {
-  return {
-    type: GET_SEARCH_YEARS,
-    payload: { searchYears },
-  };
-}
-
-function getPraxisYearsAction(praxisSearchYears) {
-  return {
-    type: GET_SEARCH_YEARS,
-    payload: { praxisSearchYears },
-  };
-}
-
-function getViewerImageAction(viewer) {
-  return {
-    type: GET_VIEWER_IMAGE,
+    type: UPDATE_VIEWER_IMAGE,
     payload: { viewer },
-  };
-}
-
-export function togglePrimaryResultsAction(isOpen) {
-  return {
-    type: TOGGLE_PRIMARY_RESULTS,
-    payload: { isPrimaryResultsOpen: isOpen },
-  };
-}
-
-export function togglePrimaryActiveAction(isActive) {
-  return {
-    type: TOGGLE_PRIMARY_ACTIVE,
-    payload: { isPrimaryResultsActive: isActive },
-  };
-}
-
-export function toggleDetailedResultsAction(isOpen) {
-  return {
-    type: TOGGLE_DETAILED_RESULTS,
-    payload: { isDetailedResultsOpen: isOpen },
   };
 }
 
@@ -115,7 +64,7 @@ export function handlePrimarySearchQuery(
     )
       .then((json) => {
         const flattendResults = flattenPrimaryResults(json);
-        dispatch(primarySearchQuery(flattendResults));
+        dispatch(updatePrimarySearch({ results: flattendResults }));
         return flattendResults;
       })
       .catch((err) => {
@@ -147,7 +96,7 @@ export function handlePrimarySearchAll({ searchTerm, searchYear }, routes) {
       partialZipcodeResults,
     ]);
 
-    dispatch(primarySearchQuery(flattendResults));
+    dispatch(updatePrimarySearch({ results: flattendResults }));
   };
 }
 
@@ -161,7 +110,7 @@ export function handleDetailedSearchQuery(
       route
     )
       .then((json) => {
-        dispatch(updateDetailedResults(json));
+        dispatch(updateDetailedSearch({ results: json }));
         return json;
       })
       .catch((err) => {
@@ -175,7 +124,7 @@ export function handleGetYearsAction(route) {
   return (dispatch) => {
     return APISearchQueryFromRoute(route)
       .then((json) => {
-        dispatch(getYearsAction(json));
+        dispatch(updateSearchBar({ searchYears: json }));
         return json;
       })
       .catch((err) => {
@@ -188,7 +137,7 @@ export function handleGetPraxisYearsAction(route) {
   return (dispatch) => {
     return APISearchQueryFromRoute(route)
       .then((json) => {
-        dispatch(getPraxisYearsAction(json));
+        dispatch(updateDetailedSearch({ recordYears: json }));
         return json;
       })
       .catch((err) => {
@@ -197,18 +146,18 @@ export function handleGetPraxisYearsAction(route) {
   };
 }
 
-export function handleGetViewerImageAction(longitude, latitude) {
+export function handleGetViewerImage(longitude, latitude) {
   return (dispatch) => {
     return getImageKey(longitude, latitude)
       .then((viewer) => {
         dispatch(
-          getViewerImageAction({
+          getViewerImage({
             bearing: null,
             key: null,
             viewerMarker: null,
           })
         );
-        dispatch(getViewerImageAction(viewer));
+        dispatch(getViewerImage(viewer));
         return viewer;
       })
       .catch((err) => {
@@ -217,6 +166,17 @@ export function handleGetViewerImageAction(longitude, latitude) {
   };
 }
 
+// export const PRIMARY_SEARCH_QUERY = "PRIMARY_SEARCH_QUERY";
+// export const TOGGLE_DETAILED_RESULTS = "TOGGLE_DETAILED_RESULTS";
+// export const UPDATE_DETAILED_RESULTS = "UPDATE_DETAILED_RESULTS";
+// export const TOGGLE_PRIMARY_RESULTS = "TOGGLE_PRIMARY_RESULTS";
+// export const UPDATE_PRIMARY_RESULTS = "UPDATE_PRIMARY_RESULTS";
+// export const TOGGLE_PRIMARY_ACTIVE = "TOGGLE_PRIMARY_ACTIVE";
+// export const UPDATE_PRIMARY_INDEX = "UPDATE_PRIMARY_INDEX";
+// export const GET_SEARCH_YEARS = "GET_SEARCH_YEARS";
+// export const GET_PRAXIS_SEARCH_YEARS = "GET_PRAXIS_SEARCH_YEARS"; // should be DB Years
+
+//////////////////////////////////////////////////////////
 // export function handleGetDownloadDataAction(route) {
 //   return (dispatch) => {
 //     dispatch(getDownloadDataAction(null));
@@ -235,5 +195,76 @@ export function handleGetViewerImageAction(longitude, latitude) {
 //   return {
 //     type: GET_DOWNLOAD_DATA,
 //     payload: { downloadData },
+//   };
+// }
+
+// export function togglePrimaryResultsAction(isOpen) {
+//   return {
+//     type: TOGGLE_PRIMARY_RESULTS,
+//     payload: { isPrimaryResultsOpen: isOpen },
+//   };
+// }
+
+// export function togglePrimaryActiveAction(isActive) {
+//   return {
+//     type: TOGGLE_PRIMARY_ACTIVE,
+//     payload: { isPrimaryResultsActive: isActive },
+//   };
+// }
+
+// export function toggleDetailedResultsAction(isOpen) {
+//   return {
+//     type: TOGGLE_DETAILED_RESULTS,
+//     payload: { isDetailedResultsOpen: isOpen },
+//   };
+// }
+
+// function primarySearchQuery(primaryResults) {
+//   return {
+//     type: PRIMARY_SEARCH_QUERY,
+//     payload: {
+//       primaryResults,
+//     },
+//   };
+// }
+
+// export function updatePrimaryIndex(primaryIndex) {
+//   return {
+//     type: UPDATE_PRIMARY_INDEX,
+//     payload: {
+//       primaryIndex,
+//     },
+//   };
+// }
+
+// export function updatePrimaryResults(primaryResults) {
+//   return {
+//     type: UPDATE_PRIMARY_RESULTS,
+//     payload: {
+//       primaryResults,
+//     },
+//   };
+// }
+
+// export function updateDetailedResults(detailedResults) {
+//   return {
+//     type: UPDATE_DETAILED_RESULTS,
+//     payload: {
+//       detailedResults,
+//     },
+//   };
+// }
+
+// function getYearsAction(searchBar) {
+//   return {
+//     type: GET_SEARCH_YEARS,
+//     payload: { searchBar },
+//   };
+// }
+
+// function getPraxisYearsAction(praxisSearchYears) {
+//   return {
+//     type: GET_SEARCH_YEARS,
+//     payload: { praxisSearchYears },
 //   };
 // }

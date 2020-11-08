@@ -7,9 +7,8 @@ import { getPropertiesFromMapData } from "../../utils/helper";
 import DetailedSearchResults from "./DetailedSearchResults";
 
 class DetailedResultsContainer extends Component {
-  
   render() {
-    const { isDetailedResultsOpen } = this.props.searchState;
+    const { isOpen } = this.props.searchState.detailedSearch;
 
     /*This component tree needs to know what the ppraxis 
     data properties and ids are. */
@@ -18,7 +17,7 @@ class DetailedResultsContainer extends Component {
     if (details) {
       return (
         <CSSTransition
-          in={isDetailedResultsOpen} //set false on load
+          in={isOpen} //set false on load
           appear={true}
           timeout={0}
           classNames="results-drawer"
