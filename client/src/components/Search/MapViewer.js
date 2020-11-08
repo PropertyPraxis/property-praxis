@@ -41,7 +41,6 @@ class MapViewer extends Component {
         handleGetViewerImage(longitude, latitude)
       );
 
-      debugger;
       // if a viewer object is returned with params then
       // create a Viewer instance
       if (viewer.key) {
