@@ -120,7 +120,7 @@ export function handleDetailedSearchQuery(
   };
 }
 
-export function handleGetYearsAction(route) {
+export function handleSearchBarYearsAction(route) {
   return (dispatch) => {
     return APISearchQueryFromRoute(route)
       .then((json) => {
