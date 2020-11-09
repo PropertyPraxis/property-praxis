@@ -10,6 +10,7 @@ import MapContainer from "./Map/MapContainer";
 import SearchContainer from "./Search/SearchContainer";
 import DetailedResultsContainer from "./Search/DetailedResultsContainer";
 import LoadingIndicator from "./LoadingIndicator/LoadingIndicator";
+import Error from "./Redirect/Error";
 import PPLogo from "./Logo/Logo";
 
 class App extends Component {
@@ -24,7 +25,7 @@ class App extends Component {
         <div className="app-container">
           <Router>
             <Switch>
-              <Route exact path={"/"} component={Home}></Route>
+              <Route exact path={"/"} component={Error}></Route>
               <Route path={"/map"} component={MapContainer}></Route>
               <Route path={"/data"} component={DownloadData}></Route>
               <Route path={"/methodology"} component={Methodology}></Route>
