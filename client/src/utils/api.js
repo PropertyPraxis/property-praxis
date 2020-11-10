@@ -40,13 +40,24 @@ export async function APISearchQueryFromRoute(route) {
   }
 }
 
-// function isGeoJSONEmpty(geojson) {
-//   if (geojson.features.length === 0) {
-//     return true;
-//   } else {
-//     return false;
-//   }
-// }
+export function isGeoJSONEmpty(geojson) {
+  if (geojson && geojson.features.length === 0) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+//function helper for downloading data
+export async function getDownloadData(route) {
+  try {
+    const response = await fetch(route);
+    const json = await response.json();
+    return json;
+  } catch (err) {
+    throw Error(`An error occured searching: ${err}`);
+  }
+}
 
 // export async function APIParcelQueryFromRoute(route) {
 //   try {
@@ -63,14 +74,3 @@ export async function APISearchQueryFromRoute(route) {
 //     throw new Error(`An error occurred querying API from route: ${err}`);
 //   }
 // }
-
-//function helper for downloading data
-export async function getDownloadData(route) {
-  try {
-    const response = await fetch(route);
-    const json = await response.json();
-    return json;
-  } catch (err) {
-    throw Error(`An error occured searching: ${err}`);
-  }
-}

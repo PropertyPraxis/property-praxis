@@ -114,19 +114,17 @@ export function handleDetailedSearchQuery(
   route
 ) {
   return async (dispatch) => {
-    return APISearchQueryFromParams(
-      { searchType, searchTerm, searchCoordinates, searchYear },
-      route
-    )
-      .then((json) => {
-        dispatch(updateDetailedSearch({ results: json }));
-        return json;
-      })
-      .catch((err) => {
-        //need to add some more error hadling
-        dispatch(triggerFetchError(true));
-        throw Error(`An error occured for detailed search. Message: ${err}`);
-      });
+    try {
+      const json = await APISearchQueryFromParams(
+        { searchType, searchTerm, searchCoordinates, searchYear },
+        route
+      );
+      dispatch(updateDetailedSearch({ results: json }));
+      return json;
+    } catch (err) {
+      dispatch(triggerFetchError(true));
+      throw Error(`An error occured for detailed search. Message: ${err}`);
+    }
   };
 }
 
@@ -163,7 +161,7 @@ export function handleGetPraxisYearsAction(route) {
 export function handleGetViewerImage(longitude, latitude) {
   return async (dispatch) => {
     try {
-      const viewer = getImageKey(longitude, latitude);
+      const viewer = await getImageKey(longitude, latitude);
       dispatch(
         getViewerImage({
           bearing: null,
