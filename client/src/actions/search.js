@@ -1,3 +1,4 @@
+import { triggerFetchError } from "./redirect";
 import {
   APISearchQueryFromParams,
   APISearchQueryFromRoute,
@@ -14,6 +15,8 @@ export const UPDATE_VIEWER_IMAGE = "UPDATE_VIEWER_IMAGE";
 export const GET_DOWNLOAD_DATA = "GET_DOWNLOAD_DATA";
 
 // General action to set search state
+// use this sparingly as the action
+// type is not explicit
 export function updateGeneralSearch(searchState) {
   return {
     type: UPDATE_GENERAL_SEARCH,
@@ -69,6 +72,7 @@ export function handlePrimarySearchQuery(
       })
       .catch((err) => {
         //need to add some more error hadling
+        dispatch(triggerFetchError(true));
         throw Error(`An error occured searching: ${err}`);
       });
   };
@@ -76,27 +80,32 @@ export function handlePrimarySearchQuery(
 
 export function handlePrimarySearchAll({ searchTerm, searchYear }, routes) {
   return async (dispatch) => {
-    const types = ["address", "speculator", "zipcode"];
+    try {
+      const types = ["address", "speculator", "zipcode"];
 
-    const [
-      partialAddressResults,
-      partialSpeculatorResults,
-      partialZipcodeResults,
-    ] = await Promise.all(
-      routes.map(async (route, index) => {
-        return await APISearchQueryFromParams(
-          { searchType: types[index], searchTerm, searchYear },
-          route
-        );
-      })
-    );
-    const flattendResults = flattenPrimaryResults([
-      partialAddressResults,
-      partialSpeculatorResults,
-      partialZipcodeResults,
-    ]);
+      const [
+        partialAddressResults,
+        partialSpeculatorResults,
+        partialZipcodeResults,
+      ] = await Promise.all(
+        routes.map(async (route, index) => {
+          return await APISearchQueryFromParams(
+            { searchType: types[index], searchTerm, searchYear },
+            route
+          );
+        })
+      );
+      const flattendResults = flattenPrimaryResults([
+        partialAddressResults,
+        partialSpeculatorResults,
+        partialZipcodeResults,
+      ]);
 
-    dispatch(updatePrimarySearch({ results: flattendResults }));
+      dispatch(updatePrimarySearch({ results: flattendResults }));
+    } catch (err) {
+      dispatch(triggerFetchError(true));
+      throw Error(`An error occured searching all primaries. Message: ${err}`);
+    }
   };
 }
 
@@ -115,54 +124,59 @@ export function handleDetailedSearchQuery(
       })
       .catch((err) => {
         //need to add some more error hadling
-        throw Error(`An error occured searching: ${err}`);
+        dispatch(triggerFetchError(true));
+        throw Error(`An error occured for detailed search. Message: ${err}`);
       });
   };
 }
 
 export function handleSearchBarYearsAction(route) {
-  return (dispatch) => {
-    return APISearchQueryFromRoute(route)
-      .then((json) => {
-        dispatch(updateSearchBar({ searchYears: json }));
-        return json;
-      })
-      .catch((err) => {
-        throw Error(`An error occured searching search years: ${err}`);
-      });
+  return async (dispatch) => {
+    try {
+      const json = await APISearchQueryFromRoute(route);
+      dispatch(updateSearchBar({ searchYears: json }));
+      return json;
+    } catch (err) {
+      dispatch(triggerFetchError(true));
+      throw Error(
+        `An error occured searching search bar years.  Message: ${err}`
+      );
+    }
   };
 }
 
 export function handleGetPraxisYearsAction(route) {
-  return (dispatch) => {
-    return APISearchQueryFromRoute(route)
-      .then((json) => {
-        dispatch(updateDetailedSearch({ recordYears: json }));
-        return json;
-      })
-      .catch((err) => {
-        throw Error(`An error occured searching praxis years: ${err}`);
-      });
+  return async (dispatch) => {
+    try {
+      const json = await APISearchQueryFromRoute(route);
+      dispatch(updateDetailedSearch({ searchYears: json }));
+      return json;
+    } catch (err) {
+      dispatch(triggerFetchError(true));
+      throw Error(
+        `An error occured searching search bar years.  Message: ${err}`
+      );
+    }
   };
 }
 
 export function handleGetViewerImage(longitude, latitude) {
-  return (dispatch) => {
-    return getImageKey(longitude, latitude)
-      .then((viewer) => {
-        dispatch(
-          getViewerImage({
-            bearing: null,
-            key: null,
-            viewerMarker: null,
-          })
-        );
-        dispatch(getViewerImage(viewer));
-        return viewer;
-      })
-      .catch((err) => {
-        throw Error(`An error occured searching: ${err}`);
-      });
+  return async (dispatch) => {
+    try {
+      const viewer = getImageKey(longitude, latitude);
+      dispatch(
+        getViewerImage({
+          bearing: null,
+          key: null,
+          viewerMarker: null,
+        })
+      );
+      dispatch(getViewerImage(viewer));
+      return viewer;
+    } catch (err) {
+      // viewer image ui error
+      throw Error(`An error occured fetching viewer image. Message: ${err}`);
+    }
   };
 }
 

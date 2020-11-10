@@ -22,7 +22,8 @@ class DetailedResultsContainer extends Component {
           timeout={0}
           classNames="results-drawer"
         >
-          <DetailedSearchResults {...this.props} details={details} />
+          {/* <DetailedSearchResults {...this.props} details={details} /> */}
+          <div>HELLO</div>
         </CSSTransition>
       );
     }

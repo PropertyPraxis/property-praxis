@@ -51,12 +51,16 @@ router.get("/speculator/:id/:year", async (req, res) => {
 });
 
 router.get("/address/:coords/:year", async (req, res) => {
-  const { coords, year } = req.params;
-  const { longitude, latitude } = JSON.parse(decodeURI(coords));
+  try {
+    const { coords, year } = req.params;
+    const { longitude, latitude } = JSON.parse(decodeURI(coords));
 
-  // query to find parcels within a distance
-  // return geojson
-  const query = `SELECT jsonb_build_object(
+    // constant for search distance of nearby addresses
+    const searchRadius = 1000;
+
+    // query to find parcels within a distance
+    // return geojson
+    const query = `SELECT jsonb_build_object(
     'type',     'FeatureCollection',
     'features', jsonb_agg(feature)
   )
@@ -71,35 +75,35 @@ router.get("/address/:coords/:year", async (req, res) => {
     FROM (
       SELECT *, ST_Distance(ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326)::geography, geom_${year}::geography) AS distance 
       FROM parcels_${year} WHERE 
-      ST_Distance(ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326)::geography, geom_${year}::geography) < 1000
+      ST_Distance(ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326)::geography, geom_${year}::geography) < ${searchRadius}
     ) inputs
   ) features;`;
 
-  const { rows } = await db.templateQuery(query);
+    const { rows } = await db.templateQuery(query);
 
-  //check to see if there is a distance of 0
-  const { features } = rows[0].jsonb_build_object;
-  const { targetAddress, nearbyAddresses } = findTargetAddress(features);
+    // check to see if there is a distance of 0
+    const { features } = rows[0].jsonb_build_object;
 
-  let geoJSON;
-  if (targetAddress.length === 0 && nearbyAddresses.length === 0) {
-    //this is a default empty geojson
-    geoJSON = buildGeoJSONTemplate([
-      {
-        type: "Feature",
-        properties: { id: -1 },
-        geometry: { type: "GeometryCollection", geometries: [] },
-      },
-    ]);
+    // returns arrays
+    const { targetAddress, nearbyAddresses } = findTargetAddress(features);
+
+    let geoJSON;
+    if (targetAddress.length === 0 && nearbyAddresses.length === 0) {
+      // this is a default empty geojson
+      // where there is no features returned
+      geoJSON = buildGeoJSONTemplate([]);
+    } else if (targetAddress.length > 0) {
+      geoJSON = buildGeoJSONTemplate(targetAddress);
+    } else if (targetAddress.length === 0 && nearbyAddresses.length > 0) {
+      geoJSON = buildGeoJSONTemplate(nearbyAddresses);
+    } else {
+      geoJSON = buildGeoJSONTemplate([]);
+    }
+
+    res.send(geoJSON);
+  } catch (err) {
+    res.send(err);
   }
-  if (targetAddress.length > 0) {
-    geoJSON = geoJSON = buildGeoJSONTemplate(targetAddress);
-  }
-  if (targetAddress.length === 0 && nearbyAddresses.length > 0) {
-    geoJSON = buildGeoJSONTemplate(nearbyAddresses);
-  }
-  ///can include more conditions
-  res.send(geoJSON);
 });
 
 module.exports = router;

@@ -54,6 +54,7 @@ class AddressDetails extends Component {
     // other years to search for this address
     const praxisRecordYears = availablePraxisYears(recordYears, searchYear);
 
+    
     return (
       <div className="results-inner">
         <MapViewer {...this.props} />

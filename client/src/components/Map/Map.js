@@ -37,35 +37,6 @@ const MAPBOX_TOKEN =
   "pk.eyJ1IjoibWFwcGluZ2FjdGlvbiIsImEiOiJjazZrMTQ4bW4wMXpxM251cnllYnR6NjMzIn0.9KhQIoSfLvYrGCl3Hf_9Bw";
 // "pk.eyJ1IjoidGltLWhpdGNoaW5zIiwiYSI6ImNqdmNzODZ0dDBkdXIzeW9kbWRtczV3dDUifQ.29F1kg9koRwGRwjg-vpD6A";
 
-// HOC wrapper to reuse reverse geocode logic
-// function withMapboxAPI(WrappedComponent) {
-//   return class extends Component {
-//     _reverseGeocode = async (inCoords) => {
-//       const apiReverseGeocodeRoute = `/api/address-search/reverse-geocode/${inCoords}`;
-
-//       const { place_name, geometry } = await this.props.dispatch(
-//         handleGetReverseGeocodeAction(apiReverseGeocodeRoute)
-//       );
-//       const [reverseGCLongitude, reverseGCLatitude] = geometry.coordinates;
-//       const reverseGCEncodedCoords = encodeURI(
-//         JSON.stringify({
-//           longitude: reverseGCLongitude,
-//           latitude: reverseGCLatitude,
-//         })
-//       );
-//       return { place_name, reverseGCEncodedCoords };
-//     };
-//     render() {
-//       return (
-//         <WrappedComponent
-//           {...this.props}
-//           _reverseGeocode={this._reverseGeocode}
-//         />
-//       );
-//     }
-//   };
-// }
-
 class PraxisMarker extends React.Component {
   _logDragEvent(name, event) {
     this.props.dispatch(logMarkerDragEventAction(name, event));
@@ -219,7 +190,9 @@ class PraxisMap extends Component {
     }
 
     //Set viewport
-    this._createNewViewport(parcelsGeojson);
+    if (parcelsGeojson) {
+      this._createNewViewport(parcelsGeojson);
+    }
 
     // set marker not undefined or null
     const { searchCoordinates } = this.props.searchQueryParams;
@@ -425,3 +398,32 @@ PraxisMap.propTypes = {
 };
 
 export default PraxisMap;
+
+// HOC wrapper to reuse reverse geocode logic
+// function withMapboxAPI(WrappedComponent) {
+//   return class extends Component {
+//     _reverseGeocode = async (inCoords) => {
+//       const apiReverseGeocodeRoute = `/api/address-search/reverse-geocode/${inCoords}`;
+
+//       const { place_name, geometry } = await this.props.dispatch(
+//         handleGetReverseGeocodeAction(apiReverseGeocodeRoute)
+//       );
+//       const [reverseGCLongitude, reverseGCLatitude] = geometry.coordinates;
+//       const reverseGCEncodedCoords = encodeURI(
+//         JSON.stringify({
+//           longitude: reverseGCLongitude,
+//           latitude: reverseGCLatitude,
+//         })
+//       );
+//       return { place_name, reverseGCEncodedCoords };
+//     };
+//     render() {
+//       return (
+//         <WrappedComponent
+//           {...this.props}
+//           _reverseGeocode={this._reverseGeocode}
+//         />
+//       );
+//     }
+//   };
+// }

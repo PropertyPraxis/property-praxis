@@ -39,6 +39,31 @@ export async function APISearchQueryFromRoute(route) {
     throw new Error(`An error occurred querying API from route: ${err}`);
   }
 }
+
+// function isGeoJSONEmpty(geojson) {
+//   if (geojson.features.length === 0) {
+//     return true;
+//   } else {
+//     return false;
+//   }
+// }
+
+// export async function APIParcelQueryFromRoute(route) {
+//   try {
+//     const respose = await fetch(route);
+//     const json = await respose.json();
+//     if (isGeoJSONEmpty(json)) {
+//       return null;
+//     } else {
+//       return json;
+//     }
+
+//     return json;
+//   } catch (err) {
+//     throw new Error(`An error occurred querying API from route: ${err}`);
+//   }
+// }
+
 //function helper for downloading data
 export async function getDownloadData(route) {
   try {
