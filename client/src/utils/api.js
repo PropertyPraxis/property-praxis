@@ -1,3 +1,4 @@
+import queryString from "query-string";
 // function to build routes depending on search params
 export async function APISearchQueryFromParams(
   { searchType, searchTerm, searchCoordinates = null, searchYear },
@@ -25,6 +26,43 @@ export async function APISearchQueryFromParams(
       }
       return await response.json();
     }
+  } catch (err) {
+    throw Error(`An error occured querying API from params: ${err}`);
+  }
+}
+
+export async function APISearchQueryFromParamsPROTO(
+  { type, ownid = null, code = null, place = null, coordinates = null, year },
+  route
+) {
+  try {
+    let qs;
+    switch (type) {
+      case "address":
+        qs = `${route}?${queryString.stringify(
+          { type, place, coordinates, year },
+          { sort: false, skipNull: true }
+        )}`;
+        break;
+      case "zipcode":
+        qs = `${route}?${queryString.stringify(
+          { type, code, year },
+          { sort: false, skipNull: true }
+        )}`;
+        break;
+      case "speculator":
+        qs = `${route}?${queryString.stringify(
+          { type, ownid, year },
+          { sort: false, skipNull: true }
+        )}`;
+        break;
+      default:
+        throw new Error("UNKNOWN QUERY");
+    }
+
+    const response = await fetch(qs);
+    const json = response.json();
+    debugger;
   } catch (err) {
     throw Error(`An error occured querying API from params: ${err}`);
   }

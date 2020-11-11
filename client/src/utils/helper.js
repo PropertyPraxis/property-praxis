@@ -184,20 +184,89 @@ export function createQueryStringFromSearch({
 
   return query;
 }
+//////////////////
+export function sanitizeSearchResultPROTO({ result, year }) {
+  // result return sanitized result object
+  const keys = Object.keys(result);
+  if (keys.includes("propzip")) {
+    const zipcodeQuery = {
+      type: "zipcode",
+      code: result.propzip,
+      coordinates: null,
+      year,
+    };
+    return zipcodeQuery;
+  } else if (keys.includes("own_id")) {
+    const speculatorQuery = {
+      type: "speculator",
+      ownid: capitalizeFirstLetter(result.own_id),
+      coordinates: null,
+      year,
+    };
+    return speculatorQuery;
+  } else if (keys.includes("place_name")) {
+    const [longitude, latitude] = result.geometry.coordinates;
+    const encodedCoords = encodeURI(JSON.stringify({ longitude, latitude }));
+    const addressQuery = {
+      type: "address",
+      place: result.place_name,
+      coordinates: encodedCoords,
+      year,
+    };
 
+    return addressQuery;
+  } else {
+    throw new Error(
+      `Known key does not exist in object: ${JSON.stringify(result)}`
+    );
+  }
+}
+
+export function createAPIQueryStringFromSearch(
+  { type, ownid = null, code = null, place = null, coordinates = null, year },
+  route
+) {
+  let qs;
+  debugger;
+  switch (type) {
+    case "address":
+      qs = `${route}?${queryString.stringify(
+        { type, place, coordinates, year },
+        { sort: false, skipNull: true }
+      )}`;
+      break;
+    case "zipcode":
+      qs = `${route}?${queryString.stringify(
+        { type, code, year },
+        { sort: false, skipNull: true }
+      )}`;
+      break;
+    case "speculator":
+      qs = `${route}?${queryString.stringify(
+        { type, ownid, year },
+        { sort: false, skipNull: true }
+      )}`;
+      break;
+    default:
+      throw new Error("UNKNOWN QUERY");
+  }
+
+  return qs;
+}
+/////////////
 export function flattenPrimaryResults(primaryResults) {
   return primaryResults.reduce((acc, val) => acc.concat(val), []);
 }
 
-export function getPropertiesFromMapData(geojson) {
+export function getDetailsFromGeoJSON(geojson) {
   if (geojson) {
     const details = geojson.features.map((feature) => {
       const { id, properties } = feature;
       return { id, properties };
     });
-    return details;
+    return { details };
   } else {
-    return null;
+    return { details: null };
   }
 }
 

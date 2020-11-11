@@ -4,7 +4,8 @@ const searchSpeculators = require("./searchSpeculator");
 const initialData = require("./initialData");
 const searchParcels = require("./searchParcels");
 const searchPraxisYears = require("./searchPraxisYears");
-
+///////////////////////////////////////
+const primarySearch = require("./primarySearch");
 // depending on how nginx is set up in production,
 // the "/api will need to be removed"
 if (process.env.NODE_ENV === "development") {
@@ -15,6 +16,8 @@ if (process.env.NODE_ENV === "development") {
     app.use("/api/geojson", initialData);
     app.use("/api/geojson/parcels", searchParcels);
     app.use("/api/praxisyears", searchPraxisYears);
+    //////////
+    app.use("/api/primary-search", primarySearch);
   };
 }
 

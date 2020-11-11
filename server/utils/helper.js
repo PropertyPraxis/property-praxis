@@ -30,7 +30,6 @@ function findTargetAddress(features) {
 }
 
 function buildGeoJSONTemplate(features) {
-  
   const template = {
     type: "FeatureCollection",
     features: features,

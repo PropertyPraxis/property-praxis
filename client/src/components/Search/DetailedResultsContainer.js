@@ -4,29 +4,29 @@ import { withRouter } from "react-router-dom";
 import PropTypes from "prop-types";
 import { CSSTransition } from "react-transition-group";
 import { updateDetailedSearch } from "../../actions/search";
-import { getPropertiesFromMapData } from "../../utils/helper";
+import { getDetailsFromGeoJSON } from "../../utils/helper";
 import { isGeoJSONEmpty } from "../../utils/api";
 import DetailedSearchResults from "./DetailedSearchResults";
 
 class DetailedResultsContainer extends Component {
-  _parseStateForDetails = () => {
+  _parseDetails = () => {
     /* something here to parse the current search state 
     and geojson return to determine the details ui*/
-    
-    // const { ppraxis } = this.props.mapData;
+
+    const { ppraxis } = this.props.mapData;
 
     // if (isGeoJSONEmpty(ppraxis)) {
     //   debugger;
     //   this.props.dispatch(updateDetailedSearch({ type: "no-data" }));
     // }else
 
-    const details = getPropertiesFromMapData(ppraxis);
+    const { details } = getDetailsFromGeoJSON(ppraxis);
     return details;
   };
 
   render() {
     const { isOpen } = this.props.searchState.detailedSearch;
-    const details = this._parseGeoJSONDetails();
+    const details = this._parseDetails();
     /*This component tree needs to know what the ppraxis 
     data properties and ids are. */
 

@@ -1,6 +1,7 @@
 import { triggerFetchError } from "./redirect";
 import {
   APISearchQueryFromParams,
+  APISearchQueryFromParamsPROTO,
   APISearchQueryFromRoute,
 } from "../utils/api";
 import { getImageKey } from "../utils/viewer";
@@ -75,6 +76,26 @@ export function handlePrimarySearchQuery(
         dispatch(triggerFetchError(true));
         throw Error(`An error occured searching: ${err}`);
       });
+  };
+}
+
+export async function handlePrimarySearchQueryPROTO(
+  { type, ownid = null, code = null, place = null, coordinates = null, year },
+  route
+) {
+  return async (dispatch) => {;
+    try {
+      const json = await APISearchQueryFromParamsPROTO(
+        { type, ownid, code, place, coordinates, year },
+        route
+      )
+      const flattendResults = await flattenPrimaryResults(json);
+      // dispatch(updatePrimarySearch({ results: flattendResults }));
+      return flattendResults;
+    } catch (err) {
+      // dispatch(triggerFetchError(true));
+      throw Error(`An error occured for primary search query: ${err}`);
+    }
   };
 }
 
