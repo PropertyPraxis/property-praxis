@@ -61,8 +61,8 @@ export async function APISearchQueryFromParamsPROTO(
     }
 
     const response = await fetch(qs);
-    const json = response.json();
-    debugger;
+    const json = await response.json();
+    return json;
   } catch (err) {
     throw Error(`An error occured querying API from params: ${err}`);
   }

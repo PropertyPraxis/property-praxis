@@ -227,7 +227,6 @@ export function createAPIQueryStringFromSearch(
   route
 ) {
   let qs;
-  debugger;
   switch (type) {
     case "address":
       qs = `${route}?${queryString.stringify(

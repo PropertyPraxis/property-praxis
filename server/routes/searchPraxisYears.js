@@ -18,7 +18,6 @@ router.get("/address/:coords", async (req, res) => {
   const { coords } = req.params;
   const { longitude, latitude } = JSON.parse(decodeURI(coords));
 
-  console.log("hello", longitude, latitude);
   try {
     const query = `SELECT DISTINCT y.praxisyear
     FROM parcel_property_geom AS ppg

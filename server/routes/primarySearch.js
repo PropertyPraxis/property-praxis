@@ -11,12 +11,12 @@ router.get("/", async (req, res) => {
       const { data } = await queries.queryMapboxAPI({
         place,
         coordinates,
-        mbQueryType: "place",
+        mbQueryType: "primary-place",
       });
       clientData = data;
     } else if (["zipcode", "speculator"].includes(type)) {
       const { data } = await queries.queryPGDB({
-        PGDBQueryType: type,
+        PGDBQueryType: `primary-${type}`,
         code,
         ownid,
         coordinates,

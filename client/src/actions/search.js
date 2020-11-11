@@ -83,12 +83,13 @@ export async function handlePrimarySearchQueryPROTO(
   { type, ownid = null, code = null, place = null, coordinates = null, year },
   route
 ) {
-  return async (dispatch) => {;
+  return async (dispatch) => {
     try {
       const json = await APISearchQueryFromParamsPROTO(
         { type, ownid, code, place, coordinates, year },
         route
-      )
+      );
+      debugger;
       const flattendResults = await flattenPrimaryResults(json);
       // dispatch(updatePrimarySearch({ results: flattendResults }));
       return flattendResults;

@@ -2,26 +2,19 @@ import React, { Component } from "react";
 import { DebounceInput } from "react-debounce-input";
 import PropTypes from "prop-types";
 import {
-  resetSearch,
   handlePrimarySearchQuery,
-  handlePrimarySearchQueryPROTO,
   handlePrimarySearchAll,
-  updatePrimaryIndex,
-  togglePrimaryResultsAction,
-  /////
   updateSearchParams,
   updatePrimarySearch,
   updateDetailedSearch,
-  ///////
 } from "../../actions/search";
 import { parseURLParams } from "../../utils/parseURL";
 import {
   capitalizeFirstLetter,
   sanitizeSearchResult,
-  sanitizeSearchResultPROTO,
   createQueryStringFromSearch,
-  createAPIQueryStringFromSearch,
 } from "../../utils/helper";
+// import { APISearchQueryFromParamsPROTO } from "../../utils/api";
 import PrimaryResultsContainer from "./PrimarySearchResults";
 import * as searchIcon from "../../assets/img/search.png";
 import styleVars from "../../scss/colors.scss";
@@ -52,6 +45,8 @@ class SearchBar extends Component {
     const { searchYear } = this.props.searchState.searchParams;
 
     if (result) {
+
+      // there are porototypes to replace these in api utils
       const route = createQueryStringFromSearch(
         sanitizeSearchResult({
           result,
@@ -120,18 +115,6 @@ class SearchBar extends Component {
           primarySearchRoutes[searchType]
         )
       );
-
-      // this.props.dispatch(
-      //   handlePrimarySearchQueryPROTO(
-      //     {
-      //       type: searchType,
-      //       place: searchTerm,
-      //       year: searchYear,
-      //     },
-      //     primarySearchRoutes[searchType]
-      //   )
-      // );
-
     }
   };
 
