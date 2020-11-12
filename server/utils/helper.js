@@ -34,7 +34,7 @@ function buildGeoJSONTemplate(features) {
     type: "FeatureCollection",
     features: features,
   };
-  return JSON.stringify(template);
+  return template;
 }
 
 module.exports = { findTargetAddress, buildGeoJSONTemplate };

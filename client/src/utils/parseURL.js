@@ -36,3 +36,31 @@ export function parseURLParams(searchQuery) {
     searchYear,
   };
 }
+
+// const defaultParamsPROTO = {
+//   type: null,
+//   code: null,
+//   ownid: null,
+//   coordinates: null,
+//   year: "2020",
+// };
+
+// export function parseURLParamsPROTO(searchQuery) {
+//   let { type, code, ownid, coordinates, year } = queryString.parse(searchQuery);
+//   debugger;
+//   switch (type) {
+//     case "zipcode":
+//       break;
+//     case "speculator":
+//       break;
+//     case "address":
+//       break;
+//     default:
+//       break;
+//   }
+
+//   return {
+//     searchType: type,
+//     searchYear: year,
+//   };
+// }

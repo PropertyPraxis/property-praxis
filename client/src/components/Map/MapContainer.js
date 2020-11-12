@@ -10,6 +10,7 @@ the search params to the map*/
 class MapContainer extends Component {
   render() {
     const searchQueryParams = parseURLParams(this.props.location.search);
+
     return <PraxisMap {...this.props} searchQueryParams={searchQueryParams} />;
   }
 }

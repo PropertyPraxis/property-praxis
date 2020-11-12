@@ -30,8 +30,8 @@ router.get("/", async (req, res) => {
     res.json(clientData);
   } catch (err) {
     const msg = `An error occurred executing primary search query. Message: ${err}`;
+    console.error(msg);
     res.status(404).send(msg);
-    throw new Error(msg);
   }
 });
 module.exports = router;

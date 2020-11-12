@@ -180,16 +180,11 @@ class PraxisMap extends Component {
     const parcelsGeojson = await this.props.dispatch(
       handleGetParcelsByQueryAction(route)
     );
-
     const zipsGeojson = await this.props.dispatch(
       handleGetZipcodesDataAction("/api/geojson/zipcodes")
     );
-    // toggle indicator (need refactor to hook in)
-    if (parcelsGeojson && zipsGeojson) {
-      this.props.dispatch(toggleLoadingIndicatorAction(false));
-    }
 
-    //Set viewport
+    //Set viewport to parcels bbox
     if (parcelsGeojson) {
       this._createNewViewport(parcelsGeojson);
     }
@@ -201,6 +196,11 @@ class PraxisMap extends Component {
       this.props.dispatch(setMarkerCoordsAction(longitude, latitude));
     } else {
       this.props.dispatch(setMarkerCoordsAction(null, null));
+    }
+
+    // Toggle indicator off
+    if (parcelsGeojson && zipsGeojson) {
+      this.props.dispatch(toggleLoadingIndicatorAction(false));
     }
   };
 
