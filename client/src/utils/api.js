@@ -57,7 +57,7 @@ export async function APISearchQueryFromParamsPROTO(
         )}`;
         break;
       default:
-        throw new Error("UNKNOWN QUERY");
+        console.error(`Unknown API search query type: ${type}`);
     }
 
     const response = await fetch(qs);

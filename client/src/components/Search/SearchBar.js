@@ -12,9 +12,8 @@ import { parseURLParams } from "../../utils/parseURL";
 import {
   capitalizeFirstLetter,
   sanitizeSearchResult,
-  createQueryStringFromSearch,
+  createAPIQueryStringFromSearch,
 } from "../../utils/helper";
-// import { APISearchQueryFromParamsPROTO } from "../../utils/api";
 import PrimaryResultsContainer from "./PrimarySearchResults";
 import * as searchIcon from "../../assets/img/search.png";
 import styleVars from "../../scss/colors.scss";
@@ -40,18 +39,19 @@ class SearchBar extends Component {
   _inputRef = React.createRef();
 
   /*Passed down to Search Results.
-  Changes the URL query*/
+  Changes the query string*/
   _setSearchLocationParams = (result) => {
     const { searchYear } = this.props.searchState.searchParams;
 
     if (result) {
-
       // there are porototypes to replace these in api utils
-      const route = createQueryStringFromSearch(
+
+      const route = createAPIQueryStringFromSearch(
         sanitizeSearchResult({
           result,
           year: searchYear,
-        })
+        }),
+        "/map"
       );
       this.props.history.push(route);
     }

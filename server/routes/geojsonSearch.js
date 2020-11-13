@@ -32,7 +32,6 @@ router.get("/parcels", async (req, res) => {
 
         // check to see if there is a distance of 0
         // which represents a target match
-        console.log(pgData)
         const { features } = pgData.data[0].jsonb_build_object;
 
         // returns arrays

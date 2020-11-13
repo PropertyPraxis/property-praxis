@@ -8,25 +8,61 @@ const defaultParams = {
   year: "2020",
 };
 
+// export function parseURLParams(searchQuery) {
+//   let {
+//     type: searchType,
+//     search: searchTerm,
+//     coordinates: searchCoordinates,
+//     year: searchYear,
+//   } = queryString.parse(searchQuery);
+
+//   if (searchType === undefined) {
+//     searchType = defaultParams.type;
+//   }
+//   if (searchTerm === undefined) {
+//     searchTerm = defaultParams.search;
+//   }
+//   if (searchCoordinates === undefined) {
+//     searchCoordinates = defaultParams.searchCoordinates;
+//   }
+//   if (searchYear === undefined) {
+//     searchYear = defaultParams.searchYear;
+//   }
+
+//   return {
+//     searchType,
+//     searchTerm,
+//     searchCoordinates,
+//     searchYear,
+//   };
+// }
+
 export function parseURLParams(searchQuery) {
-  let {
+  const {
     type: searchType,
-    search: searchTerm,
+    code,
+    ownid,
+    place,
     coordinates: searchCoordinates,
     year: searchYear,
   } = queryString.parse(searchQuery);
 
-  if (searchType === undefined) {
-    searchType = defaultParams.type;
-  }
-  if (searchTerm === undefined) {
-    searchTerm = defaultParams.search;
-  }
-  if (searchCoordinates === undefined) {
-    searchCoordinates = defaultParams.searchCoordinates;
-  }
-  if (searchYear === undefined) {
-    searchYear = defaultParams.searchYear;
+  let searchTerm;
+
+  // this assumes that there can only be one search term
+  switch (searchType) {
+    case "zipcode":
+      searchTerm = code;
+      break;
+    case "speculator":
+      searchTerm = ownid;
+      break;
+    case "address":
+      searchTerm = place;
+      break;
+    default:
+      console.error(`Unkown search type:${searchType}`);
+      break;
   }
 
   return {
@@ -36,31 +72,3 @@ export function parseURLParams(searchQuery) {
     searchYear,
   };
 }
-
-// const defaultParamsPROTO = {
-//   type: null,
-//   code: null,
-//   ownid: null,
-//   coordinates: null,
-//   year: "2020",
-// };
-
-// export function parseURLParamsPROTO(searchQuery) {
-//   let { type, code, ownid, coordinates, year } = queryString.parse(searchQuery);
-//   debugger;
-//   switch (type) {
-//     case "zipcode":
-//       break;
-//     case "speculator":
-//       break;
-//     case "address":
-//       break;
-//     default:
-//       break;
-//   }
-
-//   return {
-//     searchType: type,
-//     searchYear: year,
-//   };
-// }

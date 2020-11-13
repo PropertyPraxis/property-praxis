@@ -128,41 +128,41 @@ export function getYearString() {
 
 /* result return sanitized result object with keys that 
 can be used to map through primary results*/
-export function sanitizeSearchResult({ result, year }) {
-  // result return sanitized result object
-  const keys = Object.keys(result);
-  if (keys.includes("propzip")) {
-    const zipcodeQuery = {
-      type: "zipcode",
-      search: result.propzip,
-      coordinates: null,
-      year,
-    };
-    return zipcodeQuery;
-  } else if (keys.includes("own_id")) {
-    const speculatorQuery = {
-      type: "speculator",
-      search: capitalizeFirstLetter(result.own_id),
-      coordinates: null,
-      year,
-    };
-    return speculatorQuery;
-  } else if (keys.includes("place_name")) {
-    const [longitude, latitude] = result.geometry.coordinates;
-    const encodedCoords = encodeURI(JSON.stringify({ longitude, latitude }));
-    const addressQuery = {
-      type: "address",
-      search: result.place_name,
-      coordinates: encodedCoords,
-      year,
-    };
-    return addressQuery;
-  } else {
-    throw new Error(
-      `Known key does not exist in object: ${JSON.stringify(result)}`
-    );
-  }
-}
+// export function sanitizeSearchResult({ result, year }) {
+//   // result return sanitized result object
+//   const keys = Object.keys(result);
+//   if (keys.includes("propzip")) {
+//     const zipcodeQuery = {
+//       type: "zipcode",
+//       search: result.propzip,
+//       coordinates: null,
+//       year,
+//     };
+//     return zipcodeQuery;
+//   } else if (keys.includes("own_id")) {
+//     const speculatorQuery = {
+//       type: "speculator",
+//       search: capitalizeFirstLetter(result.own_id),
+//       coordinates: null,
+//       year,
+//     };
+//     return speculatorQuery;
+//   } else if (keys.includes("place_name")) {
+//     const [longitude, latitude] = result.geometry.coordinates;
+//     const encodedCoords = encodeURI(JSON.stringify({ longitude, latitude }));
+//     const addressQuery = {
+//       type: "address",
+//       search: result.place_name,
+//       coordinates: encodedCoords,
+//       year,
+//     };
+//     return addressQuery;
+//   } else {
+//     throw new Error(
+//       `Known key does not exist in object: ${JSON.stringify(result)}`
+//     );
+//   }
+// }
 
 export function createQueryStringFromSearch({
   type,
@@ -185,7 +185,7 @@ export function createQueryStringFromSearch({
   return query;
 }
 //////////////////
-export function sanitizeSearchResultPROTO({ result, year }) {
+export function sanitizeSearchResult({ result, year }) {
   // result return sanitized result object
   const keys = Object.keys(result);
   if (keys.includes("propzip")) {
@@ -247,11 +247,32 @@ export function createAPIQueryStringFromSearch(
       )}`;
       break;
     default:
-      throw new Error("UNKNOWN QUERY");
+      console.error(`Unkown API search type: ${type}`);
   }
 
   return qs;
 }
+
+export function setResultFromParams({ type, code, ownid, place }) {
+  let searchResult;
+  switch (type) {
+    case "zipcode":
+      searchResult = code;
+      break;
+    case "speculator":
+      searchResult = ownid;
+      break;
+    case "address":
+      searchResult = place;
+      break;
+    default:
+      searchResult = null;
+      console.error(`Unkown result from paramsL ${type}`);
+      break;
+  }
+  return searchResult;
+}
+
 /////////////
 export function flattenPrimaryResults(primaryResults) {
   return primaryResults.reduce((acc, val) => acc.concat(val), []);
