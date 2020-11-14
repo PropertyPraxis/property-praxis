@@ -32,7 +32,7 @@ class App extends Component {
           </Switch>
           {/* The following components are inside Router to have access to Link */}
           <SearchContainer />
-          {/* <DetailedResultsContainer /> */}
+          <DetailedResultsContainer />
           <PPLogo />
           <LoadingIndicator {...this.props} />
           <Error />

@@ -10,7 +10,7 @@ import {
 import {
   capitalizeFirstLetter,
   addUnderscoreToString,
-  createQueryStringFromSearch,
+  createQueryStringFromParams,
   currencyFormatter,
   availablePraxisYears,
 } from "../../utils/helper";
@@ -54,7 +54,6 @@ class AddressDetails extends Component {
     // other years to search for this address
     const praxisRecordYears = availablePraxisYears(recordYears, searchYear);
 
-    
     return (
       <div className="results-inner">
         <MapViewer {...this.props} />
@@ -130,12 +129,15 @@ class AddressDetails extends Component {
               .
             </p>
             <Link
-              to={createQueryStringFromSearch({
-                type: "zipcode",
-                search: propzip,
-                coordinates: null,
-                year: searchYear,
-              })}
+              to={createQueryStringFromParams(
+                {
+                  type: "zipcode",
+                  code: propzip,
+                  coordinates: null,
+                  year: searchYear,
+                },
+                "/map"
+              )}
             >
               <span>
                 <img src={infoIcon} alt="More Information"></img>
@@ -143,12 +145,15 @@ class AddressDetails extends Component {
               </span>
             </Link>
             <Link
-              to={createQueryStringFromSearch({
-                type: "speculator",
-                search: own_id,
-                coordinates: null,
-                year: searchYear,
-              })}
+              to={createQueryStringFromParams(
+                {
+                  type: "speculator",
+                  ownid: own_id,
+                  coordinates: null,
+                  year: searchYear,
+                },
+                "/map"
+              )}
             >
               <span>
                 <img src={infoIcon} alt="More Information"></img>
@@ -161,12 +166,15 @@ class AddressDetails extends Component {
               ? praxisRecordYears.map((year) => {
                   return (
                     <Link
-                      to={createQueryStringFromSearch({
-                        type: "address",
-                        search: searchTerm,
-                        coordinates: searchCoordinates,
-                        year: year,
-                      })}
+                      to={createQueryStringFromParams(
+                        {
+                          type: "address",
+                          place: searchTerm,
+                          coordinates: searchCoordinates,
+                          year,
+                        },
+                        "/map"
+                      )}
                     >
                       <span>
                         <img src={infoIcon} alt="More Information"></img>
