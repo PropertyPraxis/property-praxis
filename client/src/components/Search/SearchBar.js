@@ -12,7 +12,7 @@ import { parseURLParams } from "../../utils/parseURL";
 import {
   capitalizeFirstLetter,
   sanitizeSearchResult,
-  createAPIQueryStringFromSearch,
+  createQueryStringFromParams,
 } from "../../utils/helper";
 import PrimaryResultsContainer from "./PrimarySearchResults";
 import * as searchIcon from "../../assets/img/search.png";
@@ -46,7 +46,7 @@ class SearchBar extends Component {
     if (result) {
       // there are porototypes to replace these in api utils
 
-      const route = createAPIQueryStringFromSearch(
+      const route = createQueryStringFromParams(
         sanitizeSearchResult({
           result,
           year: searchYear,

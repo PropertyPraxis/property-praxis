@@ -8,6 +8,7 @@ import {
   createAddressString,
   parseMBAddressString,
   createLayerFilter,
+  createQueryStringFromParams,
 } from "../../utils/helper";
 import {
   getMapStateAction,
@@ -65,7 +66,7 @@ class PraxisMarker extends React.Component {
 
     // query mapbox api based on those coords
 
-    const apiReverseGeocodeRoute = `/api/${encodedCoords}`;
+    const apiReverseGeocodeRoute = `/api/address-search/reverse-geocode/${encodedCoords}`;
     const { place_name, geometry } = await this.props.dispatch(
       handleGetReverseGeocodeAction(apiReverseGeocodeRoute)
     );
@@ -78,9 +79,18 @@ class PraxisMarker extends React.Component {
     );
 
     // create a new route using the api return data
-    const parsedPlaceName = parseMBAddressString(place_name);
+    // const parsedPlaceName = parseMBAddressString(place_name);
     const { searchYear } = this.props.searchState.searchParams;
-    const clientRoute = `/map?type=address&search=${parsedPlaceName}&coordinates=${reverseGCEncodedCoords}&year=${searchYear}`;
+    const clientRoute = createQueryStringFromParams(
+      {
+        type: "address",
+        place: parseMBAddressString(place_name),
+        coordinates: reverseGCEncodedCoords,
+        year: searchYear,
+      },
+      "/map"
+    );
+
     this.props.history.push(clientRoute);
   };
 
@@ -263,7 +273,15 @@ class PraxisMap extends Component {
       });
 
       const { searchYear } = this.props.searchState.searchParams;
-      const clientRoute = `/map?type=address&search=${addressString}&coordinates=${encodedCoords}&year=${searchYear}`;
+      const clientRoute = createQueryStringFromParams(
+        {
+          type: "address",
+          place: addressString,
+          coordinates: encodedCoords,
+          year: searchYear,
+        },
+        "/map"
+      );
       this.props.history.push(clientRoute);
     }
   };

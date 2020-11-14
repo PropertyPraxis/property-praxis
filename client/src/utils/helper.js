@@ -222,7 +222,7 @@ export function sanitizeSearchResult({ result, year }) {
   }
 }
 
-export function createAPIQueryStringFromSearch(
+export function createQueryStringFromParams(
   { type, ownid = null, code = null, place = null, coordinates = null, year },
   route
 ) {
@@ -253,26 +253,50 @@ export function createAPIQueryStringFromSearch(
   return qs;
 }
 
-export function setResultFromParams({ type, code, ownid, place }) {
+export function createResultFromParams({ type, code, ownid, place }) {
   let searchResult;
   switch (type) {
+    case "address":
+      searchResult = place;
+      break;
     case "zipcode":
       searchResult = code;
       break;
     case "speculator":
       searchResult = ownid;
       break;
-    case "address":
-      searchResult = place;
-      break;
     default:
       searchResult = null;
-      console.error(`Unkown result from paramsL ${type}`);
+      console.error(`Unkown type to create search params: ${type}`);
       break;
   }
   return searchResult;
 }
 
+// export function createClientQueryStringFromSearch({
+//   searchType: type,
+//   searchTerm,
+//   searchYear: year,
+//   searchCoordinates: coordinates,
+// }) {
+//   let ownid, code, place, queryString;
+
+//   switch (type) {
+//     case "address":
+//       place = searchTerm;
+//       break;
+//     case "zipcode":
+//       code = searchTerm;
+//       break;
+//     case "speculator":
+//       ownid = searchTerm;
+//       break;
+//     default:
+//       queryString = null;
+//       console.error(`Unkown type to create query string ${type}`);
+//       break;
+//   }
+// }
 /////////////
 export function flattenPrimaryResults(primaryResults) {
   return primaryResults.reduce((acc, val) => acc.concat(val), []);

@@ -4,8 +4,8 @@ import PropTypes from "prop-types";
 import { updatePrimarySearch } from "../../actions/search";
 import {
   sanitizeSearchResult,
-  createAPIQueryStringFromSearch,
-  setResultFromParams,
+  createQueryStringFromParams,
+  createResultFromParams,
 } from "../../utils/helper";
 import * as zipcodeIcon from "../../assets/img/zipcode-icon-transparent.png";
 import * as speculatorIcon from "../../assets/img/speculator-icon-transparent.png";
@@ -41,7 +41,7 @@ class PrimaryResults extends Component {
     const { searchYear } = this.props.searchState.searchParams;
     const { index } = this.props.searchState.primarySearch;
     const { results } = this.props;
-    debugger;
+
     return (
       <section
         className="partial-results-container"
@@ -62,7 +62,7 @@ class PrimaryResults extends Component {
               year: searchYear,
             });
 
-            const searchQueryRoute = createAPIQueryStringFromSearch(
+            const searchQueryRoute = createQueryStringFromParams(
               {
                 type,
                 code,
@@ -86,7 +86,7 @@ class PrimaryResults extends Component {
                   onClick={this._handleOnClick}
                 >
                   <img src={primaryResultIcons[type]} alt={`Icon of ${type}`} />
-                  {setResultFromParams({
+                  {createResultFromParams({
                     type,
                     code,
                     ownid,
