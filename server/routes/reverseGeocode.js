@@ -5,9 +5,8 @@ const queries = require("../utils/queries");
 
 router.get("/", async (req, res) => {
   try {
-    const { place, coordinates } = req.query;
+    const { coordinates = null } = req.query;
     const { data } = await queries.queryMapboxAPI({
-      place,
       coordinates,
       mbQueryType: queries.REVERSE_GEOCODE,
     });

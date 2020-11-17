@@ -65,8 +65,7 @@ class PraxisMarker extends React.Component {
     );
 
     // query mapbox api based on those coords
-
-    const apiReverseGeocodeRoute = `/api/address-search/reverse-geocode/${encodedCoords}`;
+    const apiReverseGeocodeRoute = `/api/reverse-geocode?coordinates=${encodedCoords}`;
     const { place_name, geometry } = await this.props.dispatch(
       handleGetReverseGeocodeAction(apiReverseGeocodeRoute)
     );

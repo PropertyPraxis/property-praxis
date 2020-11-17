@@ -184,7 +184,7 @@ async function queryPGDB({
         console.warn("Unknown SQL query type.");
         break;
     }
-    console.log(`PG Query: ${query}`);
+    console.log(`DB Query: ${query}`);
     const { rows } = await db.query(query);
     return { data: rows };
   } catch (err) {
@@ -198,27 +198,29 @@ async function queryPGDB({
 
 async function queryMapboxAPI({ coordinates, place, mbQueryType }) {
   try {
-    let mbResponse, mbJSON;
+    let mbResponse, mbJSON, APIRequest;
 
     switch (mbQueryType) {
       case GEOCODE:
-        mbResponse = await fetch(
-          `https://api.mapbox.com/geocoding/v5/mapbox.places/${place}.json?fuzzyMatch=true&bbox=-83.287959,42.25519197,-82.91043917,42.45023198&types=address,poi&access_token=${keys.MAPBOX_ACCESS_TOKEN}`
-        );
+        APIRequest = `https://api.mapbox.com/geocoding/v5/mapbox.places/${place}.json?fuzzyMatch=true&bbox=-83.287959,42.25519197,-82.91043917,42.45023198&types=address,poi&access_token=${keys.MAPBOX_ACCESS_TOKEN}`;
+        console.log(`MBAPIRequest: ${APIRequest}`);
+        mbResponse = await fetch(APIRequest);
         mbJSON = await mbResponse.json();
         const mb = mbJSON.features.map(({ place_name, geometry }) => ({
           place_name,
           geometry, //contains the coordinates
         }));
         return { data: mb };
+
       case REVERSE_GEOCODE:
         const { longitude, latitude } = JSON.parse(decodeURI(coordinates));
-        mbResponse = await fetch(
-          `https://api.mapbox.com/geocoding/v5/mapbox.places/${longitude},${latitude}.json?access_token=${keys.MAPBOX_ACCESS_TOKEN}`
-        );
+        APIRequest = `https://api.mapbox.com/geocoding/v5/mapbox.places/${longitude},${latitude}.json?access_token=${keys.MAPBOX_ACCESS_TOKEN}`;
+        console.log(`MBAPIRequest: ${APIRequest}`);
+        mbResponse = await fetch(APIRequest);
         mbJSON = await mbResponse.json();
         const { place_name, geometry } = mbJSON.features[0];
         return { data: { place_name, geometry } };
+
       default:
         console.error(`Unkown Mapbox query type: ${mbQueryType}`);
         return { data: `Unkown Mapbox query type: ${mbQueryType}` };

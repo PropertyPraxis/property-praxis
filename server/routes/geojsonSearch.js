@@ -16,7 +16,7 @@ router.get("/", async (req, res) => {
       year = "2020",
     } = req.query;
 
-    let pgData, clientData;
+    let pgData, clientData, detailsType;
     switch (type) {
       case "parcels-by-geocode":
         // return geoJSON dependent on coverage
@@ -40,12 +40,16 @@ router.get("/", async (req, res) => {
           // this is a default empty geojson
           // where there is no features returned
           geoJSON = buildGeoJSONTemplate([]);
+          praxisDataType = "parcels-by-geocode:empty";
         } else if (targetAddress.length > 0) {
           geoJSON = buildGeoJSONTemplate(targetAddress);
+          praxisDataType = "parcels-by-geocode:single-parcel";
         } else if (targetAddress.length === 0 && nearbyAddresses.length > 0) {
           geoJSON = buildGeoJSONTemplate(nearbyAddresses);
+          praxisDataType = "parcels-by-geocode:multiple-parcels";
         } else {
           geoJSON = buildGeoJSONTemplate([]);
+          praxisDataType = "parcels-by-geocode:empty";
         }
         clientData = geoJSON;
         break;
@@ -57,6 +61,7 @@ router.get("/", async (req, res) => {
         });
 
         clientData = data[0].jsonb_build_object; //geoJSON
+        praxisDataType = "parcels-by-code";
         break;
 
       case "parcels-by-speculator":
@@ -66,18 +71,20 @@ router.get("/", async (req, res) => {
           PGDBQueryType: queries.GEOJSON_PARCELS_OWNID,
         });
         clientData = pgData.data[0].jsonb_build_object; //geoJSON
+        praxisDataType = "parcels-by-speculator";
         break;
       case "zipcode-all": // this shoudl be reowrked to hanlde "codes"
         pgData = await queries.queryPGDB({
           PGDBQueryType: queries.GEOJSON_ZIPCODES,
         });
         clientData = pgData.data[0].jsonb_build_object;
+        praxisDataType = "zicode-all";
         break;
       default:
         clientData = null;
         break;
     }
-
+    clientData.praxisDataType = praxisDataType;
     res.json(clientData);
   } catch (err) {
     const msg = `An error occurred executing parcels geoJSON query. Message: ${err}`;
