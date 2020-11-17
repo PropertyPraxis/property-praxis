@@ -5,7 +5,7 @@ const findTargetAddress = require("../utils/helper").findTargetAddress;
 const buildGeoJSONTemplate = require("../utils/helper").buildGeoJSONTemplate;
 const router = new Router();
 
-router.get("/parcels", async (req, res) => {
+router.get("/", async (req, res) => {
   try {
     const {
       type,
@@ -17,9 +17,8 @@ router.get("/parcels", async (req, res) => {
     } = req.query;
 
     let pgData, clientData;
-
     switch (type) {
-      case "address":
+      case "parcels-by-geocode":
         // return geoJSON dependent on coverage
         let geoJSON;
 
@@ -27,7 +26,7 @@ router.get("/parcels", async (req, res) => {
           place,
           coordinates,
           year,
-          PGDBQueryType: "geojson-parcels-distance",
+          PGDBQueryType: queries.GEOJSON_PARCELS_DISTANCE,
         });
 
         // check to see if there is a distance of 0
@@ -50,25 +49,30 @@ router.get("/parcels", async (req, res) => {
         }
         clientData = geoJSON;
         break;
-      case "zipcode":
+      case "parcels-by-code":
         const { data } = await queries.queryPGDB({
           code,
           year,
-          PGDBQueryType: "geojson-parcels-code",
+          PGDBQueryType: queries.GEOJSON_PARCELS_CODE,
         });
 
         clientData = data[0].jsonb_build_object; //geoJSON
         break;
 
-      case "speculator":
+      case "parcels-by-speculator":
         pgData = await queries.queryPGDB({
           ownid,
           year,
-          PGDBQueryType: "geojson-parcels-ownid",
+          PGDBQueryType: queries.GEOJSON_PARCELS_OWNID,
         });
         clientData = pgData.data[0].jsonb_build_object; //geoJSON
         break;
-
+      case "zipcode-all": // this shoudl be reowrked to hanlde "codes"
+        pgData = await queries.queryPGDB({
+          PGDBQueryType: queries.GEOJSON_ZIPCODES,
+        });
+        clientData = pgData.data[0].jsonb_build_object;
+        break;
       default:
         clientData = null;
         break;
@@ -81,37 +85,5 @@ router.get("/parcels", async (req, res) => {
     res.status(404).send(msg);
   }
 });
-
-// router.get("/zipcodes", async (req, res) => {
-//   try {
-//     const { type, ownid, code, place, coordinates, year } = req.query;
-//     let clientData;
-//     if (["address"].includes(type)) {
-//       const { data } = await queries.queryMapboxAPI({
-//         place,
-//         coordinates,
-//         mbQueryType: "primary-place",
-//       });
-//       clientData = data;
-//     } else if (["zipcode", "speculator"].includes(type)) {
-//       const { data } = await queries.queryPGDB({
-//         PGDBQueryType: `primary-${type}`,
-//         code,
-//         ownid,
-//         coordinates,
-//         year,
-//       });
-//       clientData = data;
-//     } else {
-//       clientData = null;
-//     }
-
-//     res.json(clientData);
-//   } catch (err) {
-//     const msg = `An error occurred executing zipcodes geoJSON query. Message: ${err}`;
-//     console.error(msg);
-//     res.status(404).send(msg);
-//   }
-// });
 
 module.exports = router;

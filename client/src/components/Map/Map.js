@@ -146,13 +146,13 @@ class PraxisMap extends Component {
   }) => {
     switch (searchType) {
       case "zipcode":
-        return `/api/geojson/parcels/${searchType}/${searchTerm}/${searchYear}`;
+        return `/api/geojson-test?type=parcels-by-code&code=${searchTerm}&year=${searchYear}`;
       case "speculator":
-        return `/api/geojson/parcels/${searchType}/${searchTerm}/${searchYear}`;
+        return `/api/geojson-test?type=parcels-by-speculator&ownid=${searchTerm}&year=${searchYear}`;
       case "address":
-        return `/api/geojson/parcels/address/${searchCoordinates}/${searchYear}`;
+        return `/api/geojson-test?type=parcels-by-geocode&place=${searchTerm}&coordinates=${searchCoordinates}&year=${searchYear}`;
       default:
-        return `/api/geojson/parcels/${searchYear}`;
+        return null;
     }
   };
 
@@ -172,11 +172,12 @@ class PraxisMap extends Component {
 
     // if the return geojson has features aka the search term was
     // valid then change the veiwport accordingly
-    features
-      ? this.props.dispatch(getMapStateAction(newViewport))
-      : this.props.dispatch(
-          handleGetParcelsByQueryAction(`/api/geojson/parcels/${searchYear}`) //default return
-        );
+    if (features) {
+      this.props.dispatch(getMapStateAction(newViewport));
+    }
+    // : this.props.dispatch(
+    //     handleGetParcelsByQueryAction(`/api/geojson/parcels/${searchYear}`) //default return
+    //   );
   };
 
   _getMapData = async () => {
@@ -185,13 +186,12 @@ class PraxisMap extends Component {
 
     // Build route and get data
     const route = this._routeSwitcher(this.props.searchQueryParams);
-
     // Get Data
     const parcelsGeojson = await this.props.dispatch(
       handleGetParcelsByQueryAction(route)
     );
     const zipsGeojson = await this.props.dispatch(
-      handleGetZipcodesDataAction("/api/geojson/zipcodes")
+      handleGetZipcodesDataAction("/api/geojson-test?type=zipcode-all")
     );
 
     //Set viewport to parcels bbox

@@ -7,18 +7,24 @@ router.get("/", async (req, res) => {
   try {
     const { type, ownid, code, place, coordinates, year } = req.query;
     let clientData;
-    if (["address"].includes(type)) {
+    if (type === "address") {
       const { data } = await queries.queryMapboxAPI({
         place,
         coordinates,
-        mbQueryType: "primary-place",
+        mbQueryType: queries.GEOCODE,
       });
       clientData = data;
-    } else if (["zipcode", "speculator"].includes(type)) {
+    } else if (type === "speculator") {
       const { data } = await queries.queryPGDB({
-        PGDBQueryType: `primary-${type}`,
-        code,
+        PGDBQueryType: queries.PRIMARY_SPECULATOR,
         ownid,
+        year,
+      });
+      clientData = data;
+    } else if (type === "zipcode") {
+      const { data } = await queries.queryPGDB({
+        PGDBQueryType: queries.PRIMARY_ZIPCODE,
+        code,
         coordinates,
         year,
       });
@@ -34,4 +40,5 @@ router.get("/", async (req, res) => {
     res.status(404).send(msg);
   }
 });
+
 module.exports = router;

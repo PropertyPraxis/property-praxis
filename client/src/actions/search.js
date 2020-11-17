@@ -1,7 +1,6 @@
 import { triggerFetchError } from "./redirect";
 import {
-  APISearchQueryFromParams,
-  APISearchQueryFromParamsPROTO,
+  APIQueryStringFromSearchParams,
   APISearchQueryFromRoute,
 } from "../utils/api";
 import { getImageKey } from "../utils/viewer";
@@ -15,9 +14,9 @@ export const UPDATE_SEARCH_BAR = "UPDATE_SEARCH_BAR";
 export const UPDATE_VIEWER_IMAGE = "UPDATE_VIEWER_IMAGE";
 export const GET_DOWNLOAD_DATA = "GET_DOWNLOAD_DATA";
 
-// General action to set search state
-// use this sparingly as the action
-// type is not explicit
+/* General action to set search state
+use this sparingly as the action
+type is not explicit */
 export function updateGeneralSearch(searchState) {
   return {
     type: UPDATE_GENERAL_SEARCH,
@@ -62,45 +61,22 @@ export function handlePrimarySearchQuery(
   route
 ) {
   return async (dispatch) => {
-    return APISearchQueryFromParams(
-      { searchType, searchTerm, searchCoordinates, searchYear },
-      route
-    )
-      .then((json) => {
-        const flattendResults = flattenPrimaryResults(json);
-        dispatch(updatePrimarySearch({ results: flattendResults }));
-        return flattendResults;
-      })
-      .catch((err) => {
-        //need to add some more error hadling
-        dispatch(triggerFetchError(true));
-        throw Error(`An error occured searching: ${err}`);
-      });
-  };
-}
-
-export async function handlePrimarySearchQueryPROTO(
-  { type, ownid = null, code = null, place = null, coordinates = null, year },
-  route
-) {
-  return async (dispatch) => {
     try {
-      const json = await APISearchQueryFromParamsPROTO(
-        { type, ownid, code, place, coordinates, year },
+      const json = await APIQueryStringFromSearchParams(
+        { searchType, searchTerm, searchCoordinates, searchYear },
         route
       );
-      debugger;
-      const flattendResults = await flattenPrimaryResults(json);
-      // dispatch(updatePrimarySearch({ results: flattendResults }));
+      const flattendResults = flattenPrimaryResults(json);
+      dispatch(updatePrimarySearch({ results: flattendResults }));
       return flattendResults;
     } catch (err) {
-      // dispatch(triggerFetchError(true));
-      throw Error(`An error occured for primary search query: ${err}`);
+      dispatch(triggerFetchError(true));
+      console.error(`An error occured for primary search query: ${err}`);
     }
   };
 }
 
-export function handlePrimarySearchAll({ searchTerm, searchYear }, routes) {
+export function handlePrimarySearchAll({ searchTerm, searchYear }, route) {
   return async (dispatch) => {
     try {
       const types = ["address", "speculator", "zipcode"];
@@ -110,9 +86,9 @@ export function handlePrimarySearchAll({ searchTerm, searchYear }, routes) {
         partialSpeculatorResults,
         partialZipcodeResults,
       ] = await Promise.all(
-        routes.map(async (route, index) => {
-          return await APISearchQueryFromParams(
-            { searchType: types[index], searchTerm, searchYear },
+        types.map(async (searchType, index) => {
+          return await APIQueryStringFromSearchParams(
+            { searchType, searchTerm, searchYear },
             route
           );
         })
@@ -126,7 +102,9 @@ export function handlePrimarySearchAll({ searchTerm, searchYear }, routes) {
       dispatch(updatePrimarySearch({ results: flattendResults }));
     } catch (err) {
       dispatch(triggerFetchError(true));
-      throw Error(`An error occured searching all primaries. Message: ${err}`);
+      console.error(
+        `An error occured searching all primaries. Message: ${err}`
+      );
     }
   };
 }
@@ -137,7 +115,7 @@ export function handleDetailedSearchQuery(
 ) {
   return async (dispatch) => {
     try {
-      const json = await APISearchQueryFromParams(
+      const json = await APIQueryStringFromSearchParams(
         { searchType, searchTerm, searchCoordinates, searchYear },
         route
       );
@@ -145,7 +123,7 @@ export function handleDetailedSearchQuery(
       return json;
     } catch (err) {
       dispatch(triggerFetchError(true));
-      throw Error(`An error occured for detailed search. Message: ${err}`);
+      console.error(`An error occured for detailed search. Message: ${err}`);
     }
   };
 }
@@ -158,7 +136,7 @@ export function handleSearchBarYearsAction(route) {
       return json;
     } catch (err) {
       dispatch(triggerFetchError(true));
-      throw Error(
+      console.error(
         `An error occured searching search bar years.  Message: ${err}`
       );
     }
@@ -173,7 +151,7 @@ export function handleGetPraxisYearsAction(route) {
       return json;
     } catch (err) {
       dispatch(triggerFetchError(true));
-      throw Error(
+      console.error(
         `An error occured searching search bar years.  Message: ${err}`
       );
     }
@@ -195,110 +173,8 @@ export function handleGetViewerImage(longitude, latitude) {
       return viewer;
     } catch (err) {
       // viewer image ui error
-      throw Error(`An error occured fetching viewer image. Message: ${err}`);
+      // dispatch something here for error
+      console.error(`An error occured fetching viewer image. Message: ${err}`);
     }
   };
 }
-
-// export const PRIMARY_SEARCH_QUERY = "PRIMARY_SEARCH_QUERY";
-// export const TOGGLE_DETAILED_RESULTS = "TOGGLE_DETAILED_RESULTS";
-// export const UPDATE_DETAILED_RESULTS = "UPDATE_DETAILED_RESULTS";
-// export const TOGGLE_PRIMARY_RESULTS = "TOGGLE_PRIMARY_RESULTS";
-// export const UPDATE_PRIMARY_RESULTS = "UPDATE_PRIMARY_RESULTS";
-// export const TOGGLE_PRIMARY_ACTIVE = "TOGGLE_PRIMARY_ACTIVE";
-// export const UPDATE_PRIMARY_INDEX = "UPDATE_PRIMARY_INDEX";
-// export const GET_SEARCH_YEARS = "GET_SEARCH_YEARS";
-// export const GET_PRAXIS_SEARCH_YEARS = "GET_PRAXIS_SEARCH_YEARS"; // should be DB Years
-
-//////////////////////////////////////////////////////////
-// export function handleGetDownloadDataAction(route) {
-//   return (dispatch) => {
-//     dispatch(getDownloadDataAction(null));
-//     return getDownloadData(route)
-//       .then((data) => {
-//         dispatch(getDownloadDataAction(data));
-//         return data;
-//       })
-//       .catch((err) => {
-//         throw Error(`An error occured searching: ${err}`);
-//       });
-//   };
-// }
-
-// function getDownloadDataAction(downloadData) {
-//   return {
-//     type: GET_DOWNLOAD_DATA,
-//     payload: { downloadData },
-//   };
-// }
-
-// export function togglePrimaryResultsAction(isOpen) {
-//   return {
-//     type: TOGGLE_PRIMARY_RESULTS,
-//     payload: { isPrimaryResultsOpen: isOpen },
-//   };
-// }
-
-// export function togglePrimaryActiveAction(isActive) {
-//   return {
-//     type: TOGGLE_PRIMARY_ACTIVE,
-//     payload: { isPrimaryResultsActive: isActive },
-//   };
-// }
-
-// export function toggleDetailedResultsAction(isOpen) {
-//   return {
-//     type: TOGGLE_DETAILED_RESULTS,
-//     payload: { isDetailedResultsOpen: isOpen },
-//   };
-// }
-
-// function primarySearchQuery(primaryResults) {
-//   return {
-//     type: PRIMARY_SEARCH_QUERY,
-//     payload: {
-//       primaryResults,
-//     },
-//   };
-// }
-
-// export function updatePrimaryIndex(primaryIndex) {
-//   return {
-//     type: UPDATE_PRIMARY_INDEX,
-//     payload: {
-//       primaryIndex,
-//     },
-//   };
-// }
-
-// export function updatePrimaryResults(primaryResults) {
-//   return {
-//     type: UPDATE_PRIMARY_RESULTS,
-//     payload: {
-//       primaryResults,
-//     },
-//   };
-// }
-
-// export function updateDetailedResults(detailedResults) {
-//   return {
-//     type: UPDATE_DETAILED_RESULTS,
-//     payload: {
-//       detailedResults,
-//     },
-//   };
-// }
-
-// function getYearsAction(searchBar) {
-//   return {
-//     type: GET_SEARCH_YEARS,
-//     payload: { searchBar },
-//   };
-// }
-
-// function getPraxisYearsAction(praxisSearchYears) {
-//   return {
-//     type: GET_SEARCH_YEARS,
-//     payload: { praxisSearchYears },
-//   };
-// }

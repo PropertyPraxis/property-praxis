@@ -2,6 +2,20 @@ const db = require("../db"); //index.js
 const fetch = require("node-fetch");
 const keys = require("../config/keys");
 
+/*PG DB query types*/
+const PRIMARY_ZIPCODE = "PRIMARY_ZIPCODE";
+const PRIMARY_SPECULATOR = "PRIMARY_SPECULATOR";
+const GEOJSON_ZIPCODES = "GEOJSON_ZIPCODES";
+const GEOJSON_PARCELS_CODE = "GEOJSON_PARCELS_CODE";
+const GEOJSON_PARCELS_OWNID = "GEOJSON_PARCELS_OWNID";
+const GEOJSON_PARCELS_DISTANCE = "GEOJSON_PARCELS_DISTANCE";
+const DETAILED_ADDRESS_YEARS = "DETAILED_ADDRESS_YEARS";
+const SEARCHBAR_YEARS = "SEARCHBAR_YEARS";
+
+/*Mapbox API query types*/
+const GEOCODE = "GEOCODE"; // works for primary address as well
+const REVERSE_GEOCODE = "REVERSE_GEOCODE";
+
 async function queryPGDB({
   PGDBQueryType = null,
   code = null,
@@ -19,7 +33,7 @@ async function queryPGDB({
     }
 
     switch (PGDBQueryType) {
-      case "primary-zipcode":
+      case PRIMARY_ZIPCODE:
         query = `SELECT DISTINCT p.propzip, AVG(oc.count) as avg_count
           FROM property as p
           INNER JOIN taxpayer_property AS tpp ON p.prop_id = tpp.prop_id
@@ -34,7 +48,7 @@ async function queryPGDB({
           `;
         break;
 
-      case "primary-speculator":
+      case PRIMARY_SPECULATOR:
         query = `SELECT * FROM owner_count
           WHERE own_id LIKE '${decodeURI(ownid).toUpperCase()}%'
           AND praxisyear = '${year}'
@@ -42,8 +56,8 @@ async function queryPGDB({
           ORDER BY count DESC
           LIMIT 5;`;
         break;
-
-      case "geojson-zipcodes-all":
+      // add WHERE to query for all the intersecting zips/parcels
+      case GEOJSON_ZIPCODES:
         query = `SELECT jsonb_build_object(
             'type',     'FeatureCollection',
             'features', jsonb_agg(feature)
@@ -60,7 +74,7 @@ async function queryPGDB({
           ) features;`;
         break;
 
-      case "geojson-parcels-code":
+      case GEOJSON_PARCELS_CODE:
         query = `SELECT jsonb_build_object(
             'type',     'FeatureCollection',
             'features', jsonb_agg(feature)
@@ -79,7 +93,7 @@ async function queryPGDB({
           ) features;`;
         break;
 
-      case "geojson-parcels-ownid":
+      case GEOJSON_PARCELS_OWNID:
         query = `SELECT jsonb_build_object(
             'type',     'FeatureCollection',
             'features', jsonb_agg(feature)
@@ -98,7 +112,7 @@ async function queryPGDB({
           ) features;`;
         break;
 
-      case "geojson-parcels-distance":
+      case GEOJSON_PARCELS_DISTANCE:
         // constant for search distance
         const searchRadius = 1000;
 
@@ -130,7 +144,7 @@ async function queryPGDB({
           ) features;`;
         break;
 
-      case "detailed-address-year": // need to rework this one to check other geom cols
+      case DETAILED_ADDRESS_YEARS: // need to rework this one to check other geom cols
         query = `SELECT DISTINCT y.praxisyear
           FROM parcel_property_geom AS ppg
           INNER JOIN property as p ON ppg.parprop_id = p.parprop_id
@@ -146,7 +160,7 @@ async function queryPGDB({
           ORDER BY y.praxisyear DESC;`; // geom_gj needs work here
         break;
 
-      case "searchbar-years":
+      case SEARCHBAR_YEARS:
         query = `SELECT DISTINCT praxisyear FROM year 
           ORDER BY praxisyear DESC;`;
         break;
@@ -187,7 +201,7 @@ async function queryMapboxAPI({ coordinates, place, mbQueryType }) {
     let mbResponse, mbJSON;
 
     switch (mbQueryType) {
-      case "primary-place":
+      case GEOCODE:
         mbResponse = await fetch(
           `https://api.mapbox.com/geocoding/v5/mapbox.places/${place}.json?fuzzyMatch=true&bbox=-83.287959,42.25519197,-82.91043917,42.45023198&types=address,poi&access_token=${keys.MAPBOX_ACCESS_TOKEN}`
         );
@@ -197,7 +211,7 @@ async function queryMapboxAPI({ coordinates, place, mbQueryType }) {
           geometry, //contains the coordinates
         }));
         return { data: mb };
-      case "reverse-geocode":
+      case REVERSE_GEOCODE:
         const { longitude, latitude } = JSON.parse(decodeURI(coordinates));
         mbResponse = await fetch(
           `https://api.mapbox.com/geocoding/v5/mapbox.places/${longitude},${latitude}.json?access_token=${keys.MAPBOX_ACCESS_TOKEN}`
@@ -206,11 +220,25 @@ async function queryMapboxAPI({ coordinates, place, mbQueryType }) {
         const { place_name, geometry } = mbJSON.features[0];
         return { data: { place_name, geometry } };
       default:
-        console.warn(`Unkown Mapbox query type: ${mbQueryType}`);
+        console.error(`Unkown Mapbox query type: ${mbQueryType}`);
         return { data: `Unkown Mapbox query type: ${mbQueryType}` };
     }
   } catch (err) {
     console.error(`An error occurred executing MB query. Message: ${err}`);
   }
 }
-module.exports = { queryPGDB, queryMapboxAPI };
+
+module.exports = {
+  queryPGDB,
+  queryMapboxAPI,
+  PRIMARY_ZIPCODE,
+  PRIMARY_SPECULATOR,
+  GEOJSON_ZIPCODES,
+  GEOJSON_PARCELS_CODE,
+  GEOJSON_PARCELS_OWNID,
+  GEOJSON_PARCELS_DISTANCE,
+  DETAILED_ADDRESS_YEARS,
+  SEARCHBAR_YEARS,
+  GEOCODE,
+  REVERSE_GEOCODE,
+};

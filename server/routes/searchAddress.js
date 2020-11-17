@@ -22,26 +22,26 @@ router.get("/reverse-geocode/:coords", async (req, res) => {
   }
 });
 
-router.get("/partial/:id/:year", async (req, res) => {
-  const { id } = req.params;
-  // const decodeId = decodeURI(id).toUpperCase();
+// router.get("/partial/:id/:year", async (req, res) => {
+//   const { id } = req.params;
+//   // const decodeId = decodeURI(id).toUpperCase();
 
-  try {
-    //   query the MB Geocoder APIz`
-    const mbResponse = await fetch(
-      `https://api.mapbox.com/geocoding/v5/mapbox.places/${id}.json?fuzzyMatch=true&bbox=-83.287959,42.25519197,-82.91043917,42.45023198&types=address,poi&access_token=${keys.MAPBOX_ACCESS_TOKEN}`
-    );
-    const mbJson = await mbResponse.json();
-    const mbFeatures = mbJson.features;
-    const mb = mbFeatures.map(({ place_name, geometry }) => ({
-      place_name,
-      geometry, //contains the coordinates
-    }));
-    res.json(mb);
-  } catch (err) {
-    res.json(err);
-  }
-});
+//   try {
+//     //   query the MB Geocoder APIz`
+//     const mbResponse = await fetch(
+//       `https://api.mapbox.com/geocoding/v5/mapbox.places/${id}.json?fuzzyMatch=true&bbox=-83.287959,42.25519197,-82.91043917,42.45023198&types=address,poi&access_token=${keys.MAPBOX_ACCESS_TOKEN}`
+//     );
+//     const mbJson = await mbResponse.json();
+//     const mbFeatures = mbJson.features;
+//     const mb = mbFeatures.map(({ place_name, geometry }) => ({
+//       place_name,
+//       geometry, //contains the coordinates
+//     }));
+//     res.json(mb);
+//   } catch (err) {
+//     res.json(err);
+//   }
+// });
 
 router.get("/full/:coords/:year", async (req, res) => {
   const { coords, year } = req.params;

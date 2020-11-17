@@ -33,7 +33,7 @@ class PrimaryResults extends Component {
   };
 
   componentWillUnmount() {
-    // turn active state to true
+    // turn active state to false
     this.props.dispatch(updatePrimarySearch({ isActive: false }));
   }
 

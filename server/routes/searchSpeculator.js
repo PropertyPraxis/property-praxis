@@ -3,27 +3,27 @@ const db = require("../db"); //index.js
 
 const router = new Router();
 
-router.get("/partial/:id/:year", async (req, res) => {
-  const { id, year } = req.params;
-  const decodeId = decodeURI(id);
-  try {
-    //   WHERE levenshtein(own_id, $1) <= 2
-    const query = `SELECT * FROM owner_count
-                WHERE own_id LIKE $1
-                AND praxisyear = $2
-                AND count > 9
-                ORDER BY count DESC
-                LIMIT 5;`;
+// router.get("/partial/:id/:year", async (req, res) => {
+//   const { id, year } = req.params;
+//   const decodeId = decodeURI(id);
+//   try {
+//     //   WHERE levenshtein(own_id, $1) <= 2
+//     const query = `SELECT * FROM owner_count
+//                 WHERE own_id LIKE $1
+//                 AND praxisyear = $2
+//                 AND count > 9
+//                 ORDER BY count DESC
+//                 LIMIT 5;`;
 
-    const { rows } = await db.query(query, [
-      `%${decodeId.toUpperCase()}%`,
-      year,
-    ]);
-    res.json(rows);
-  } catch (err) {
-    res.json(err);
-  }
-});
+//     const { rows } = await db.query(query, [
+//       `%${decodeId.toUpperCase()}%`,
+//       year,
+//     ]);
+//     res.json(rows);
+//   } catch (err) {
+//     res.json(err);
+//   }
+// });
 
 router.get("/full/:id/:year", async (req, res) => {
   const { id, year } = req.params;
