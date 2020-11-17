@@ -146,11 +146,11 @@ class PraxisMap extends Component {
   }) => {
     switch (searchType) {
       case "zipcode":
-        return `/api/geojson-test?type=parcels-by-code&code=${searchTerm}&year=${searchYear}`;
+        return `/api/geojson?type=parcels-by-code&code=${searchTerm}&year=${searchYear}`;
       case "speculator":
-        return `/api/geojson-test?type=parcels-by-speculator&ownid=${searchTerm}&year=${searchYear}`;
+        return `/api/geojson?type=parcels-by-speculator&ownid=${searchTerm}&year=${searchYear}`;
       case "address":
-        return `/api/geojson-test?type=parcels-by-geocode&place=${searchTerm}&coordinates=${searchCoordinates}&year=${searchYear}`;
+        return `/api/geojson?type=parcels-by-geocode&place=${searchTerm}&coordinates=${searchCoordinates}&year=${searchYear}`;
       default:
         return null;
     }
@@ -191,7 +191,7 @@ class PraxisMap extends Component {
       handleGetParcelsByQueryAction(route)
     );
     const zipsGeojson = await this.props.dispatch(
-      handleGetZipcodesDataAction("/api/geojson-test?type=zipcode-all")
+      handleGetZipcodesDataAction("/api/geojson?type=zipcode-all")
     );
 
     //Set viewport to parcels bbox
