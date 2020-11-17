@@ -5,11 +5,11 @@ const queries = require("../utils/queries");
 
 router.get("/", async (req, res) => {
   try {
-    const { place, coordinates, year } = req.query;
+    const { place, coordinates } = req.query;
     const { data } = await queries.queryMapboxAPI({
       place,
       coordinates,
-      mbQueryType: "reverse-geocode",
+      mbQueryType: queries.REVERSE_GEOCODE,
     });
 
     res.json(data);
