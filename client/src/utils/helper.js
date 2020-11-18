@@ -1,7 +1,6 @@
-import { feature } from "@turf/turf";
 import queryString from "query-string";
-//logic to render mobile properly
 
+//logic to render mobile properly
 export function setDocHeightOnWindow() {
   function setDocHeight() {
     document.documentElement.style.setProperty(
@@ -28,44 +27,6 @@ export function capitalizeFirstLetter(string) {
   });
 
   return capitalizedStrArray.join(" ");
-}
-
-export function pathnameToSearchType(path) {
-  switch (path) {
-    case "/address":
-      return "Address";
-    case "/zipcode":
-      return "Zipcode";
-    case "/speculator":
-      return "Speculator";
-    case "/all":
-      return "All";
-    default:
-      return "All";
-  }
-}
-
-// function to find the single target address at distance 0
-export function findTargetAddress(features) {
-  const targetAddress = features
-    .map((feature) => {
-      if (feature.properties.distance === 0) {
-        return feature;
-      }
-      return null;
-    })
-    .filter((result) => result !== null);
-
-  const nearbyAddresses = features
-    .map((feature) => {
-      if (feature.properties.distance !== 0) {
-        return feature;
-      }
-      return null;
-    })
-    .filter((result) => result !== null);
-
-  return { targetAddress, nearbyAddresses };
 }
 
 export function createAddressString({ propno, propdir, propstr }) {
@@ -126,65 +87,6 @@ export function getYearString() {
   return new Date().getFullYear();
 }
 
-/* result return sanitized result object with keys that 
-can be used to map through primary results*/
-// export function sanitizeSearchResult({ result, year }) {
-//   // result return sanitized result object
-//   const keys = Object.keys(result);
-//   if (keys.includes("propzip")) {
-//     const zipcodeQuery = {
-//       type: "zipcode",
-//       search: result.propzip,
-//       coordinates: null,
-//       year,
-//     };
-//     return zipcodeQuery;
-//   } else if (keys.includes("own_id")) {
-//     const speculatorQuery = {
-//       type: "speculator",
-//       search: capitalizeFirstLetter(result.own_id),
-//       coordinates: null,
-//       year,
-//     };
-//     return speculatorQuery;
-//   } else if (keys.includes("place_name")) {
-//     const [longitude, latitude] = result.geometry.coordinates;
-//     const encodedCoords = encodeURI(JSON.stringify({ longitude, latitude }));
-//     const addressQuery = {
-//       type: "address",
-//       search: result.place_name,
-//       coordinates: encodedCoords,
-//       year,
-//     };
-//     return addressQuery;
-//   } else {
-//     throw new Error(
-//       `Known key does not exist in object: ${JSON.stringify(result)}`
-//     );
-//   }
-// }
-
-export function createQueryStringFromSearch({
-  type,
-  search,
-  coordinates,
-  year,
-}) {
-  let parsedSearch;
-  if (type === "address") {
-    parsedSearch = parseMBAddressString(search);
-  } else {
-    parsedSearch = search;
-  }
-
-  const query = `/map?${queryString.stringify(
-    { type, search: parsedSearch, coordinates, year },
-    { sort: false, skipNull: true }
-  )}`;
-
-  return query;
-}
-//////////////////
 export function sanitizeSearchResult({ result, year }) {
   // result return sanitized result object
   const keys = Object.keys(result);
@@ -220,6 +122,27 @@ export function sanitizeSearchResult({ result, year }) {
       `Known key does not exist in object: ${JSON.stringify(result)}`
     );
   }
+}
+
+export function createQueryStringFromSearch({
+  type,
+  search,
+  coordinates,
+  year,
+}) {
+  let parsedSearch;
+  if (type === "address") {
+    parsedSearch = parseMBAddressString(search);
+  } else {
+    parsedSearch = search;
+  }
+
+  const query = `/map?${queryString.stringify(
+    { type, search: parsedSearch, coordinates, year },
+    { sort: false, skipNull: true }
+  )}`;
+
+  return query;
 }
 
 export function createQueryStringFromParams(
@@ -273,6 +196,62 @@ export function createResultFromParams({ type, code, ownid, place }) {
   return searchResult;
 }
 
+export function flattenPrimaryResults(primaryResults) {
+  return primaryResults.reduce((acc, val) => acc.concat(val), []);
+}
+
+export function getDetailsFromGeoJSON(geojson) {
+  if (geojson) {
+    const details = geojson.features.map((feature) => {
+      const { id, properties } = feature;
+      return { id, properties };
+    });
+    return { details, detailsType: geojson.praxisDataType };
+  } else {
+    return { details: null, detailsType: null };
+  }
+}
+
+export const currencyFormatter = new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "USD",
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 0,
+});
+
+export function availablePraxisYears(praxisYears, currentYear) {
+  if (praxisYears && currentYear) {
+    const availableYears = praxisYears
+      .map(({ praxisyear }) => praxisyear)
+      .filter((year) => year !== Number(currentYear));
+    return availableYears;
+  } else {
+    return null;
+  }
+}
+
+// function to find the single target address at distance 0
+// export function findTargetAddress(features) {
+//   const targetAddress = features
+//     .map((feature) => {
+//       if (feature.properties.distance === 0) {
+//         return feature;
+//       }
+//       return null;
+//     })
+//     .filter((result) => result !== null);
+
+//   const nearbyAddresses = features
+//     .map((feature) => {
+//       if (feature.properties.distance !== 0) {
+//         return feature;
+//       }
+//       return null;
+//     })
+//     .filter((result) => result !== null);
+
+//   return { targetAddress, nearbyAddresses };
+// }
 // export function createClientQueryStringFromSearch({
 //   searchType: type,
 //   searchTerm,
@@ -298,36 +277,3 @@ export function createResultFromParams({ type, code, ownid, place }) {
 //   }
 // }
 /////////////
-export function flattenPrimaryResults(primaryResults) {
-  return primaryResults.reduce((acc, val) => acc.concat(val), []);
-}
-
-export function getDetailsFromGeoJSON(geojson) {
-  if (geojson) {
-    const details = geojson.features.map((feature) => {
-      const { id, properties } = feature;
-      return { id, properties };
-    });
-    return { details };
-  } else {
-    return { details: null };
-  }
-}
-
-export const currencyFormatter = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-  minimumFractionDigits: 0,
-  maximumFractionDigits: 0,
-});
-
-export function availablePraxisYears(praxisYears, currentYear) {
-  if (praxisYears && currentYear) {
-    const availableYears = praxisYears
-      .map(({ praxisyear }) => praxisyear)
-      .filter((year) => year !== Number(currentYear));
-    return availableYears;
-  } else {
-    return null;
-  }
-}

@@ -5,31 +5,19 @@ import PropTypes from "prop-types";
 import { CSSTransition } from "react-transition-group";
 import { updateDetailedSearch } from "../../actions/search";
 import { getDetailsFromGeoJSON } from "../../utils/helper";
-import { isGeoJSONEmpty } from "../../utils/api";
 import DetailedSearchResults from "./DetailedSearchResults";
 
 class DetailedResultsContainer extends Component {
   _parseDetails = () => {
-    /* something here to parse the current search state 
-    and geojson return to determine the details ui*/
-
     const { ppraxis } = this.props.mapData;
+    const { details, detailsType } = getDetailsFromGeoJSON(ppraxis);
 
-    // if (isGeoJSONEmpty(ppraxis)) {
-    //   debugger;
-    //   this.props.dispatch(updateDetailedSearch({ type: "no-data" }));
-    // }else
-
-    const { details } = getDetailsFromGeoJSON(ppraxis);
-    return details;
+    return { details, detailsType };
   };
 
   render() {
     const { isOpen } = this.props.searchState.detailedSearch;
-    const details = this._parseDetails();
-    /*This component tree needs to know what the ppraxis 
-    data properties and ids are. */
-
+    const { details, detailsType } = this._parseDetails();
     if (details) {
       return (
         <CSSTransition
@@ -38,7 +26,11 @@ class DetailedResultsContainer extends Component {
           timeout={0}
           classNames="results-drawer"
         >
-          <DetailedSearchResults {...this.props} details={details} />
+          <DetailedSearchResults
+            {...this.props}
+            details={details}
+            detailsType={detailsType}
+          />
         </CSSTransition>
       );
     }

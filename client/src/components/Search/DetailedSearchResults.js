@@ -18,14 +18,15 @@ import MapViewer from "./MapViewer";
 import * as downloadIcon from "../../assets/img/download-icon.png";
 import * as infoIcon from "../../assets/img/info-icon.png";
 
+/*Detailed result components need to know what the ppraxis 
+    data properties, ids, and data return type (details type). */
+
 class AddressDetails extends Component {
   componentDidMount() {
-    // when mounted calculate query all the years available
-    // for these coords
+    // when mounted query all the years available for these coords
     const { searchCoordinates } = this.props.searchState.searchParams;
-
     if (searchCoordinates) {
-      const route = `/api/praxisyears/address/${encodeURI(searchCoordinates)}`;
+      const route = `/api/praxisyears?${encodeURI(searchCoordinates)}`;
       this.props.dispatch(handleGetPraxisYearsAction(route));
     }
   }
@@ -197,12 +198,15 @@ class DetailedSearchResults extends Component {
     this.props.dispatch(updateDetailedSearch({ isOpen: !isOpen }));
   };
 
-  _getDetailedResultsFromGeoJSON = (details) => {
-    this.props.dispatch(updateDetailedSearch({ results: details }));
+  _updateResultDetails = ({ details, detailsType }) => {
+    this.props.dispatch(
+      updateDetailedSearch({ results: details, resultsType: detailsType })
+    );
   };
 
   componentDidMount() {
-    this._getDetailedResultsFromGeoJSON(this.props.details);
+    const { details, detailsType } = this.props;
+    this._updateResultDetails({ details, detailsType });
   }
 
   render() {

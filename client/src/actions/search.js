@@ -147,7 +147,7 @@ export function handleGetPraxisYearsAction(route) {
   return async (dispatch) => {
     try {
       const json = await APISearchQueryFromRoute(route);
-      dispatch(updateDetailedSearch({ searchYears: json }));
+      dispatch(updateDetailedSearch({ recordYears: json }));
       return json;
     } catch (err) {
       dispatch(triggerFetchError(true));

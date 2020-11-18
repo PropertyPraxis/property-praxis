@@ -18,13 +18,6 @@ import PrimaryResultsContainer from "./PrimarySearchResults";
 import * as searchIcon from "../../assets/img/search.png";
 import styleVars from "../../scss/colors.scss";
 
-// use this object to reset
-const resetSearchOptions = {
-  searchTerm: "",
-  searchType: "all",
-  searchCoordinates: null,
-};
-
 class SearchBar extends Component {
   _inputRef = React.createRef();
 

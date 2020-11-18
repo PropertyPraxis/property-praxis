@@ -21,7 +21,7 @@ const initialSearchState = {
   detailedSearch: {
     results: null,
     isOpen: false,
-    detailsType: null,
+    resultsType: null,
     recordYears: null,
   },
   downloadData: null,
