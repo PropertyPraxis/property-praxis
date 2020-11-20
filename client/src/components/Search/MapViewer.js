@@ -86,15 +86,18 @@ class MapViewer extends Component {
 
   render() {
     const { viewer } = this.props.searchState;
-
     const { searchCoordinates } = this.props.searchState.searchParams;
-    const { isOpen } = this.props.searchState.detailedSearch;
+    const { contentIsVisible } = this.props.searchState.detailedSearch;
 
     if (viewer.key && searchCoordinates) {
       return (
         <div
           className="map-viewer"
-          style={isOpen ? { visibility: "visible" } : { visibility: "hidden" }}
+          style={
+            contentIsVisible
+              ? { visibility: "visible" }
+              : { visibility: "hidden" }
+          }
           id="mly"
         ></div>
       );
@@ -102,7 +105,7 @@ class MapViewer extends Component {
     return (
       <div
         className="map-viewer"
-        style={isOpen ? { display: "block" } : { display: "none" }}
+        style={contentIsVisible ? { display: "block" } : { display: "none" }}
       >
         <div className="no-viewer-image">
           <img

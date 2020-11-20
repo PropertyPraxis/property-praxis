@@ -21,271 +21,460 @@ import * as infoIcon from "../../assets/img/info-icon.png";
 
 /*Detailed result components need to know what the ppraxis 
     data properties, ids, and data return type (details type). */
-class ContentSwitch extends Component {
-  render() {
-    const { results } = this.props.searchState.detailedSearch;
-    const { detailsType } = this.props;
-    if (results) {
-      switch (detailsType) {
-        case "parcels-by-geocode:single-parcel":
-          return <SingleParcel {...this.props} result={results[0]} />;
 
-        case "parcels-by-geocode:multiple-parcels":
-          return <MultipleParcels {...this.props} />;
+function ContentSwitch(props) {
+  const { results } = useSelector((state) => state.searchState.detailedSearch);
 
-        case "parcels-by-speculator":
-          return <SpeculatorParcels {...this.props} />;
+  if (results) {
+    switch (props.detailsType) {
+      case "parcels-by-geocode:single-parcel":
+        return <SingleParcel result={results[0]} />;
 
-        case "parcels-by-code":
-          return <CodeParcels {...this.props} />;
+      case "parcels-by-geocode:multiple-parcels":
+        return <MultipleParcels />;
 
-        default:
-          return null;
-      }
-    } else {
-      return <div>FUCK YOU! NO RESULTS YET! THEY NULL!</div>;
+      case "parcels-by-speculator":
+        return <SpeculatorParcels {...props} />;
+
+      case "parcels-by-code":
+        return <CodeParcels {...props} />;
+
+      default:
+        return null;
     }
+  } else {
+    return <div>FUCK YOU! NO RESULTS YET! THEY NULL!</div>;
   }
 }
 
-class CodeParcels extends Component {
-  render() {
-    return <div className="results-inner">ZIPCODES</div>;
-  }
+function CodeParcels(props) {
+  return <div className="results-inner">ZIPCODES</div>;
 }
 
-class SpeculatorParcels extends Component {
-  render() {
-    return <div className="results-inner">SPECULATORS</div>;
-  }
+function SpeculatorParcels(props) {
+  return <div className="results-inner">SPECULATORS</div>;
 }
 
-class MultipleParcels extends Component {
-  render() {
-    return (
-      <div className="results-inner scroller">
-        <MapViewer {...this.props} />
-      </div>
-    );
-  }
+function MultipleParcels(props) {
+  const { searchState } = useSelector((state) => state);
+  const dispatch = useDispatch();
+  return (
+    <div className="results-inner scroller">
+      <MapViewer searchState={searchState} dispatch={dispatch} />
+    </div>
+  );
 }
 
-class SingleParcel extends Component {
-  componentDidMount() {
-    // when mounted query all the years available for these coords
-    const { searchCoordinates } = this.props.searchState.searchParams;
+function SingleParcel(props) {
+  const { searchState } = useSelector((state) => state);
+  const { drawerIsOpen, recordYears } = searchState.detailedSearch;
+  const {
+    searchTerm,
+    searchYear,
+    searchCoordinates,
+  } = searchState.searchParams;
+  const dispatch = useDispatch();
+
+  const {
+    own_id,
+    resyrbuilt,
+    saledate,
+    saleprice,
+    totsqft,
+    propzip,
+    propaddr,
+    count,
+    parcelno,
+  } = props.result.properties;
+
+  // other years to search for this address
+  const praxisRecordYears = availablePraxisYears(recordYears, searchYear);
+
+  useEffect(() => {
     if (searchCoordinates) {
       const route = `/api/praxisyears?${encodeURI(searchCoordinates)}`;
-      this.props.dispatch(handleGetPraxisYearsAction(route));
+      dispatch(handleGetPraxisYearsAction(route));
     }
-  }
+  }, [dispatch, searchCoordinates]);
 
-  render() {
-    const {
-      searchTerm,
-      searchYear,
-      searchCoordinates,
-    } = this.props.searchState.searchParams;
-
-    const { drawerIsOpen, recordYears } = this.props.searchState.detailedSearch;
-
-    const {
-      own_id,
-      resyrbuilt,
-      saledate,
-      saleprice,
-      totsqft,
-      propzip,
-      propaddr,
-      count,
-      parcelno,
-    } = this.props.result.properties;
-
-    // other years to search for this address
-    const praxisRecordYears = availablePraxisYears(recordYears, searchYear);
-
-    return (
-      <div className="results-inner scroller">
-        <MapViewer {...this.props} />
-        <div
-          style={drawerIsOpen ? { display: "block" } : { display: "none" }}
-        >
-          <div className="address-title">
-            <img
-              src="https://property-praxis-web.s3-us-west-2.amazonaws.com/map_marker_rose.svg"
-              alt="A map marker icon"
-            />
-            <span>{searchTerm}</span>
+  return (
+    <div className="results-inner scroller">
+      <MapViewer searchState={searchState} dispatch={dispatch} />
+      <div style={drawerIsOpen ? { display: "block" } : { display: "none" }}>
+        <div className="address-title">
+          <img
+            src="https://property-praxis-web.s3-us-west-2.amazonaws.com/map_marker_rose.svg"
+            alt="A map marker icon"
+          />
+          <span>{searchTerm}</span>
+        </div>
+        <div className="address-properties">
+          <div>
+            <span>Speculator</span>
+            <span>{capitalizeFirstLetter(own_id)}</span>
           </div>
-          <div className="address-properties">
+          {propzip === 0 || propzip === null ? null : (
             <div>
-              <span>Speculator</span>
-              <span>{capitalizeFirstLetter(own_id)}</span>
+              <span>Zip Code</span>
+              <span>{propzip}</span>
             </div>
-            {propzip === 0 || propzip === null ? null : (
-              <div>
-                <span>Zip Code</span>
-                <span>{propzip}</span>
-              </div>
-            )}
-            {resyrbuilt === 0 || resyrbuilt === null ? null : (
-              <div>
-                <span>Year Built</span> <span>{resyrbuilt}</span>
-              </div>
-            )}
+          )}
+          {resyrbuilt === 0 || resyrbuilt === null ? null : (
+            <div>
+              <span>Year Built</span> <span>{resyrbuilt}</span>
+            </div>
+          )}
 
-            {saledate === 0 || saledate === null ? null : (
-              <div>
-                <span>Last Sale Date </span>
-                <span>{saledate}</span>
-              </div>
-            )}
+          {saledate === 0 || saledate === null ? null : (
+            <div>
+              <span>Last Sale Date </span>
+              <span>{saledate}</span>
+            </div>
+          )}
 
-            {saleprice === null ? null : (
-              <div>
-                <span>Last Sale Price</span>
-                <span>{currencyFormatter.format(saleprice)}</span>
-              </div>
+          {saleprice === null ? null : (
+            <div>
+              <span>Last Sale Price</span>
+              <span>{currencyFormatter.format(saleprice)}</span>
+            </div>
+          )}
+          {totsqft === null ? null : (
+            <div>
+              <span>Area</span>
+              <span>{`${totsqft.toLocaleString()} sq. ft.`}</span>{" "}
+            </div>
+          )}
+          {parcelno === null ? null : (
+            <div>
+              <span>Parcel Number</span>
+              <span>{parcelno}</span>{" "}
+            </div>
+          )}
+        </div>
+        <div className="address-title">
+          <img
+            src="https://property-praxis-web.s3-us-west-2.amazonaws.com/question_mark_rose.svg"
+            alt="A question mark icon"
+          />
+          <span> About the Property</span>
+        </div>
+        <div className="address-properties">
+          <p>
+            In <span>{searchYear}</span>,{" "}
+            <span>{capitalizeFirstLetter(propaddr)}</span> was located in
+            Detroit zipcode <span>{propzip}</span>, and was one of{" "}
+            <span>{count}</span> properties owned by speculator{" "}
+            <span>{capitalizeFirstLetter(own_id)}</span>. Additional years of
+            speculation for this property ocurred in{" "}
+            <span>
+              {praxisRecordYears ? praxisRecordYears.join(", ") : null}
+            </span>
+            .
+          </p>
+          <Link
+            to={createQueryStringFromParams(
+              {
+                type: "zipcode",
+                code: propzip,
+                coordinates: null,
+                year: searchYear,
+              },
+              "/map"
             )}
-            {totsqft === null ? null : (
-              <div>
-                <span>Area</span>
-                <span>{`${totsqft.toLocaleString()} sq. ft.`}</span>{" "}
-              </div>
+          >
+            <span>
+              <img src={infoIcon} alt="More Information"></img>
+              {`Search additional properties in ${propzip}.`}
+            </span>
+          </Link>
+          <Link
+            to={createQueryStringFromParams(
+              {
+                type: "speculator",
+                ownid: own_id,
+                coordinates: null,
+                year: searchYear,
+              },
+              "/map"
             )}
-            {parcelno === null ? null : (
-              <div>
-                <span>Parcel Number</span>
-                <span>{parcelno}</span>{" "}
-              </div>
-            )}
-          </div>
-          <div className="address-title">
-            <img
-              src="https://property-praxis-web.s3-us-west-2.amazonaws.com/question_mark_rose.svg"
-              alt="A question mark icon"
-            />
-            <span> About the Property</span>
-          </div>
-          <div className="address-properties">
-            <p>
-              In <span>{searchYear}</span>,{" "}
-              <span>{capitalizeFirstLetter(propaddr)}</span> was located in
-              Detroit zipcode <span>{propzip}</span>, and was one of{" "}
-              <span>{count}</span> properties owned by speculator{" "}
-              <span>{capitalizeFirstLetter(own_id)}</span>. Additional years of
-              speculation for this property ocurred in{" "}
-              <span>
-                {praxisRecordYears ? praxisRecordYears.join(", ") : null}
-              </span>
-              .
-            </p>
-            <Link
-              to={createQueryStringFromParams(
-                {
-                  type: "zipcode",
-                  code: propzip,
-                  coordinates: null,
-                  year: searchYear,
-                },
-                "/map"
-              )}
-            >
-              <span>
-                <img src={infoIcon} alt="More Information"></img>
-                {`Search additional properties in ${propzip}.`}
-              </span>
-            </Link>
-            <Link
-              to={createQueryStringFromParams(
-                {
-                  type: "speculator",
-                  ownid: own_id,
-                  coordinates: null,
-                  year: searchYear,
-                },
-                "/map"
-              )}
-            >
-              <span>
-                <img src={infoIcon} alt="More Information"></img>
-                {`Search additional properties owned by ${capitalizeFirstLetter(
-                  own_id
-                )}.`}
-              </span>
-            </Link>
-            {praxisRecordYears
-              ? praxisRecordYears.map((year) => {
-                  return (
-                    <Link
-                      to={createQueryStringFromParams(
-                        {
-                          type: "address",
-                          place: searchTerm,
-                          coordinates: searchCoordinates,
-                          year,
-                        },
-                        "/map"
-                      )}
-                    >
-                      <span>
-                        <img src={infoIcon} alt="More Information"></img>
-                        {`Search the ${year} record for this property.`}
-                      </span>
-                    </Link>
-                  );
-                })
-              : null}
-          </div>
+          >
+            <span>
+              <img src={infoIcon} alt="More Information"></img>
+              {`Search additional properties owned by ${capitalizeFirstLetter(
+                own_id
+              )}.`}
+            </span>
+          </Link>
+          {praxisRecordYears
+            ? praxisRecordYears.map((year) => {
+                return (
+                  <Link
+                    to={createQueryStringFromParams(
+                      {
+                        type: "address",
+                        place: searchTerm,
+                        coordinates: searchCoordinates,
+                        year,
+                      },
+                      "/map"
+                    )}
+                  >
+                    <span>
+                      <img src={infoIcon} alt="More Information"></img>
+                      {`Search the ${year} record for this property.`}
+                    </span>
+                  </Link>
+                );
+              })
+            : null}
         </div>
       </div>
-    );
-  }
+    </div>
+  );
 }
 
-class DetailedSearchResults extends Component {
-  _toggleDetailedResultsDrawer = () => {
-    const { drawerIsOpen } = this.props.searchState.detailedSearch;
-    this.props.dispatch(updateDetailedSearch({ drawerIsOpen: !drawerIsOpen }));
+function DetailedSearchResults(props) {
+  const { drawerIsOpen, contentIsVisible } = useSelector(
+    (state) => state.searchState.detailedSearch
+  );
+
+  const dispatch = useDispatch();
+
+  const toggleDetailedResultsDrawer = () => {
+    dispatch(updateDetailedSearch({ drawerIsOpen: !drawerIsOpen }));
   };
 
-  _updateResultDetails = ({ details, detailsType }) => {
-    this.props.dispatch(
-      updateDetailedSearch({ results: details, resultsType: detailsType })
-    );
-  };
-
-  componentDidMount() {
-    const { details, detailsType } = this.props;
-    this._updateResultDetails({ details, detailsType });
-  }
-
-  render() {
-    const {
-      drawerIsOpen,
-      contentIsVisible, //THIS WAS ADDED
-    } = this.props.searchState.detailedSearch;
-    const { detailsType } = this.props;
-
-    return (
-      <section className="result-drawer-static">
-        <div
-          className={
-            drawerIsOpen
-              ? "results-hamburger-button drawer-open"
-              : "results-hamburger-button drawer-closed"
-          }
-          onClick={this._toggleDetailedResultsDrawer}
-        >
-          &#9776;
-        </div>
-        {contentIsVisible && <ContentSwitch {...this.props} />}
-      </section>
-    );
-  }
+  return (
+    <section className="result-drawer-static">
+      <div
+        className={
+          drawerIsOpen
+            ? "results-hamburger-button drawer-open"
+            : "results-hamburger-button drawer-closed"
+        }
+        onClick={() => toggleDetailedResultsDrawer()}
+      >
+        &#9776;
+      </div>
+      {contentIsVisible && <ContentSwitch {...props} />}
+    </section>
+  );
 }
+
+// class DetailedSearchResults extends Component {
+//   _toggleDetailedResultsDrawer = () => {
+//     const { drawerIsOpen } = this.props.searchState.detailedSearch;
+//     this.props.dispatch(updateDetailedSearch({ drawerIsOpen: !drawerIsOpen }));
+//   };
+
+//   _updateResultDetails = ({ details, detailsType }) => {
+//     this.props.dispatch(
+//       updateDetailedSearch({ results: details, resultsType: detailsType })
+//     );
+//   };
+
+//   componentDidMount() {
+//     const { details, detailsType } = this.props;
+//     this._updateResultDetails({ details, detailsType });
+//   }
+
+//   render() {
+//     const {
+//       drawerIsOpen,
+//       contentIsVisible, //THIS WAS ADDED
+//     } = this.props.searchState.detailedSearch;
+//     const { detailsType } = this.props;
+
+//     return (
+//       <section className="result-drawer-static">
+//         <div
+//           className={
+//             drawerIsOpen
+//               ? "results-hamburger-button drawer-open"
+//               : "results-hamburger-button drawer-closed"
+//           }
+//           onClick={this._toggleDetailedResultsDrawer}
+//         >
+//           &#9776;
+//         </div>
+//         {contentIsVisible && <ContentSwitch {...this.props} />}
+//       </section>
+//     );
+//   }
+// }
 
 export default DetailedSearchResults;
+
+// class SingleParcel extends Component {
+//   componentDidMount() {
+//     // when mounted query all the years available for these coords
+//     const { searchCoordinates } = this.props.searchState.searchParams;
+//     if (searchCoordinates) {
+//       const route = `/api/praxisyears?${encodeURI(searchCoordinates)}`;
+//       this.props.dispatch(handleGetPraxisYearsAction(route));
+//     }
+//   }
+
+//   render() {
+//     const {
+//       searchTerm,
+//       searchYear,
+//       searchCoordinates,
+//     } = this.props.searchState.searchParams;
+
+//     const { drawerIsOpen, recordYears } = this.props.searchState.detailedSearch;
+
+//     const {
+//       own_id,
+//       resyrbuilt,
+//       saledate,
+//       saleprice,
+//       totsqft,
+//       propzip,
+//       propaddr,
+//       count,
+//       parcelno,
+//     } = this.props.result.properties;
+
+//     // other years to search for this address
+//     const praxisRecordYears = availablePraxisYears(recordYears, searchYear);
+
+//     return (
+//       <div className="results-inner scroller">
+//         <MapViewer {...this.props} />
+//         <div style={drawerIsOpen ? { display: "block" } : { display: "none" }}>
+//           <div className="address-title">
+//             <img
+//               src="https://property-praxis-web.s3-us-west-2.amazonaws.com/map_marker_rose.svg"
+//               alt="A map marker icon"
+//             />
+//             <span>{searchTerm}</span>
+//           </div>
+//           <div className="address-properties">
+//             <div>
+//               <span>Speculator</span>
+//               <span>{capitalizeFirstLetter(own_id)}</span>
+//             </div>
+//             {propzip === 0 || propzip === null ? null : (
+//               <div>
+//                 <span>Zip Code</span>
+//                 <span>{propzip}</span>
+//               </div>
+//             )}
+//             {resyrbuilt === 0 || resyrbuilt === null ? null : (
+//               <div>
+//                 <span>Year Built</span> <span>{resyrbuilt}</span>
+//               </div>
+//             )}
+
+//             {saledate === 0 || saledate === null ? null : (
+//               <div>
+//                 <span>Last Sale Date </span>
+//                 <span>{saledate}</span>
+//               </div>
+//             )}
+
+//             {saleprice === null ? null : (
+//               <div>
+//                 <span>Last Sale Price</span>
+//                 <span>{currencyFormatter.format(saleprice)}</span>
+//               </div>
+//             )}
+//             {totsqft === null ? null : (
+//               <div>
+//                 <span>Area</span>
+//                 <span>{`${totsqft.toLocaleString()} sq. ft.`}</span>{" "}
+//               </div>
+//             )}
+//             {parcelno === null ? null : (
+//               <div>
+//                 <span>Parcel Number</span>
+//                 <span>{parcelno}</span>{" "}
+//               </div>
+//             )}
+//           </div>
+//           <div className="address-title">
+//             <img
+//               src="https://property-praxis-web.s3-us-west-2.amazonaws.com/question_mark_rose.svg"
+//               alt="A question mark icon"
+//             />
+//             <span> About the Property</span>
+//           </div>
+//           <div className="address-properties">
+//             <p>
+//               In <span>{searchYear}</span>,{" "}
+//               <span>{capitalizeFirstLetter(propaddr)}</span> was located in
+//               Detroit zipcode <span>{propzip}</span>, and was one of{" "}
+//               <span>{count}</span> properties owned by speculator{" "}
+//               <span>{capitalizeFirstLetter(own_id)}</span>. Additional years of
+//               speculation for this property ocurred in{" "}
+//               <span>
+//                 {praxisRecordYears ? praxisRecordYears.join(", ") : null}
+//               </span>
+//               .
+//             </p>
+//             <Link
+//               to={createQueryStringFromParams(
+//                 {
+//                   type: "zipcode",
+//                   code: propzip,
+//                   coordinates: null,
+//                   year: searchYear,
+//                 },
+//                 "/map"
+//               )}
+//             >
+//               <span>
+//                 <img src={infoIcon} alt="More Information"></img>
+//                 {`Search additional properties in ${propzip}.`}
+//               </span>
+//             </Link>
+//             <Link
+//               to={createQueryStringFromParams(
+//                 {
+//                   type: "speculator",
+//                   ownid: own_id,
+//                   coordinates: null,
+//                   year: searchYear,
+//                 },
+//                 "/map"
+//               )}
+//             >
+//               <span>
+//                 <img src={infoIcon} alt="More Information"></img>
+//                 {`Search additional properties owned by ${capitalizeFirstLetter(
+//                   own_id
+//                 )}.`}
+//               </span>
+//             </Link>
+//             {praxisRecordYears
+//               ? praxisRecordYears.map((year) => {
+//                   return (
+//                     <Link
+//                       to={createQueryStringFromParams(
+//                         {
+//                           type: "address",
+//                           place: searchTerm,
+//                           coordinates: searchCoordinates,
+//                           year,
+//                         },
+//                         "/map"
+//                       )}
+//                     >
+//                       <span>
+//                         <img src={infoIcon} alt="More Information"></img>
+//                         {`Search the ${year} record for this property.`}
+//                       </span>
+//                     </Link>
+//                   );
+//                 })
+//               : null}
+//           </div>
+//         </div>
+//       </div>
+//     );
+//   }
+// }
 
 // function calculateResultsType(searchType, results) {
 //   if (results.length === 1 && searchType === "address") {
