@@ -1,5 +1,6 @@
 import React, { Component } from "react";
-import { connect } from "react-redux";
+import { connect, useSelector, useDispatch } from "react-redux";
+import { useHistory } from "react-router-dom";
 import { withRouter } from "react-router-dom";
 import PropTypes from "prop-types";
 import { CSSTransition } from "react-transition-group";
@@ -15,16 +16,34 @@ class DetailedResultsContainer extends Component {
     return { details, detailsType };
   };
 
+  componentDidMount() {
+    this.props.dispatch(updateDetailedSearch({ isOpen: true }));
+  }
+
+  // componenWillUnmount() {
+  //   this.props.dispatch(updateDetailedSearch({ isOpen: false }));
+  // }
+
   render() {
-    const { isOpen } = this.props.searchState.detailedSearch;
+    const { drawerIsOpen } = this.props.searchState.detailedSearch;
     const { details, detailsType } = this._parseDetails();
     if (details) {
       return (
         <CSSTransition
-          in={isOpen} //set false on load
+          in={drawerIsOpen} //set false on load
           appear={true}
-          timeout={0}
+          timeout={400}
           classNames="results-drawer"
+          onEntered={() =>
+            this.props.dispatch(
+              updateDetailedSearch({ contentIsVisible: true })
+            )
+          }
+          onExit={() =>
+            this.props.dispatch(
+              updateDetailedSearch({ contentIsVisible: false })
+            )
+          }
         >
           <DetailedSearchResults
             {...this.props}

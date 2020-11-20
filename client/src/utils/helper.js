@@ -118,7 +118,7 @@ export function sanitizeSearchResult({ result, year }) {
 
     return addressQuery;
   } else {
-    throw new Error(
+    console.error(
       `Known key does not exist in object: ${JSON.stringify(result)}`
     );
   }
@@ -170,7 +170,9 @@ export function createQueryStringFromParams(
       )}`;
       break;
     default:
+      qs = null;
       console.error(`Unkown API search type: ${type}`);
+      break;
   }
 
   return qs;

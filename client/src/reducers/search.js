@@ -20,7 +20,7 @@ const initialSearchState = {
   primarySearch: { results: null, index: 0, isOpen: false, isActive: false },
   detailedSearch: {
     results: null,
-    isOpen: false,
+    drawerIsOpen: false,
     resultsType: null,
     recordYears: null,
   },

@@ -1,4 +1,5 @@
-import React, { Component } from "react";
+import React, { Component, useState, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 import { CSVLink } from "react-csv";
@@ -20,8 +21,56 @@ import * as infoIcon from "../../assets/img/info-icon.png";
 
 /*Detailed result components need to know what the ppraxis 
     data properties, ids, and data return type (details type). */
+class ContentSwitch extends Component {
+  render() {
+    const { results } = this.props.searchState.detailedSearch;
+    const { detailsType } = this.props;
+    if (results) {
+      switch (detailsType) {
+        case "parcels-by-geocode:single-parcel":
+          return <SingleParcel {...this.props} result={results[0]} />;
 
-class AddressDetails extends Component {
+        case "parcels-by-geocode:multiple-parcels":
+          return <MultipleParcels {...this.props} />;
+
+        case "parcels-by-speculator":
+          return <SpeculatorParcels {...this.props} />;
+
+        case "parcels-by-code":
+          return <CodeParcels {...this.props} />;
+
+        default:
+          return null;
+      }
+    } else {
+      return <div>FUCK YOU! NO RESULTS YET! THEY NULL!</div>;
+    }
+  }
+}
+
+class CodeParcels extends Component {
+  render() {
+    return <div className="results-inner">ZIPCODES</div>;
+  }
+}
+
+class SpeculatorParcels extends Component {
+  render() {
+    return <div className="results-inner">SPECULATORS</div>;
+  }
+}
+
+class MultipleParcels extends Component {
+  render() {
+    return (
+      <div className="results-inner scroller">
+        <MapViewer {...this.props} />
+      </div>
+    );
+  }
+}
+
+class SingleParcel extends Component {
   componentDidMount() {
     // when mounted query all the years available for these coords
     const { searchCoordinates } = this.props.searchState.searchParams;
@@ -38,7 +87,7 @@ class AddressDetails extends Component {
       searchCoordinates,
     } = this.props.searchState.searchParams;
 
-    const { isOpen, recordYears } = this.props.searchState.detailedSearch;
+    const { drawerIsOpen, recordYears } = this.props.searchState.detailedSearch;
 
     const {
       own_id,
@@ -56,9 +105,11 @@ class AddressDetails extends Component {
     const praxisRecordYears = availablePraxisYears(recordYears, searchYear);
 
     return (
-      <div className="results-inner">
+      <div className="results-inner scroller">
         <MapViewer {...this.props} />
-        <div style={isOpen ? { display: "block" } : { display: "none" }}>
+        <div
+          style={drawerIsOpen ? { display: "block" } : { display: "none" }}
+        >
           <div className="address-title">
             <img
               src="https://property-praxis-web.s3-us-west-2.amazonaws.com/map_marker_rose.svg"
@@ -194,8 +245,8 @@ class AddressDetails extends Component {
 
 class DetailedSearchResults extends Component {
   _toggleDetailedResultsDrawer = () => {
-    const { isOpen } = this.props.searchState.detailedSearch;
-    this.props.dispatch(updateDetailedSearch({ isOpen: !isOpen }));
+    const { drawerIsOpen } = this.props.searchState.detailedSearch;
+    this.props.dispatch(updateDetailedSearch({ drawerIsOpen: !drawerIsOpen }));
   };
 
   _updateResultDetails = ({ details, detailsType }) => {
@@ -210,26 +261,27 @@ class DetailedSearchResults extends Component {
   }
 
   render() {
-    const { isOpen, results } = this.props.searchState.detailedSearch;
+    const {
+      drawerIsOpen,
+      contentIsVisible, //THIS WAS ADDED
+    } = this.props.searchState.detailedSearch;
+    const { detailsType } = this.props;
 
-    if (results) {
-      return (
-        <section className="result-drawer-static">
-          <div
-            className={
-              isOpen
-                ? "results-hamburger-button drawer-open"
-                : "results-hamburger-button drawer-closed"
-            }
-            onClick={this._toggleDetailedResultsDrawer}
-          >
-            &#9776;
-          </div>
-          <AddressDetails {...this.props} result={results[0]} />
-        </section>
-      );
-    }
-    return null; // could add loading info
+    return (
+      <section className="result-drawer-static">
+        <div
+          className={
+            drawerIsOpen
+              ? "results-hamburger-button drawer-open"
+              : "results-hamburger-button drawer-closed"
+          }
+          onClick={this._toggleDetailedResultsDrawer}
+        >
+          &#9776;
+        </div>
+        {contentIsVisible && <ContentSwitch {...this.props} />}
+      </section>
+    );
   }
 }
 
