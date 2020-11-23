@@ -116,6 +116,7 @@ function SingleParcel(props) {
     propaddr,
     count,
     parcelno,
+    parprop_id // this is the PK for geoms in DB
   } = props.result.properties;
 
   // other years to search for this address
@@ -123,7 +124,7 @@ function SingleParcel(props) {
 
   useEffect(() => {
     if (parcelno) {
-      const route = `/api/detailed-search?type=detailed-record-years&parcelno=${parcelno}&year=${searchYear}`;
+      const route = `/api/detailed-search?type=detailed-record-years&parpropid=${parprop_id}&year=${searchYear}`;
       dispatch(handleGetPraxisYearsAction(route));
     }
   }, [dispatch, searchCoordinates]);

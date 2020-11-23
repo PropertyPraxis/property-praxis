@@ -4,7 +4,7 @@ const queries = require("../utils/queries");
 
 router.get("/", async (req, res) => {
   try {
-    const { type, year, parcelno } = req.query;
+    const { type, year, parpropid } = req.query;
     let clientData;
     if (type === "detailed-record-years") {
       const years = await queries.queryPGDB({
@@ -16,7 +16,7 @@ router.get("/", async (req, res) => {
       const { data } = await queries.queryPGDB({
         PGDBQueryType: queries.DETAILED_RECORD_YEARS,
         searchYears,
-        parcelno,
+        parpropid,
       });
       clientData = Object.values(data[0]);
     } else {

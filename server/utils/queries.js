@@ -24,7 +24,7 @@ async function queryPGDB({
   code = null,
   ownid = null,
   coordinates = null,
-  parcelno = null, // this should be changed to parprop-id to be a PK
+  parpropid = null, // this should be changed to parprop-id to be a PK
   searchYears = [2015, 2016, 2017, 2018, 2019, 2020],
   searchRadius = 1000,
   year = null,
@@ -119,8 +119,6 @@ async function queryPGDB({
         break;
 
       case GEOJSON_PARCELS_DISTANCE:
-        // constant for search distance
-
         query = `SELECT jsonb_build_object(
             'type',     'FeatureCollection',
             'features', jsonb_agg(feature)
@@ -165,7 +163,7 @@ async function queryPGDB({
         query = `SELECT
           ${geomCols}  
           FROM parcel_property_geom
-          WHERE parcelno = '${parcelno}'`; // this should be changed to parpropid
+          WHERE parprop_id = '${parpropid}'`;
         break;
 
       // all the years in the DB to search

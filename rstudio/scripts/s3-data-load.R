@@ -930,7 +930,7 @@ createParcelGeomByYear <- function(years) {
         paste0("parcels_", year),
         "AS",
         "(SELECT DISTINCT ROW_NUMBER() OVER (ORDER BY 1) AS feature_id, y.*,",
-        "ppg.parcelno, ppg.propaddr, ot.own_id, ot.taxpayer1, count.count, p.propno, p.propdir, p.propstr, p.propzip, ",
+        "ppg.parprop_id, ppg.parcelno, ppg.propaddr, ot.own_id, ot.taxpayer1, count.count, p.propno, p.propdir, p.propstr, p.propzip, ",
         "ST_centroid(",
         paste0("geom_", year),
         ") AS centroid, ",
