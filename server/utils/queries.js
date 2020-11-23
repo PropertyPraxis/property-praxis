@@ -9,19 +9,25 @@ const GEOJSON_ZIPCODES = "GEOJSON_ZIPCODES";
 const GEOJSON_PARCELS_CODE = "GEOJSON_PARCELS_CODE";
 const GEOJSON_PARCELS_OWNID = "GEOJSON_PARCELS_OWNID";
 const GEOJSON_PARCELS_DISTANCE = "GEOJSON_PARCELS_DISTANCE";
-const DETAILED_ADDRESS_YEARS = "DETAILED_ADDRESS_YEARS";
-const SEARCHBAR_YEARS = "SEARCHBAR_YEARS";
+const DETAILED_RECORD_YEARS = "DETAILED_RECORD_YEARS"; // years for a praxis record
+const AVAILABLE_PRAXIS_YEARS = "AVAILABLE_PRAXIS_YEARS"; // all the available search years
+const SPECULATORS_BY_CODE = "SPECULATORS_BY_CODE";
+const CODES_BY_SPECULATOR = "CODE_BY_SPECULATOR";
 
 /*Mapbox API query types*/
 const GEOCODE = "GEOCODE"; // works for primary address as well
 const REVERSE_GEOCODE = "REVERSE_GEOCODE";
 
+/*All the queries for the db are managed in here.*/
 async function queryPGDB({
   PGDBQueryType = null,
   code = null,
   ownid = null,
   coordinates = null,
-  year,
+  parcelno = null, // this should be changed to parprop-id to be a PK
+  searchYears = [2015, 2016, 2017, 2018, 2019, 2020],
+  searchRadius = 1000,
+  year = null,
 }) {
   try {
     let query, longitude, latitude;
@@ -114,7 +120,6 @@ async function queryPGDB({
 
       case GEOJSON_PARCELS_DISTANCE:
         // constant for search distance
-        const searchRadius = 1000;
 
         query = `SELECT jsonb_build_object(
             'type',     'FeatureCollection',
@@ -144,44 +149,61 @@ async function queryPGDB({
           ) features;`;
         break;
 
-      case DETAILED_ADDRESS_YEARS: // need to rework this one to check other geom cols
-        query = `SELECT DISTINCT y.praxisyear
-          FROM parcel_property_geom AS ppg
-          INNER JOIN property as p ON ppg.parprop_id = p.parprop_id
-          INNER JOIN taxpayer_property AS tpp ON p.prop_id = tpp.prop_id
-          INNER JOIN year AS y ON tpp.taxparprop_id = y.taxparprop_id
-          INNER JOIN taxpayer as tp ON tpp.tp_id = tp.tp_id
-          INNER JOIN owner_taxpayer as otp ON tp.owntax_id = otp.owntax_id
-          WHERE ST_Intersects(
-            ST_SetSRID(
-              ST_MakePoint(${longitude}, ${latitude})::geography, 
-            4326), 
-          ppg.geom_gj::geography)
-          ORDER BY y.praxisyear DESC;`; // geom_gj needs work here
+      // search for available geometry cols
+      case DETAILED_RECORD_YEARS:
+        const geomCols = searchYears
+          .map(
+            (year) => ` 
+          CASE WHEN ST_AsText(geom_${year}) = 'GEOMETRYCOLLECTION EMPTY'
+          THEN 'false'
+          ELSE 'true'
+          END AS geom_${year}
+          `
+          )
+          .join(", ");
+
+        query = `SELECT
+          ${geomCols}  
+          FROM parcel_property_geom
+          WHERE parcelno = '${parcelno}'`; // this should be changed to parpropid
         break;
 
-      case SEARCHBAR_YEARS:
+      // all the years in the DB to search
+      case AVAILABLE_PRAXIS_YEARS:
         query = `SELECT DISTINCT praxisyear FROM year 
           ORDER BY praxisyear DESC;`;
         break;
 
-      case "address":
-        query = `SELECT DISTINCT ROW_NUMBER() OVER (ORDER BY 1) as id, 
-          ST_X(centroid) as longitude,
-          own_id, count as property_count, 
-          parcelno, propaddr, propno, propdir, propstr, propzip,
-          resyrbuilt, saledate, saleprice, taxpayer1, totacres, totsqft, 
-          ST_Y(centroid) as latitude
-          FROM parcels_${year} 
-          WHERE ST_Intersects(
-            ST_SetSRID(
-              ST_MakePoint(${longitude}, ${latitude}), 
-            4326), 
-          geom_${year})`;
+      case SPECULATORS_BY_CODE:
+        query = `SELECT DISTINCT otp.own_id, oc.count
+        FROM property as p
+        INNER JOIN taxpayer_property AS tpp ON p.prop_id = tpp.prop_id
+        INNER JOIN taxpayer as tp ON tpp.tp_id = tp.tp_id
+        INNER JOIN owner_taxpayer AS otp ON tp.owntax_id = otp.owntax_id
+        INNER JOIN owner_count as OC ON otp.own_id = oc.own_id
+        WHERE p.propzip LIKE '${code}%'
+        AND oc.praxisyear = '${year}'
+        ORDER BY oc.count DESC
+        LIMIT 5
+        `;
+        break;
+
+      case CODES_BY_SPECULATOR:
+        query = `SELECT DISTINCT otp.own_id, oc.count
+          FROM property as p
+          INNER JOIN taxpayer_property AS tpp ON p.prop_id = tpp.prop_id
+          INNER JOIN taxpayer as tp ON tpp.tp_id = tp.tp_id
+          INNER JOIN owner_taxpayer AS otp ON tp.owntax_id = otp.owntax_id
+          INNER JOIN owner_count as OC ON otp.own_id = oc.own_id
+          WHERE p.propzip LIKE '${code}%'
+          AND oc.praxisyear = '${year}'
+          ORDER BY oc.count DESC
+          LIMIT 5
+          `;
         break;
 
       default:
-        console.warn("Unknown SQL query type.");
+        console.error(`Unknown SQL query type: ${type}`);
         break;
     }
     console.log(`DB Query: ${query}`);
@@ -239,8 +261,10 @@ module.exports = {
   GEOJSON_PARCELS_CODE,
   GEOJSON_PARCELS_OWNID,
   GEOJSON_PARCELS_DISTANCE,
-  DETAILED_ADDRESS_YEARS,
-  SEARCHBAR_YEARS,
+  DETAILED_RECORD_YEARS,
+  AVAILABLE_PRAXIS_YEARS,
   GEOCODE,
   REVERSE_GEOCODE,
+  SPECULATORS_BY_CODE,
+  CODES_BY_SPECULATOR,
 };

@@ -31,19 +31,20 @@ function ContentSwitch(props) {
         return <SingleParcel result={results[0]} />;
 
       case "parcels-by-geocode:multiple-parcels":
-        return <MultipleParcels />;
+        return <MultipleParcels results={results} />;
 
       case "parcels-by-speculator":
-        return <SpeculatorParcels {...props} />;
+        return <SpeculatorParcels results={results} />;
 
       case "parcels-by-code":
-        return <CodeParcels {...props} />;
+        return <CodeParcels results={results} />;
 
       default:
         return null;
     }
   } else {
-    return <div>FUCK YOU! NO RESULTS YET! THEY NULL!</div>;
+    //TODO: ADD LODING INDICATOR
+    return <div>LOADING...</div>;
   }
 }
 
@@ -57,10 +58,40 @@ function SpeculatorParcels(props) {
 
 function MultipleParcels(props) {
   const { searchState } = useSelector((state) => state);
+  const { drawerIsOpen, recordYears } = searchState.detailedSearch;
+  const {
+    searchTerm,
+    searchYear,
+    searchCoordinates,
+  } = searchState.searchParams;
   const dispatch = useDispatch();
   return (
     <div className="results-inner scroller">
       <MapViewer searchState={searchState} dispatch={dispatch} />
+      <div style={drawerIsOpen ? { display: "block" } : { display: "none" }}>
+        <div className="address-title">
+          <img
+            src="https://property-praxis-web.s3-us-west-2.amazonaws.com/map_marker_rose.svg"
+            alt="A map marker icon"
+          />
+          <span>{searchTerm}</span>
+        </div>
+        <div className="address-properties">
+          <p>
+            We could not find a record for <span>{searchTerm}</span> in{" "}
+            <span>{searchYear}</span>. See additional details for this area
+            below.
+          </p>
+        </div>
+        <div className="address-title">
+          <img
+            src="https://property-praxis-web.s3-us-west-2.amazonaws.com/question_mark_rose.svg"
+            alt="A question mark icon"
+          />
+          <span> Top Speculators in this Zipcode</span>
+        </div>
+        <div className="address-properties"></div>
+      </div>
     </div>
   );
 }
@@ -91,8 +122,8 @@ function SingleParcel(props) {
   const praxisRecordYears = availablePraxisYears(recordYears, searchYear);
 
   useEffect(() => {
-    if (searchCoordinates) {
-      const route = `/api/praxisyears?${encodeURI(searchCoordinates)}`;
+    if (parcelno) {
+      const route = `/api/detailed-search?type=detailed-record-years&parcelno=${parcelno}&year=${searchYear}`;
       dispatch(handleGetPraxisYearsAction(route));
     }
   }, [dispatch, searchCoordinates]);
@@ -205,7 +236,7 @@ function SingleParcel(props) {
               )}.`}
             </span>
           </Link>
-          {praxisRecordYears
+          {/* {praxisRecordYears
             ? praxisRecordYears.map((year) => {
                 return (
                   <Link
@@ -226,7 +257,7 @@ function SingleParcel(props) {
                   </Link>
                 );
               })
-            : null}
+            : null} */}
         </div>
       </div>
     </div>
@@ -237,9 +268,7 @@ function DetailedSearchResults(props) {
   const { drawerIsOpen, contentIsVisible } = useSelector(
     (state) => state.searchState.detailedSearch
   );
-
   const dispatch = useDispatch();
-
   const toggleDetailedResultsDrawer = () => {
     dispatch(updateDetailedSearch({ drawerIsOpen: !drawerIsOpen }));
   };
@@ -260,48 +289,6 @@ function DetailedSearchResults(props) {
     </section>
   );
 }
-
-// class DetailedSearchResults extends Component {
-//   _toggleDetailedResultsDrawer = () => {
-//     const { drawerIsOpen } = this.props.searchState.detailedSearch;
-//     this.props.dispatch(updateDetailedSearch({ drawerIsOpen: !drawerIsOpen }));
-//   };
-
-//   _updateResultDetails = ({ details, detailsType }) => {
-//     this.props.dispatch(
-//       updateDetailedSearch({ results: details, resultsType: detailsType })
-//     );
-//   };
-
-//   componentDidMount() {
-//     const { details, detailsType } = this.props;
-//     this._updateResultDetails({ details, detailsType });
-//   }
-
-//   render() {
-//     const {
-//       drawerIsOpen,
-//       contentIsVisible, //THIS WAS ADDED
-//     } = this.props.searchState.detailedSearch;
-//     const { detailsType } = this.props;
-
-//     return (
-//       <section className="result-drawer-static">
-//         <div
-//           className={
-//             drawerIsOpen
-//               ? "results-hamburger-button drawer-open"
-//               : "results-hamburger-button drawer-closed"
-//           }
-//           onClick={this._toggleDetailedResultsDrawer}
-//         >
-//           &#9776;
-//         </div>
-//         {contentIsVisible && <ContentSwitch {...this.props} />}
-//       </section>
-//     );
-//   }
-// }
 
 export default DetailedSearchResults;
 

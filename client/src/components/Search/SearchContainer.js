@@ -10,7 +10,7 @@ for selection to SearchBar */
 class SearchContainer extends Component {
   componentDidMount() {
     // load the available years
-    const yearsRoute = "/api/praxisyears";
+    const yearsRoute = "/api/general?type=available-praxis-years";
     this.props.dispatch(handleSearchBarYearsAction(yearsRoute));
   }
 

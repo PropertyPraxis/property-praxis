@@ -1,0 +1,35 @@
+const Router = require("express-promise-router");
+const router = new Router();
+const queries = require("../utils/queries");
+
+router.get("/", async (req, res) => {
+  console.log(req.query);
+  try {
+    const { type, year, parcelno } = req.query;
+    let clientData;
+    if (type === "detailed-record-years") {
+      const years = await queries.queryPGDB({
+        PGDBQueryType: queries.AVAILABLE_PRAXIS_YEARS,
+      });
+      const searchYears = years.data
+        .map((record) => record.praxisyear)
+        .filter((pyear) => Number(pyear) !== Number(year));
+
+      const { data } = await queries.queryPGDB({
+        PGDBQueryType: queries.DETAILED_RECORD_YEARS,
+        searchYears,
+        parcelno,
+      });
+      clientData = data;
+    } else {
+      clientData = null;
+    }
+    res.json(clientData);
+  } catch (err) {
+    const msg = `An error occurred executing search search query. Message: ${err}`;
+    console.error(msg);
+    res.status(500).send(msg);
+  }
+});
+
+module.exports = router;

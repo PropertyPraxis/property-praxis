@@ -15,7 +15,7 @@ router.get("/", async (req, res) => {
   } catch (err) {
     const msg = `An error occurred executing reverse geocode. Message: ${err}`;
     console.error(msg);
-    res.status(404).send(msg);
+    res.status(500).send(msg);
   }
 });
 module.exports = router;

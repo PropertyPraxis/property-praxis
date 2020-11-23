@@ -37,7 +37,7 @@ router.get("/", async (req, res) => {
   } catch (err) {
     const msg = `An error occurred executing primary search query. Message: ${err}`;
     console.error(msg);
-    res.status(404).send(msg);
+    res.status(500).send(msg);
   }
 });
 

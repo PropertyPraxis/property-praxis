@@ -1,5 +1,4 @@
 const Router = require("express-promise-router");
-const db = require("../db"); //index.js
 const queries = require("../utils/queries");
 const findTargetAddress = require("../utils/helper").findTargetAddress;
 const buildGeoJSONTemplate = require("../utils/helper").buildGeoJSONTemplate;
@@ -89,7 +88,7 @@ router.get("/", async (req, res) => {
   } catch (err) {
     const msg = `An error occurred executing parcels geoJSON query. Message: ${err}`;
     console.error(msg);
-    res.status(404).send(msg);
+    res.status(500).send(msg);
   }
 });
 
