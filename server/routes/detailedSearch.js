@@ -3,7 +3,6 @@ const router = new Router();
 const queries = require("../utils/queries");
 
 router.get("/", async (req, res) => {
-  console.log(req.query);
   try {
     const { type, year, parcelno } = req.query;
     let clientData;
@@ -11,16 +10,15 @@ router.get("/", async (req, res) => {
       const years = await queries.queryPGDB({
         PGDBQueryType: queries.AVAILABLE_PRAXIS_YEARS,
       });
-      const searchYears = years.data
-        .map((record) => record.praxisyear)
-        .filter((pyear) => Number(pyear) !== Number(year));
+      const searchYears = years.data.map((record) => record.praxisyear);
+      // .filter((pyear) => Number(pyear) !== Number(year)); //filter the current year
 
       const { data } = await queries.queryPGDB({
         PGDBQueryType: queries.DETAILED_RECORD_YEARS,
         searchYears,
         parcelno,
       });
-      clientData = data;
+      clientData = Object.values(data[0]);
     } else {
       clientData = null;
     }

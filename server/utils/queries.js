@@ -155,8 +155,8 @@ async function queryPGDB({
           .map(
             (year) => ` 
           CASE WHEN ST_AsText(geom_${year}) = 'GEOMETRYCOLLECTION EMPTY'
-          THEN 'false'
-          ELSE 'true'
+          THEN 'null'
+          ELSE '${year}'
           END AS geom_${year}
           `
           )
