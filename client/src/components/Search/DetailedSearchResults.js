@@ -236,7 +236,7 @@ function SingleParcel(props) {
               )}.`}
             </span>
           </Link>
-          {/* {praxisRecordYears
+          {praxisRecordYears
             ? praxisRecordYears.map((year) => {
                 return (
                   <Link
@@ -257,7 +257,7 @@ function SingleParcel(props) {
                   </Link>
                 );
               })
-            : null} */}
+            : null}
         </div>
       </div>
     </div>

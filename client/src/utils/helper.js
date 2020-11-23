@@ -223,59 +223,14 @@ export const currencyFormatter = new Intl.NumberFormat("en-US", {
 
 export function availablePraxisYears(praxisYears, currentYear) {
   if (praxisYears && currentYear) {
-    const availableYears = praxisYears
-      .map(({ praxisyear }) => praxisyear)
-      .filter((year) => year !== Number(currentYear));
-    return availableYears;
+    return praxisYears.filter((year) => {
+      if (year === "null" || year === null || year === currentYear) {
+        return false;
+      } else {
+        return true;
+      }
+    });
   } else {
     return null;
   }
 }
-
-// function to find the single target address at distance 0
-// export function findTargetAddress(features) {
-//   const targetAddress = features
-//     .map((feature) => {
-//       if (feature.properties.distance === 0) {
-//         return feature;
-//       }
-//       return null;
-//     })
-//     .filter((result) => result !== null);
-
-//   const nearbyAddresses = features
-//     .map((feature) => {
-//       if (feature.properties.distance !== 0) {
-//         return feature;
-//       }
-//       return null;
-//     })
-//     .filter((result) => result !== null);
-
-//   return { targetAddress, nearbyAddresses };
-// }
-// export function createClientQueryStringFromSearch({
-//   searchType: type,
-//   searchTerm,
-//   searchYear: year,
-//   searchCoordinates: coordinates,
-// }) {
-//   let ownid, code, place, queryString;
-
-//   switch (type) {
-//     case "address":
-//       place = searchTerm;
-//       break;
-//     case "zipcode":
-//       code = searchTerm;
-//       break;
-//     case "speculator":
-//       ownid = searchTerm;
-//       break;
-//     default:
-//       queryString = null;
-//       console.error(`Unkown type to create query string ${type}`);
-//       break;
-//   }
-// }
-/////////////

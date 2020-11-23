@@ -88,8 +88,7 @@ class MapViewer extends Component {
     const { viewer } = this.props.searchState;
     const { searchCoordinates } = this.props.searchState.searchParams;
     const { contentIsVisible } = this.props.searchState.detailedSearch;
-
-    if (viewer.key && searchCoordinates) {
+    if (viewer && searchCoordinates) {
       return (
         <div
           className="map-viewer"
@@ -112,10 +111,7 @@ class MapViewer extends Component {
             src="https://property-praxis-web.s3-us-west-2.amazonaws.com/no_image_icon.svg"
             alt="An illustration to indicate no image returned"
           ></img>
-          <span>
-            We did not find an image for this exact location. Try moving the map
-            marker.
-          </span>
+          <span>Loading image.</span>
         </div>
       </div>
     );
