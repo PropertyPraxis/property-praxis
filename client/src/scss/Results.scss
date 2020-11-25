@@ -112,7 +112,7 @@
     position: sticky;
     top: 15px;
   }
-  .address-properties {
+  .detailed-properties {
     max-height: 100%;
   }
   //addd css for partial results
@@ -128,6 +128,12 @@
   border: 4px solid $ui-black;
   position: sticky;
   top: 0px;
+}
+
+.mapillary-js {
+  // background: url("https://property-praxis-web.s3-us-west-2.amazonaws.com/no_image_icon.svg")
+  //   50% 50% no-repeat !important;
+  // background-color: $ui-light-gray;
 }
 
 .no-viewer-image {
@@ -235,7 +241,7 @@
   transform: translateY(+1px);
 }
 
-.address-properties {
+.detailed-properties {
   display: flex;
   flex-direction: column;
   font-size: 1rem;

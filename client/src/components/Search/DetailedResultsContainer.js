@@ -8,7 +8,7 @@ import DetailedSearchResults from "./DetailedSearchResults";
 
 function DetailedResultsContainer() {
   const { ppraxis } = useSelector((state) => state.mapData);
-  const { drawerIsOpen } = useSelector(
+  const { drawerIsOpen, results, resultsType } = useSelector(
     (state) => state.searchState.detailedSearch
   );
 
@@ -24,7 +24,7 @@ function DetailedResultsContainer() {
     );
   }, [JSON.stringify(details), detailsType]);
 
-  if (details) {
+  if (results && resultsType) {
     return (
       <CSSTransition
         in={drawerIsOpen} //set false on load

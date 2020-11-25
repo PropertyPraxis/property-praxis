@@ -163,9 +163,7 @@ export function handleGetViewerImage(longitude, latitude) {
   return async (dispatch) => {
     try {
       const viewer = await getImageKey(longitude, latitude);
-      dispatch(
-        getViewerImage(null)
-      );
+      dispatch(getViewerImage(null));
       dispatch(getViewerImage(viewer));
       return viewer;
     } catch (err) {

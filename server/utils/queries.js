@@ -7,12 +7,14 @@ const PRIMARY_ZIPCODE = "PRIMARY_ZIPCODE";
 const PRIMARY_SPECULATOR = "PRIMARY_SPECULATOR";
 const GEOJSON_ZIPCODES = "GEOJSON_ZIPCODES";
 const GEOJSON_PARCELS_CODE = "GEOJSON_PARCELS_CODE";
+const GEOJSON_PARCELS_CODE_OWNID = "GEOJSON_PARCELS_CODE_OWNID";
 const GEOJSON_PARCELS_OWNID = "GEOJSON_PARCELS_OWNID";
+const GEOJSON_PARCELS_OWNID_CODE = "GEOJSON_PARCELS_OWNID_CODE";
 const GEOJSON_PARCELS_DISTANCE = "GEOJSON_PARCELS_DISTANCE";
 const DETAILED_RECORD_YEARS = "DETAILED_RECORD_YEARS"; // years for a praxis record
 const AVAILABLE_PRAXIS_YEARS = "AVAILABLE_PRAXIS_YEARS"; // all the available search years
 const SPECULATORS_BY_CODE = "SPECULATORS_BY_CODE";
-const CODES_BY_SPECULATOR = "CODE_BY_SPECULATOR";
+const CODES_BY_SPECULATOR = "CODES_BY_SPECULATOR";
 
 /*Mapbox API query types*/
 const GEOCODE = "GEOCODE"; // works for primary address as well
@@ -24,7 +26,7 @@ async function queryPGDB({
   code = null,
   ownid = null,
   coordinates = null,
-  parpropid = null, // this should be changed to parprop-id to be a PK
+  parpropid = null,
   searchYears = [2015, 2016, 2017, 2018, 2019, 2020],
   searchRadius = 1000,
   year = null,
@@ -47,7 +49,8 @@ async function queryPGDB({
           INNER JOIN taxpayer as tp ON tpp.tp_id = tp.tp_id
           INNER JOIN owner_taxpayer AS otp ON tp.owntax_id = otp.owntax_id
           INNER JOIN owner_count as OC ON otp.own_id = oc.own_id
-          WHERE p.propzip LIKE '${code}%' AND y.praxisyear = '${year}'
+          WHERE p.propzip LIKE '${code}%' 
+          AND y.praxisyear = '${year}'
           GROUP BY  p.propzip
           ORDER BY avg_count DESC
           LIMIT 5;
@@ -116,6 +119,46 @@ async function queryPGDB({
               WHERE own_id LIKE '%${decodeURI(ownid).toUpperCase()}%'
             ) inputs
           ) features;`;
+        break;
+
+      case GEOJSON_PARCELS_CODE_OWNID:
+        query = `SELECT jsonb_build_object(
+              'type',     'FeatureCollection',
+              'features', jsonb_agg(feature)
+            )
+            FROM (
+              SELECT jsonb_build_object(
+                'type',       'Feature',
+                'geometry',   ST_AsGeoJSON(geom_${year}, 6)::json,
+                'properties', to_jsonb(inputs) - 'geom_${year}',
+                'centroid',   ST_AsText(centroid)
+              ) AS feature
+              FROM (
+                SELECT * FROM parcels_${year} 
+                WHERE propzip LIKE '%${code}%'
+                AND own_id LIKE '%${decodeURI(ownid).toUpperCase()}%'
+              ) inputs
+            ) features;`;
+        break;
+
+      case GEOJSON_PARCELS_OWNID_CODE:
+        query = `SELECT jsonb_build_object(
+              'type',     'FeatureCollection',
+              'features', jsonb_agg(feature)
+            )
+            FROM (
+              SELECT jsonb_build_object(
+                'type',       'Feature',
+                'geometry',   ST_AsGeoJSON(geom_${year}, 6)::json,
+                'properties', to_jsonb(inputs) - 'geom_${year}',
+                'centroid',   ST_AsText(centroid)
+              ) AS feature
+              FROM (
+                SELECT * FROM parcels_${year} 
+                WHERE own_id LIKE '%${decodeURI(ownid).toUpperCase()}%'
+                AND propzip LIKE '%${code}%'
+              ) inputs
+            ) features;`;
         break;
 
       case GEOJSON_PARCELS_DISTANCE:
@@ -187,17 +230,20 @@ async function queryPGDB({
         break;
 
       case CODES_BY_SPECULATOR:
-        query = `SELECT DISTINCT otp.own_id, oc.count
-          FROM property as p
-          INNER JOIN taxpayer_property AS tpp ON p.prop_id = tpp.prop_id
-          INNER JOIN taxpayer as tp ON tpp.tp_id = tp.tp_id
-          INNER JOIN owner_taxpayer AS otp ON tp.owntax_id = otp.owntax_id
-          INNER JOIN owner_count as OC ON otp.own_id = oc.own_id
-          WHERE p.propzip LIKE '${code}%'
-          AND oc.praxisyear = '${year}'
-          ORDER BY oc.count DESC
-          LIMIT 5
-          `;
+        query = `SELECT DISTINCT p.propzip,
+          STRING_AGG(DISTINCT ot.own_id, ',') AS own_id, COUNT(ot.own_id) AS count
+          FROM parcel_property_geom AS ppg
+          INNER JOIN property AS p ON ppg.parprop_id = p.parprop_id
+          INNER JOIN taxpayer_property AS tp ON p.prop_id = tp.prop_id
+          INNER JOIN year AS y on tp.taxparprop_id = y.taxparprop_id
+          INNER JOIN taxpayer AS t ON tp.tp_id = t.tp_id
+          INNER JOIN owner_taxpayer AS ot ON t.owntax_id = ot.owntax_id
+          WHERE ot.own_id LIKE '${decodeURI(ownid).toUpperCase()}%'
+          AND y.praxisyear = '${year}'
+          GROUP BY p.propzip, ot.own_id
+          ORDER BY count DESC
+          LIMIT 5;
+        `;
         break;
 
       default:
@@ -257,7 +303,9 @@ module.exports = {
   PRIMARY_SPECULATOR,
   GEOJSON_ZIPCODES,
   GEOJSON_PARCELS_CODE,
+  GEOJSON_PARCELS_CODE_OWNID,
   GEOJSON_PARCELS_OWNID,
+  GEOJSON_PARCELS_OWNID_CODE,
   GEOJSON_PARCELS_DISTANCE,
   DETAILED_RECORD_YEARS,
   AVAILABLE_PRAXIS_YEARS,

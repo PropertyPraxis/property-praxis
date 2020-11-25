@@ -33,8 +33,9 @@ class MapViewer extends Component {
 
   async componentDidMount() {
     const { searchCoordinates } = this.props.searchState.searchParams;
+    const viewerEl = document.getElementById("mly");
 
-    if (searchCoordinates) {
+    if (viewerEl && searchCoordinates) {
       const { longitude, latitude } = JSON.parse(decodeURI(searchCoordinates));
 
       const viewer = await this.props.dispatch(
@@ -43,7 +44,7 @@ class MapViewer extends Component {
 
       // if a viewer object is returned with params then
       // create a Viewer instance
-      if (viewer.key) {
+      if (viewer && viewer.key !== null) {
         // Enable marker component when setting up viewer
         const mly = new Mapillary.Viewer(
           "mly",
@@ -56,7 +57,6 @@ class MapViewer extends Component {
             },
           }
         );
-
         // Create a non interactive simple marker with default options
         const defaultMarker = new Mapillary.MarkerComponent.SimpleMarker(
           "default-id",
@@ -68,18 +68,20 @@ class MapViewer extends Component {
         const markerComponent = mly.getComponent("marker");
         markerComponent.add([defaultMarker]); //interactiveMarker,
 
-        // Adjust the viwer after moving to close coords
-        try {
-          const node = await mly.moveCloseTo(latitude, longitude);
-          // setBearing(node);
-          this._setBearing(node, mly);
-        } catch (err) {
-          mly.moveToKey(viewer.key).catch(function (e) {});
-        }
+        // Adjust the viewer after moving to close coords
+        const node = await mly.moveCloseTo(latitude, longitude);
+
+        // setBearing(node);
+        this._setBearing(node, mly);
+
         // Viewer size is dynamic so resize should be called every time the window size changes
         window.addEventListener("resize", function () {
           mly.resize();
         });
+      } else {
+        console.error(
+          `No search coordinates provided for viewer: ${searchCoordinates}`
+        );
       }
     }
   }
@@ -88,33 +90,37 @@ class MapViewer extends Component {
     const { viewer } = this.props.searchState;
     const { searchCoordinates } = this.props.searchState.searchParams;
     const { contentIsVisible } = this.props.searchState.detailedSearch;
-    if (viewer && searchCoordinates) {
+
+    if (contentIsVisible) {
       return (
         <div
           className="map-viewer"
-          style={
-            contentIsVisible
-              ? { visibility: "visible" }
-              : { visibility: "hidden" }
-          }
+          // style={
+          //   contentIsVisible
+          //     ? { visibility: "visible" }
+          //     : { visibility: "hidden" }
+          // }
           id="mly"
         ></div>
       );
     }
-    return (
-      <div
-        className="map-viewer"
-        style={contentIsVisible ? { display: "block" } : { display: "none" }}
-      >
-        <div className="no-viewer-image">
-          <img
-            src="https://property-praxis-web.s3-us-west-2.amazonaws.com/no_image_icon.svg"
-            alt="An illustration to indicate no image returned"
-          ></img>
-          <span>Loading image.</span>
-        </div>
-      </div>
-    );
+    return null;
+
+    /* This is ui when the viewer is null */
+    // return (
+    //   <div
+    //     className="map-viewer"
+    //     style={contentIsVisible ? { display: "block" } : { display: "none" }}
+    //   >
+    //     <div className="no-viewer-image">
+    //       <img
+    //         src="https://property-praxis-web.s3-us-west-2.amazonaws.com/no_image_icon.svg"
+    //         alt="An illustration to indicate no image returned"
+    //       ></img>
+    //       <span>Loading...</span>
+    //     </div>
+    //   </div>
+    // );
   }
 }
 

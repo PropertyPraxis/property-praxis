@@ -18,14 +18,17 @@ import {
 import MapViewer from "./MapViewer";
 import * as downloadIcon from "../../assets/img/download-icon.png";
 import * as infoIcon from "../../assets/img/info-icon.png";
+import { APISearchQueryFromRoute } from "../../utils/api";
 
 /*Detailed result components need to know what the ppraxis 
     data properties, ids, and data return type (details type). */
 
 function ContentSwitch(props) {
-  const { results } = useSelector((state) => state.searchState.detailedSearch);
+  const { results, resultsType } = useSelector(
+    (state) => state.searchState.detailedSearch
+  );
 
-  if (results) {
+  if (results && resultsType) {
     switch (props.detailsType) {
       case "parcels-by-geocode:single-parcel":
         return <SingleParcel result={results[0]} />;
@@ -44,27 +47,134 @@ function ContentSwitch(props) {
     }
   } else {
     //TODO: ADD LODING INDICATOR
-    return <div>LOADING...</div>;
+    return null;
   }
 }
 
 function CodeParcels(props) {
-  return <div className="results-inner">ZIPCODES</div>;
+  const { searchState } = useSelector((state) => state);
+  const { drawerIsOpen, recordYears, results } = searchState.detailedSearch;
+  const {
+    searchTerm,
+    searchYear,
+    searchCoordinates,
+  } = searchState.searchParams;
+
+  const [speculators, setSpeculators] = useState(null);
+
+  useEffect(() => {
+    (async () => {
+      const code = results[0].properties.propzip; // need some error handling
+      if (code) {
+        const route = `/api/detailed-search?type=speculators-by-code&code=${searchTerm}&year=${searchYear}`;
+        const data = await APISearchQueryFromRoute(route);
+        setSpeculators(data);
+      }
+    })();
+    return () => null;
+  }, [searchTerm]);
+
+  return (
+    <div className="results-inner">
+      {" "}
+      <div style={drawerIsOpen ? { display: "block" } : { display: "none" }}>
+        <div className="address-title">
+          <img
+            src="https://property-praxis-web.s3-us-west-2.amazonaws.com/map_marker_rose.svg"
+            alt="A map marker icon"
+          />
+          <span>Details for {searchTerm}</span>
+        </div>
+        <div className="detailed-properties">
+          <p>Lorem ipsum.</p>
+        </div>
+        <div className="address-title">
+          <img
+            src="https://property-praxis-web.s3-us-west-2.amazonaws.com/question_mark_rose.svg"
+            alt="A question mark icon"
+          />
+          <span>Top Speculators in this Zip Code</span>
+        </div>
+        <div className="detailed-properties">{JSON.stringify(speculators)}</div>
+      </div>
+    </div>
+  );
 }
 
 function SpeculatorParcels(props) {
-  return <div className="results-inner">SPECULATORS</div>;
+  const { searchState } = useSelector((state) => state);
+  const { drawerIsOpen, recordYears, results } = searchState.detailedSearch;
+  const {
+    searchTerm,
+    searchYear,
+    searchCoordinates,
+  } = searchState.searchParams;
+
+  const [zipcodes, setZipcodes] = useState(null);
+
+  useEffect(() => {
+    (async () => {
+      const code = results[0].properties.propzip; // need some error handling
+      if (code) {
+        const route = `http://localhost:5000/api/detailed-search?type=codes-by-speculator&ownid=${searchTerm}&year=${searchYear}`;
+        const data = await APISearchQueryFromRoute(route);
+        setZipcodes(data);
+      }
+    })();
+    return () => null;
+  }, [searchTerm]);
+
+  return (
+    <div className="results-inner">
+      {" "}
+      <div style={drawerIsOpen ? { display: "block" } : { display: "none" }}>
+        <div className="address-title">
+          <img
+            src="https://property-praxis-web.s3-us-west-2.amazonaws.com/map_marker_rose.svg"
+            alt="A map marker icon"
+          />
+          <span>{searchTerm}</span>
+        </div>
+        <div className="detailed-properties">
+          <p>Lorem ipsum.</p>
+        </div>
+        <div className="address-title">
+          <img
+            src="https://property-praxis-web.s3-us-west-2.amazonaws.com/question_mark_rose.svg"
+            alt="A question mark icon"
+          />
+          <span>Properties by Zip Code for this Speculator</span>
+        </div>
+        <div className="detailed-properties">{JSON.stringify(zipcodes)}</div>
+      </div>
+    </div>
+  );
 }
 
 function MultipleParcels(props) {
   const { searchState } = useSelector((state) => state);
-  const { drawerIsOpen, recordYears } = searchState.detailedSearch;
+  const { drawerIsOpen, recordYears, results } = searchState.detailedSearch;
   const {
     searchTerm,
     searchYear,
     searchCoordinates,
   } = searchState.searchParams;
   const dispatch = useDispatch();
+
+  const [speculators, setSpeculators] = useState(null);
+
+  useEffect(() => {
+    (async () => {
+      const code = results[0].properties.propzip; // need some error handling
+      if (code) {
+        const route = `/api/detailed-search?type=speculators-by-code&code=${results[0].properties.propzip}&year=${searchYear}`;
+        const data = await APISearchQueryFromRoute(route);
+        setSpeculators(data);
+      }
+    })();
+    return () => null;
+  }, [dispatch, searchTerm]);
+
   return (
     <div className="results-inner scroller">
       <MapViewer searchState={searchState} dispatch={dispatch} />
@@ -76,11 +186,11 @@ function MultipleParcels(props) {
           />
           <span>{searchTerm}</span>
         </div>
-        <div className="address-properties">
+        <div className="detailed-properties">
           <p>
-            We could not find a record for <span>{searchTerm}</span> in{" "}
-            <span>{searchYear}</span>. See additional details for this area
-            below.
+            We could not find a speculation record for <span>{searchTerm}</span>{" "}
+            in <span>{searchYear}</span>, but in {results[0].properties.propzip}{" "}
+            we have identified {results.length} speculative properties.
           </p>
         </div>
         <div className="address-title">
@@ -88,9 +198,9 @@ function MultipleParcels(props) {
             src="https://property-praxis-web.s3-us-west-2.amazonaws.com/question_mark_rose.svg"
             alt="A question mark icon"
           />
-          <span> Top Speculators in this Zipcode</span>
+          <span> Top Speculators in this Zip Code</span>
         </div>
-        <div className="address-properties"></div>
+        <div className="detailed-properties">{JSON.stringify(speculators)}</div>
       </div>
     </div>
   );
@@ -98,7 +208,7 @@ function MultipleParcels(props) {
 
 function SingleParcel(props) {
   const { searchState } = useSelector((state) => state);
-  const { drawerIsOpen, recordYears } = searchState.detailedSearch;
+  const { drawerIsOpen, recordYears, viewer } = searchState.detailedSearch;
   const {
     searchTerm,
     searchYear,
@@ -116,17 +226,18 @@ function SingleParcel(props) {
     propaddr,
     count,
     parcelno,
-    parprop_id // this is the PK for geoms in DB
+    parprop_id, // this is the PK for geoms in DB
   } = props.result.properties;
 
   // other years to search for this address
   const praxisRecordYears = availablePraxisYears(recordYears, searchYear);
 
   useEffect(() => {
-    if (parcelno) {
+    if (parprop_id) {
       const route = `/api/detailed-search?type=detailed-record-years&parpropid=${parprop_id}&year=${searchYear}`;
       dispatch(handleGetPraxisYearsAction(route));
     }
+    return () => null;
   }, [dispatch, searchCoordinates]);
 
   return (
@@ -140,7 +251,7 @@ function SingleParcel(props) {
           />
           <span>{searchTerm}</span>
         </div>
-        <div className="address-properties">
+        <div className="detailed-properties">
           <div>
             <span>Speculator</span>
             <span>{capitalizeFirstLetter(own_id)}</span>
@@ -190,11 +301,11 @@ function SingleParcel(props) {
           />
           <span> About the Property</span>
         </div>
-        <div className="address-properties">
+        <div className="detailed-properties">
           <p>
             In <span>{searchYear}</span>,{" "}
             <span>{capitalizeFirstLetter(propaddr)}</span> was located in
-            Detroit zipcode <span>{propzip}</span>, and was one of{" "}
+            Detroit zip code <span>{propzip}</span>, and was one of{" "}
             <span>{count}</span> properties owned by speculator{" "}
             <span>{capitalizeFirstLetter(own_id)}</span>. Additional years of
             speculation for this property ocurred in{" "}
@@ -266,13 +377,20 @@ function SingleParcel(props) {
 }
 
 function DetailedSearchResults(props) {
-  const { drawerIsOpen, contentIsVisible } = useSelector(
+  const { drawerIsOpen, contentIsVisible, results, resultsType } = useSelector(
     (state) => state.searchState.detailedSearch
   );
   const dispatch = useDispatch();
   const toggleDetailedResultsDrawer = () => {
     dispatch(updateDetailedSearch({ drawerIsOpen: !drawerIsOpen }));
   };
+
+  useEffect(() => {
+    if (results && resultsType) {
+      dispatch(updateDetailedSearch({ drawerIsOpen: true }));
+    }
+    return () => null;
+  }, [results, resultsType, dispatch]);
 
   return (
     <section className="result-drawer-static">
@@ -338,7 +456,7 @@ export default DetailedSearchResults;
 //             />
 //             <span>{searchTerm}</span>
 //           </div>
-//           <div className="address-properties">
+//           <div className="detailed-properties">
 //             <div>
 //               <span>Speculator</span>
 //               <span>{capitalizeFirstLetter(own_id)}</span>
@@ -388,7 +506,7 @@ export default DetailedSearchResults;
 //             />
 //             <span> About the Property</span>
 //           </div>
-//           <div className="address-properties">
+//           <div className="detailed-properties">
 //             <p>
 //               In <span>{searchYear}</span>,{" "}
 //               <span>{capitalizeFirstLetter(propaddr)}</span> was located in
@@ -929,7 +1047,7 @@ export default DetailedSearchResults;
 //             <img src={infoIcon} alt="More Information"></img>
 //           </span>
 //           <hr></hr>
-//           <div className="address-properties">
+//           <div className="detailed-properties">
 //             <div
 //               onClick={() => {
 //                 this._onSpeculatorClick();

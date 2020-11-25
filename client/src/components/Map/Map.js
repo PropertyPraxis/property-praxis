@@ -6,10 +6,12 @@ import BasemapController from "./BasemapController";
 import { createNewViewport } from "../../utils/map";
 import {
   createAddressString,
+  capitalizeFirstLetter,
   parseMBAddressString,
   createLayerFilter,
   createQueryStringFromParams,
 } from "../../utils/helper";
+import { URLParamsToAPIQueryString } from "../../utils/parseURL";
 import {
   getMapStateAction,
   toggleLoadingIndicatorAction,
@@ -137,23 +139,23 @@ class PraxisMap extends Component {
   ];
 
   // returns a route dependent on URL search params passed from MapContainer
-  _routeSwitcher = ({
-    searchType,
-    searchTerm,
-    searchCoordinates,
-    searchYear,
-  }) => {
-    switch (searchType) {
-      case "zipcode":
-        return `/api/geojson?type=parcels-by-code&code=${searchTerm}&year=${searchYear}`;
-      case "speculator":
-        return `/api/geojson?type=parcels-by-speculator&ownid=${searchTerm}&year=${searchYear}`;
-      case "address":
-        return `/api/geojson?type=parcels-by-geocode&place=${searchTerm}&coordinates=${searchCoordinates}&year=${searchYear}`;
-      default:
-        return null;
-    }
-  };
+  // _routeSwitcher = ({
+  //   searchType,
+  //   searchTerm,
+  //   searchCoordinates,
+  //   searchYear,
+  // }) => {
+  //   switch (searchType) {
+  //     case "zipcode":
+  //       return `/api/geojson?type=parcels-by-code&code=${searchTerm}&year=${searchYear}`;
+  //     case "speculator":
+  //       return `/api/geojson?type=parcels-by-speculator&ownid=${searchTerm}&year=${searchYear}`;
+  //     case "address":
+  //       return `/api/geojson?type=parcels-by-geocode&place=${searchTerm}&coordinates=${searchCoordinates}&year=${searchYear}`;
+  //     default:
+  //       return null;
+  //   }
+  // };
 
   // create new vieport dependent on geojson bbox
   _createNewViewport = (geojson) => {
@@ -174,9 +176,6 @@ class PraxisMap extends Component {
     if (features) {
       this.props.dispatch(getMapStateAction(newViewport));
     }
-    // : this.props.dispatch(
-    //     handleGetParcelsByQueryAction(`/api/geojson/parcels/${searchYear}`) //default return
-    //   );
   };
 
   _getMapData = async () => {
@@ -184,10 +183,13 @@ class PraxisMap extends Component {
     this.props.dispatch(toggleLoadingIndicatorAction(true));
 
     // Build route and get data
-    const route = this._routeSwitcher(this.props.searchQueryParams);
+    // const route = this._routeSwitcher(this.props.searchParams);//REMOVE
+
+    const routePROTO = URLParamsToAPIQueryString(this.props.location.search);
+
     // Get Data
     const parcelsGeojson = await this.props.dispatch(
-      handleGetParcelsByQueryAction(route)
+      handleGetParcelsByQueryAction(routePROTO)
     );
     const zipsGeojson = await this.props.dispatch(
       handleGetZipcodesDataAction("/api/geojson?type=zipcode-all")
@@ -199,7 +201,7 @@ class PraxisMap extends Component {
     }
 
     // set marker not undefined or null
-    const { searchCoordinates } = this.props.searchQueryParams;
+    const { searchCoordinates } = this.props.searchParams;
     if (searchCoordinates) {
       const { longitude, latitude } = JSON.parse(decodeURI(searchCoordinates));
       this.props.dispatch(setMarkerCoordsAction(longitude, latitude));
@@ -263,19 +265,14 @@ class PraxisMap extends Component {
       };
 
       // build route using feature properties
-      const { propno, propstr, propdir, propzip } = hoveredFeature.properties;
+      const { propaddr } = hoveredFeature.properties;
       const encodedCoords = encodeURI(JSON.stringify(coordinates));
-      const addressString = createAddressString({
-        propno,
-        propdir,
-        propstr,
-      });
 
       const { searchYear } = this.props.searchState.searchParams;
       const clientRoute = createQueryStringFromParams(
         {
           type: "address",
-          place: addressString,
+          place: capitalizeFirstLetter(propaddr),
           coordinates: encodedCoords,
           year: searchYear,
         },

@@ -7,6 +7,7 @@ router.get("/", async (req, res) => {
   try {
     const { type, ownid, code, place, coordinates, year } = req.query;
     let clientData;
+
     if (type === "address") {
       const { data } = await queries.queryMapboxAPI({
         place,

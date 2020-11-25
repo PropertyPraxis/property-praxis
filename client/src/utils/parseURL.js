@@ -8,43 +8,14 @@ const defaultParams = {
   year: "2020",
 };
 
-// export function parseURLParams(searchQuery) {
-//   let {
-//     type: searchType,
-//     search: searchTerm,
-//     coordinates: searchCoordinates,
-//     year: searchYear,
-//   } = queryString.parse(searchQuery);
-
-//   if (searchType === undefined) {
-//     searchType = defaultParams.type;
-//   }
-//   if (searchTerm === undefined) {
-//     searchTerm = defaultParams.search;
-//   }
-//   if (searchCoordinates === undefined) {
-//     searchCoordinates = defaultParams.searchCoordinates;
-//   }
-//   if (searchYear === undefined) {
-//     searchYear = defaultParams.searchYear;
-//   }
-
-//   return {
-//     searchType,
-//     searchTerm,
-//     searchCoordinates,
-//     searchYear,
-//   };
-// }
-
-export function parseURLParams(searchQuery) {
+export function URLParamsToSearchParams(searchQuery) {
   const {
-    type: searchType,
-    code,
-    ownid,
-    place,
-    coordinates: searchCoordinates,
-    year: searchYear,
+    type: searchType = null,
+    code = null,
+    ownid = null,
+    place = null,
+    coordinates: searchCoordinates = null,
+    year: searchYear = null,
   } = queryString.parse(searchQuery);
 
   let searchTerm;
@@ -71,4 +42,43 @@ export function parseURLParams(searchQuery) {
     searchCoordinates,
     searchYear,
   };
+}
+
+export function URLParamsToAPIQueryString(searchQuery) {
+  const {
+    type = null,
+    ownid = null,
+    code = null,
+    place = null,
+    year = null,
+    coordinates = null,
+  } = queryString.parse(searchQuery);
+
+  switch (type) {
+    case "zipcode":
+      if (code && ownid && year) {
+        return `/api/geojson?type=parcels-by-code-speculator&code=${code}&ownid=${ownid}&year=${year}`;
+      } else if (code && year) {
+        return `/api/geojson?type=parcels-by-code&code=${code}&year=${year}`;
+      } else {
+        return null;
+      }
+    case "speculator":
+      if (ownid && code && year) {
+        return `/api/geojson?type=parcels-by-speculator-code&ownid=${ownid}&code=${code}&year=${year}`;
+      } else if (ownid && year) {
+        return `/api/geojson?type=parcels-by-speculator&ownid=${ownid}&year=${year}`;
+      } else {
+        return null;
+      }
+
+    case "address":
+      if (place && coordinates && year) {
+        return `/api/geojson?type=parcels-by-geocode&place=${place}&coordinates=${coordinates}&year=${year}`;
+      } else {
+        return null;
+      }
+    default:
+      return null;
+  }
 }

@@ -21,15 +21,12 @@ const initialSearchState = {
   detailedSearch: {
     results: null,
     drawerIsOpen: false,
+    contentIsVisible: false,
     resultsType: null,
     recordYears: null,
   },
   downloadData: null,
-  viewer: {
-    bearing: null,
-    key: null,
-    viewerMarker: null,
-  },
+  viewer: null,
 };
 
 export default function searchState(state = initialSearchState, action) {
@@ -60,35 +57,8 @@ export default function searchState(state = initialSearchState, action) {
   }
 }
 
-// PRIMARY_SEARCH_QUERY,
-// TOGGLE_DETAILED_RESULTS,
-// UPDATE_DETAILED_RESULTS,
-// TOGGLE_PRIMARY_RESULTS,
-// TOGGLE_PRIMARY_ACTIVE,
-// UPDATE_PRIMARY_RESULTS,
-// UPDATE_PRIMARY_INDEX,
-// GET_SEARCH_YEARS,
-// GET_PRAXIS_SEARCH_YEARS,
-
-///////
-// case TOGGLE_DETAILED_RESULTS:
-//   return { ...state, ...action.payload };
-// case UPDATE_DETAILED_RESULTS:
-//   return { ...state, ...action.payload };
-// case PRIMARY_SEARCH_QUERY:
-//   return { ...state, ...action.payload };
-// case TOGGLE_PRIMARY_RESULTS:
-//   return { ...state, ...action.payload };
-// case TOGGLE_PRIMARY_ACTIVE:
-//   return { ...state, ...action.payload };
-// case UPDATE_PRIMARY_RESULTS:
-//   return { ...state, ...action.payload };
-// case UPDATE_PRIMARY_INDEX:
-//   return { ...state, ...action.payload };
-// case GET_SEARCH_YEARS:
-//   return { ...state, ...action.payload };
-// case GET_PRAXIS_SEARCH_YEARS:
-//   return { ...state, ...action.payload };
-// case TOGGLE_DETAILED_RESULTS:
-//   return { ...state, ...action.payload };
-///////
+// viewer: {
+//   bearing: null,
+//   key: null,
+//   viewerMarker: null,
+// },

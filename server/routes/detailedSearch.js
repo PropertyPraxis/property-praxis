@@ -4,7 +4,7 @@ const queries = require("../utils/queries");
 
 router.get("/", async (req, res) => {
   try {
-    const { type, year, parpropid } = req.query;
+    const { type, year, parpropid, code, ownid } = req.query;
     let clientData;
     if (type === "detailed-record-years") {
       const years = await queries.queryPGDB({
@@ -19,6 +19,22 @@ router.get("/", async (req, res) => {
         parpropid,
       });
       clientData = Object.values(data[0]);
+    } else if (type === "speculators-by-code") {
+      const { data } = await queries.queryPGDB({
+        PGDBQueryType: queries.SPECULATORS_BY_CODE,
+        code,
+        year,
+      });
+
+      clientData = data;
+    } else if (type === "codes-by-speculator") {
+      const { data } = await queries.queryPGDB({
+        PGDBQueryType: queries.CODES_BY_SPECULATOR,
+        ownid,
+        year,
+      });
+
+      clientData = data;
     } else {
       clientData = null;
     }

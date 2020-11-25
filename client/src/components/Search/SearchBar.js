@@ -8,7 +8,7 @@ import {
   updatePrimarySearch,
   updateDetailedSearch,
 } from "../../actions/search";
-import { parseURLParams } from "../../utils/parseURL";
+import { URLParamsToSearchParams } from "../../utils/parseURL";
 import {
   capitalizeFirstLetter,
   sanitizeSearchResult,
@@ -130,12 +130,18 @@ class SearchBar extends Component {
     );
 
     this.props.dispatch(updatePrimarySearch({ results: null }));
-    this.props.dispatch(updateDetailedSearch({ results: null }));
+    this.props.dispatch(
+      updateDetailedSearch({
+        results: null,
+        resultsType: null,
+        drawerIsOpen: false,
+        contentIsVisible: false,
+      })
+    );
   };
 
   _handleKeyPress = (e) => {
     const { results, index } = this.props.searchState.primarySearch;
-
     // if it is an enter key press
     if (e.key === "Enter") {
       // set location according to current index selection
@@ -184,7 +190,14 @@ class SearchBar extends Component {
       })
     );
     this.props.dispatch(updatePrimarySearch({ results: null, index: 0 }));
-    this.props.dispatch(updateDetailedSearch({ results: null }));
+    this.props.dispatch(
+      updateDetailedSearch({
+        results: null,
+        resultsType: null,
+        drawerIsOpen: false,
+        contentIsVisible: false,
+      })
+    );
   };
 
   _handleYearSelect = (e) => {
@@ -202,7 +215,7 @@ class SearchBar extends Component {
         searchTerm,
         searchCoordinates,
         searchYear,
-      } = parseURLParams(searchQuery);
+      } = URLParamsToSearchParams(searchQuery);
 
       this._setSearchStateParams({
         searchType,
@@ -236,7 +249,7 @@ class SearchBar extends Component {
         searchTerm,
         searchYear,
         searchCoordinates,
-      } = parseURLParams(searchQuery);
+      } = URLParamsToSearchParams(searchQuery);
       this._setSearchStateParams({
         searchType,
         searchTerm,

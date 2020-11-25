@@ -37,4 +37,25 @@ function buildGeoJSONTemplate(features) {
   return template;
 }
 
-module.exports = { findTargetAddress, buildGeoJSONTemplate };
+function isGeoJSONEmpty(geoJSON) {
+  if (geoJSON.features === null || geoJSON.features.length === 0) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+function checkEmptyGeoJSON(geoJSON) {
+  if (isGeoJSONEmpty(geoJSON)) {
+    return buildGeoJSONTemplate([]);
+  } else {
+    return geoJSON;
+  }
+}
+
+module.exports = {
+  findTargetAddress,
+  buildGeoJSONTemplate,
+  isGeoJSONEmpty,
+  checkEmptyGeoJSON,
+};
