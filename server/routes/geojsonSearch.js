@@ -75,7 +75,7 @@ router.get("/", async (req, res) => {
 
         geoJSON = pgData.data[0].jsonb_build_object;
         clientData = checkEmptyGeoJSON(geoJSON);
-        praxisDataType = "parcels-by-code";
+        praxisDataType = "parcels-by-speculator";
         break;
 
       case "parcels-by-code-speculator":

@@ -21,14 +21,15 @@ import * as infoIcon from "../../assets/img/info-icon.png";
 import { APISearchQueryFromRoute } from "../../utils/api";
 
 /*Detailed result components need to know what the ppraxis 
-    data properties, ids, and data return type (details type). */
+  data properties, ids, and data return type (details type) are. 
+  They also use internal state in some cases. */
 
 function ContentSwitch(props) {
   const { results, resultsType } = useSelector(
     (state) => state.searchState.detailedSearch
   );
 
-  if (results && resultsType) {
+  if (results && results.length > 0 && resultsType) {
     switch (props.detailsType) {
       case "parcels-by-geocode:single-parcel":
         return <SingleParcel result={results[0]} />;
@@ -45,15 +46,44 @@ function ContentSwitch(props) {
       default:
         return null;
     }
+  } else if (results && results.length === 0) {
+    //TODO: BUILD OUT THESE UIS
+    return <NoResults />;
   } else {
-    //TODO: ADD LODING INDICATOR
-    return null;
+    return <div>ERROR</div>;
   }
+}
+
+function NoResults(props) {
+  const { searchState } = useSelector((state) => state);
+  const { drawerIsOpen, results } = searchState.detailedSearch;
+  const {
+    searchTerm,
+    searchYear,
+    searchCoordinates,
+  } = searchState.searchParams;
+  return (
+    <div className="results-inner">
+      {" "}
+      <div style={drawerIsOpen ? { display: "block" } : { display: "none" }}>
+        <div className="detailed-title">
+          <img
+            src="https://property-praxis-web.s3-us-west-2.amazonaws.com/map_marker_rose.svg"
+            alt="A map marker icon"
+          />
+          <span>No Results for this Search</span>
+        </div>
+        <div className="detailed-properties">
+          <p>Lorem ipsum.</p>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function CodeParcels(props) {
   const { searchState } = useSelector((state) => state);
-  const { drawerIsOpen, recordYears, results } = searchState.detailedSearch;
+  const { drawerIsOpen, results } = searchState.detailedSearch;
   const {
     searchTerm,
     searchYear,
@@ -78,7 +108,7 @@ function CodeParcels(props) {
     <div className="results-inner">
       {" "}
       <div style={drawerIsOpen ? { display: "block" } : { display: "none" }}>
-        <div className="address-title">
+        <div className="detailed-title">
           <img
             src="https://property-praxis-web.s3-us-west-2.amazonaws.com/map_marker_rose.svg"
             alt="A map marker icon"
@@ -88,7 +118,7 @@ function CodeParcels(props) {
         <div className="detailed-properties">
           <p>Lorem ipsum.</p>
         </div>
-        <div className="address-title">
+        <div className="detailed-title">
           <img
             src="https://property-praxis-web.s3-us-west-2.amazonaws.com/question_mark_rose.svg"
             alt="A question mark icon"
@@ -103,7 +133,7 @@ function CodeParcels(props) {
 
 function SpeculatorParcels(props) {
   const { searchState } = useSelector((state) => state);
-  const { drawerIsOpen, recordYears, results } = searchState.detailedSearch;
+  const { drawerIsOpen, results } = searchState.detailedSearch;
   const {
     searchTerm,
     searchYear,
@@ -128,7 +158,7 @@ function SpeculatorParcels(props) {
     <div className="results-inner">
       {" "}
       <div style={drawerIsOpen ? { display: "block" } : { display: "none" }}>
-        <div className="address-title">
+        <div className="detailed-title">
           <img
             src="https://property-praxis-web.s3-us-west-2.amazonaws.com/map_marker_rose.svg"
             alt="A map marker icon"
@@ -138,7 +168,7 @@ function SpeculatorParcels(props) {
         <div className="detailed-properties">
           <p>Lorem ipsum.</p>
         </div>
-        <div className="address-title">
+        <div className="detailed-title">
           <img
             src="https://property-praxis-web.s3-us-west-2.amazonaws.com/question_mark_rose.svg"
             alt="A question mark icon"
@@ -179,7 +209,7 @@ function MultipleParcels(props) {
     <div className="results-inner scroller">
       <MapViewer searchState={searchState} dispatch={dispatch} />
       <div style={drawerIsOpen ? { display: "block" } : { display: "none" }}>
-        <div className="address-title">
+        <div className="detailed-title">
           <img
             src="https://property-praxis-web.s3-us-west-2.amazonaws.com/map_marker_rose.svg"
             alt="A map marker icon"
@@ -193,7 +223,7 @@ function MultipleParcels(props) {
             we have identified {results.length} speculative properties.
           </p>
         </div>
-        <div className="address-title">
+        <div className="detailed-title">
           <img
             src="https://property-praxis-web.s3-us-west-2.amazonaws.com/question_mark_rose.svg"
             alt="A question mark icon"
@@ -244,7 +274,7 @@ function SingleParcel(props) {
     <div className="results-inner scroller">
       <MapViewer searchState={searchState} dispatch={dispatch} />
       <div style={drawerIsOpen ? { display: "block" } : { display: "none" }}>
-        <div className="address-title">
+        <div className="detailed-title">
           <img
             src="https://property-praxis-web.s3-us-west-2.amazonaws.com/map_marker_rose.svg"
             alt="A map marker icon"
@@ -294,7 +324,7 @@ function SingleParcel(props) {
             </div>
           )}
         </div>
-        <div className="address-title">
+        <div className="detailed-title">
           <img
             src="https://property-praxis-web.s3-us-west-2.amazonaws.com/question_mark_rose.svg"
             alt="A question mark icon"
@@ -449,7 +479,7 @@ export default DetailedSearchResults;
 //       <div className="results-inner scroller">
 //         <MapViewer {...this.props} />
 //         <div style={drawerIsOpen ? { display: "block" } : { display: "none" }}>
-//           <div className="address-title">
+//           <div className="detailed-title">
 //             <img
 //               src="https://property-praxis-web.s3-us-west-2.amazonaws.com/map_marker_rose.svg"
 //               alt="A map marker icon"
@@ -499,7 +529,7 @@ export default DetailedSearchResults;
 //               </div>
 //             )}
 //           </div>
-//           <div className="address-title">
+//           <div className="detailed-title">
 //             <img
 //               src="https://property-praxis-web.s3-us-west-2.amazonaws.com/question_mark_rose.svg"
 //               alt="A question mark icon"
@@ -1031,7 +1061,7 @@ export default DetailedSearchResults;
 //       return (
 //         <div>
 //           <MapViewer {...this.props} />
-//           <div className="address-title">
+//           <div className="detailed-title">
 //             <span>
 //               <img src={mapMarkerIcon} alt="Address Result" />
 //               {addressList[0]}
