@@ -13,7 +13,7 @@ const initialSearchState = {
   },
   searchParams: {
     searchType: "all",
-    searchYear: "2017",
+    searchYear: "2020",
     searchTerm: "",
     searchCoordinates: null,
   },

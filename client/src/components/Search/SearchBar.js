@@ -204,11 +204,9 @@ class SearchBar extends Component {
     this.props.dispatch(updateSearchParams({ searchYear: e.target.value }));
   };
 
-  _handleYearSelectFocus = () => {};
   componentDidMount() {
     // parse URL and dispatch params
     const { search: searchQuery, pathname } = this.props.history.location;
-
     if (pathname === "/map") {
       const {
         searchType,
@@ -223,14 +221,6 @@ class SearchBar extends Component {
         searchCoordinates,
         searchYear,
       });
-      this.props.dispatch(
-        updateSearchParams({
-          searchType,
-          searchTerm,
-          searchYear,
-          searchCoordinates,
-        })
-      );
       this._handleQueryPrimaryResults({
         searchType,
         searchTerm,
@@ -267,6 +257,7 @@ class SearchBar extends Component {
         searchTerm: "",
         searchType: "all",
         searchCoordinates: null,
+        searchYear: "2020", //this is hardcoded and can be more dynamic
       });
     }
   }
