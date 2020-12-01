@@ -57,7 +57,7 @@
 
 .scroller {
   height: 100%;
-  overflow-y: auto;
+  overflow-y: overlay;
   scrollbar-color: #7f7f7f white;
   scrollbar-width: thin;
 }
@@ -79,13 +79,12 @@
     bottom: 0;
     left: 0;
     right: 0;
-    /*overflow: overlay;*/
     width: 100%;
-    height: 20px;
+    height: 25px;
   }
 
   .results-drawer-enter {
-    height: 20px;
+    height: 25px;
     overflow: hidden;
   }
 
@@ -94,6 +93,7 @@
   .results-drawer-appear {
     height: calc(100vh - 120px);
     transition: height 300ms;
+    overflow: hidden;
   }
 
   .results-drawer-exit {
@@ -103,7 +103,7 @@
 
   .results-drawer-exit-active,
   .results-drawer-exit-done {
-    height: 20px;
+    height: 25px;
     transition: height 300ms;
     overflow: hidden;
   }
@@ -130,11 +130,11 @@
   top: 0px;
 }
 
-.mapillary-js {
-  // background: url("https://property-praxis-web.s3-us-west-2.amazonaws.com/no_image_icon.svg")
-  //   50% 50% no-repeat !important;
-  // background-color: $ui-light-gray;
-}
+// .mapillary-js {
+//   // background: url("https://property-praxis-web.s3-us-west-2.amazonaws.com/no_image_icon.svg")
+//   //   50% 50% no-repeat !important;
+//   // background-color: $ui-light-gray;
+// }
 
 .no-viewer-image {
   display: flex;
