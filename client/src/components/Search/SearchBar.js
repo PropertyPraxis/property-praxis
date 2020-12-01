@@ -144,12 +144,14 @@ class SearchBar extends Component {
     const { results, index } = this.props.searchState.primarySearch;
     // if it is an enter key press
     if (e.key === "Enter") {
-      // set location according to current index selection
-      this._setSearchLocationParams(results[index]);
-      this.props.dispatch(updatePrimarySearch({ isOpen: false }));
+      if (results && results.length > 0) {
+        // set location according to current index selection
+        this._setSearchLocationParams(results[index]);
+        this.props.dispatch(updatePrimarySearch({ isOpen: false }));
 
-      // blur the input
-      this._inputRef.current.blur();
+        // blur the input
+        this._inputRef.current.blur();
+      }
     }
   };
 
