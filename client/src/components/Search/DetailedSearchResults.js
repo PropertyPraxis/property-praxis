@@ -146,13 +146,13 @@ function SpeculatorParcels(props) {
     (async () => {
       const code = results[0].properties.propzip; // need some error handling
       if (code) {
-        const route = `http://localhost:5000/api/detailed-search?type=codes-by-speculator&ownid=${searchTerm}&year=${searchYear}`;
+        const route = `/api/detailed-search?type=codes-by-speculator&ownid=${searchTerm}&year=${searchYear}`;
         const data = await APISearchQueryFromRoute(route);
         setZipcodes(data);
       }
     })();
     return () => null;
-  }, [searchTerm]);
+  }, [searchTerm, searchYear]);
 
   return (
     <div className="results-inner">

@@ -91,7 +91,7 @@ class MapViewer extends Component {
     const { searchCoordinates } = this.props.searchState.searchParams;
     const { contentIsVisible } = this.props.searchState.detailedSearch;
 
-    if (contentIsVisible) {
+    if (contentIsVisible && viewer) {
       return (
         <div
           className="map-viewer"
@@ -104,23 +104,21 @@ class MapViewer extends Component {
         ></div>
       );
     }
-    return null;
-
     /* This is ui when the viewer is null */
-    // return (
-    //   <div
-    //     className="map-viewer"
-    //     style={contentIsVisible ? { display: "block" } : { display: "none" }}
-    //   >
-    //     <div className="no-viewer-image">
-    //       <img
-    //         src="https://property-praxis-web.s3-us-west-2.amazonaws.com/no_image_icon.svg"
-    //         alt="An illustration to indicate no image returned"
-    //       ></img>
-    //       <span>Loading...</span>
-    //     </div>
-    //   </div>
-    // );
+    return (
+      <div
+        className="map-viewer"
+        // style={contentIsVisible ? { display: "block" } : { display: "none" }}
+      >
+        <div className="no-viewer-image">
+          <img
+            src="https://property-praxis-web.s3-us-west-2.amazonaws.com/no_image_icon.svg"
+            alt="An illustration to indicate no image returned"
+          ></img>
+          <span>Image not available.</span>
+        </div>
+      </div>
+    );
   }
 }
 
