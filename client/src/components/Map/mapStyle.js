@@ -71,7 +71,7 @@ export const parcelCentroid = {
 export const zipsLayer = {
   id: "zips",
   type: "line",
-  maxzoom: 13,
+  // maxzoom: 13,
   paint: {
     "line-width": 3,
     "line-dasharray": [3, 3],
@@ -82,7 +82,7 @@ export const zipsLayer = {
 export const zipsLabel = {
   id: "zips-label",
   type: "symbol",
-  maxzoom: 13,
+  // maxzoom: 13,
   layout: {
     "text-field": ["get", "zipcode"],
     "text-anchor": "center",

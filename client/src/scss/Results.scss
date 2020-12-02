@@ -6,7 +6,6 @@
   grid-column: 1 / 2;
   background-color: $ui-white;
   display: flex;
-  /*overflow: overlay;*/
 }
 
 .results-drawer-enter-active,
@@ -20,8 +19,6 @@
   background-color: $ui-white;
   transition: width 300ms;
   border-radius: 4px 0 0 4px;
-  // box-shadow: 10px 0px 10px 0 rgba(0, 0, 0, 0.5);
-  /*overflow: overlay;*/
 }
 
 .results-drawer-exit {
@@ -32,8 +29,6 @@
   grid-column: 1 / 2;
   background-color: $ui-white;
   border-radius: 4px 0 0 4px;
-  // box-shadow: 10px 0px 10px 0 rgba(0, 0, 0, 0.5);
-  /*overflow: overlay;*/
 }
 
 .results-drawer-exit-active,
@@ -44,7 +39,6 @@
   grid-column: 1 / 2;
   background-color: $ui-white;
   transition: width 300ms;
-  /*overflow: overlay;*/
 }
 
 .results-inner {
@@ -55,9 +49,16 @@
   }
 }
 
+.results-inner > div {
+  min-width: 380px;
+  @media (max-width: $mobile) {
+    min-width: unset;
+  }
+}
+
 .scroller {
   height: 100%;
-  overflow-y: overlay;
+  overflow-y: scroll;
   scrollbar-color: #7f7f7f white;
   scrollbar-width: thin;
 }
@@ -126,8 +127,8 @@
   height: 250px;
   box-sizing: border-box;
   border: 4px solid $ui-black;
-  position: sticky;
-  top: 0px;
+  // position: sticky;
+  // top: 0px;
 }
 
 // .mapillary-js {
