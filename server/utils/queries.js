@@ -6,15 +6,18 @@ const keys = require("../config/keys");
 const PRIMARY_ZIPCODE = "PRIMARY_ZIPCODE";
 const PRIMARY_SPECULATOR = "PRIMARY_SPECULATOR";
 const GEOJSON_ZIPCODES = "GEOJSON_ZIPCODES";
+const GEOJSON_ZIPCODES_PARCELS = "GEOJSON_ZIPCODES_PARCELS";
 const GEOJSON_PARCELS_CODE = "GEOJSON_PARCELS_CODE";
 const GEOJSON_PARCELS_CODE_OWNID = "GEOJSON_PARCELS_CODE_OWNID";
 const GEOJSON_PARCELS_OWNID = "GEOJSON_PARCELS_OWNID";
 const GEOJSON_PARCELS_OWNID_CODE = "GEOJSON_PARCELS_OWNID_CODE";
 const GEOJSON_PARCELS_DISTANCE = "GEOJSON_PARCELS_DISTANCE";
+const GEOJSON_PARCELS_CODE_DISTANCE = "GEOJSON_PARCELS_CODE_DISTANCE";
 const DETAILED_RECORD_YEARS = "DETAILED_RECORD_YEARS"; // years for a praxis record
 const AVAILABLE_PRAXIS_YEARS = "AVAILABLE_PRAXIS_YEARS"; // all the available search years
 const SPECULATORS_BY_CODE = "SPECULATORS_BY_CODE";
 const CODES_BY_SPECULATOR = "CODES_BY_SPECULATOR";
+const POINT_CODE = "POINT_CODE"; // get the zipcode for a specific point
 
 /*Mapbox API query types*/
 const GEOCODE = "GEOCODE"; // works for primary address as well
@@ -81,6 +84,26 @@ async function queryPGDB({
               SELECT * FROM zips_geom
             ) inputs
           ) features;`;
+        break;
+
+      case GEOJSON_ZIPCODES_PARCELS:
+        query = `SELECT jsonb_build_object(
+          'type',     'FeatureCollection',
+          'features', jsonb_agg(feature)
+        )
+        FROM (
+          SELECT jsonb_build_object(
+            'type',       'Feature',
+            'geometry',   ST_AsGeoJSON(geometry, 6)::json,
+            'properties', to_jsonb(inputs) - 'geometry'
+          ) AS feature
+          FROM (
+            SELECT DISTINCT z.geometry AS geometry, z.zipcode AS zipcode 
+            FROM zips_geom AS z
+            INNER JOIN parcels_${year} AS p ON ST_Intersects(geometry, p.geom_${year})
+            ${createCodeSQLPredicate({ code, ownid, coordinates })}
+            ) inputs
+        ) features;`;
         break;
 
       case GEOJSON_PARCELS_CODE:
@@ -161,6 +184,7 @@ async function queryPGDB({
             ) features;`;
         break;
 
+      /*currenlty dead query - not used*/
       case GEOJSON_PARCELS_DISTANCE:
         query = `SELECT jsonb_build_object(
             'type',     'FeatureCollection',
@@ -177,17 +201,53 @@ async function queryPGDB({
             FROM (
               SELECT *, ST_Distance(
                 ST_SetSRID(
-                  ST_MakePoint(${longitude}, ${latitude}), 
-                4326)::geography, 
-              geom_${year}::geography) AS distance 
-              FROM parcels_${year} 
+                  ST_MakePoint(${longitude}, ${latitude}),
+                4326)::geography,
+              geom_${year}::geography) AS distance
+              FROM parcels_${year}
               WHERE ST_Distance(
                 ST_SetSRID(
-                  ST_MakePoint(${longitude}, ${latitude}), 
-                4326)::geography, 
+                  ST_MakePoint(${longitude}, ${latitude}),
+                4326)::geography,
               geom_${year}::geography) < ${searchRadius}
             ) inputs
           ) features;`;
+        break;
+
+      case GEOJSON_PARCELS_CODE_DISTANCE:
+        query = `SELECT jsonb_build_object(
+          'type',     'FeatureCollection',
+          'features', jsonb_agg(feature)
+        )
+        FROM (
+          SELECT jsonb_build_object(
+            'type',       'Feature',
+            'id',          feature_id,
+            'geometry',   ST_AsGeoJSON(geom_${year}, 6)::json,
+            'properties', to_jsonb(inputs) - 'geom_${year}',
+            'centroid',   ST_AsText(centroid)
+          ) AS feature
+          FROM (
+            SELECT *, ST_Distance(
+              ST_SetSRID(
+                ST_MakePoint(${longitude}, ${latitude}),
+              4326)::geography,
+            geom_${year}::geography) AS distance
+            FROM parcels_${year}
+            WHERE propzip LIKE'${code}%'
+          ) inputs
+        ) features;`;
+        break;
+
+      case POINT_CODE:
+        query = `SELECT * 
+          FROM zips_geom AS z
+          WHERE 
+          ST_Intersects(
+            ST_SetSRID(
+              ST_MakePoint(${longitude}, ${latitude}),
+            4326)::geography,
+          z.geometry)`;
         break;
 
       // search for available geometry cols
@@ -296,17 +356,46 @@ async function queryMapboxAPI({ coordinates, place, mbQueryType }) {
   }
 }
 
+/*String helper function*/
+function createCodeSQLPredicate({
+  code = null,
+  ownid = null,
+  coordinates = null,
+}) {
+  if (code) {
+    return `WHERE p.propzip LIKE '%${code}%'`;
+  } else if (ownid) {
+    return `WHERE p.own_id LIKE '%${decodeURI(ownid).toUpperCase()}%'`;
+  } else if (ownid && code) {
+    return `WHERE p.own_id LIKE '%${decodeURI(ownid).toUpperCase()}%'
+            AND p.propzip LIKE '%${code}%'`;
+  } else if (coordinates) {
+    const { longitude, latitude } = JSON.parse(decodeURI(coordinates));
+    return `WHERE 
+    ST_Intersects(
+      ST_SetSRID(
+        ST_MakePoint(${longitude}, ${latitude}),
+      4326)::geography,
+    z.geometry)`;
+  } else {
+    return "";
+  }
+}
+
 module.exports = {
   queryPGDB,
   queryMapboxAPI,
   PRIMARY_ZIPCODE,
   PRIMARY_SPECULATOR,
   GEOJSON_ZIPCODES,
+  GEOJSON_ZIPCODES_PARCELS,
   GEOJSON_PARCELS_CODE,
   GEOJSON_PARCELS_CODE_OWNID,
   GEOJSON_PARCELS_OWNID,
   GEOJSON_PARCELS_OWNID_CODE,
   GEOJSON_PARCELS_DISTANCE,
+  GEOJSON_PARCELS_CODE_DISTANCE,
+  POINT_CODE,
   DETAILED_RECORD_YEARS,
   AVAILABLE_PRAXIS_YEARS,
   GEOCODE,

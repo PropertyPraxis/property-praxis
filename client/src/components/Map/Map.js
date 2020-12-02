@@ -183,16 +183,21 @@ class PraxisMap extends Component {
     this.props.dispatch(toggleLoadingIndicatorAction(true));
 
     // Build route and get data
-    // const route = this._routeSwitcher(this.props.searchParams);//REMOVE
+    const parcelsRoute = URLParamsToAPIQueryString(
+      this.props.location.search,
+      "parcels"
+    );
 
-    const routePROTO = URLParamsToAPIQueryString(this.props.location.search);
-
+    const zipRoute = URLParamsToAPIQueryString(
+      this.props.location.search,
+      "zipcode"
+    );
     // Get Data
     const parcelsGeojson = await this.props.dispatch(
-      handleGetParcelsByQueryAction(routePROTO)
+      handleGetParcelsByQueryAction(parcelsRoute)
     );
     const zipsGeojson = await this.props.dispatch(
-      handleGetZipcodesDataAction("/api/geojson?type=zipcode-all")
+      handleGetZipcodesDataAction(zipRoute)
     );
 
     //Set viewport to parcels bbox

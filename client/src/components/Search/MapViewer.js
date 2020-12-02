@@ -33,15 +33,13 @@ class MapViewer extends Component {
 
   async componentDidMount() {
     const { searchCoordinates } = this.props.searchState.searchParams;
-    const viewerEl = document.getElementById("mly");
 
-    if (viewerEl && searchCoordinates) {
+    if (searchCoordinates) {
       const { longitude, latitude } = JSON.parse(decodeURI(searchCoordinates));
 
       const viewer = await this.props.dispatch(
         handleGetViewerImage(longitude, latitude)
       );
-
       // if a viewer object is returned with params then
       // create a Viewer instance
       if (viewer && viewer.key !== null) {
@@ -88,18 +86,17 @@ class MapViewer extends Component {
 
   render() {
     const { viewer } = this.props.searchState;
-    const { searchCoordinates } = this.props.searchState.searchParams;
     const { contentIsVisible } = this.props.searchState.detailedSearch;
 
     if (contentIsVisible && viewer) {
       return (
         <div
           className="map-viewer"
-          // style={
-          //   contentIsVisible
-          //     ? { visibility: "visible" }
-          //     : { visibility: "hidden" }
-          // }
+          style={
+            contentIsVisible
+              ? { visibility: "visible" }
+              : { visibility: "hidden" }
+          }
           id="mly"
         ></div>
       );
@@ -108,7 +105,7 @@ class MapViewer extends Component {
     return (
       <div
         className="map-viewer"
-        // style={contentIsVisible ? { display: "block" } : { display: "none" }}
+        style={contentIsVisible ? { display: "block" } : { display: "none" }}
       >
         <div className="no-viewer-image">
           <img

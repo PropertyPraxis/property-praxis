@@ -167,8 +167,6 @@ export function handleGetViewerImage(longitude, latitude) {
       dispatch(getViewerImage(viewer));
       return viewer;
     } catch (err) {
-      debugger;
-
       // viewer image ui error
       // dispatch something here for error
       console.error(`An error occured fetching viewer image. Message: ${err}`);

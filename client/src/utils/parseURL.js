@@ -44,7 +44,7 @@ export function URLParamsToSearchParams(searchQuery) {
   };
 }
 
-export function URLParamsToAPIQueryString(searchQuery) {
+export function URLParamsToAPIQueryString(searchQuery, layer) {
   const {
     type = null,
     ownid = null,
@@ -54,31 +54,118 @@ export function URLParamsToAPIQueryString(searchQuery) {
     coordinates = null,
   } = queryString.parse(searchQuery);
 
-  switch (type) {
-    case "zipcode":
-      if (code && ownid && year) {
-        return `/api/geojson?type=parcels-by-code-speculator&code=${code}&ownid=${ownid}&year=${year}`;
-      } else if (code && year) {
-        return `/api/geojson?type=parcels-by-code&code=${code}&year=${year}`;
-      } else {
-        return null;
-      }
-    case "speculator":
-      if (ownid && code && year) {
-        return `/api/geojson?type=parcels-by-speculator-code&ownid=${ownid}&code=${code}&year=${year}`;
-      } else if (ownid && year) {
-        return `/api/geojson?type=parcels-by-speculator&ownid=${ownid}&year=${year}`;
-      } else {
-        return null;
-      }
+  const route = "/api/geojson";
+  let qs;
 
-    case "address":
-      if (place && coordinates && year) {
-        return `/api/geojson?type=parcels-by-geocode&place=${place}&coordinates=${coordinates}&year=${year}`;
-      } else {
-        return null;
-      }
-    default:
-      return null;
+  if (layer === "parcels") {
+    switch (type) {
+      case "zipcode":
+        if (code && ownid && year) {
+          qs = `${route}?${queryString.stringify(
+            { type: "parcels-by-code-speculator", ownid, year },
+            { sort: false, skipNull: true }
+          )}`;
+          break;
+        } else if (code && year) {
+          qs = `${route}?${queryString.stringify(
+            { type: "parcels-by-code", code, year },
+            { sort: false, skipNull: true }
+          )}`;
+          break;
+        } else {
+          qs = null;
+          break;
+        }
+      case "speculator":
+        if (ownid && code && year) {
+          qs = `${route}?${queryString.stringify(
+            { type: "parcels-by-speculator-code", ownid, code, year },
+            { sort: false, skipNull: true }
+          )}`;
+          break;
+        } else if (ownid && year) {
+          qs = `${route}?${queryString.stringify(
+            { type: "parcels-by-speculator", ownid, year },
+            { sort: false, skipNull: true }
+          )}`;
+          break;
+        } else {
+          qs = null;
+          break;
+        }
+
+      case "address":
+        if (place && coordinates && year) {
+          qs = `${route}?${queryString.stringify(
+            { type: "parcels-by-geocode", place, coordinates, year },
+            { sort: false, skipNull: true }
+          )}`;
+          break;
+        } else {
+          qs = null;
+          break;
+        }
+      default:
+        qs = null;
+        break;
+    }
+  } else if (layer === "zipcode") {
+    switch (type) {
+      case "zipcode":
+        if (code && ownid && year) {
+          qs = `${route}?${queryString.stringify(
+            { type: "zipcode-intersect", ownid, year },
+            { sort: false, skipNull: true }
+          )}`;
+
+          break;
+        } else if (code && year) {
+          qs = `${route}?${queryString.stringify(
+            { type: "zipcode-intersect", code, year },
+            { sort: false, skipNull: true }
+          )}`;
+
+          break;
+        } else {
+          qs = null;
+          break;
+        }
+      case "speculator":
+        if (ownid && code && year) {
+          qs = `${route}?${queryString.stringify(
+            { type: "zipcode-intersect", ownid, code, year },
+            { sort: false, skipNull: true }
+          )}`;
+
+          break;
+        } else if (ownid && year) {
+          qs = `${route}?${queryString.stringify(
+            { type: "zipcode-intersect", ownid, year },
+            { sort: false, skipNull: true }
+          )}`;
+
+          break;
+        } else {
+          qs = null;
+          break;
+        }
+
+      case "address":
+        if (place && coordinates && year) {
+          qs = `${route}?${queryString.stringify(
+            { type: "zipcode-intersect", place, coordinates, year },
+            { sort: false, skipNull: true }
+          )}`;
+
+          break;
+        } else {
+          qs = null;
+          break;
+        }
+      default:
+        qs = null;
+        break;
+    }
   }
+  return qs;
 }

@@ -22,11 +22,18 @@ router.get("/", async (req, res) => {
     switch (type) {
       case "parcels-by-geocode":
         // return geoJSON dependent on coverage
-        pgData = await queries.queryPGDB({
+        const { data } = await queries.queryPGDB({
           place,
           coordinates,
+          PGDBQueryType: queries.POINT_CODE,
+        });
+        const { zipcode } = data[0];
+
+        pgData = await queries.queryPGDB({
+          code: zipcode,
+          coordinates,
           year,
-          PGDBQueryType: queries.GEOJSON_PARCELS_DISTANCE,
+          PGDBQueryType: queries.GEOJSON_PARCELS_CODE_DISTANCE,
         });
 
         // check to see if there is a distance of 0
@@ -90,7 +97,7 @@ router.get("/", async (req, res) => {
         clientData = checkEmptyGeoJSON(geoJSON);
         praxisDataType = "parcels-by-code";
         break;
-      //
+ 
       case "parcels-by-speculator-code":
         pgData = await queries.queryPGDB({
           ownid,
@@ -100,10 +107,7 @@ router.get("/", async (req, res) => {
         });
 
         geoJSON = pgData.data[0].jsonb_build_object;
-
-        console.log("hello", geoJSON);
         clientData = checkEmptyGeoJSON(geoJSON);
-        // clientData = buildGeoJSONTemplate([]);
         praxisDataType = "parcels-by-speculator";
         break;
 
@@ -116,6 +120,21 @@ router.get("/", async (req, res) => {
         clientData = checkEmptyGeoJSON(geoJSON);
         praxisDataType = "zipcode-all";
         break;
+
+      case "zipcode-intersect": // this should be reowrked to hanlde "codes"
+        pgData = await queries.queryPGDB({
+          PGDBQueryType: queries.GEOJSON_ZIPCODES_PARCELS,
+          ownid,
+          code,
+          coordinates,
+          year,
+        });
+
+        geoJSON = pgData.data[0].jsonb_build_object;
+        clientData = checkEmptyGeoJSON(geoJSON);
+        praxisDataType = "zipcode-intersect";
+        break;
+
       default:
         clientData = null;
         break;
