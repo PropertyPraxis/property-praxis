@@ -95,7 +95,7 @@ router.get("/", async (req, res) => {
 
         geoJSON = pgData.data[0].jsonb_build_object;
         clientData = checkEmptyGeoJSON(geoJSON);
-        praxisDataType = "parcels-by-code";
+        praxisDataType = "parcels-by-code-speculator";
         break;
  
       case "parcels-by-speculator-code":
@@ -108,7 +108,7 @@ router.get("/", async (req, res) => {
 
         geoJSON = pgData.data[0].jsonb_build_object;
         clientData = checkEmptyGeoJSON(geoJSON);
-        praxisDataType = "parcels-by-speculator";
+        praxisDataType = "parcels-by-speculator-code";
         break;
 
       case "zipcode-all": // this shoudl be reowrked to hanlde "codes"

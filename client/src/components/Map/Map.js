@@ -5,7 +5,6 @@ import ParcelLayerController from "./ParcelLayerController";
 import BasemapController from "./BasemapController";
 import { createNewViewport } from "../../utils/map";
 import {
-  createAddressString,
   capitalizeFirstLetter,
   parseMBAddressString,
   createLayerFilter,
@@ -138,28 +137,8 @@ class PraxisMap extends Component {
     [7, styleVars.parcelStop7],
   ];
 
-  // returns a route dependent on URL search params passed from MapContainer
-  // _routeSwitcher = ({
-  //   searchType,
-  //   searchTerm,
-  //   searchCoordinates,
-  //   searchYear,
-  // }) => {
-  //   switch (searchType) {
-  //     case "zipcode":
-  //       return `/api/geojson?type=parcels-by-code&code=${searchTerm}&year=${searchYear}`;
-  //     case "speculator":
-  //       return `/api/geojson?type=parcels-by-speculator&ownid=${searchTerm}&year=${searchYear}`;
-  //     case "address":
-  //       return `/api/geojson?type=parcels-by-geocode&place=${searchTerm}&coordinates=${searchCoordinates}&year=${searchYear}`;
-  //     default:
-  //       return null;
-  //   }
-  // };
-
   // create new vieport dependent on geojson bbox
   _createNewViewport = (geojson) => {
-    const { searchYear } = this.props.searchState.searchParams;
     const features = geojson.features;
     const { viewport } = this.props.mapState;
     const { longitude, latitude, zoom } = createNewViewport(geojson, viewport);
@@ -192,6 +171,8 @@ class PraxisMap extends Component {
       this.props.location.search,
       "zipcode"
     );
+
+
     // Get Data
     const parcelsGeojson = await this.props.dispatch(
       handleGetParcelsByQueryAction(parcelsRoute)

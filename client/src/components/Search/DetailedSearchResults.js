@@ -90,45 +90,98 @@ function CodeParcels(props) {
     searchCoordinates,
   } = searchState.searchParams;
 
-  const [speculators, setSpeculators] = useState(null);
+  const [speculatorData, setSpeculatorsData] = useState(null);
+  const [topCount, setTopCount] = useState(null);
+  const [topPer, setTopPer] = useState(null);
+
+  const reducer = (accumulator, currentValue) =>
+    Number(accumulator) + Number(currentValue);
+
+  const calulateTotals = (data) => {
+    const sumCount = data.map((record) => record.count).reduce(reducer);
+    const sumPer = data.map((record) => record.per).reduce(reducer);
+    return { sumCount, sumPer };
+  };
 
   useEffect(() => {
     (async () => {
-      const code = results[0].properties.propzip; // need some error handling
+      const code = results[0].properties.propzip; // need some error handling to ensure there is a propzip
       if (code) {
-        const route = `/api/detailed-search?type=speculators-by-code&code=${searchTerm}&year=${searchYear}`;
+        const route = `/api/detailed-search?type=speculation-by-code&code=${searchTerm}&year=${searchYear}`;
         const data = await APISearchQueryFromRoute(route);
-        setSpeculators(data);
+        setSpeculatorsData(data);
+
+        // sub calculations to populate charts
+        const { sumCount, sumPer } = calulateTotals(data.slice(0, 10));
+        setTopCount(sumCount);
+        setTopPer(sumPer);
       }
     })();
     return () => null;
   }, [searchTerm]);
 
-  return (
-    <div className="results-inner">
-      {" "}
-      <div style={drawerIsOpen ? { display: "block" } : { display: "none" }}>
-        <div className="detailed-title">
-          <img
-            src="https://property-praxis-web.s3-us-west-2.amazonaws.com/map_marker_rose.svg"
-            alt="A map marker icon"
-          />
-          <span>Details for {searchTerm}</span>
+  if (speculatorData) {
+    return (
+      <div className="results-inner scroller">
+        <div style={drawerIsOpen ? { display: "block" } : { display: "none" }}>
+          <div className="detailed-title">
+            <img
+              src="https://property-praxis-web.s3-us-west-2.amazonaws.com/map_marker_polygon_rose.svg"
+              alt="A map marker icon"
+            />
+            <span>Details for {searchTerm}</span>
+          </div>
+          <div className="detailed-properties">
+            <p>
+              There were a total of
+              <span>{` ${speculatorData[0].total} properties `}</span> owned by
+              <span>{` ${speculatorData.length} speculators `}</span>
+              in <span>{searchTerm} </span> for the year
+              <span>{` ${searchYear}`}</span>. The top 10 speculators own
+              <span>{` ${Math.round(topPer)}% `}</span>
+              of the specualtive properties we have on record for this zip code.
+            </p>
+          </div>
+          <div className="detailed-title">
+            <img
+              src="https://property-praxis-web.s3-us-west-2.amazonaws.com/question_mark_rose.svg"
+              alt="A question mark icon"
+            />
+            <span>Top 10 Speculators</span>
+          </div>
+          <div className="detailed-speculator">
+            {speculatorData.slice(0, 10).map((record) => {
+              return (
+                <div className="speculator-item" key={record.own_id}>
+                  <div>
+                    <Link
+                      to={createQueryStringFromParams(
+                        {
+                          type: "zipcode",
+                          code: searchTerm,
+                          ownid: record.own_id,
+                          coordinates: null,
+                          year: searchYear,
+                        },
+                        "/map"
+                      )}
+                    >
+                      <span>{capitalizeFirstLetter(record.own_id)}</span>
+                    </Link>
+                  </div>
+                  <div>
+                    <div>{`${record.count}  properties`}</div>
+                    <div>{`${Math.round(record.per)}% ownership`}</div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
-        <div className="detailed-properties">
-          <p>Lorem ipsum.</p>
-        </div>
-        <div className="detailed-title">
-          <img
-            src="https://property-praxis-web.s3-us-west-2.amazonaws.com/question_mark_rose.svg"
-            alt="A question mark icon"
-          />
-          <span>Top Speculators in this Zip Code</span>
-        </div>
-        <div className="detailed-properties">{JSON.stringify(speculators)}</div>
       </div>
-    </div>
-  );
+    );
+  }
+  return null;
 }
 
 function SpeculatorParcels(props) {

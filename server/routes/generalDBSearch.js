@@ -28,7 +28,6 @@ router.get("/", async (req, res) => {
         clientData = null;
         break;
     }
-
     res.json(clientData);
   } catch (err) {
     const msg = `An error occurred executing search search query. Message: ${err}`;

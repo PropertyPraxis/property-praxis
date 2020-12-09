@@ -62,7 +62,7 @@ export function URLParamsToAPIQueryString(searchQuery, layer) {
       case "zipcode":
         if (code && ownid && year) {
           qs = `${route}?${queryString.stringify(
-            { type: "parcels-by-code-speculator", ownid, year },
+            { type: "parcels-by-code-speculator", ownid, code, year },
             { sort: false, skipNull: true }
           )}`;
           break;

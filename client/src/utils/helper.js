@@ -159,13 +159,13 @@ export function createQueryStringFromParams(
       break;
     case "zipcode":
       qs = `${route}?${queryString.stringify(
-        { type, code, year },
+        { type, code, year, ownid },
         { sort: false, skipNull: true }
       )}`;
       break;
     case "speculator":
       qs = `${route}?${queryString.stringify(
-        { type, ownid, year },
+        { type, ownid, code, year },
         { sort: false, skipNull: true }
       )}`;
       break;
