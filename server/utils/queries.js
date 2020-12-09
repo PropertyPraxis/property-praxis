@@ -18,6 +18,9 @@ const AVAILABLE_PRAXIS_YEARS = "AVAILABLE_PRAXIS_YEARS"; // all the available se
 const SPECULATORS_BY_CODE = "SPECULATORS_BY_CODE";
 const CODES_BY_SPECULATOR = "CODES_BY_SPECULATOR";
 const POINT_CODE = "POINT_CODE"; // get the zipcode for a specific point
+const SPECULATION_BY_CODE = "SPECULATION_BY_CODE";
+const SPECULATION_BY_OWNID = "SPECULATION_BY_OWNID";
+const SQL_QUERY_GENERAL = "SQL_QUERY_GENERAL";
 
 /*Mapbox API query types*/
 const GEOCODE = "GEOCODE"; // works for primary address as well
@@ -33,6 +36,7 @@ async function queryPGDB({
   searchYears = [2015, 2016, 2017, 2018, 2019, 2020],
   searchRadius = 1000,
   year = null,
+  q = null,
 }) {
   try {
     let query, longitude, latitude;
@@ -306,6 +310,77 @@ async function queryPGDB({
         `;
         break;
 
+      case SPECULATION_BY_CODE:
+        /*Query to  get the rate of speculation in a zipcode.*/
+        query = `
+          SELECT count, total, own_id,
+          (count::float / total::float) * 100 AS per
+          FROM (
+          SELECT DISTINCT count,
+          own_id,
+          ( SELECT DISTINCT COUNT(geom_${year})
+            FROM parcel_property_geom AS ppg
+            INNER JOIN property AS p ON ppg.parprop_id = p.parprop_id
+            INNER JOIN taxpayer_property AS tp ON p.prop_id = tp.prop_id
+            INNER JOIN year AS y on tp.taxparprop_id = y.taxparprop_id
+            INNER JOIN taxpayer AS t ON tp.tp_id = t.tp_id
+            INNER JOIN owner_taxpayer AS ot ON t.owntax_id = ot.owntax_id
+            WHERE p.propzip LIKE '%${code}%'
+            AND y.praxisyear = '${year}' ) AS total
+          FROM (
+            SELECT DISTINCT COUNT(ppg.geom_${year}) AS count,
+            ot.own_id AS own_id
+            FROM parcel_property_geom AS ppg
+            INNER JOIN property AS p ON ppg.parprop_id = p.parprop_id
+            INNER JOIN taxpayer_property AS tp ON p.prop_id = tp.prop_id
+            INNER JOIN year AS y on tp.taxparprop_id = y.taxparprop_id
+            INNER JOIN taxpayer AS t ON tp.tp_id = t.tp_id
+            INNER JOIN owner_taxpayer AS ot ON t.owntax_id = ot.owntax_id
+            WHERE p.propzip LIKE '%${code}%'
+            AND y.praxisyear = '${year}'
+            GROUP BY ot.own_id
+          ) x
+          ORDER BY x.count DESC) y;
+          `;
+        break;
+
+      case SPECULATION_BY_OWNID:
+        /*Search specualltion by own_id in each zipcode.*/
+        query = `SELECT DISTINCT 
+        x.own_id, x.count::int, x.propzip, y.total::int,
+        (x.count::float / y.total::float) * 100 AS per
+        FROM (
+          SELECT DISTINCT COUNT(ppg1.geom_${year}) AS count, 
+          ot1.own_id AS own_id, p1.propzip AS propzip
+          FROM parcel_property_geom AS ppg1
+          INNER JOIN property AS p1 ON ppg1.parprop_id = p1.parprop_id
+          INNER JOIN taxpayer_property AS tp1 ON p1.prop_id = tp1.prop_id
+          INNER JOIN year AS y1 on tp1.taxparprop_id = y1.taxparprop_id
+          INNER JOIN taxpayer AS t1 ON tp1.tp_id = t1.tp_id
+          INNER JOIN owner_taxpayer AS ot1 ON t1.owntax_id = ot1.owntax_id
+          WHERE ot1.own_id LIKE '%${ownid}%'
+          AND y1.praxisyear = '${year}'
+          GROUP BY ot1.own_id, p1.propzip
+        ) x 
+        INNER JOIN (
+          SELECT DISTINCT COUNT(ppg2.geom_${year}) AS total, 
+          p2.propzip AS propzip
+          FROM parcel_property_geom AS ppg2
+          INNER JOIN property AS p2 ON ppg2.parprop_id = p2.parprop_id
+          INNER JOIN taxpayer_property AS tp2 ON p2.prop_id = tp2.prop_id
+          INNER JOIN year AS y2 on tp2.taxparprop_id = y2.taxparprop_id
+          INNER JOIN taxpayer AS t2 ON tp2.tp_id = t2.tp_id
+          INNER JOIN owner_taxpayer AS ot2 ON t2.owntax_id = ot2.owntax_id
+          AND y2.praxisyear = '${year}'
+          GROUP BY p2.propzip
+          ) y ON x.propzip = y.propzip
+          ORDER BY propzip, own_id, count;`;
+        break;
+
+      case SQL_QUERY_GENERAL:
+        query = q;
+        break;
+
       default:
         console.error(`Unknown SQL query type: ${type}`);
         break;
@@ -402,4 +477,7 @@ module.exports = {
   REVERSE_GEOCODE,
   SPECULATORS_BY_CODE,
   CODES_BY_SPECULATOR,
+  SPECULATION_BY_CODE,
+  SPECULATION_BY_OWNID,
+  SQL_QUERY_GENERAL,
 };

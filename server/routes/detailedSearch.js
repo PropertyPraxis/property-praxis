@@ -35,6 +35,22 @@ router.get("/", async (req, res) => {
       });
 
       clientData = data;
+    } else if (type === "speculation-by-code") {
+      const { data } = await queries.queryPGDB({
+        PGDBQueryType: queries.SPECULATION_BY_CODE,
+        code,
+        year,
+      });
+
+      clientData = data;
+    } else if (type === "speculation-by-ownid") {
+      const { data } = await queries.queryPGDB({
+        PGDBQueryType: queries.SPECULATION_BY_OWNID,
+        ownid,
+        year,
+      });
+
+      clientData = data;
     } else {
       clientData = null;
     }
