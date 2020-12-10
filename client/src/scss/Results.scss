@@ -262,7 +262,6 @@
   p > span {
     font-weight: 600;
     line-height: 1.6;
-    border-bottom: 2px solid $pp-rose;
   }
 
   img {
@@ -302,8 +301,15 @@
   justify-content: space-between;
   line-height: 1.6;
 
-  div > span {
+  div > a > span {
+    color: $ui-black;
     font-weight: bold;
+    border-bottom: 2px solid $pp-rose;
+  }
+
+  div > a > span:hover {
+    font-weight: bold;
+    color: $ui-dark-gray;
   }
 }
 

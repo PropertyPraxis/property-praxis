@@ -10,7 +10,6 @@ import {
 } from "../../actions/search";
 import {
   capitalizeFirstLetter,
-  addUnderscoreToString,
   createQueryStringFromParams,
   currencyFormatter,
   availablePraxisYears,
@@ -29,25 +28,34 @@ function ContentSwitch(props) {
     (state) => state.searchState.detailedSearch
   );
 
+  const { queryParams } = props;
+
   if (results && results.length > 0 && resultsType) {
     switch (props.detailsType) {
       case "parcels-by-geocode:single-parcel":
-        return <SingleParcel result={results[0]} />;
+        return <SingleParcel result={results[0]} queryParams={queryParams} />;
 
       case "parcels-by-geocode:multiple-parcels":
-        return <MultipleParcels results={results} />;
+        return <MultipleParcels results={results} queryParams={queryParams} />;
 
       case "parcels-by-speculator":
-        return <SpeculatorParcels results={results} />;
+        return (
+          <SpeculatorParcels results={results} queryParams={queryParams} />
+        );
 
       case "parcels-by-code":
-        return <CodeParcels results={results} />;
+        return <CodeParcels results={results} queryParams={queryParams} />;
+
+      case "parcels-by-code-speculator":
+        return <div>{resultsType}</div>;
+
+      case "parcels-by-speculator-code":
+        return <div>{resultsType}</div>;
 
       default:
         return null;
     }
   } else if (results && results.length === 0) {
-    //TODO: BUILD OUT THESE UIS
     return <NoResults />;
   } else {
     return <div>ERROR</div>;
@@ -64,7 +72,6 @@ function NoResults(props) {
   } = searchState.searchParams;
   return (
     <div className="results-inner">
-      {" "}
       <div style={drawerIsOpen ? { display: "block" } : { display: "none" }}>
         <div className="detailed-title">
           <img
@@ -74,7 +81,7 @@ function NoResults(props) {
           <span>No Results for this Search</span>
         </div>
         <div className="detailed-properties">
-          <p>Lorem ipsum.</p>
+          <p>We were unable to locate any records for this search.</p>
         </div>
       </div>
     </div>
@@ -84,11 +91,8 @@ function NoResults(props) {
 function CodeParcels(props) {
   const { searchState } = useSelector((state) => state);
   const { drawerIsOpen, results } = searchState.detailedSearch;
-  const {
-    searchTerm,
-    searchYear,
-    searchCoordinates,
-  } = searchState.searchParams;
+
+  const { code, year } = props.queryParams;
 
   const [speculatorData, setSpeculatorsData] = useState(null);
   const [topCount, setTopCount] = useState(null);
@@ -105,20 +109,19 @@ function CodeParcels(props) {
 
   useEffect(() => {
     (async () => {
-      const code = results[0].properties.propzip; // need some error handling to ensure there is a propzip
-      if (code) {
-        const route = `/api/detailed-search?type=speculation-by-code&code=${searchTerm}&year=${searchYear}`;
+      const { propzip } = results[0].properties; // need some error handling to ensure there is a propzip
+      if (propzip) {
+        const route = `/api/detailed-search?type=speculation-by-code&code=${code}&year=${year}`;
         const data = await APISearchQueryFromRoute(route);
         setSpeculatorsData(data);
 
-        // sub calculations to populate charts
         const { sumCount, sumPer } = calulateTotals(data.slice(0, 10));
         setTopCount(sumCount);
         setTopPer(sumPer);
       }
     })();
     return () => null;
-  }, [searchTerm]);
+  }, [code]);
 
   if (speculatorData) {
     return (
@@ -129,15 +132,16 @@ function CodeParcels(props) {
               src="https://property-praxis-web.s3-us-west-2.amazonaws.com/map_marker_polygon_rose.svg"
               alt="A map marker icon"
             />
-            <span>Details for {searchTerm}</span>
+            <span>Details for {code}</span>
           </div>
           <div className="detailed-properties">
             <p>
               There were a total of
               <span>{` ${speculatorData[0].total} properties `}</span> owned by
               <span>{` ${speculatorData.length} speculators `}</span>
-              in <span>{searchTerm} </span> for the year
-              <span>{` ${searchYear}`}</span>. The top 10 speculators own
+              in <span>{code} </span> for the year
+              <span>{` ${year}`}</span>. The top 10 speculators own{" "}
+              <span>{` ${topCount} `}</span>or
               <span>{` ${Math.round(topPer)}% `}</span>
               of the specualtive properties we have on record for this zip code.
             </p>
@@ -158,10 +162,10 @@ function CodeParcels(props) {
                       to={createQueryStringFromParams(
                         {
                           type: "zipcode",
-                          code: searchTerm,
+                          code,
                           ownid: record.own_id,
                           coordinates: null,
-                          year: searchYear,
+                          year,
                         },
                         "/map"
                       )}
@@ -187,11 +191,7 @@ function CodeParcels(props) {
 function SpeculatorParcels(props) {
   const { searchState } = useSelector((state) => state);
   const { drawerIsOpen, results } = searchState.detailedSearch;
-  const {
-    searchTerm,
-    searchYear,
-    searchCoordinates,
-  } = searchState.searchParams;
+  const { searchTerm, searchYear } = searchState.searchParams;
 
   const [zipcodes, setZipcodes] = useState(null);
 
@@ -209,7 +209,6 @@ function SpeculatorParcels(props) {
 
   return (
     <div className="results-inner">
-      {" "}
       <div style={drawerIsOpen ? { display: "block" } : { display: "none" }}>
         <div className="detailed-title">
           <img
@@ -219,7 +218,7 @@ function SpeculatorParcels(props) {
           <span>{searchTerm}</span>
         </div>
         <div className="detailed-properties">
-          <p>Lorem ipsum.</p>
+          <p>{searchTerm}</p>
         </div>
         <div className="detailed-title">
           <img

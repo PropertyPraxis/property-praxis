@@ -22,6 +22,6 @@ if (process.env.NODE_ENV === "production") {
     app.use("/detailed-search", detailedSearch);
     app.use("/geojson", geoJSONSearch);
     app.use("/reverse-geocode", reverseGeocode);
-    app.use("/api/general", generalDBSearch);
+    app.use("/general", generalDBSearch);
   };
 }

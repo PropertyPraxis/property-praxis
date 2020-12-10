@@ -27,7 +27,13 @@ router.get("/", async (req, res) => {
           coordinates,
           PGDBQueryType: queries.POINT_CODE,
         });
-        const { zipcode } = data[0];
+
+        let zipcode;
+        if (data[0]) {
+          zipcode = data[0].zipcode;
+        } else {
+          zipcode = null;
+        }
 
         pgData = await queries.queryPGDB({
           code: zipcode,
@@ -97,7 +103,7 @@ router.get("/", async (req, res) => {
         clientData = checkEmptyGeoJSON(geoJSON);
         praxisDataType = "parcels-by-code-speculator";
         break;
- 
+
       case "parcels-by-speculator-code":
         pgData = await queries.queryPGDB({
           ownid,
