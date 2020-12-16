@@ -177,32 +177,32 @@ gc(rm(
 
 ##DETROIT DATA GEOJSON######
 ##Get parcel data
-for (i in 1:10) {
-  skip_to_next <- FALSE
-  
-  tryCatch({
-    if (exists("gj")) {
-      print(paste("Done fetching from", gjUrl, "..."))
-      break
-    } else {
-      gjUrl <- Sys.getenv("PARCELS_URL")
-      print(paste("Fetching parcel GeoJSON at", gjUrl, "..."))
-      gj <- geojson_sf(gjUrl)
-    }
-    
-  }, error = function(e) {
-    print(e)
-    skip_to_next <<- TRUE
-  }, warning = function(w) {
-    print(w)
-    skip_to_next <<- TRUE
-  })
-  
-  if (skip_to_next) {
-    print(paste("Atempt", i, "to fech parcels GeoJSON..."))
-    next
-  }
-}
+# for (i in 1:10) {
+#   skip_to_next <- FALSE
+#
+#   tryCatch({
+#     if (exists("gj")) {
+#       print(paste("Done fetching from", gjUrl, "..."))
+#       break
+#     } else {
+#       gjUrl <- Sys.getenv("PARCELS_URL")
+#       print(paste("Fetching parcel GeoJSON at", gjUrl, "..."))
+#       gj <- geojson_sf(gjUrl)
+#     }
+#
+#   }, error = function(e) {
+#     print(e)
+#     skip_to_next <<- TRUE
+#   }, warning = function(w) {
+#     print(w)
+#     skip_to_next <<- TRUE
+#   })
+#
+#   if (skip_to_next) {
+#     print(paste("Atempt", i, "to fech parcels GeoJSON..."))
+#     next
+#   }
+# }
 
 ##Get zipcode data
 for (i in 1:10) {
@@ -232,7 +232,7 @@ for (i in 1:10) {
   }
 }
 
-#################################
+################################
 ##TABLE CLEANING / PREP PHASE
 ################################
 
@@ -254,7 +254,7 @@ for (i in 1:10) {
 ## any name standardization should go in this function
 nameFixer <- function(df) {
   names(df)[names(df) == "id_old"] <- "old_id"
-  names(df)[names(df) %in% c("taxpayer 1", "taxpayer_1")] <-
+  names(df)[names(df) %in% c("taxpayer 1", "taxpayer_1", "taxpayer")] <-
     "taxpayer1"
   names(df)[names(df) %in% c("taxpayer 2", "taxpayer_2")] <-
     "taxpayer2"
@@ -367,21 +367,59 @@ propnoFixer <- function(df) {
   return(df)
 }
 
+## add zipcode based on zips geom rather than propzip
+zipFixer <- function(shpDf, zipDf) {
+
+  shpDf$temp_id <- 1:nrow(shpDf)
+
+  shpCentroid <- shpDf %>%
+    st_transform(3857) %>%
+    st_centroid() %>%
+    st_transform(4326)
+  
+  withDf <-
+    st_join(st_as_sf(shpCentroid), zipDf["zipcode"])
+  
+  naDf <- withDf[is.na(withDf$zipcode) ,] %>%
+    select(-c(zipcode))
+  withDf <- withDf[!is.na(withDf$zipcode) ,]
+  
+  naDf <-
+    st_join(st_as_sf(naDf), zipDf["zipcode"], join = st_nearest_feature)
+  
+  st_geometry(withDf) <- NULL
+  st_geometry(naDf) <- NULL
+  
+  joinDf <-
+    bind_rows(withDf, naDf) %>%
+    arrange(temp_id)
+
+  
+  shpDf$zipcode_sj <- joinDf$zipcode
+  shpDf <- shpDf[!is.na(shpDf$zipcode_sj),]
+  return(shpDf)
+}
+
 
 ## fix the GeoJSON names to follow the other praxis data conventions
-names(gj) <- str_replace_all(names(gj), "_", "")
-gj <- nameFixer(gj)
-
-## add it to the shpList
-shpList[["gj"]] <- gj
+## this assumes that the City of Detroit parcel geoJSON fields do not change
+# names(gj) <- str_replace_all(names(gj), "_", "")
+# gj <- nameFixer(gj)
+#
+# ## add it to the shpList
+# shpList[["gj"]] <- gj
 
 print(paste("Standardizing", names(shpList), "..."))
 shpList <- lapply(shpList, nameFixer)
 
+## Add the calculated zip code
+print(paste("Calulating zipcode from zips geometry",  names(shpList), "..."))
+shpList <- lapply(shpList, zipFixer, zipDf = zips)
+
 ## fix col names and add propno
 print(paste("Standardizing", names(csvList), "..."))
 csvList <-
-  lapply(csvList, nameFixer) %>% 
+  lapply(csvList, nameFixer) %>%
   lapply(propnoFixer) %>%
   lapply(parcelnoFixer)
 
@@ -393,7 +431,8 @@ csvList <- lapply(seq_along(csvList), addYear, dfs = csvList)
 print(paste("Binding all CSVs and removing duplicates..."))
 ppFull <- bind_rows(csvList)
 ppFull <- ppFull[, ppCols]
-ppFull <- ppFull[!duplicated(ppFull), ]
+ppFull <- ppFull[!duplicated(ppFull),]
+
 
 ##cleanup env
 print("Cleaning up global environement...")
@@ -403,7 +442,7 @@ gc(rm(list = c("csvList")))
 print("Creating parcels_property table...")
 parPropCols <- c("parcelno", "propaddr") #PK
 parProp <- ppFull[, parPropCols]
-parProp <- parProp[!duplicated(parProp),]
+parProp <- parProp[!duplicated(parProp), ]
 parProp$parprop_id <- paste("parprop", 1:nrow(parProp), sep = "-")
 
 ##property table
@@ -415,7 +454,7 @@ propCols <- c("parcelno",
               "propzip")
 
 prop <- ppFull[, propCols]
-prop <- prop[!duplicated(prop), ]
+prop <- prop[!duplicated(prop),]
 prop$prop_id <- paste("prop", 1:nrow(prop), sep = "-")
 ##add parprop_id to prop table
 prop <- parProp %>%
@@ -425,7 +464,7 @@ prop <- parProp %>%
 print("Creating owner_taxpayer table...")
 ownTaxCols <- c("taxpayer1", "own_id")
 ownTax <- ppFull[, ownTaxCols]
-ownTax <- ownTax[!duplicated(ownTax), ]
+ownTax <- ownTax[!duplicated(ownTax),]
 ownTax$owntax_id <- paste("owntax", 1:nrow(ownTax), sep = "-")
 
 ##taxpayer table
@@ -441,7 +480,7 @@ taxCols <- c(
   "taxstatus"
 )
 tax <- ppFull[, taxCols]
-tax <- tax[!duplicated(tax), ]
+tax <- tax[!duplicated(tax),]
 tax$tp_id <- paste("tp", 1:nrow(tax), sep = "-")
 
 ##add owntax_id to tax table
@@ -466,7 +505,7 @@ taxParPropCols <- c(
 )
 
 taxParProp <- ppFull[, taxParPropCols]
-taxParProp <- taxParProp[!duplicated(taxParProp), ]
+taxParProp <- taxParProp[!duplicated(taxParProp),]
 taxParProp$taxparprop_id <-
   paste("tpp", 1:nrow(taxParProp), sep = "-")
 
@@ -498,7 +537,7 @@ taxParPropwIds <- taxParProp %>%
 ##remove redundant cols
 taxPropCols <- c("tp_id", "prop_id", "taxparprop_id")
 taxProp <- taxParPropwIds[, taxPropCols]
-taxProp <- taxProp[!duplicated(taxProp), ]
+taxProp <- taxProp[!duplicated(taxProp),]
 
 ##Back to Prop table
 ##remove redundant cols
@@ -557,7 +596,7 @@ yearCols <- c(
   "praxisyear"
 )
 year <- ppFull[, yearCols]
-year <- year[!duplicated(year), ]
+year <- year[!duplicated(year),]
 
 ##Join entire dataset to year
 taxParPropYear <- taxParProp %>%
@@ -592,7 +631,7 @@ year <- taxParPropYear[, c(
   "resyrbuilt",
   "praxisyear"
 )]
-year <- year[!duplicated(year), ]
+year <- year[!duplicated(year),]
 
 ##create count column
 ##This can be joined to the full dataset
@@ -614,7 +653,7 @@ countGrouper <- function (val) {
     return(5)
   else if (val > 1000 & val <= 1500)
     return(6)
-  else if (val > 1500 & val <= 2000)
+  else if (val > 1500)
     return(7)
   else
     return(0)
@@ -627,15 +666,18 @@ geomList <- lapply(seq_along(shpList), function(i) {
   print(paste("Creating geometry table for", names(shpList[i]), "..."))
   shpName <- names(shpList[i])
   shp <- shpList[[shpName]][!is.na(shpList[[shpName]]$parcelno),
-                            c("parcelno", "propaddr", "geometry")]
+                            c("parcelno", "propaddr", "zipcode_sj", "geometry")]
   shp$tmp_id <- paste0(shp$parcelno, shp$propaddr)
   dupIds <- unique(shp$tmp_id[duplicated(shp$tmp_id)])
-  dupShp <- shp[shp$tmp_id %in% dupIds,]
+  dupShp <- shp[shp$tmp_id %in% dupIds, ]
   dupShp <- dupShp %>% group_by(parcelno, propaddr) %>%
-    summarise(geometry = st_union(geometry),
-              geom_agg_count = n())
+    summarise(
+      geometry = st_union(geometry),
+      geom_agg_count = n(),
+      zipcode_sj = toString(unique(zipcode_sj))
+    )
   
-  uniShp <- shp[!shp$tmp_id %in% dupIds,]
+  uniShp <- shp[!shp$tmp_id %in% dupIds, ]
   shp <- bind_rows(dupShp, uniShp)
   
   geom <- parProp %>%
@@ -644,9 +686,10 @@ geomList <- lapply(seq_along(shpList), function(i) {
     geom[, c("parprop_id",
              "parcelno",
              "propaddr",
+             "zipcode_sj",
              "geom_agg_count",
              "geometry")]
-  geom <- st_as_sf(geom[!duplicated(geom), ])
+  geom <- st_as_sf(geom[!duplicated(geom),])
   st_crs(geom) = 4326
   return(geom)
 })
@@ -660,21 +703,41 @@ names(geomList) <-
 geomList2 <- lapply(seq_along(geomList), function(i) {
   geomName <- names(geomList[i])
   print(paste("Joining property praxis data to", geomName, "..."))
-  geom <- geomList[[geomName]][, c("parprop_id", "geometry")] %>%
+  geom <-
+    geomList[[geomName]][, c("parprop_id", "zipcode_sj",  "geometry")] %>%
     right_join(parProp, by = c("parprop_id"))
   names(geom)[names(geom) == "geometry"] <- geomName
   st_geometry(geom) <- geomName
-  orderedGeom <- geom[order(geom$parprop_id),]
+  orderedGeom <- geom[order(geom$parprop_id), ]
   return(orderedGeom)
 })
 
+
 print("Creating parcel_property table...")
 geomAll <- bind_cols(geomList2)
-keepCols <- c("parprop_id...1", "parcelno...3", "propaddr...4")
+
+keepCols <-
+  c("parprop_id...1",
+    "parcelno...4",
+    "propaddr...5")
+zipCols <- names(geomAll)[str_detect(names(geomAll), "zipcode_sj")]
 geomCols <- names(geomAll)[str_detect(names(geomAll), "geom")]
+
 parPropGeom <- geomAll[, c(keepCols, geomCols)]
+
+##helper function for when aggregating zips
+uniqueZips <- function(x) {
+  zip <- toString(unique(x[!is.na(x)]))
+  return(zip)
+}
+zipDf <- geomAll[, zipCols]
+st_geometry(zipDf) <- NULL
+zipsAgg <- apply(zipDf , 1 , uniqueZips)
+
 names(parPropGeom) <-
-  c("parprop_id", "parcelno", "propaddr", geomCols)
+  c("parprop_id", "parcelno", "propaddr",  geomCols)
+
+parPropGeom$zipcode_sj <- zipsAgg
 
 
 ##Remove intermediary tables from local env
@@ -687,7 +750,7 @@ gc(rm(
     "geomList",
     "geomList2",
     "taxParPropYear",
-    "gj",
+    # "gj",
     "ppFull",
     "parProp"
   )
@@ -905,7 +968,7 @@ createOwnerCount <- function() {
       "WHERE count > 1000 AND count <= 1500;",
       "UPDATE owner_count",
       "SET own_group = 7",
-      "WHERE count > 1500 AND count <= 2000;"
+      "WHERE count > 1500;"
     )
   )
   
@@ -930,7 +993,8 @@ createParcelGeomByYear <- function(years) {
         paste0("parcels_", year),
         "AS",
         "(SELECT DISTINCT ROW_NUMBER() OVER (ORDER BY 1) AS feature_id, y.*,",
-        "ppg.parprop_id, ppg.parcelno, ppg.propaddr, ot.own_id, ot.taxpayer1, count.count, p.propno, p.propdir, p.propstr, p.propzip, ",
+        "ppg.parprop_id, ppg.parcelno, ppg.propaddr, ppg.zipcode_sj AS propzip, ",
+        "ot.own_id, ot.taxpayer1, count.count, p.propno, p.propdir, p.propstr, p.propzip AS propzip2, ",
         "ST_centroid(",
         paste0("geom_", year),
         ") AS centroid, ",
@@ -997,3 +1061,4 @@ createParcelGeomByYear <- function(years) {
 
 createParcelGeomByYear(yearList)
 print("Done.")
+
