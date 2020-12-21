@@ -56,7 +56,7 @@ async function queryPGDB({
           INNER JOIN taxpayer as tp ON tpp.tp_id = tp.tp_id
           INNER JOIN owner_taxpayer AS otp ON tp.owntax_id = otp.owntax_id
           INNER JOIN owner_count as OC ON otp.own_id = oc.own_id
-          WHERE p.propzip LIKE '${code}%' 
+          WHERE p.zipcode_sj LIKE '${code}%' 
           AND y.praxisyear = '${year}'
           GROUP BY  p.zipcode_sj
           ORDER BY avg_count DESC
