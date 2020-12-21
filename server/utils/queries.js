@@ -49,7 +49,7 @@ async function queryPGDB({
 
     switch (PGDBQueryType) {
       case PRIMARY_ZIPCODE:
-        query = `SELECT DISTINCT p.propzip, AVG(oc.count) as avg_count
+        query = `SELECT DISTINCT p.zipcode_sj AS propzip, AVG(oc.count) as avg_count
           FROM property as p
           INNER JOIN taxpayer_property AS tpp ON p.prop_id = tpp.prop_id
           INNER JOIN year AS y ON tpp.taxparprop_id = y.taxparprop_id
@@ -58,7 +58,7 @@ async function queryPGDB({
           INNER JOIN owner_count as OC ON otp.own_id = oc.own_id
           WHERE p.propzip LIKE '${code}%' 
           AND y.praxisyear = '${year}'
-          GROUP BY  p.propzip
+          GROUP BY  p.zipcode_sj
           ORDER BY avg_count DESC
           LIMIT 5;
           `;
@@ -286,7 +286,7 @@ async function queryPGDB({
         INNER JOIN taxpayer as tp ON tpp.tp_id = tp.tp_id
         INNER JOIN owner_taxpayer AS otp ON tp.owntax_id = otp.owntax_id
         INNER JOIN owner_count as OC ON otp.own_id = oc.own_id
-        WHERE p.propzip LIKE '${code}%'
+        WHERE p.zipcode_sj LIKE '${code}%'
         AND oc.praxisyear = '${year}'
         ORDER BY oc.count DESC
         LIMIT 5
@@ -294,7 +294,7 @@ async function queryPGDB({
         break;
 
       case CODES_BY_SPECULATOR:
-        query = `SELECT DISTINCT p.propzip,
+        query = `SELECT DISTINCT p.zipcode_sj AS propzip,
           STRING_AGG(DISTINCT ot.own_id, ',') AS own_id, COUNT(ot.own_id) AS count
           FROM parcel_property_geom AS ppg
           INNER JOIN property AS p ON ppg.parprop_id = p.parprop_id
@@ -304,7 +304,7 @@ async function queryPGDB({
           INNER JOIN owner_taxpayer AS ot ON t.owntax_id = ot.owntax_id
           WHERE ot.own_id LIKE '${decodeURI(ownid).toUpperCase()}%'
           AND y.praxisyear = '${year}'
-          GROUP BY p.propzip, ot.own_id
+          GROUP BY p.zipcode_sj, ot.own_id
           ORDER BY count DESC
           LIMIT 5;
         `;
@@ -325,7 +325,7 @@ async function queryPGDB({
             INNER JOIN year AS y on tp.taxparprop_id = y.taxparprop_id
             INNER JOIN taxpayer AS t ON tp.tp_id = t.tp_id
             INNER JOIN owner_taxpayer AS ot ON t.owntax_id = ot.owntax_id
-            WHERE p.propzip LIKE '%${code}%'
+            WHERE p.zipcode_sj LIKE '%${code}%'
             AND y.praxisyear = '${year}' ) AS total
           FROM (
             SELECT DISTINCT COUNT(ppg.geom_${year}) AS count,
@@ -336,7 +336,7 @@ async function queryPGDB({
             INNER JOIN year AS y on tp.taxparprop_id = y.taxparprop_id
             INNER JOIN taxpayer AS t ON tp.tp_id = t.tp_id
             INNER JOIN owner_taxpayer AS ot ON t.owntax_id = ot.owntax_id
-            WHERE p.propzip LIKE '%${code}%'
+            WHERE p.zipcode_sj LIKE '%${code}%'
             AND y.praxisyear = '${year}'
             GROUP BY ot.own_id
           ) x
@@ -351,7 +351,7 @@ async function queryPGDB({
         (x.count::float / y.total::float) * 100 AS per
         FROM (
           SELECT DISTINCT COUNT(ppg1.geom_${year}) AS count, 
-          ot1.own_id AS own_id, p1.propzip AS propzip
+          ot1.own_id AS own_id, p1.zipcode_sj AS propzip
           FROM parcel_property_geom AS ppg1
           INNER JOIN property AS p1 ON ppg1.parprop_id = p1.parprop_id
           INNER JOIN taxpayer_property AS tp1 ON p1.prop_id = tp1.prop_id
@@ -360,11 +360,11 @@ async function queryPGDB({
           INNER JOIN owner_taxpayer AS ot1 ON t1.owntax_id = ot1.owntax_id
           WHERE ot1.own_id LIKE '%${ownid}%'
           AND y1.praxisyear = '${year}'
-          GROUP BY ot1.own_id, p1.propzip
+          GROUP BY ot1.own_id, p1.zipcode_sj
         ) x 
         INNER JOIN (
           SELECT DISTINCT COUNT(ppg2.geom_${year}) AS total, 
-          p2.propzip AS propzip
+          p2.zipcode_sj AS propzip
           FROM parcel_property_geom AS ppg2
           INNER JOIN property AS p2 ON ppg2.parprop_id = p2.parprop_id
           INNER JOIN taxpayer_property AS tp2 ON p2.prop_id = tp2.prop_id
@@ -372,7 +372,7 @@ async function queryPGDB({
           INNER JOIN taxpayer AS t2 ON tp2.tp_id = t2.tp_id
           INNER JOIN owner_taxpayer AS ot2 ON t2.owntax_id = ot2.owntax_id
           AND y2.praxisyear = '${year}'
-          GROUP BY p2.propzip
+          GROUP BY p2.zipcode_sj
           ) y ON x.propzip = y.propzip
           ORDER BY propzip, own_id, count;`;
         break;
