@@ -288,13 +288,15 @@
   }
 }
 
-.detailed-speculator {
+.detailed-speculator,
+.detailed-zipcode {
   display: flex;
   flex-direction: column;
   background-color: $ui-light-gray;
   padding: 5px;
 }
 
+.zipcode-item,
 .speculator-item {
   margin-bottom: 10px;
   display: flex;
@@ -313,7 +315,7 @@
   }
 }
 
-.speculator-item > div:nth-child(2) {
+.zipcode-item > div:nth-child(2) {
   margin-left: 10px;
 }
 
@@ -357,4 +359,11 @@
 
 .results-hamburger-button:active {
   transform: translateY(+1px);
+}
+
+
+.angle-rotate {
+  display: inline-block;
+  -webkit-transform: rotate(90deg);
+  transform: rotate(90deg);
 }

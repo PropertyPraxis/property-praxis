@@ -305,43 +305,26 @@ async function queryPGDB({
           WHERE ot.own_id LIKE '${decodeURI(ownid).toUpperCase()}%'
           AND y.praxisyear = '${year}'
           GROUP BY p.zipcode_sj, ot.own_id
-          ORDER BY count DESC
-          LIMIT 5;
+          ORDER BY count DESC;
         `;
         break;
 
       case SPECULATION_BY_CODE:
         /*Query to  get the rate of speculation in a zipcode.*/
-        query = `
-          SELECT count, total, own_id,
-          (count::float / total::float) * 100 AS per
-          FROM (
-          SELECT DISTINCT count,
-          own_id,
-          ( SELECT DISTINCT COUNT(geom_${year})
-            FROM parcel_property_geom AS ppg
-            INNER JOIN property AS p ON ppg.parprop_id = p.parprop_id
-            INNER JOIN taxpayer_property AS tp ON p.prop_id = tp.prop_id
-            INNER JOIN year AS y on tp.taxparprop_id = y.taxparprop_id
-            INNER JOIN taxpayer AS t ON tp.tp_id = t.tp_id
-            INNER JOIN owner_taxpayer AS ot ON t.owntax_id = ot.owntax_id
-            WHERE p.zipcode_sj LIKE '%${code}%'
-            AND y.praxisyear = '${year}' ) AS total
-          FROM (
-            SELECT DISTINCT COUNT(ppg.geom_${year}) AS count,
-            ot.own_id AS own_id
-            FROM parcel_property_geom AS ppg
-            INNER JOIN property AS p ON ppg.parprop_id = p.parprop_id
-            INNER JOIN taxpayer_property AS tp ON p.prop_id = tp.prop_id
-            INNER JOIN year AS y on tp.taxparprop_id = y.taxparprop_id
-            INNER JOIN taxpayer AS t ON tp.tp_id = t.tp_id
-            INNER JOIN owner_taxpayer AS ot ON t.owntax_id = ot.owntax_id
-            WHERE p.zipcode_sj LIKE '%${code}%'
-            AND y.praxisyear = '${year}'
-            GROUP BY ot.own_id
-          ) x
-          ORDER BY x.count DESC) y;
-          `;
+        query = `SELECT y.own_id, y.count, y.total,
+        (y.count::float / y.total::float) * 100 AS per
+         FROM 
+        (SELECT SUM(x.count)::INT as count, x.own_id as own_id, x.total
+          FROM
+            (SELECT DISTINCT own_id, COUNT(own_id)::INT as count,
+            (SELECT COUNT(feature_id) FROM parcels_${year}
+            WHERE propzip LIKE '%${code}%' )::INT AS total 
+            FROM parcels_${year}
+            WHERE propzip LIKE '%${code}%'
+            GROUP BY own_id) x
+          GROUP BY own_id, total
+          ORDER BY count DESC ) y;`;
+
         break;
 
       case SPECULATION_BY_OWNID:
