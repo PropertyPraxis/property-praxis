@@ -12,23 +12,25 @@ class MapViewer extends Component {
   _setBearing = (node, mly) => {
     const { searchCoordinates } = this.props.searchState.searchParams;
     const { longitude, latitude } = JSON.parse(decodeURI(searchCoordinates));
-    if (!node.fullPano) {
-      // We are only interested in setting the bearing for full 360 panoramas.
-      return;
+    if (longitude && latitude) {
+      if (!node.fullPano) {
+        // We are only interested in setting the bearing for full 360 panoramas.
+        return;
+      }
+      const { lat, lon } = node.latLon;
+
+      const nodeBearing = node.computedCA;
+      const desiredBearing = calculateDesiredBearing(
+        lat,
+        lon,
+        latitude,
+        longitude
+      );
+
+      const basicX = bearingToBasic(desiredBearing, nodeBearing);
+      const basicY = 0.5; // Vertical center
+      mly.setCenter([basicX, basicY]);
     }
-    const { lat, lon } = node.latLon;
-
-    const nodeBearing = node.computedCA;
-    const desiredBearing = calculateDesiredBearing(
-      lat,
-      lon,
-      latitude,
-      longitude
-    );
-
-    const basicX = bearingToBasic(desiredBearing, nodeBearing);
-    const basicY = 0.5; // Vertical center
-    mly.setCenter([basicX, basicY]);
   };
 
   async componentDidMount() {

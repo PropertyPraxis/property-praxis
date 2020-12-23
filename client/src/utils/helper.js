@@ -19,7 +19,7 @@ export function setDocHeightOnWindow() {
 }
 
 export function capitalizeFirstLetter(string) {
-  if (string === null) return null;
+  if (string === null | string === undefined) return null;
   const lowerString = string.toLowerCase();
   const strArray = lowerString.split(" ");
   const capitalizedStrArray = strArray.map((val) => {
