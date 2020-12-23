@@ -10,7 +10,7 @@ import {
 import {
   capitalizeFirstLetter,
   createQueryStringFromParams,
-  createAddressString,
+  parseMBAddressString,
   parseCentroidString,
   currencyFormatter,
   availablePraxisYears,
@@ -330,17 +330,18 @@ function MultipleParcels(props) {
               src="https://property-praxis-web.s3-us-west-2.amazonaws.com/map_marker_rose.svg"
               alt="A map marker icon"
             />
-            <span>{place}</span>
+            <span>{parseMBAddressString(place)}</span>
           </div>
           <div className="detailed-properties">
             <p>
               We could not find a speculation record for
-              <span>{` ${place} `}</span> in
+              <span>{` ${parseMBAddressString(place)} `}</span> in
               <span>{` ${year}. `}</span> In zip code
               <span>{` ${code}`}</span> we have identified
               <span>{` ${results.length} `}</span>
-              other properties owned by {`${speculatorData.length} `}{" "}
-              speculators who owned
+              other properties owned by{" "}
+              <span>{`${speculatorData.length} `}</span>
+              speculators. Of these speculators, the top ten owned
               <span>{` ${topCount} `}</span>or
               <span>{` ${Math.round(topPer)}% `}</span>of the speculative
               properties we have on record for this zip code.

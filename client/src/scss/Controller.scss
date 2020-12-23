@@ -43,6 +43,8 @@
   height: 20px;
   left: -10px;
   box-shadow: none;
+  border-radius: 5px !important;
+  border: 2px solid $ui-black !important;
 }
 
 .rangeslider .rangeslider__handle {
@@ -71,7 +73,6 @@
   background: #e6e6e6;
   touch-action: none;
 }
-//////
 
 .basemap-controller-container {
   display: flex;
