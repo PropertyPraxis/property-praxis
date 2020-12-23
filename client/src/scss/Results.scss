@@ -272,11 +272,12 @@
 
   a > span {
     color: $ui-black;
+    border-bottom: 2px solid $pp-rose;
   }
 
   a > span:hover {
-    color: $pp-rose;
-    text-decoration: underline;
+    color: $ui-dark-gray;
+    
   }
 
   a > span:active,
@@ -320,6 +321,10 @@
     color: $ui-black;
     font-weight: bold;
     border-bottom: 2px solid $pp-rose;
+    img {
+      height: 20px;
+      width: 20px;
+    }
   }
 
   div > a > span:hover {

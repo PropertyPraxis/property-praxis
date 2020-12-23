@@ -214,7 +214,14 @@ function CodeParcels(props) {
                         "/map"
                       )}
                     >
-                      <span>{capitalizeFirstLetter(record.own_id)}</span>
+                      <span
+                        title={`Search ${capitalizeFirstLetter(
+                          record.own_id
+                        )}'s properties in ${code}.`}
+                      >
+                        <img src={infoIcon} alt="More Information"></img>
+                        {capitalizeFirstLetter(record.own_id)}
+                      </span>
                     </Link>
                   </div>
                   <div>
@@ -290,7 +297,14 @@ function SpeculatorParcels(props) {
                         "/map"
                       )}
                     >
-                      <span>{capitalizeFirstLetter(record.propzip)}</span>
+                      <span
+                        title={`Seach ${capitalizeFirstLetter(
+                          ownid
+                        )}'s properties in ${record.propzip}`}
+                      >
+                        <img src={infoIcon} alt="More Information"></img>
+                        {capitalizeFirstLetter(record.propzip)}
+                      </span>
                     </Link>
                   </div>
                   <div>
@@ -509,9 +523,9 @@ function SingleParcel(props) {
               "/map"
             )}
           >
-            <span>
+            <span title={`Search additional properties in ${propzip}.`}>
               <img src={infoIcon} alt="More Information"></img>
-              {`Search additional properties in ${propzip}.`}
+              {`Properties in ${propzip}`}
             </span>
           </Link>
           <Link
@@ -525,11 +539,13 @@ function SingleParcel(props) {
               "/map"
             )}
           >
-            <span>
-              <img src={infoIcon} alt="More Information"></img>
-              {`Search additional properties owned by ${capitalizeFirstLetter(
+            <span
+              title={`Search all properties owned by ${capitalizeFirstLetter(
                 own_id
               )}.`}
+            >
+              <img src={infoIcon} alt="More Information"></img>
+              {`Properties owned by ${capitalizeFirstLetter(own_id)}`}
             </span>
           </Link>
           {praxisRecordYears
@@ -546,9 +562,9 @@ function SingleParcel(props) {
                       "/map"
                     )}
                   >
-                    <span>
+                    <span title={`Search this property's record for ${year}.`}>
                       <img src={infoIcon} alt="More Information"></img>
-                      {`Search the ${year} record for this property.`}
+                      {` ${year} property record`}
                     </span>
                   </Link>
                 );
@@ -607,7 +623,14 @@ function CodeSpeculatorParcels(props) {
                       "/map"
                     )}
                   >
-                    <span>{capitalizeFirstLetter(propaddr)}</span>
+                    <span
+                      title={`Search details for ${capitalizeFirstLetter(
+                        propaddr
+                      )}.`}
+                    >
+                      <img src={infoIcon} alt="More Information"></img>
+                      {capitalizeFirstLetter(propaddr)}
+                    </span>
                   </Link>
                 </div>
               );
@@ -637,7 +660,14 @@ function CodeSpeculatorParcels(props) {
                         "/map"
                       )}
                     >
-                      <span>{capitalizeFirstLetter(record.propzip)}</span>
+                      <span
+                        title={`Search ${capitalizeFirstLetter(
+                          ownid
+                        )}'s properties in ${record.propzip}.`}
+                      >
+                        <img src={infoIcon} alt="More Information"></img>
+                        {capitalizeFirstLetter(record.propzip)}
+                      </span>
                     </Link>
                   </div>
                   <div>
