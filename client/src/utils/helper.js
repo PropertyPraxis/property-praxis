@@ -205,8 +205,8 @@ export function flattenPrimaryResults(primaryResults) {
 export function getDetailsFromGeoJSON(geojson) {
   if (geojson) {
     const details = geojson.features.map((feature) => {
-      const { id, properties } = feature;
-      return { id, properties };
+      const { id, centroid, properties } = feature;
+      return { id, centroid, properties };
     });
     return { details, detailsType: geojson.praxisDataType };
   } else {
@@ -230,6 +230,24 @@ export function availablePraxisYears(praxisYears, currentYear) {
         return true;
       }
     });
+  } else {
+    return null;
+  }
+}
+
+export function parseCentroidString(centroid, encode = false) {
+  if (centroid !== "POINT EMPTY") {
+    const [longitude, latitude] = centroid
+      .split(" ")
+      .map((item) => item.replace(/[POINT(, )]/gi, ""));
+    if (encode) {
+      return JSON.stringify({
+        longitude: Number(longitude),
+        latitude: Number(latitude),
+      });
+    } else {
+      return { longitude: Number(longitude), latitude: Number(latitude) };
+    }
   } else {
     return null;
   }

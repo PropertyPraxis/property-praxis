@@ -191,13 +191,14 @@
   margin: 10px 0 10px 0;
   background-color: $ui-dark-gray;
   color: $ui-white;
-  font-size: 1.3rem;
+  font-size: 1.1rem;
   display: flex;
   align-items: center;
   box-sizing: border-box;
   border: 4px solid $ui-black;
   text-transform: uppercase;
   font-weight: 500;
+  word-break: break-word;
 
   img {
     height: 40px;
@@ -288,6 +289,18 @@
   }
 }
 
+.address-item {
+  color: $ui-black;
+  display: inline-block;
+  width: fit-content;
+  border-bottom: 2px solid $pp-rose;
+
+  a > span:hover {
+    color: $ui-dark-gray;
+    text-decoration: none;
+  }
+}
+
 .detailed-speculator,
 .detailed-zipcode {
   display: flex;
@@ -360,7 +373,6 @@
 .results-hamburger-button:active {
   transform: translateY(+1px);
 }
-
 
 .angle-rotate {
   display: inline-block;
