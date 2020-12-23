@@ -1,0 +1,44 @@
+.loading-container {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  width: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  z-index: 600;
+}
+
+.loader {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  margin: -50px 0 0 -50px;
+  border: 16px solid #f3f3f3;
+  border-radius: 50%;
+  border-top: 16px solid $ui-dark-gray;
+  width: 75px;
+  height: 75px;
+  -webkit-animation: spin 1s linear infinite;
+  animation: spin 1s linear infinite;
+}
+
+@-webkit-keyframes spin {
+  0% {
+    -webkit-transform: rotate(0deg);
+  }
+
+  100% {
+    -webkit-transform: rotate(360deg);
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
