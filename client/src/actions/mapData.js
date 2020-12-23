@@ -1,4 +1,4 @@
-import { APISearchQueryFromRoute } from "../utils/api";
+import { APISearchQueryFromRoute, APIParcelQueryFromRoute } from "../utils/api";
 
 export const GET_PARCELS_BY_QUERY = "GET_PARCELS_BY_QUERY";
 export const GET_YEAR = "GET_YEAR";
@@ -73,9 +73,9 @@ export function handleGetParcelsByQueryAction(route) {
   return (dispatch) => {
     dispatch(getParcelsByQueryAction(null));
     return APISearchQueryFromRoute(route)
-      .then((json) => {
-        dispatch(getParcelsByQueryAction(json));
-        return json;
+      .then((data) => {
+        dispatch(getParcelsByQueryAction(data));
+        return data;
       })
       .catch((err) => {
         throw Error(`An error occured searching parcels: ${err}`);

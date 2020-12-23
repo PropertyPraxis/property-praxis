@@ -1,79 +1,58 @@
+import { triggerFetchError } from "./redirect";
 import {
-  APISearchQueryFromParams,
+  APIQueryStringFromSearchParams,
   APISearchQueryFromRoute,
 } from "../utils/api";
 import { getImageKey } from "../utils/viewer";
 import { flattenPrimaryResults } from "../utils/helper";
 
-export const RESET_SEARCH = "RESET_SEARCH";
-export const PRIMARY_SEARCH_QUERY = "PRIMARY_SEARCH_QUERY";
-export const UPDATE_DETAILED_RESULTS = "UPDATE_DETAILED_RESULTS";
-export const UPDATE_PRIMARY_INDEX = "UPDATE_PRIMARY_INDEX";
-export const GET_SEARCH_YEARS = "GET_SEARCH_YEARS";
-export const GET_PRAXIS_SEARCH_YEARS = "GET_PRAXIS_SEARCH_YEARS";
-export const GET_VIEWER_IMAGE = "GET_VIEWER_IMAGE";
-// export const GET_DOWNLOAD_DATA = "GET_DOWNLOAD_DATA";
-export const TOGGLE_DETAILED_RESULTS = "TOGGLE_DETAILED_RESULTS";
+export const UPDATE_GENERAL_SEARCH = "UPDATE_GENERAL_SEARCH"; // general shortcut
+export const UPDATE_SEARCH_PARAMS = "UPDATE_SEARCH_PARAMS";
+export const UPDATE_PRIMARY_SEARCH = "UPDATE_PRIMARY_SEARCH";
+export const UPDATE_DETAILED_SEARCH = "UPDATE_DETAILED_SEARCH";
+export const UPDATE_SEARCH_BAR = "UPDATE_SEARCH_BAR";
+export const UPDATE_VIEWER_IMAGE = "UPDATE_VIEWER_IMAGE";
+export const GET_DOWNLOAD_DATA = "GET_DOWNLOAD_DATA";
 
-export function resetSearch(searchState) {
+/* General action to set search state
+use this sparingly as the action
+type is not explicit */
+export function updateGeneralSearch(searchState) {
   return {
-    type: RESET_SEARCH,
+    type: UPDATE_GENERAL_SEARCH,
     payload: { ...searchState },
   };
 }
-
-function primarySearchQuery(primaryResults) {
+export function updateSearchParams(searchParams) {
   return {
-    type: PRIMARY_SEARCH_QUERY,
-    payload: {
-      primaryResults,
-    },
+    type: UPDATE_SEARCH_PARAMS,
+    payload: { ...searchParams },
+  };
+}
+export function updatePrimarySearch(primarySearch) {
+  return {
+    type: UPDATE_PRIMARY_SEARCH,
+    payload: { ...primarySearch },
+  };
+}
+export function updateDetailedSearch(detailedSearch) {
+  return {
+    type: UPDATE_DETAILED_SEARCH,
+    payload: { ...detailedSearch },
   };
 }
 
-export function updatePrimaryIndex(primaryIndex) {
+function updateSearchBar(searchBar) {
   return {
-    type: UPDATE_PRIMARY_INDEX,
-    payload: {
-      primaryIndex,
-    },
+    type: UPDATE_SEARCH_BAR,
+    payload: { ...searchBar },
   };
 }
 
-export function updateDetailedResults(detailedResults) {
+function getViewerImage(viewer) {
   return {
-    type: UPDATE_DETAILED_RESULTS,
-    payload: {
-      detailedResults,
-    },
-  };
-}
-
-function getYearsAction(searchYears) {
-  return {
-    type: GET_SEARCH_YEARS,
-    payload: { searchYears },
-  };
-}
-
-function getPraxisYearsAction(praxisSearchYears) {
-  return {
-    type: GET_SEARCH_YEARS,
-    payload: { praxisSearchYears },
-  };
-}
-
-function getViewerImageAction(viewer) {
-  return {
-    type: GET_VIEWER_IMAGE,
+    type: UPDATE_VIEWER_IMAGE,
     payload: { viewer },
-  };
-}
-
-export function toggleDetailedResultsAction(isOpen) {
-  return {
-    type: TOGGLE_DETAILED_RESULTS,
-    payload: { isDetailedResultsOpen: isOpen },
   };
 }
 
@@ -82,45 +61,51 @@ export function handlePrimarySearchQuery(
   route
 ) {
   return async (dispatch) => {
-    return APISearchQueryFromParams(
-      { searchType, searchTerm, searchCoordinates, searchYear },
-      route
-    )
-      .then((json) => {
-        const flattendResults = flattenPrimaryResults(json);
-        dispatch(primarySearchQuery(flattendResults));
-        return flattendResults;
-      })
-      .catch((err) => {
-        //need to add some more error hadling
-        throw Error(`An error occured searching: ${err}`);
-      });
+    try {
+      const json = await APIQueryStringFromSearchParams(
+        { searchType, searchTerm, searchCoordinates, searchYear },
+        route
+      );
+      const flattendResults = flattenPrimaryResults(json);
+      dispatch(updatePrimarySearch({ results: flattendResults }));
+      return flattendResults;
+    } catch (err) {
+      dispatch(triggerFetchError(true));
+      console.error(`An error occured for primary search query: ${err}`);
+    }
   };
 }
 
-export function handlePrimarySearchAll({ searchTerm, searchYear }, routes) {
+export function handlePrimarySearchAll({ searchTerm, searchYear }, route) {
   return async (dispatch) => {
-    const types = ["address", "speculator", "zipcode"];
+    try {
+      const types = ["address", "speculator", "zipcode"];
 
-    const [
-      partialAddressResults,
-      partialSpeculatorResults,
-      partialZipcodeResults,
-    ] = await Promise.all(
-      routes.map(async (route, index) => {
-        return await APISearchQueryFromParams(
-          { searchType: types[index], searchTerm, searchYear },
-          route
-        );
-      })
-    );
-    const flattendResults = flattenPrimaryResults([
-      partialAddressResults,
-      partialSpeculatorResults,
-      partialZipcodeResults,
-    ]);
+      const [
+        partialAddressResults,
+        partialSpeculatorResults,
+        partialZipcodeResults,
+      ] = await Promise.all(
+        types.map(async (searchType, index) => {
+          return await APIQueryStringFromSearchParams(
+            { searchType, searchTerm, searchYear },
+            route
+          );
+        })
+      );
+      const flattendResults = flattenPrimaryResults([
+        partialAddressResults,
+        partialSpeculatorResults,
+        partialZipcodeResults,
+      ]);
 
-    dispatch(primarySearchQuery(flattendResults));
+      dispatch(updatePrimarySearch({ results: flattendResults }));
+    } catch (err) {
+      dispatch(triggerFetchError(true));
+      console.error(
+        `An error occured searching all primaries. Message: ${err}`
+      );
+    }
   };
 }
 
@@ -129,84 +114,62 @@ export function handleDetailedSearchQuery(
   route
 ) {
   return async (dispatch) => {
-    return APISearchQueryFromParams(
-      { searchType, searchTerm, searchCoordinates, searchYear },
-      route
-    )
-      .then((json) => {
-        dispatch(updateDetailedResults(json));
-        return json;
-      })
-      .catch((err) => {
-        //need to add some more error hadling
-        throw Error(`An error occured searching: ${err}`);
-      });
+    try {
+      const json = await APIQueryStringFromSearchParams(
+        { searchType, searchTerm, searchCoordinates, searchYear },
+        route
+      );
+      dispatch(updateDetailedSearch({ results: json }));
+      return json;
+    } catch (err) {
+      dispatch(triggerFetchError(true));
+      console.error(`An error occured for detailed search. Message: ${err}`);
+    }
   };
 }
 
-export function handleGetYearsAction(route) {
-  return (dispatch) => {
-    return APISearchQueryFromRoute(route)
-      .then((json) => {
-        dispatch(getYearsAction(json));
-        return json;
-      })
-      .catch((err) => {
-        throw Error(`An error occured searching search years: ${err}`);
-      });
+export function handleSearchBarYearsAction(route) {
+  return async (dispatch) => {
+    try {
+      const json = await APISearchQueryFromRoute(route);
+      dispatch(updateSearchBar({ searchYears: json }));
+      return json;
+    } catch (err) {
+      dispatch(triggerFetchError(true));
+      console.error(
+        `An error occured searching search bar years.  Message: ${err}`
+      );
+    }
   };
 }
 
 export function handleGetPraxisYearsAction(route) {
-  return (dispatch) => {
-    return APISearchQueryFromRoute(route)
-      .then((json) => {
-        dispatch(getPraxisYearsAction(json));
-        return json;
-      })
-      .catch((err) => {
-        throw Error(`An error occured searching praxis years: ${err}`);
-      });
+  return async (dispatch) => {
+    try {
+      dispatch(updateDetailedSearch({ recordYears: null }));
+      const json = await APISearchQueryFromRoute(route);
+      dispatch(updateDetailedSearch({ recordYears: json }));
+      return json;
+    } catch (err) {
+      dispatch(triggerFetchError(true));
+      console.error(
+        `An error occured searching search bar years.  Message: ${err}`
+      );
+    }
   };
 }
 
-export function handleGetViewerImageAction(longitude, latitude) {
-  return (dispatch) => {
-    return getImageKey(longitude, latitude)
-      .then((viewer) => {
-        dispatch(
-          getViewerImageAction({
-            bearing: null,
-            key: null,
-            viewerMarker: null,
-          })
-        );
-        dispatch(getViewerImageAction(viewer));
-        return viewer;
-      })
-      .catch((err) => {
-        throw Error(`An error occured searching: ${err}`);
-      });
+export function handleGetViewerImage(longitude, latitude) {
+  return async (dispatch) => {
+    try {
+      const viewer = await getImageKey(longitude, latitude);
+      dispatch(getViewerImage(null));
+      dispatch(getViewerImage(viewer));
+      return viewer;
+    } catch (err) {
+      // viewer image ui error
+      // dispatch something here for error
+      console.error(`An error occured fetching viewer image. Message: ${err}`);
+    }
   };
 }
-
-// export function handleGetDownloadDataAction(route) {
-//   return (dispatch) => {
-//     dispatch(getDownloadDataAction(null));
-//     return getDownloadData(route)
-//       .then((data) => {
-//         dispatch(getDownloadDataAction(data));
-//         return data;
-//       })
-//       .catch((err) => {
-//         throw Error(`An error occured searching: ${err}`);
-//       });
-//   };
-// }
-
-// function getDownloadDataAction(downloadData) {
-//   return {
-//     type: GET_DOWNLOAD_DATA,
-//     payload: { downloadData },
-//   };
-// }

@@ -1,9 +1,11 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { Component } from "react";
+import { Link, withRouter } from "react-router-dom";
 import PropTypes from "prop-types";
+import { updatePrimarySearch } from "../../actions/search";
 import {
   sanitizeSearchResult,
-  createQueryStringFromSearch,
+  createQueryStringFromParams,
+  createResultFromParams,
 } from "../../utils/helper";
 import * as zipcodeIcon from "../../assets/img/zipcode-icon-transparent.png";
 import * as speculatorIcon from "../../assets/img/speculator-icon-transparent.png";
@@ -16,46 +18,89 @@ const primaryResultIcons = {
   zipcode: zipcodeIcon,
 };
 
-const PrimaryResults = (props) => {
-  const { searchYear, primaryIndex } = props.searchState;
-  const { results } = props;
+class PrimaryResults extends Component {
+  _handleOnMouseOver = () => {
+    // turn active state to true
+    this.props.dispatch(updatePrimarySearch({ isActive: true }));
+  };
 
-  return (
-    <section className="partial-results-container">
-      <ul>
-        {results.map((result, index) => {
-          const { type, search, coordinates, year } = sanitizeSearchResult({
-            result,
-            year: searchYear,
-          });
+  _handleOnMouseOut = () => {
+    this.props.dispatch(updatePrimarySearch({ isActive: false }));
+  };
 
-          const searchQueryRoute = createQueryStringFromSearch({
-            type,
-            search,
-            coordinates,
-            year,
-          });
+  _handleOnClick = () => {
+    this.props.dispatch(updatePrimarySearch({ isOpen: false }));
+  };
 
-          return (
-            <Link key={searchQueryRoute} to={searchQueryRoute}>
-              <li
-                className={index % 2 ? "list-item-odd" : "list-item-even"}
-                style={
-                  index === primaryIndex
-                    ? { backgroundColor: styleVars.uiMedGray }
-                    : null
-                }
-              >
-                <img src={primaryResultIcons[type]} alt={`Icon of ${type}`} />
-                {search}
-              </li>
-            </Link>
-          );
-        })}
-      </ul>
-    </section>
-  );
-};
+  componentWillUnmount() {
+    // turn active state to false
+    this.props.dispatch(updatePrimarySearch({ isActive: false }));
+  }
+
+  render() {
+    const { searchYear } = this.props.searchState.searchParams;
+    const { index } = this.props.searchState.primarySearch;
+    const { results } = this.props;
+
+    return (
+      <section
+        className="partial-results-container"
+        onMouseOver={this._handleOnMouseOver}
+        onMouseOut={this._handleOnMouseOut}
+      >
+        <ul>
+          {results.map((result, i) => {
+            const {
+              type,
+              code = null,
+              ownid = null,
+              place = null,
+              coordinates = null,
+              year,
+            } = sanitizeSearchResult({
+              result,
+              year: searchYear,
+            });
+
+            const searchQueryRoute = createQueryStringFromParams(
+              {
+                type,
+                code,
+                ownid,
+                place,
+                coordinates,
+                year,
+              },
+              "/map"
+            );
+
+            return (
+              <Link key={searchQueryRoute} to={searchQueryRoute}>
+                <li
+                  className={i % 2 ? "list-item-odd" : "list-item-even"}
+                  style={
+                    i === index
+                      ? { backgroundColor: styleVars.uiMedGray }
+                      : null
+                  }
+                  onClick={this._handleOnClick}
+                >
+                  <img src={primaryResultIcons[type]} alt={`Icon of ${type}`} />
+                  {createResultFromParams({
+                    type,
+                    code,
+                    ownid,
+                    place,
+                  })}
+                </li>
+              </Link>
+            );
+          })}
+        </ul>
+      </section>
+    );
+  }
+}
 
 PrimaryResults.propTypes = {
   results: PropTypes.array.isRequired,
@@ -66,12 +111,11 @@ PrimaryResults.propTypes = {
 };
 
 const PrimaryResultsContainer = (props) => {
-  const { primaryResults } = props.searchState;
+  const { isOpen, results } = props.searchState.primarySearch;
 
-  if (primaryResults && primaryResults.length > 0) {
-    return <PrimaryResults {...props} results={primaryResults} />;
+  if (isOpen && results && results.length > 0) {
+    return <PrimaryResults {...props} results={results} />;
   }
-
   return null;
 };
 
@@ -81,4 +125,4 @@ PrimaryResultsContainer.propTypes = {
   }).isRequired,
 };
 
-export default PrimaryResultsContainer;
+export default withRouter(PrimaryResultsContainer);

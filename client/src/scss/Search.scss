@@ -59,7 +59,8 @@
   }
 
   div:hover {
-    border: $ui-white solid 1px;
+    background-color: $ui-light-gray;
+    color: $pp-rose;
   }
 
   div:active {

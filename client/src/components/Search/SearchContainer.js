@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 import PropTypes from "prop-types";
-import { handleGetYearsAction } from "../../actions/search";
+import { handleSearchBarYearsAction } from "../../actions/search";
 import SearchBar from "./SearchBar";
 
 /* The SearchContainer passes the avaialble years
@@ -10,8 +10,8 @@ for selection to SearchBar */
 class SearchContainer extends Component {
   componentDidMount() {
     // load the available years
-    const yearsRoute = "/api/praxisyears";
-    this.props.dispatch(handleGetYearsAction(yearsRoute));
+    const yearsRoute = "/api/general?type=available-praxis-years";
+    this.props.dispatch(handleSearchBarYearsAction(yearsRoute));
   }
 
   render() {

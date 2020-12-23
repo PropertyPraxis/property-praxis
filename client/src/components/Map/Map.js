@@ -4,7 +4,13 @@ import ReactMapGL, { Source, Layer, Marker } from "react-map-gl";
 import ParcelLayerController from "./ParcelLayerController";
 import BasemapController from "./BasemapController";
 import { createNewViewport } from "../../utils/map";
-import { createAddressString, createLayerFilter } from "../../utils/helper";
+import {
+  capitalizeFirstLetter,
+  parseMBAddressString,
+  createLayerFilter,
+  createQueryStringFromParams,
+} from "../../utils/helper";
+import { URLParamsToAPIQueryString } from "../../utils/parseURL";
 import {
   getMapStateAction,
   toggleLoadingIndicatorAction,
@@ -60,12 +66,11 @@ class PraxisMarker extends React.Component {
     );
 
     // query mapbox api based on those coords
-    const apiReverseGeocodeRoute = `/api/address-search/reverse-geocode/${encodedCoords}`;
+    const apiReverseGeocodeRoute = `/api/reverse-geocode?coordinates=${encodedCoords}`;
     const { place_name, geometry } = await this.props.dispatch(
       handleGetReverseGeocodeAction(apiReverseGeocodeRoute)
     );
     const [reverseGCLongitude, reverseGCLatitude] = geometry.coordinates;
-    const { searchYear } = this.props.searchState;
     const reverseGCEncodedCoords = encodeURI(
       JSON.stringify({
         longitude: reverseGCLongitude,
@@ -74,7 +79,18 @@ class PraxisMarker extends React.Component {
     );
 
     // create a new route using the api return data
-    const clientRoute = `/map?type=address&search=${place_name}&coordinates=${reverseGCEncodedCoords}&year=${searchYear}`;
+    // const parsedPlaceName = parseMBAddressString(place_name);
+    const { searchYear } = this.props.searchState.searchParams;
+    const clientRoute = createQueryStringFromParams(
+      {
+        type: "address",
+        place: parseMBAddressString(place_name),
+        coordinates: reverseGCEncodedCoords,
+        year: searchYear,
+      },
+      "/map"
+    );
+
     this.props.history.push(clientRoute);
   };
 
@@ -121,28 +137,8 @@ class PraxisMap extends Component {
     [7, styleVars.parcelStop7],
   ];
 
-  // returns a route dependent on URL search params passed from MapContainer
-  _routeSwitcher = ({
-    searchType,
-    searchTerm,
-    searchCoordinates,
-    searchYear,
-  }) => {
-    switch (searchType) {
-      case "zipcode":
-        return `/api/geojson/parcels/${searchType}/${searchTerm}/${searchYear}`;
-      case "speculator":
-        return `/api/geojson/parcels/${searchType}/${searchTerm}/${searchYear}`;
-      case "address":
-        return `/api/geojson/parcels/address/${searchCoordinates}/${searchYear}`;
-      default:
-        return `/api/geojson/parcels/${searchYear}`;
-    }
-  };
-
   // create new vieport dependent on geojson bbox
   _createNewViewport = (geojson) => {
-    const { searchYear } = this.props.searchState;
     const features = geojson.features;
     const { viewport } = this.props.mapState;
     const { longitude, latitude, zoom } = createNewViewport(geojson, viewport);
@@ -156,11 +152,9 @@ class PraxisMap extends Component {
 
     // if the return geojson has features aka the search term was
     // valid then change the veiwport accordingly
-    features
-      ? this.props.dispatch(getMapStateAction(newViewport))
-      : this.props.dispatch(
-          handleGetParcelsByQueryAction(`/api/geojson/parcels/${searchYear}`) //default return
-        );
+    if (features) {
+      this.props.dispatch(getMapStateAction(newViewport));
+    }
   };
 
   _getMapData = async () => {
@@ -168,31 +162,42 @@ class PraxisMap extends Component {
     this.props.dispatch(toggleLoadingIndicatorAction(true));
 
     // Build route and get data
-    const route = this._routeSwitcher(this.props.searchQueryParams);
+    const parcelsRoute = URLParamsToAPIQueryString(
+      this.props.location.search,
+      "parcels"
+    );
+
+    const zipRoute = URLParamsToAPIQueryString(
+      this.props.location.search,
+      "zipcode"
+    );
+
 
     // Get Data
     const parcelsGeojson = await this.props.dispatch(
-      handleGetParcelsByQueryAction(route)
+      handleGetParcelsByQueryAction(parcelsRoute)
+    );
+    const zipsGeojson = await this.props.dispatch(
+      handleGetZipcodesDataAction(zipRoute)
     );
 
-    const zipsGeojson = await this.props.dispatch(
-      handleGetZipcodesDataAction("/api/geojson/zipcodes")
-    );
-    // toggle indicator (need refactor to hook in)
-    if (parcelsGeojson && zipsGeojson) {
-      this.props.dispatch(toggleLoadingIndicatorAction(false));
+    //Set viewport to parcels bbox
+    if (parcelsGeojson) {
+      this._createNewViewport(parcelsGeojson);
     }
 
-    //Set viewport
-    this._createNewViewport(parcelsGeojson);
-
     // set marker not undefined or null
-    const { searchCoordinates } = this.props.searchQueryParams;
+    const { searchCoordinates } = this.props.searchParams;
     if (searchCoordinates) {
       const { longitude, latitude } = JSON.parse(decodeURI(searchCoordinates));
       this.props.dispatch(setMarkerCoordsAction(longitude, latitude));
     } else {
       this.props.dispatch(setMarkerCoordsAction(null, null));
+    }
+
+    // Toggle indicator off
+    if (parcelsGeojson && zipsGeojson) {
+      this.props.dispatch(toggleLoadingIndicatorAction(false));
     }
   };
 
@@ -239,23 +244,26 @@ class PraxisMap extends Component {
       this.props.dispatch(
         setMarkerCoordsAction(markerLongitude, markerLatitude)
       );
-      const { searchYear } = this.props.searchState;
+
       const coordinates = {
         longitude: markerLongitude,
         latitude: markerLatitude,
       };
 
       // build route using feature properties
-      const { propno, propstr, propdir, propzip } = hoveredFeature.properties;
+      const { propaddr } = hoveredFeature.properties;
       const encodedCoords = encodeURI(JSON.stringify(coordinates));
-      const addressString = createAddressString({
-        propno,
-        propdir,
-        propstr,
-        propzip,
-      });
 
-      const clientRoute = `/map?type=address&search=${addressString}&coordinates=${encodedCoords}&year=${searchYear}`;
+      const { searchYear } = this.props.searchState.searchParams;
+      const clientRoute = createQueryStringFromParams(
+        {
+          type: "address",
+          place: capitalizeFirstLetter(propaddr),
+          coordinates: encodedCoords,
+          year: searchYear,
+        },
+        "/map"
+      );
       this.props.history.push(clientRoute);
     }
   };
@@ -390,11 +398,32 @@ PraxisMap.propTypes = {
 };
 
 export default PraxisMap;
-/* <Marker
-  latitude={42.35554476757099}
-  longitude={-82.9895677109488}
-  // offsetLeft={-20}
-  // offsetTop={-10}
->
-  <ArrowIcon style={{ transform: "rotate(350deg)" }} />
-</Marker>; */
+
+// HOC wrapper to reuse reverse geocode logic
+// function withMapboxAPI(WrappedComponent) {
+//   return class extends Component {
+//     _reverseGeocode = async (inCoords) => {
+//       const apiReverseGeocodeRoute = `/api/address-search/reverse-geocode/${inCoords}`;
+
+//       const { place_name, geometry } = await this.props.dispatch(
+//         handleGetReverseGeocodeAction(apiReverseGeocodeRoute)
+//       );
+//       const [reverseGCLongitude, reverseGCLatitude] = geometry.coordinates;
+//       const reverseGCEncodedCoords = encodeURI(
+//         JSON.stringify({
+//           longitude: reverseGCLongitude,
+//           latitude: reverseGCLatitude,
+//         })
+//       );
+//       return { place_name, reverseGCEncodedCoords };
+//     };
+//     render() {
+//       return (
+//         <WrappedComponent
+//           {...this.props}
+//           _reverseGeocode={this._reverseGeocode}
+//         />
+//       );
+//     }
+//   };
+// }

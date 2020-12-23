@@ -1,8 +1,7 @@
-import React, { Component } from "react";
+import React from "react";
 import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 import PropTypes from "prop-types";
-import { resetSearch } from "../../actions/search";
 import SearchBar from "../Search/SearchBar";
 import Footer from "./Footer";
 

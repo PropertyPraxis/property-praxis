@@ -1,50 +1,74 @@
-import React, { Component } from "react";
-import { connect } from "react-redux";
+import React, { useEffect, useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import { withRouter } from "react-router-dom";
-import PropTypes from "prop-types";
 import { CSSTransition } from "react-transition-group";
-import { getPropertiesFromMapData } from "../../utils/helper";
+import queryString from "query-string";
+import { updateDetailedSearch } from "../../actions/search";
+import { getDetailsFromGeoJSON } from "../../utils/helper";
 import DetailedSearchResults from "./DetailedSearchResults";
 
-class DetailedResultsContainer extends Component {
-  render() {
-    const { isDetailedResultsOpen } = this.props.searchState;
+function useQueryParams(props) {
+  const { searchQuery } = props;
 
-    /*This component tree needs to know what the ppraxis 
-    data properties and ids are. */
-    const { ppraxis } = this.props.mapData;
-    const details = getPropertiesFromMapData(ppraxis);
-    if (details) {
-      return (
-        <CSSTransition
-          in={isDetailedResultsOpen} //set false on load
-          appear={true}
-          timeout={0}
-          classNames="results-drawer"
-        >
-          <DetailedSearchResults {...this.props} details={details} />
-        </CSSTransition>
-      );
-    }
-    return null;
+  const [queryParams, setQueryParams] = useState(null);
+  useEffect(() => {
+    const params = queryString.parse(searchQuery);
+    setQueryParams(params);
+    return () => null;
+  }, [searchQuery]);
+
+  return queryParams;
+}
+
+function DetailedResultsContainer() {
+  const { ppraxis } = useSelector((state) => state.mapData);
+  const { drawerIsOpen, results, resultsType } = useSelector(
+    (state) => state.searchState.detailedSearch
+  );
+  const { details, detailsType } = getDetailsFromGeoJSON(ppraxis);
+  const dispatch = useDispatch();
+
+  const queryParams = useQueryParams({ searchQuery: window.location.search });
+  useEffect(() => {
+    dispatch(
+      updateDetailedSearch({
+        results: details,
+        resultsType: detailsType,
+      })
+    );
+  }, [JSON.stringify(details), detailsType]);
+
+  if (results && resultsType && queryParams) {
+    return (
+      <CSSTransition
+        in={drawerIsOpen} //set false on load
+        appear={true}
+        timeout={400}
+        classNames="results-drawer"
+        onEntered={() =>
+          dispatch(
+            updateDetailedSearch({
+              contentIsVisible: true,
+            })
+          )
+        }
+        onExit={() =>
+          dispatch(
+            updateDetailedSearch({
+              contentIsVisible: false,
+            })
+          )
+        }
+      >
+        <DetailedSearchResults
+          details={details}
+          detailsType={detailsType}
+          queryParams={queryParams}
+        />
+      </CSSTransition>
+    );
   }
+  return null;
 }
 
-DetailedResultsContainer.propTypes = {
-  mapData: PropTypes.object.isRequired,
-  mapState: PropTypes.object.isRequired,
-  results: PropTypes.shape({ isFullResultsOpen: PropTypes.bool.isRequired })
-    .isRequired,
-  searchState: PropTypes.shape({
-    searchTerm: PropTypes.oneOfType([
-      PropTypes.string,
-      PropTypes.number, //null
-    ]),
-  }).isRequired,
-};
-
-function mapStateToProps({ mapData, mapState, searchState }) {
-  return { mapData, mapState, searchState };
-}
-
-export default withRouter(connect(mapStateToProps)(DetailedResultsContainer));
+export default withRouter(DetailedResultsContainer);

@@ -1,54 +1,64 @@
 import {
-  RESET_SEARCH,
-  PRIMARY_SEARCH_QUERY,
-  UPDATE_DETAILED_RESULTS,
-  UPDATE_PRIMARY_INDEX,
-  GET_SEARCH_YEARS,
-  GET_PRAXIS_SEARCH_YEARS,
-  GET_VIEWER_IMAGE,
-  TOGGLE_DETAILED_RESULTS,
+  UPDATE_VIEWER_IMAGE,
+  UPDATE_GENERAL_SEARCH,
+  UPDATE_SEARCH_PARAMS,
+  UPDATE_PRIMARY_SEARCH,
+  UPDATE_DETAILED_SEARCH,
+  UPDATE_SEARCH_BAR,
 } from "../actions/search";
 
 const initialSearchState = {
-  searchType: "all",
-  searchTerm: "",
-  searchCoordinates: null,
-  searchDisplayType: null,
-  searchYear: "2017",
-  searchYears: null,
-  praxisSearchYears:null,
-  primaryResults: null,
-  detailedResults: null,
-  primaryIndex: 0,
-  downloadData: null,
-  isDetailedResultsOpen: false,
-  isPartialResultsOpen: false,
-  viewer: {
-    bearing: null,
-    key: null,
-    viewerMarker: null,
+  searchBar: {
+    searchYears: null,
   },
+  searchParams: {
+    searchType: "all",
+    searchYear: "2020",
+    searchTerm: "",
+    searchCoordinates: null,
+  },
+  primarySearch: { results: null, index: 0, isOpen: false, isActive: false },
+  detailedSearch: {
+    results: null,
+    drawerIsOpen: false,
+    contentIsVisible: false,
+    resultsType: null,
+    recordYears: null,
+  },
+  downloadData: null,
+  viewer: null,
 };
 
 export default function searchState(state = initialSearchState, action) {
   switch (action.type) {
-    case RESET_SEARCH:
+    case UPDATE_VIEWER_IMAGE:
       return { ...state, ...action.payload };
-    case PRIMARY_SEARCH_QUERY:
+    case UPDATE_GENERAL_SEARCH:
       return { ...state, ...action.payload };
-    case UPDATE_DETAILED_RESULTS:
-      return { ...state, ...action.payload };
-    case UPDATE_PRIMARY_INDEX:
-      return { ...state, ...action.payload };
-    case GET_SEARCH_YEARS:
-      return { ...state, ...action.payload };
-    case GET_PRAXIS_SEARCH_YEARS:
-      return { ...state, ...action.payload };
-    case GET_VIEWER_IMAGE:
-      return { ...state, ...action.payload };
-    case TOGGLE_DETAILED_RESULTS:
-      return { ...state, ...action.payload };
+    case UPDATE_SEARCH_BAR:
+      return { ...state, searchBar: { ...state.searchBar, ...action.payload } };
+    case UPDATE_SEARCH_PARAMS:
+      return {
+        ...state,
+        searchParams: { ...state.searchParams, ...action.payload },
+      };
+    case UPDATE_PRIMARY_SEARCH:
+      return {
+        ...state,
+        primarySearch: { ...state.primarySearch, ...action.payload },
+      };
+    case UPDATE_DETAILED_SEARCH:
+      return {
+        ...state,
+        detailedSearch: { ...state.detailedSearch, ...action.payload },
+      };
     default:
       return state;
   }
 }
+
+// viewer: {
+//   bearing: null,
+//   key: null,
+//   viewerMarker: null,
+// },

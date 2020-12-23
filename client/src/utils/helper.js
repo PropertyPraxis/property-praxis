@@ -1,7 +1,6 @@
-import { feature } from "@turf/turf";
 import queryString from "query-string";
-//logic to render mobile properly
 
+//logic to render mobile properly
 export function setDocHeightOnWindow() {
   function setDocHeight() {
     document.documentElement.style.setProperty(
@@ -20,7 +19,7 @@ export function setDocHeightOnWindow() {
 }
 
 export function capitalizeFirstLetter(string) {
-  if (string === null) return null;
+  if (string === null | string === undefined) return null;
   const lowerString = string.toLowerCase();
   const strArray = lowerString.split(" ");
   const capitalizedStrArray = strArray.map((val) => {
@@ -30,54 +29,19 @@ export function capitalizeFirstLetter(string) {
   return capitalizedStrArray.join(" ");
 }
 
-export function pathnameToSearchType(path) {
-  switch (path) {
-    case "/address":
-      return "Address";
-    case "/zipcode":
-      return "Zipcode";
-    case "/speculator":
-      return "Speculator";
-    case "/all":
-      return "All";
-    default:
-      return "All";
-  }
-}
-
-// function to find the single target address at distance 0
-export function findTargetAddress(features) {
-  const targetAddress = features
-    .map((feature) => {
-      if (feature.properties.distance === 0) {
-        return feature;
-      }
-      return null;
-    })
-    .filter((result) => result !== null);
-
-  const nearbyAddresses = features
-    .map((feature) => {
-      if (feature.properties.distance !== 0) {
-        return feature;
-      }
-      return null;
-    })
-    .filter((result) => result !== null);
-
-  return { targetAddress, nearbyAddresses };
-}
-
-export function createAddressString({ propno, propdir, propstr, propzip }) {
-  const addressString = `${propno} ${
-    propdir !== "0" && propdir !== null && propdir !== "null" ? propdir : ""
-  } ${propstr}${
-    propzip !== "0" && propzip !== null && propzip !== "null"
-      ? ", " + propzip
+export function createAddressString({ propno, propdir, propstr }) {
+  const addressString = `${propno.toString().trim()} ${
+    propdir !== "0" && propdir !== null && propdir !== "null"
+      ? propdir.trim()
       : ""
-  }`;
+  } ${propstr}`;
 
-  return addressString;
+  return capitalizeFirstLetter(addressString).replace(/  /g, " ");
+}
+
+export function parseMBAddressString(addressString) {
+  const strAddress = addressString.split(",");
+  return strAddress[0].trim();
 }
 
 export function createLayerFilter(arr) {
@@ -123,15 +87,13 @@ export function getYearString() {
   return new Date().getFullYear();
 }
 
-/* result return sanitized result object with keys that 
-can be used to map through primary results*/
 export function sanitizeSearchResult({ result, year }) {
   // result return sanitized result object
   const keys = Object.keys(result);
   if (keys.includes("propzip")) {
     const zipcodeQuery = {
       type: "zipcode",
-      search: result.propzip,
+      code: result.propzip,
       coordinates: null,
       year,
     };
@@ -139,7 +101,7 @@ export function sanitizeSearchResult({ result, year }) {
   } else if (keys.includes("own_id")) {
     const speculatorQuery = {
       type: "speculator",
-      search: result.own_id,
+      ownid: capitalizeFirstLetter(result.own_id),
       coordinates: null,
       year,
     };
@@ -149,13 +111,14 @@ export function sanitizeSearchResult({ result, year }) {
     const encodedCoords = encodeURI(JSON.stringify({ longitude, latitude }));
     const addressQuery = {
       type: "address",
-      search: result.place_name,
+      place: result.place_name,
       coordinates: encodedCoords,
       year,
     };
+
     return addressQuery;
   } else {
-    throw new Error(
+    console.error(
       `Known key does not exist in object: ${JSON.stringify(result)}`
     );
   }
@@ -167,27 +130,87 @@ export function createQueryStringFromSearch({
   coordinates,
   year,
 }) {
+  let parsedSearch;
+  if (type === "address") {
+    parsedSearch = parseMBAddressString(search);
+  } else {
+    parsedSearch = search;
+  }
+
   const query = `/map?${queryString.stringify(
-    { type, search, coordinates, year },
+    { type, search: parsedSearch, coordinates, year },
     { sort: false, skipNull: true }
   )}`;
 
   return query;
 }
 
+export function createQueryStringFromParams(
+  { type, ownid = null, code = null, place = null, coordinates = null, year },
+  route
+) {
+  let qs;
+  switch (type) {
+    case "address":
+      qs = `${route}?${queryString.stringify(
+        { type, place, coordinates, year },
+        { sort: false, skipNull: true }
+      )}`;
+      break;
+    case "zipcode":
+      qs = `${route}?${queryString.stringify(
+        { type, code, year, ownid },
+        { sort: false, skipNull: true }
+      )}`;
+      break;
+    case "speculator":
+      qs = `${route}?${queryString.stringify(
+        { type, ownid, code, year },
+        { sort: false, skipNull: true }
+      )}`;
+      break;
+    default:
+      qs = null;
+      console.error(`Unkown API search type: ${type}`);
+      break;
+  }
+
+  return qs;
+}
+
+export function createResultFromParams({ type, code, ownid, place }) {
+  let searchResult;
+  switch (type) {
+    case "address":
+      searchResult = place;
+      break;
+    case "zipcode":
+      searchResult = code;
+      break;
+    case "speculator":
+      searchResult = ownid;
+      break;
+    default:
+      searchResult = null;
+      console.error(`Unkown type to create search params: ${type}`);
+      break;
+  }
+  return searchResult;
+}
+
 export function flattenPrimaryResults(primaryResults) {
   return primaryResults.reduce((acc, val) => acc.concat(val), []);
 }
 
-export function getPropertiesFromMapData(geojson) {
+export function getDetailsFromGeoJSON(geojson) {
   if (geojson) {
     const details = geojson.features.map((feature) => {
-      const { id, properties } = feature;
-      return { id, properties };
+      const { id, centroid, properties } = feature;
+      return { id, centroid, properties };
     });
-    return details;
+    return { details, detailsType: geojson.praxisDataType };
   } else {
-    return null;
+    return { details: null, detailsType: null };
   }
 }
 
@@ -200,10 +223,31 @@ export const currencyFormatter = new Intl.NumberFormat("en-US", {
 
 export function availablePraxisYears(praxisYears, currentYear) {
   if (praxisYears && currentYear) {
-    const availableYears = praxisYears
-      .map(({ praxisyear }) => praxisyear)
-      .filter((year) => year !== Number(currentYear));
-    return availableYears;
+    return praxisYears.filter((year) => {
+      if (year === "null" || year === null || year === currentYear) {
+        return false;
+      } else {
+        return true;
+      }
+    });
+  } else {
+    return null;
+  }
+}
+
+export function parseCentroidString(centroid, encode = false) {
+  if (centroid !== "POINT EMPTY") {
+    const [longitude, latitude] = centroid
+      .split(" ")
+      .map((item) => item.replace(/[POINT(, )]/gi, ""));
+    if (encode) {
+      return JSON.stringify({
+        longitude: Number(longitude),
+        latitude: Number(latitude),
+      });
+    } else {
+      return { longitude: Number(longitude), latitude: Number(latitude) };
+    }
   } else {
     return null;
   }
