@@ -82,7 +82,7 @@ function useCodesBySpeculator({ code, ownid, year }) {
 }
 
 /*Specific Link components to pass to  paginator component*/
-function SpeculatorLink({ record, index, queryParams }) {
+function ZipcodeLink({ record, index, queryParams }) {
   const { ownid, year } = queryParams;
   return (
     <div className="speculator-item" key={`${record.own_id}-${index}`}>
@@ -116,8 +116,35 @@ function SpeculatorLink({ record, index, queryParams }) {
   );
 }
 
+function AddressLink({ record, index, queryParams }) {
+  const { code, year } = queryParams;
+  const { centroid } = record;
+  const { propaddr } = record.properties;
+
+  return (
+    <div key={index} className="address-item">
+      <Link
+        to={createQueryStringFromParams(
+          {
+            type: "address",
+            place: `${propaddr}, ${code}`,
+            coordinates: parseCentroidString(centroid, true),
+            year,
+          },
+          "/map"
+        )}
+      >
+        <span title={`Search details for ${capitalizeFirstLetter(propaddr)}.`}>
+          <img src={infoIcon} alt="More Information"></img>
+          {capitalizeFirstLetter(propaddr)}
+        </span>
+      </Link>
+    </div>
+  );
+}
+
 /* Dumb paginator component - this component assumes that 
-data list will be short (less than 25) */
+data list will be short (less than 50) */
 function DumbPaginator({ data, itemsPerPage = 10, queryParams, children }) {
   const [pageNo, setPage] = useState(1);
   const { pageData, end } = data.paginate(pageNo, itemsPerPage); //using paginate polyfill
@@ -355,54 +382,15 @@ function SpeculatorParcels(props) {
             />
             <span>Properties by Zip Code for this Speculator</span>
           </div>
-          {/* <div className="detailed-speculator"> */}
           <DumbPaginator
             data={speculatorData}
             length={speculatorData.length}
             queryParams={props.queryParams}
           >
-            <SpeculatorLink
-            // record={record}
-            // index={index}
-            // queryParams={queryParams}
-            />
+            <ZipcodeLink />
           </DumbPaginator>
-          {/* {speculatorData.map((record) => {
-              console.log(speculatorData);
-              return (
-                <div className="speculator-item" key={record.own_id}>
-                  <div>
-                    <Link
-                      to={createQueryStringFromParams(
-                        {
-                          type: "speculator",
-                          code: record.propzip,
-                          ownid,
-                          coordinates: null,
-                          year,
-                        },
-                        "/map"
-                      )}
-                    >
-                      <span
-                        title={`Seach ${capitalizeFirstLetter(
-                          ownid
-                        )}'s properties in ${record.propzip}`}
-                      >
-                        <img src={infoIcon} alt="More Information"></img>
-                        {capitalizeFirstLetter(record.propzip)}
-                      </span>
-                    </Link>
-                  </div>
-                  <div>
-                    <div>{`${record.count}  properties`}</div>
-                  </div>
-                </div>
-              );
-            })} */}
         </div>
       </div>
-      // </div>
     );
   }
   return null;
@@ -693,35 +681,13 @@ function CodeSpeculatorParcels(props) {
               in Detroit zip code<span>{` ${code} `}</span>
               in the year <span>{` ${year}. `}</span>
             </p>
-            {results.map((record, index) => {
-              const { centroid } = record;
-
-              const { propaddr } = record.properties;
-              return (
-                <div key={index} className="address-item">
-                  <Link
-                    to={createQueryStringFromParams(
-                      {
-                        type: "address",
-                        place: `${propaddr}, ${code}`,
-                        coordinates: parseCentroidString(centroid, true),
-                        year,
-                      },
-                      "/map"
-                    )}
-                  >
-                    <span
-                      title={`Search details for ${capitalizeFirstLetter(
-                        propaddr
-                      )}.`}
-                    >
-                      <img src={infoIcon} alt="More Information"></img>
-                      {capitalizeFirstLetter(propaddr)}
-                    </span>
-                  </Link>
-                </div>
-              );
-            })}
+            <DumbPaginator
+              data={results}
+              length={results.length}
+              queryParams={props.queryParams}
+            >
+              <AddressLink />
+            </DumbPaginator>
           </div>
           <div className="detailed-title">
             <img
@@ -801,28 +767,13 @@ function SpeculatorCodeParcels(props) {
               in Detroit zip code<span>{` ${code} `}</span>
               in the year <span>{` ${year}. `}</span>
             </p>
-            {results.map((record, index) => {
-              const { centroid } = record;
-
-              const { propaddr } = record.properties;
-              return (
-                <div key={index} className="address-item">
-                  <Link
-                    to={createQueryStringFromParams(
-                      {
-                        type: "address",
-                        place: `${propaddr}, ${code}`,
-                        coordinates: parseCentroidString(centroid, true),
-                        year,
-                      },
-                      "/map"
-                    )}
-                  >
-                    <span>{capitalizeFirstLetter(propaddr)}</span>
-                  </Link>
-                </div>
-              );
-            })}
+            <DumbPaginator
+              data={results}
+              length={results.length}
+              queryParams={props.queryParams}
+            >
+              <AddressLink />
+            </DumbPaginator>
           </div>
           <div className="detailed-title">
             <img
@@ -831,33 +782,13 @@ function SpeculatorCodeParcels(props) {
             />
             <span>{`Additional Properties by Zip Code for ${ownid}`}</span>
           </div>
-          <div className="detailed-speculator">
-            {speculatorData.map((record) => {
-              return (
-                <div className="speculator-item" key={record.own_id}>
-                  <div>
-                    <Link
-                      to={createQueryStringFromParams(
-                        {
-                          type: "speculator",
-                          code: record.propzip,
-                          ownid,
-                          coordinates: null,
-                          year,
-                        },
-                        "/map"
-                      )}
-                    >
-                      <span>{capitalizeFirstLetter(record.propzip)}</span>
-                    </Link>
-                  </div>
-                  <div>
-                    <div>{`${record.count}  properties`}</div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+          <DumbPaginator
+            data={speculatorData}
+            length={speculatorData.length}
+            queryParams={props.queryParams}
+          >
+            <ZipcodeLink />
+          </DumbPaginator>
         </div>
       </div>
     );
