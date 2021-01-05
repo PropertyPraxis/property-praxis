@@ -5,6 +5,7 @@ import { Provider } from "react-redux";
 import reducer from "./reducers";
 import middleware from "./middleware";
 import App from "./components/App";
+import "./utils/polyfills"; // additional polufills
 import "mapbox-gl/dist/mapbox-gl.css"; //mapbox css
 import "mapillary-js/dist/mapillary.min.css"; //mapillary css
 import "./scss/index.scss";

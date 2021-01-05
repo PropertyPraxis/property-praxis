@@ -81,6 +81,77 @@ function useCodesBySpeculator({ code, ownid, year }) {
   return { speculatorData, propCount, zipsBySpeculator };
 }
 
+/* Dumb paginator component - this component assumes that 
+data list will be short (less than 25) */
+function DumbPaginator({ data, itemsPerPage = 10, queryParams }) {
+  const [pageNo, setPage] = useState(1);
+  const { ownid, year } = queryParams;
+  const { pageData, end } = data.paginate(pageNo, itemsPerPage); //using paginate polyfill
+
+  if (pageData) {
+    return (
+      <div className="detailed-speculator">
+        <div className="page-controller">
+          <div
+            title="previous page"
+            style={pageNo === 1 ? { visibility: "hidden" } : null}
+            onClick={() => {
+              setPage((prevPage) => prevPage - 1);
+            }}
+          >
+            &#x276E;
+          </div>
+
+          <div>{`${pageNo} of ${Math.ceil(data.length / itemsPerPage)}`}</div>
+          <div
+            title="next page"
+            style={end ? { visibility: "hidden" } : null}
+            onClick={() => {
+              setPage((prevPage) => prevPage + 1);
+            }}
+          >
+            &#x276F;
+          </div>
+        </div>
+        {pageData.map((record, index) => {
+          console.log(record);
+          return (
+            <div className="speculator-item" key={`${record.own_id}-${index}`}>
+              <div>
+                <Link
+                  to={createQueryStringFromParams(
+                    {
+                      type: "speculator",
+                      code: record.propzip,
+                      ownid,
+                      coordinates: null,
+                      year,
+                    },
+                    "/map"
+                  )}
+                >
+                  <span
+                    title={`Seach ${capitalizeFirstLetter(
+                      ownid
+                    )}'s properties in ${record.propzip}`}
+                  >
+                    <img src={infoIcon} alt="More Information"></img>
+                    {capitalizeFirstLetter(record.propzip)}
+                  </span>
+                </Link>
+              </div>
+              <div>
+                <div>{`${record.count}  properties`}</div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+  return null;
+}
+
 /*Detailed result components need to know what the ppraxis 
   data properties, ids, and data return type (details type) are. 
   They also use internal state in most cases. */
@@ -280,8 +351,14 @@ function SpeculatorParcels(props) {
             />
             <span>Properties by Zip Code for this Speculator</span>
           </div>
-          <div className="detailed-speculator">
-            {speculatorData.map((record) => {
+          {/* <div className="detailed-speculator"> */}
+          <DumbPaginator
+            data={speculatorData}
+            length={speculatorData.length}
+            queryParams={props.queryParams}
+          />
+          {/* {speculatorData.map((record) => {
+              console.log(speculatorData);
               return (
                 <div className="speculator-item" key={record.own_id}>
                   <div>
@@ -312,10 +389,10 @@ function SpeculatorParcels(props) {
                   </div>
                 </div>
               );
-            })}
-          </div>
+            })} */}
         </div>
       </div>
+      // </div>
     );
   }
   return null;

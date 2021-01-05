@@ -277,7 +277,6 @@
 
   a > span:hover {
     color: $ui-dark-gray;
-    
   }
 
   a > span:active,
@@ -383,4 +382,26 @@
   display: inline-block;
   -webkit-transform: rotate(90deg);
   transform: rotate(90deg);
+}
+
+//page controller
+.page-controller {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 10px;
+
+  div:nth-child(even) {
+    font-weight: bold;
+  }
+
+  div:nth-child(odd) {
+    cursor: pointer;
+  }
+
+  div:nth-child(odd):hover {
+    color: $pp-rose;
+  }
+  div:nth-child(odd):active {
+    transform: translateY(1px);
+  }
 }
