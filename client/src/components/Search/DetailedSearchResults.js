@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, cloneElement } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useMediaQuery } from "react-responsive";
 import { Link } from "react-router-dom";
@@ -81,11 +81,45 @@ function useCodesBySpeculator({ code, ownid, year }) {
   return { speculatorData, propCount, zipsBySpeculator };
 }
 
+/*Specific Link components to pass to  paginator component*/
+function SpeculatorLink({ record, index, queryParams }) {
+  const { ownid, year } = queryParams;
+  return (
+    <div className="speculator-item" key={`${record.own_id}-${index}`}>
+      <div>
+        <Link
+          to={createQueryStringFromParams(
+            {
+              type: "speculator",
+              code: record.propzip,
+              ownid,
+              coordinates: null,
+              year,
+            },
+            "/map"
+          )}
+        >
+          <span
+            title={`Seach ${capitalizeFirstLetter(ownid)}'s properties in ${
+              record.propzip
+            }`}
+          >
+            <img src={infoIcon} alt="More Information"></img>
+            {capitalizeFirstLetter(record.propzip)}
+          </span>
+        </Link>
+      </div>
+      <div>
+        <div>{`${record.count}  properties`}</div>
+      </div>
+    </div>
+  );
+}
+
 /* Dumb paginator component - this component assumes that 
 data list will be short (less than 25) */
-function DumbPaginator({ data, itemsPerPage = 10, queryParams }) {
+function DumbPaginator({ data, itemsPerPage = 10, queryParams, children }) {
   const [pageNo, setPage] = useState(1);
-  const { ownid, year } = queryParams;
   const { pageData, end } = data.paginate(pageNo, itemsPerPage); //using paginate polyfill
 
   if (pageData) {
@@ -114,37 +148,7 @@ function DumbPaginator({ data, itemsPerPage = 10, queryParams }) {
           </div>
         </div>
         {pageData.map((record, index) => {
-          console.log(record);
-          return (
-            <div className="speculator-item" key={`${record.own_id}-${index}`}>
-              <div>
-                <Link
-                  to={createQueryStringFromParams(
-                    {
-                      type: "speculator",
-                      code: record.propzip,
-                      ownid,
-                      coordinates: null,
-                      year,
-                    },
-                    "/map"
-                  )}
-                >
-                  <span
-                    title={`Seach ${capitalizeFirstLetter(
-                      ownid
-                    )}'s properties in ${record.propzip}`}
-                  >
-                    <img src={infoIcon} alt="More Information"></img>
-                    {capitalizeFirstLetter(record.propzip)}
-                  </span>
-                </Link>
-              </div>
-              <div>
-                <div>{`${record.count}  properties`}</div>
-              </div>
-            </div>
-          );
+          return cloneElement(children, { record, index, queryParams });
         })}
       </div>
     );
@@ -356,7 +360,13 @@ function SpeculatorParcels(props) {
             data={speculatorData}
             length={speculatorData.length}
             queryParams={props.queryParams}
-          />
+          >
+            <SpeculatorLink
+            // record={record}
+            // index={index}
+            // queryParams={queryParams}
+            />
+          </DumbPaginator>
           {/* {speculatorData.map((record) => {
               console.log(speculatorData);
               return (
