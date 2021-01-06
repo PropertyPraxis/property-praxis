@@ -2,7 +2,6 @@ import React, { useState, useEffect, cloneElement } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useMediaQuery } from "react-responsive";
 import { Link } from "react-router-dom";
-// import PropTypes from "prop-types";
 import {
   handleGetPraxisYearsAction,
   updateDetailedSearch,
@@ -14,12 +13,13 @@ import {
   parseCentroidString,
   currencyFormatter,
   availablePraxisYears,
+  paginator,
 } from "../../utils/helper";
 import MapViewer from "./MapViewer";
 import * as infoIcon from "../../assets/img/info-icon.png";
 import { APISearchQueryFromRoute } from "../../utils/api";
 
-// helpers functions
+// helper functions
 const reducer = (accumulator, currentValue) =>
   Number(accumulator) + Number(currentValue);
 
@@ -82,6 +82,41 @@ function useCodesBySpeculator({ code, ownid, year }) {
 }
 
 /*Specific Link components to pass to  paginator component*/
+function SpeculatorLink({ record, index, queryParams }) {
+  const { code, year } = queryParams;
+  return (
+    <div className="zipcode-item" key={record.own_id}>
+      <div>
+        <Link
+          to={createQueryStringFromParams(
+            {
+              type: "zipcode",
+              code,
+              ownid: record.own_id,
+              coordinates: null,
+              year,
+            },
+            "/map"
+          )}
+        >
+          <span
+            title={`Search ${capitalizeFirstLetter(
+              record.own_id
+            )}'s properties in ${code}.`}
+          >
+            <img src={infoIcon} alt="More Information"></img>
+            {capitalizeFirstLetter(record.own_id)}
+          </span>
+        </Link>
+      </div>
+      <div>
+        <div>{`${record.count}  properties`}</div>
+        <div>{`${Math.round(record.per)}% ownership`}</div>
+      </div>
+    </div>
+  );
+}
+
 function ZipcodeLink({ record, index, queryParams }) {
   const { ownid, year } = queryParams;
   return (
@@ -144,14 +179,17 @@ function AddressLink({ record, index, queryParams }) {
 }
 
 /* Dumb paginator component - this component assumes that 
-data list will be short (less than 50) */
+data list will be short (less than 100) */
 function DumbPaginator({ data, itemsPerPage = 10, queryParams, children }) {
   const [pageNo, setPage] = useState(1);
-  const { pageData, end } = data.paginate(pageNo, itemsPerPage); //using paginate polyfill
+  const { pageData, end } = paginator(data, pageNo, itemsPerPage); //using paginate function
 
   if (pageData) {
     return (
       <div className="detailed-speculator">
+        {pageData.map((record, index) => {
+          return cloneElement(children, { record, index, queryParams });
+        })}
         <div className="page-controller">
           <div
             title="previous page"
@@ -174,9 +212,6 @@ function DumbPaginator({ data, itemsPerPage = 10, queryParams, children }) {
             &#x276F;
           </div>
         </div>
-        {pageData.map((record, index) => {
-          return cloneElement(children, { record, index, queryParams });
-        })}
       </div>
     );
   }
@@ -300,37 +335,13 @@ function CodeParcels(props) {
             <span>Top 10 Speculators</span>
           </div>
           <div className="detailed-zipcode">
-            {zipData.slice(0, 10).map((record) => {
+            {zipData.slice(0, 10).map((record, index) => {
               return (
-                <div className="zipcode-item" key={record.own_id}>
-                  <div>
-                    <Link
-                      to={createQueryStringFromParams(
-                        {
-                          type: "zipcode",
-                          code,
-                          ownid: record.own_id,
-                          coordinates: null,
-                          year,
-                        },
-                        "/map"
-                      )}
-                    >
-                      <span
-                        title={`Search ${capitalizeFirstLetter(
-                          record.own_id
-                        )}'s properties in ${code}.`}
-                      >
-                        <img src={infoIcon} alt="More Information"></img>
-                        {capitalizeFirstLetter(record.own_id)}
-                      </span>
-                    </Link>
-                  </div>
-                  <div>
-                    <div>{`${record.count}  properties`}</div>
-                    <div>{`${Math.round(record.per)}% ownership`}</div>
-                  </div>
-                </div>
+                <SpeculatorLink
+                  record={record}
+                  index={index}
+                  queryParams={props.queryParams}
+                />
               );
             })}
           </div>

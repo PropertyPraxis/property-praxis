@@ -19,7 +19,7 @@ export function setDocHeightOnWindow() {
 }
 
 export function capitalizeFirstLetter(string) {
-  if (string === null | string === undefined) return null;
+  if ((string === null) | (string === undefined)) return null;
   const lowerString = string.toLowerCase();
   const strArray = lowerString.split(" ");
   const capitalizedStrArray = strArray.map((val) => {
@@ -251,4 +251,28 @@ export function parseCentroidString(centroid, encode = false) {
   } else {
     return null;
   }
+}
+
+export function paginator(arr, pageNumber, itemsPerPage) {
+  pageNumber = Number(pageNumber);
+  itemsPerPage = Number(itemsPerPage);
+  pageNumber = pageNumber < 1 || isNaN(pageNumber) ? 1 : pageNumber;
+  itemsPerPage = itemsPerPage < 1 || isNaN(itemsPerPage) ? 1 : itemsPerPage;
+
+  let start = (pageNumber - 1) * itemsPerPage;
+  let end = start + itemsPerPage;
+  let loopCount = 0;
+  let result = {
+    pageData: [],
+    end: false,
+  };
+
+  for (loopCount = start; loopCount < end; loopCount++) {
+    arr[loopCount] && result.pageData.push(arr[loopCount]);
+  }
+
+  if ((loopCount === arr.length) | (loopCount > arr.length)) {
+    result.end = true;
+  }
+  return result;
 }

@@ -54,8 +54,7 @@ export async function APISearchQueryFromRoute(route) {
     const json = await respose.json();
     return json;
   } catch (err) {
-    
-    console.error(`An error occurred querying API from route: ${err}`);
+    console.error(`An error occurred querying API from route: ${err.message}`);
   }
 }
 

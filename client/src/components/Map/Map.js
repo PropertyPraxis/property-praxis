@@ -172,7 +172,6 @@ class PraxisMap extends Component {
       "zipcode"
     );
 
-
     // Get Data
     const parcelsGeojson = await this.props.dispatch(
       handleGetParcelsByQueryAction(parcelsRoute)
