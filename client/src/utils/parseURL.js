@@ -1,5 +1,4 @@
 import queryString from "query-string";
-import store from "../reducers";
 
 /*Default search params */
 const defaultParams = {
@@ -57,7 +56,7 @@ export function URLParamsToAPIQueryString(searchQuery, layer) {
 
   const route = "/api/geojson";
   let qs;
-  console.log("store", store)
+
   if (layer === "parcels") {
     switch (type) {
       case "zipcode":

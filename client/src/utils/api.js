@@ -1,4 +1,13 @@
 import queryString from "query-string";
+import store from "../reducers";
+import { triggerFetchError } from "../actions/redirect";
+import { toggleLoadingIndicatorAction } from "../actions/mapState";
+
+function triggerError(msg) {
+  store.dispatch(triggerFetchError(true, msg));
+  store.dispatch(toggleLoadingIndicatorAction(false));
+  console.error(msg);
+}
 
 export async function APIQueryStringFromSearchParams(
   { searchType, searchTerm, searchCoordinates = null, searchYear },
@@ -44,7 +53,8 @@ export async function APIQueryStringFromSearchParams(
     const response = await fetch(qs);
     return await response.json();
   } catch (err) {
-    console.error(`An error occured querying API from params: ${err}`);
+    const msg = `An error occured querying API from params: ${err.message}`;
+    triggerError(msg);
   }
 }
 
@@ -54,7 +64,9 @@ export async function APISearchQueryFromRoute(route) {
     const json = await respose.json();
     return json;
   } catch (err) {
-    console.error(`An error occurred querying API from route: ${err.message}`);
+    console.log("err", err);
+    const msg = `An error occurred querying API from route: ${err.message}`;
+    triggerError(msg);
   }
 }
 
@@ -63,16 +75,5 @@ export function isGeoJSONEmpty(geojson) {
     return true;
   } else {
     return false;
-  }
-}
-
-//function helper for downloading data
-export async function getDownloadData(route) {
-  try {
-    const response = await fetch(route);
-    const json = await response.json();
-    return json;
-  } catch (err) {
-    console.error(`An error searching download data: ${err}`);
   }
 }
