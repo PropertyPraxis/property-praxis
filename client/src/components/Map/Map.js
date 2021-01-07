@@ -1,4 +1,4 @@
-import React, { Component, useRef } from "react";
+import React, { Component } from "react";
 import PropTypes from "prop-types";
 import ReactMapGL, { Source, Layer, Marker } from "react-map-gl";
 import ParcelLayerController from "./ParcelLayerController";
@@ -15,7 +15,10 @@ import {
   getMapStateAction,
   toggleLoadingIndicatorAction,
 } from "../../actions/mapState";
-import { getHoveredFeatureAction } from "../../actions/currentFeature";
+import {
+  getHoveredFeatureAction,
+  setHighlightFeaturesAction,
+} from "../../actions/currentFeature";
 import {
   logMarkerDragEventAction,
   onMarkerDragEndAction,
@@ -37,7 +40,6 @@ import * as styleVars from "../../scss/colors.scss";
 /*This API token works for propertypraxis.org  */
 const MAPBOX_TOKEN =
   "pk.eyJ1IjoibWFwcGluZ2FjdGlvbiIsImEiOiJjazZrMTQ4bW4wMXpxM251cnllYnR6NjMzIn0.9KhQIoSfLvYrGCl3Hf_9Bw";
-// "pk.eyJ1IjoidGltLWhpdGNoaW5zIiwiYSI6ImNqdmNzODZ0dDBkdXIzeW9kbWRtczV3dDUifQ.29F1kg9koRwGRwjg-vpD6A";
 
 class PraxisMarker extends React.Component {
   _logDragEvent(name, event) {
@@ -216,6 +218,14 @@ class PraxisMap extends Component {
     this.props.dispatch(
       getHoveredFeatureAction({ hoveredFeature, x: offsetX, y: offsetY })
     );
+    if (hoveredFeature) {
+      console.log("hello");
+      this.props.dispatch(
+        setHighlightFeaturesAction([hoveredFeature.properties.feature_id])
+      );
+    } else {
+      this.props.dispatch(setHighlightFeaturesAction([""]));
+    }
   };
 
   _renderTooltip() {
@@ -285,10 +295,11 @@ class PraxisMap extends Component {
   render() {
     //create the new viewport before rendering
     const { latitude, longitude } = this.props.mapData.marker;
-    const { hoveredFeature } = this.props.currentFeature;
-    const highlightFilter = hoveredFeature
-      ? hoveredFeature.properties.feature_id
-      : "";
+    const { highlightIds } = this.props.currentFeature;
+
+    // const highlightFilter = hoveredFeature
+    //   ? [hoveredFeature.properties.feature_id]
+    //   : [""];
     const { ppraxis, zips } = this.props.mapData;
     const { basemapLayer } = this.props.controller;
     const { sliderValue, filter } = this.props.controller;
@@ -346,14 +357,14 @@ class PraxisMap extends Component {
                   stops: this._stops,
                 },
                 "fill-opacity": sliderValue / 100,
-                "fill-outline-color": "rgba(255,255,255,1)",
+                // "fill-outline-color": "rgba(255,255,255,1)",
               }}
               filter={parcelLayerFilter}
             />
             <Layer
               key="highlight-parcel-layer"
               {...parcelHighlightLayer}
-              filter={["in", "feature_id", highlightFilter]}
+              filter={["in", "feature_id", ...highlightIds]} // hightlight can be an array or string
             />
           </Source>
 

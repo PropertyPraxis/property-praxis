@@ -205,8 +205,8 @@ export function flattenPrimaryResults(primaryResults) {
 export function getDetailsFromGeoJSON(geojson) {
   if (geojson) {
     const details = geojson.features.map((feature) => {
-      const { id, centroid, properties } = feature;
-      return { id, centroid, properties };
+      const { centroid, properties } = feature;
+      return { centroid, properties };
     });
     return { details, detailsType: geojson.praxisDataType };
   } else {
