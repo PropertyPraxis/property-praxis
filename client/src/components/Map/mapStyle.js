@@ -24,7 +24,7 @@ export const parcelHighlightLayer = {
   id: "highlight-parcel-polygon",
   type: "fill",
   source: "parcel-polygon",
-  minzoom: 13,
+  // minzoom: 13,
   buffer: 0,
   tolerance: 0.9,
   paint: {
@@ -41,6 +41,14 @@ export const parcelCentroid = {
   buffer: 0,
   tolerance: 0.9,
 };
+
+// export const parcelCentroidHighlightLayer = {
+//   id: "highlight-parcel-centroid",
+//   type: "fill",
+//   maxzoom: 13,
+//   buffer: 0,
+//   tolerance: 0.9,
+// };
 
 export const zipsLayer = {
   id: "zips",

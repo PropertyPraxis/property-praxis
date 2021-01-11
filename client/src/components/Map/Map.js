@@ -31,6 +31,7 @@ import {
   parcelLayer,
   parcelHighlightLayer,
   parcelCentroid,
+  // parcelCentroidHighlightLayer,
   zipsLayer,
   zipsLabel,
 } from "./mapStyle";
@@ -296,10 +297,6 @@ class PraxisMap extends Component {
     //create the new viewport before rendering
     const { latitude, longitude } = this.props.mapData.marker;
     const { highlightIds } = this.props.currentFeature;
-
-    // const highlightFilter = hoveredFeature
-    //   ? [hoveredFeature.properties.feature_id]
-    //   : [""];
     const { ppraxis, zips } = this.props.mapData;
     const { basemapLayer } = this.props.controller;
     const { sliderValue, filter } = this.props.controller;
@@ -347,7 +344,11 @@ class PraxisMap extends Component {
                 "circle-opacity": sliderValue / 100,
               }}
             />
-
+            {/* <Layer
+              key="highlight-centroid-layer"
+              {...parcelCentroidHighlightLayer}
+              filter={["in", "feature_id", ...highlightIds]} // hightlight can be an array or string
+            /> */}
             <Layer
               key="parcel-layer"
               {...parcelLayer}

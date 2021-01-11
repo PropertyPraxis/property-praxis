@@ -6,6 +6,7 @@ import {
   handleGetPraxisYearsAction,
   updateDetailedSearch,
 } from "../../actions/search";
+import { setHighlightFeaturesAction } from "../../actions/currentFeature";
 import {
   capitalizeFirstLetter,
   createQueryStringFromParams,
@@ -23,14 +24,21 @@ import { APISearchQueryFromRoute } from "../../utils/api";
 const reducer = (accumulator, currentValue) =>
   Number(accumulator) + Number(currentValue);
 
-const calulateSumTotals = (data) => {
-  const sumCount = data.map((record) => record.count).reduce(reducer);
-  const sumPer = data.map((record) => record.per).reduce(reducer);
+// special function to help calculate percentage ownership
+const calulateSumTotals = (data, arrLength = 10) => {
+  const sumCount = data
+    .slice(0, arrLength)
+    .map((record) => record.count)
+    .reduce(reducer);
+  const sumPer = data
+    .slice(0, arrLength)
+    .map((record) => record.per)
+    .reduce(reducer);
   return { sumCount, sumPer };
 };
 
 // custom hooks
-function useSpeculationByCode({ code, year }) {
+function useSpeculationByCode(results, { code, year }) {
   const [data, setData] = useState(null);
   const [topCount, setTopCount] = useState(null);
   const [topPer, setTopPer] = useState(null);
@@ -40,20 +48,33 @@ function useSpeculationByCode({ code, year }) {
       if (code) {
         const route = `/api/detailed-search?type=speculation-by-code&code=${code}&year=${year}`;
         const data = await APISearchQueryFromRoute(route);
+
+        //get feature ids based on speculator name
+        await data.map((item) => {
+          const ids = results
+            .map((record) => {
+              if (record.properties.own_id === item.own_id) {
+                return record.properties.feature_id;
+              } else {
+                return null;
+              }
+            })
+            .filter((id) => id !== null);
+          item.featureIds = ids;
+        });
         setData(data);
 
-        const { sumCount, sumPer } = calulateSumTotals(data.slice(0, 10));
+        const { sumCount, sumPer } = calulateSumTotals(data);
         setTopCount(sumCount);
         setTopPer(sumPer);
       }
     })();
     return () => null;
-  }, [code, year]);
-
+  }, [code, year, results]);
   return { data, topCount, topPer };
 }
 
-function useCodesBySpeculator({ code, ownid, year }) {
+function useCodesBySpeculator(results, { code, ownid, year }) {
   const [speculatorData, setSpeculatorData] = useState(null);
   const [propCount, setPropCount] = useState(null);
   const [zipsBySpeculator, setZipsBySpeculator] = useState(null);
@@ -69,7 +90,23 @@ function useCodesBySpeculator({ code, ownid, year }) {
       if (code) {
         const route = `/api/detailed-search?type=codes-by-speculator&ownid=${ownid}&year=${year}`;
         const data = await APISearchQueryFromRoute(route);
+
+        //get feature ids based on speculator name
+        await data.map((item) => {
+          const ids = results
+            .map((record) => {
+              if (record.properties.propzip === item.propzip) {
+                return record.properties.feature_id;
+              } else {
+                return null;
+              }
+            })
+            .filter((id) => id !== null);
+          item.featureIds = ids;
+        });
+
         setSpeculatorData(data);
+
         const { propCount, speculatorZips } = calulateSpeculatorTotals(data);
         setPropCount(propCount);
         setZipsBySpeculator(speculatorZips);
@@ -84,10 +121,21 @@ function useCodesBySpeculator({ code, ownid, year }) {
 /*Specific Link components to pass to  paginator component*/
 function SpeculatorLink({ record, index, queryParams }) {
   const { code, year } = queryParams;
+  const dispatch = useDispatch();
+
+  const onMouseOver = (ids) => {
+    dispatch(setHighlightFeaturesAction(ids));
+  };
+  const onMouseOut = () => {
+    dispatch(setHighlightFeaturesAction([""]));
+  };
+
   return (
-    <div className="zipcode-item" key={record.own_id}>
+    <div className="zipcode-item" key={`${record.own_id}-${index}`}>
       <div>
         <Link
+          onMouseOver={() => onMouseOver(record.featureIds)}
+          onMouseOut={() => onMouseOut()}
           to={createQueryStringFromParams(
             {
               type: "zipcode",
@@ -119,10 +167,20 @@ function SpeculatorLink({ record, index, queryParams }) {
 
 function ZipcodeLink({ record, index, queryParams }) {
   const { ownid, year } = queryParams;
+  const dispatch = useDispatch();
+  const onMouseOver = (ids) => {
+    dispatch(setHighlightFeaturesAction(ids));
+  };
+  const onMouseOut = () => {
+    dispatch(setHighlightFeaturesAction([""]));
+  };
+
   return (
     <div className="speculator-item" key={`${record.own_id}-${index}`}>
       <div>
         <Link
+          onMouseOver={() => onMouseOver(record.featureIds)}
+          onMouseOut={() => onMouseOut()}
           to={createQueryStringFromParams(
             {
               type: "speculator",
@@ -221,15 +279,13 @@ function DumbPaginator({ data, itemsPerPage = 10, queryParams, children }) {
 /*Detailed result components need to know what the ppraxis 
   data properties, ids, and data return type (details type) are. 
   They also use internal state in most cases. */
-function ContentSwitch(props) {
+function ContentSwitch({ detailsType, queryParams }) {
   const { results, resultsType } = useSelector(
     (state) => state.searchState.detailedSearch
   );
 
-  const { queryParams } = props;
-
   if (results && results.length > 0 && resultsType) {
-    switch (props.detailsType) {
+    switch (detailsType) {
       case "parcels-by-geocode:single-parcel":
         return <SingleParcel result={results[0]} queryParams={queryParams} />;
 
@@ -298,8 +354,8 @@ function NoResults() {
 function CodeParcels(props) {
   const { code, year } = props.queryParams;
   const { searchState } = useSelector((state) => state);
-  const { drawerIsOpen } = searchState.detailedSearch;
-  const { data: zipData, topCount, topPer } = useSpeculationByCode({
+  const { drawerIsOpen, results } = searchState.detailedSearch;
+  const { data: zipData, topCount, topPer } = useSpeculationByCode(results, {
     code,
     year,
   });
@@ -360,11 +416,14 @@ function SpeculatorParcels(props) {
   );
   const code = results[0].properties.propzip; // need some error handling
 
-  const { speculatorData, propCount, zipsBySpeculator } = useCodesBySpeculator({
-    code,
-    ownid,
-    year,
-  });
+  const { speculatorData, propCount, zipsBySpeculator } = useCodesBySpeculator(
+    results,
+    {
+      code,
+      ownid,
+      year,
+    }
+  );
 
   if (speculatorData && zipsBySpeculator) {
     return (
@@ -415,10 +474,13 @@ function MultipleParcels(props) {
   const { propzip: code } = results[0].properties;
   const dispatch = useDispatch();
 
-  const { data: speculatorData, topCount, topPer } = useSpeculationByCode({
-    code,
-    year,
-  });
+  const { data: speculatorData, topCount, topPer } = useSpeculationByCode(
+    results,
+    {
+      code,
+      year,
+    }
+  );
 
   if (speculatorData) {
     return (
@@ -667,7 +729,7 @@ function CodeSpeculatorParcels(props) {
   const { drawerIsOpen, results } = useSelector(
     (state) => state.searchState.detailedSearch
   );
-  const { speculatorData, zipsBySpeculator } = useCodesBySpeculator({
+  const { speculatorData, zipsBySpeculator } = useCodesBySpeculator(results, {
     code,
     ownid,
     year,
@@ -753,7 +815,7 @@ function SpeculatorCodeParcels(props) {
   const { drawerIsOpen, results } = useSelector(
     (state) => state.searchState.detailedSearch
   );
-  const { speculatorData, zipsBySpeculator } = useCodesBySpeculator({
+  const { speculatorData, zipsBySpeculator } = useCodesBySpeculator(results, {
     code,
     ownid,
     year,
@@ -807,7 +869,7 @@ function SpeculatorCodeParcels(props) {
   return null;
 }
 
-function DetailedSearchResults(props) {
+function DetailedSearchResults({ detailsType, queryParams }) {
   const { drawerIsOpen, contentIsVisible, results, resultsType } = useSelector(
     (state) => state.searchState.detailedSearch
   );
@@ -846,7 +908,9 @@ function DetailedSearchResults(props) {
           <span className="angle-rotate">&#x276E;</span>
         ) : null}
       </div>
-      {contentIsVisible && <ContentSwitch {...props} />}
+      {contentIsVisible && (
+        <ContentSwitch detailsType={detailsType} queryParams={queryParams} />
+      )}
     </section>
   );
 }
