@@ -123,10 +123,10 @@ function SpeculatorLink({ record, index, queryParams }) {
   const { code, year } = queryParams;
   const dispatch = useDispatch();
 
-  const onMouseOver = (ids) => {
+  const highlightFeatures = (ids) => {
     dispatch(setHighlightFeaturesAction(ids));
   };
-  const onMouseOut = () => {
+  const removeHighlightFeatures = () => {
     dispatch(setHighlightFeaturesAction([""]));
   };
 
@@ -134,8 +134,9 @@ function SpeculatorLink({ record, index, queryParams }) {
     <div className="zipcode-item" key={`${record.own_id}-${index}`}>
       <div>
         <Link
-          onMouseOver={() => onMouseOver(record.featureIds)}
-          onMouseOut={() => onMouseOut()}
+          onMouseOver={() => highlightFeatures(record.featureIds)}
+          onMouseOut={() => removeHighlightFeatures()}
+          onClick={() => removeHighlightFeatures()}
           to={createQueryStringFromParams(
             {
               type: "zipcode",
@@ -168,10 +169,10 @@ function SpeculatorLink({ record, index, queryParams }) {
 function ZipcodeLink({ record, index, queryParams }) {
   const { ownid, year } = queryParams;
   const dispatch = useDispatch();
-  const onMouseOver = (ids) => {
+  const highlightFeatures = (ids) => {
     dispatch(setHighlightFeaturesAction(ids));
   };
-  const onMouseOut = () => {
+  const removeHighlightFeatures = () => {
     dispatch(setHighlightFeaturesAction([""]));
   };
 
@@ -179,8 +180,9 @@ function ZipcodeLink({ record, index, queryParams }) {
     <div className="speculator-item" key={`${record.own_id}-${index}`}>
       <div>
         <Link
-          onMouseOver={() => onMouseOver(record.featureIds)}
-          onMouseOut={() => onMouseOut()}
+          onMouseOver={() => highlightFeatures(record.featureIds)}
+          onMouseOut={() => removeHighlightFeatures()}
+          onClick={() => removeHighlightFeatures()}
           to={createQueryStringFromParams(
             {
               type: "speculator",
@@ -209,14 +211,25 @@ function ZipcodeLink({ record, index, queryParams }) {
   );
 }
 
-function AddressLink({ record, index, queryParams }) {
+function AddressLink({ index, record, queryParams }) {
   const { code, year } = queryParams;
   const { centroid } = record;
-  const { propaddr } = record.properties;
+  const { propaddr, feature_id } = record.properties;
+
+  const dispatch = useDispatch();
+  const highlightFeatures = (id) => {
+    dispatch(setHighlightFeaturesAction(id));
+  };
+  const removeHighlightFeatures = () => {
+    dispatch(setHighlightFeaturesAction([""]));
+  };
 
   return (
-    <div key={index} className="address-item">
+    <div className="address-item" key={index}>
       <Link
+        onMouseOver={() => highlightFeatures([feature_id])}
+        onMouseOut={() => removeHighlightFeatures()}
+        onClick={() => removeHighlightFeatures()}
         to={createQueryStringFromParams(
           {
             type: "address",
@@ -246,30 +259,36 @@ function DumbPaginator({ data, itemsPerPage = 10, queryParams, children }) {
     return (
       <div className="detailed-speculator">
         {pageData.map((record, index) => {
-          return cloneElement(children, { record, index, queryParams });
+          return (
+            <React.Fragment key={index}>
+              {cloneElement(children, { record, index, queryParams })}
+            </React.Fragment>
+          );
         })}
-        <div className="page-controller">
-          <div
-            title="previous page"
-            style={pageNo === 1 ? { visibility: "hidden" } : null}
-            onClick={() => {
-              setPage((prevPage) => prevPage - 1);
-            }}
-          >
-            &#x276E;
-          </div>
+        {data.length > itemsPerPage ? (
+          <div className="page-controller">
+            <div
+              title="previous page"
+              style={pageNo === 1 ? { visibility: "hidden" } : null}
+              onClick={() => {
+                setPage((prevPage) => prevPage - 1);
+              }}
+            >
+              &#x276E;
+            </div>
 
-          <div>{`${pageNo} of ${Math.ceil(data.length / itemsPerPage)}`}</div>
-          <div
-            title="next page"
-            style={end ? { visibility: "hidden" } : null}
-            onClick={() => {
-              setPage((prevPage) => prevPage + 1);
-            }}
-          >
-            &#x276F;
+            <div>{`${pageNo} of ${Math.ceil(data.length / itemsPerPage)}`}</div>
+            <div
+              title="next page"
+              style={end ? { visibility: "hidden" } : null}
+              onClick={() => {
+                setPage((prevPage) => prevPage + 1);
+              }}
+            >
+              &#x276F;
+            </div>
           </div>
-        </div>
+        ) : null}
       </div>
     );
   }
@@ -697,9 +716,10 @@ function SingleParcel(props) {
             </span>
           </Link>
           {praxisRecordYears
-            ? praxisRecordYears.map((year) => {
+            ? praxisRecordYears.map((year, index) => {
                 return (
                   <Link
+                    key={`${year}-${index}`}
                     to={createQueryStringFromParams(
                       {
                         type: "address",
@@ -770,9 +790,12 @@ function CodeSpeculatorParcels(props) {
             <span>{`Additional Properties by Zip Code for ${ownid}`}</span>
           </div>
           <div className="detailed-speculator">
-            {speculatorData.map((record) => {
+            {speculatorData.map((record, index) => {
               return (
-                <div className="speculator-item" key={record.own_id}>
+                <div
+                  className="speculator-item"
+                  key={`${record.own_id}-${index}`}
+                >
                   <div>
                     <Link
                       to={createQueryStringFromParams(

@@ -344,6 +344,8 @@ class PraxisMap extends Component {
                 "circle-opacity": sliderValue / 100,
               }}
             />
+            {/* this is an optional highlight layer that 
+            higlights centroids rather than polys */}
             {/* <Layer
               key="highlight-centroid-layer"
               {...parcelCentroidHighlightLayer}
