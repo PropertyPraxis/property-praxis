@@ -1,13 +1,5 @@
 import queryString from "query-string";
 
-/*Default search params */
-const defaultParams = {
-  type: "zipcode",
-  search: "48209",
-  coordinates: null,
-  year: "2020",
-};
-
 export function URLParamsToSearchParams(searchQuery) {
   const {
     type: searchType = null,

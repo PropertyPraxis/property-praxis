@@ -4,9 +4,10 @@ import searchState from "./search";
 import currentFeature from "./currentFeature";
 import controller from "./controller";
 import redirect from "./redirect";
-import { combineReducers } from "redux";
+import middleware from "../middleware";
+import { combineReducers, createStore } from "redux";
 
-export default combineReducers({
+const rootReducer =  combineReducers({
   mapData,
   mapState,
   searchState,
@@ -14,3 +15,7 @@ export default combineReducers({
   controller,
   redirect,
 });
+
+const store = createStore(rootReducer, middleware)
+
+export default store;

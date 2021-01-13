@@ -61,7 +61,6 @@ function DetailedResultsContainer() {
         }
       >
         <DetailedSearchResults
-          details={details}
           detailsType={detailsType}
           queryParams={queryParams}
         />

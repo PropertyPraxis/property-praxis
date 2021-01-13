@@ -1,8 +1,19 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import { triggerFetchError } from "../../actions/redirect";
 import { getYearString } from "../../utils/helper";
 
 const Footer = () => {
+  const { isFetchError } = useSelector((state) => state.redirect);
+  const dispatch = useDispatch();
+
+  const hideError = () => {
+    if (isFetchError) {
+      dispatch(triggerFetchError(false));
+    }
+  };
+
   return (
     <div>
       <footer>
@@ -23,15 +34,24 @@ const Footer = () => {
           </div>
           <div className="footer-links">
             <li>
-              <Link to={{ pathname: "/data" }}>Download Data</Link>
+              <Link to={{ pathname: "/data" }} onClick={() => hideError()}>
+                Download Data
+              </Link>
             </li>
 
             <li>
-              <Link to={{ pathname: "/about" }}>About the Project</Link>
+              <Link to={{ pathname: "/about" }} onClick={() => hideError()}>
+                About the Project
+              </Link>
             </li>
 
             <li>
-              <Link to={{ pathname: "/methodology" }}>Methodology</Link>
+              <Link
+                to={{ pathname: "/methodology" }}
+                onClick={() => hideError()}
+              >
+                Methodology
+              </Link>
             </li>
           </div>
         </div>

@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, cloneElement } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useMediaQuery } from "react-responsive";
 import { Link } from "react-router-dom";
-// import PropTypes from "prop-types";
 import {
   handleGetPraxisYearsAction,
   updateDetailedSearch,
 } from "../../actions/search";
+import { setHighlightFeaturesAction } from "../../actions/currentFeature";
 import {
   capitalizeFirstLetter,
   createQueryStringFromParams,
@@ -14,23 +14,31 @@ import {
   parseCentroidString,
   currencyFormatter,
   availablePraxisYears,
+  paginator,
 } from "../../utils/helper";
 import MapViewer from "./MapViewer";
 import * as infoIcon from "../../assets/img/info-icon.png";
 import { APISearchQueryFromRoute } from "../../utils/api";
 
-// helpers functions
+// helper functions
 const reducer = (accumulator, currentValue) =>
   Number(accumulator) + Number(currentValue);
 
-const calulateSumTotals = (data) => {
-  const sumCount = data.map((record) => record.count).reduce(reducer);
-  const sumPer = data.map((record) => record.per).reduce(reducer);
+// special function to help calculate percentage ownership
+const calulateSumTotals = (data, arrLength = 10) => {
+  const sumCount = data
+    .slice(0, arrLength)
+    .map((record) => record.count)
+    .reduce(reducer);
+  const sumPer = data
+    .slice(0, arrLength)
+    .map((record) => record.per)
+    .reduce(reducer);
   return { sumCount, sumPer };
 };
 
 // custom hooks
-function useSpeculationByCode({ code, year }) {
+function useSpeculationByCode(results, { code, year }) {
   const [data, setData] = useState(null);
   const [topCount, setTopCount] = useState(null);
   const [topPer, setTopPer] = useState(null);
@@ -40,20 +48,33 @@ function useSpeculationByCode({ code, year }) {
       if (code) {
         const route = `/api/detailed-search?type=speculation-by-code&code=${code}&year=${year}`;
         const data = await APISearchQueryFromRoute(route);
+
+        //get feature ids based on speculator name
+        await data.map((item) => {
+          const ids = results
+            .map((record) => {
+              if (record.properties.own_id === item.own_id) {
+                return record.properties.feature_id;
+              } else {
+                return null;
+              }
+            })
+            .filter((id) => id !== null);
+          item.featureIds = ids;
+        });
         setData(data);
 
-        const { sumCount, sumPer } = calulateSumTotals(data.slice(0, 10));
+        const { sumCount, sumPer } = calulateSumTotals(data);
         setTopCount(sumCount);
         setTopPer(sumPer);
       }
     })();
     return () => null;
-  }, [code, year]);
-
+  }, [code, year, results]);
   return { data, topCount, topPer };
 }
 
-function useCodesBySpeculator({ code, ownid, year }) {
+function useCodesBySpeculator(results, { code, ownid, year }) {
   const [speculatorData, setSpeculatorData] = useState(null);
   const [propCount, setPropCount] = useState(null);
   const [zipsBySpeculator, setZipsBySpeculator] = useState(null);
@@ -69,7 +90,23 @@ function useCodesBySpeculator({ code, ownid, year }) {
       if (code) {
         const route = `/api/detailed-search?type=codes-by-speculator&ownid=${ownid}&year=${year}`;
         const data = await APISearchQueryFromRoute(route);
+
+        //get feature ids based on speculator name
+        await data.map((item) => {
+          const ids = results
+            .map((record) => {
+              if (record.properties.propzip === item.propzip) {
+                return record.properties.feature_id;
+              } else {
+                return null;
+              }
+            })
+            .filter((id) => id !== null);
+          item.featureIds = ids;
+        });
+
         setSpeculatorData(data);
+
         const { propCount, speculatorZips } = calulateSpeculatorTotals(data);
         setPropCount(propCount);
         setZipsBySpeculator(speculatorZips);
@@ -81,18 +118,193 @@ function useCodesBySpeculator({ code, ownid, year }) {
   return { speculatorData, propCount, zipsBySpeculator };
 }
 
+/*Specific Link components to pass to  paginator component*/
+function SpeculatorLink({ record, index, queryParams }) {
+  const { code, year } = queryParams;
+  const dispatch = useDispatch();
+
+  const highlightFeatures = (ids) => {
+    dispatch(setHighlightFeaturesAction(ids));
+  };
+  const removeHighlightFeatures = () => {
+    dispatch(setHighlightFeaturesAction([""]));
+  };
+
+  return (
+    <div className="zipcode-item" key={`${record.own_id}-${index}`}>
+      <div>
+        <Link
+          onMouseOver={() => highlightFeatures(record.featureIds)}
+          onMouseOut={() => removeHighlightFeatures()}
+          onClick={() => removeHighlightFeatures()}
+          to={createQueryStringFromParams(
+            {
+              type: "zipcode",
+              code,
+              ownid: record.own_id,
+              coordinates: null,
+              year,
+            },
+            "/map"
+          )}
+        >
+          <span
+            title={`Search ${capitalizeFirstLetter(
+              record.own_id
+            )}'s properties in ${code}.`}
+          >
+            <img src={infoIcon} alt="More Information"></img>
+            {capitalizeFirstLetter(record.own_id)}
+          </span>
+        </Link>
+      </div>
+      <div>
+        <div>{`${record.count}  properties`}</div>
+        <div>{`${Math.round(record.per)}% ownership`}</div>
+      </div>
+    </div>
+  );
+}
+
+function ZipcodeLink({ record, index, queryParams }) {
+  const { ownid, year } = queryParams;
+  const dispatch = useDispatch();
+  const highlightFeatures = (ids) => {
+    dispatch(setHighlightFeaturesAction(ids));
+  };
+  const removeHighlightFeatures = () => {
+    dispatch(setHighlightFeaturesAction([""]));
+  };
+
+  return (
+    <div className="speculator-item" key={`${record.own_id}-${index}`}>
+      <div>
+        <Link
+          onMouseOver={() => highlightFeatures(record.featureIds)}
+          onMouseOut={() => removeHighlightFeatures()}
+          onClick={() => removeHighlightFeatures()}
+          to={createQueryStringFromParams(
+            {
+              type: "speculator",
+              code: record.propzip,
+              ownid,
+              coordinates: null,
+              year,
+            },
+            "/map"
+          )}
+        >
+          <span
+            title={`Seach ${capitalizeFirstLetter(ownid)}'s properties in ${
+              record.propzip
+            }`}
+          >
+            <img src={infoIcon} alt="More Information"></img>
+            {capitalizeFirstLetter(record.propzip)}
+          </span>
+        </Link>
+      </div>
+      <div>
+        <div>{`${record.count}  properties`}</div>
+      </div>
+    </div>
+  );
+}
+
+function AddressLink({ index, record, queryParams }) {
+  const { code, year } = queryParams;
+  const { centroid } = record;
+  const { propaddr, feature_id } = record.properties;
+
+  const dispatch = useDispatch();
+  const highlightFeatures = (id) => {
+    dispatch(setHighlightFeaturesAction(id));
+  };
+  const removeHighlightFeatures = () => {
+    dispatch(setHighlightFeaturesAction([""]));
+  };
+
+  return (
+    <div className="address-item" key={index}>
+      <Link
+        onMouseOver={() => highlightFeatures([feature_id])}
+        onMouseOut={() => removeHighlightFeatures()}
+        onClick={() => removeHighlightFeatures()}
+        to={createQueryStringFromParams(
+          {
+            type: "address",
+            place: `${propaddr}, ${code}`,
+            coordinates: parseCentroidString(centroid, true),
+            year,
+          },
+          "/map"
+        )}
+      >
+        <span title={`Search details for ${capitalizeFirstLetter(propaddr)}.`}>
+          <img src={infoIcon} alt="More Information"></img>
+          {capitalizeFirstLetter(propaddr)}
+        </span>
+      </Link>
+    </div>
+  );
+}
+
+/* Dumb paginator component - this component assumes that 
+data list will be short (less than 100) */
+function DumbPaginator({ data, itemsPerPage = 10, queryParams, children }) {
+  const [pageNo, setPage] = useState(1);
+  const { pageData, end } = paginator(data, pageNo, itemsPerPage); //using paginate function
+
+  if (pageData) {
+    return (
+      <div className="detailed-speculator">
+        {pageData.map((record, index) => {
+          return (
+            <React.Fragment key={index}>
+              {cloneElement(children, { record, index, queryParams })}
+            </React.Fragment>
+          );
+        })}
+        {data.length > itemsPerPage ? (
+          <div className="page-controller">
+            <div
+              title="previous page"
+              style={pageNo === 1 ? { visibility: "hidden" } : null}
+              onClick={() => {
+                setPage((prevPage) => prevPage - 1);
+              }}
+            >
+              &#x276E;
+            </div>
+
+            <div>{`${pageNo} of ${Math.ceil(data.length / itemsPerPage)}`}</div>
+            <div
+              title="next page"
+              style={end ? { visibility: "hidden" } : null}
+              onClick={() => {
+                setPage((prevPage) => prevPage + 1);
+              }}
+            >
+              &#x276F;
+            </div>
+          </div>
+        ) : null}
+      </div>
+    );
+  }
+  return null;
+}
+
 /*Detailed result components need to know what the ppraxis 
   data properties, ids, and data return type (details type) are. 
   They also use internal state in most cases. */
-function ContentSwitch(props) {
+function ContentSwitch({ detailsType, queryParams }) {
   const { results, resultsType } = useSelector(
     (state) => state.searchState.detailedSearch
   );
 
-  const { queryParams } = props;
-
   if (results && results.length > 0 && resultsType) {
-    switch (props.detailsType) {
+    switch (detailsType) {
       case "parcels-by-geocode:single-parcel":
         return <SingleParcel result={results[0]} queryParams={queryParams} />;
 
@@ -161,8 +373,8 @@ function NoResults() {
 function CodeParcels(props) {
   const { code, year } = props.queryParams;
   const { searchState } = useSelector((state) => state);
-  const { drawerIsOpen } = searchState.detailedSearch;
-  const { data: zipData, topCount, topPer } = useSpeculationByCode({
+  const { drawerIsOpen, results } = searchState.detailedSearch;
+  const { data: zipData, topCount, topPer } = useSpeculationByCode(results, {
     code,
     year,
   });
@@ -198,37 +410,13 @@ function CodeParcels(props) {
             <span>Top 10 Speculators</span>
           </div>
           <div className="detailed-zipcode">
-            {zipData.slice(0, 10).map((record) => {
+            {zipData.slice(0, 10).map((record, index) => {
               return (
-                <div className="zipcode-item" key={record.own_id}>
-                  <div>
-                    <Link
-                      to={createQueryStringFromParams(
-                        {
-                          type: "zipcode",
-                          code,
-                          ownid: record.own_id,
-                          coordinates: null,
-                          year,
-                        },
-                        "/map"
-                      )}
-                    >
-                      <span
-                        title={`Search ${capitalizeFirstLetter(
-                          record.own_id
-                        )}'s properties in ${code}.`}
-                      >
-                        <img src={infoIcon} alt="More Information"></img>
-                        {capitalizeFirstLetter(record.own_id)}
-                      </span>
-                    </Link>
-                  </div>
-                  <div>
-                    <div>{`${record.count}  properties`}</div>
-                    <div>{`${Math.round(record.per)}% ownership`}</div>
-                  </div>
-                </div>
+                <SpeculatorLink
+                  record={record}
+                  index={index}
+                  queryParams={props.queryParams}
+                />
               );
             })}
           </div>
@@ -247,11 +435,14 @@ function SpeculatorParcels(props) {
   );
   const code = results[0].properties.propzip; // need some error handling
 
-  const { speculatorData, propCount, zipsBySpeculator } = useCodesBySpeculator({
-    code,
-    ownid,
-    year,
-  });
+  const { speculatorData, propCount, zipsBySpeculator } = useCodesBySpeculator(
+    results,
+    {
+      code,
+      ownid,
+      year,
+    }
+  );
 
   if (speculatorData && zipsBySpeculator) {
     return (
@@ -280,40 +471,13 @@ function SpeculatorParcels(props) {
             />
             <span>Properties by Zip Code for this Speculator</span>
           </div>
-          <div className="detailed-speculator">
-            {speculatorData.map((record) => {
-              return (
-                <div className="speculator-item" key={record.own_id}>
-                  <div>
-                    <Link
-                      to={createQueryStringFromParams(
-                        {
-                          type: "speculator",
-                          code: record.propzip,
-                          ownid,
-                          coordinates: null,
-                          year,
-                        },
-                        "/map"
-                      )}
-                    >
-                      <span
-                        title={`Seach ${capitalizeFirstLetter(
-                          ownid
-                        )}'s properties in ${record.propzip}`}
-                      >
-                        <img src={infoIcon} alt="More Information"></img>
-                        {capitalizeFirstLetter(record.propzip)}
-                      </span>
-                    </Link>
-                  </div>
-                  <div>
-                    <div>{`${record.count}  properties`}</div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+          <DumbPaginator
+            data={speculatorData}
+            length={speculatorData.length}
+            queryParams={props.queryParams}
+          >
+            <ZipcodeLink />
+          </DumbPaginator>
         </div>
       </div>
     );
@@ -323,16 +487,18 @@ function SpeculatorParcels(props) {
 
 function MultipleParcels(props) {
   const { place, year } = props.queryParams;
-
   const { searchState } = useSelector((state) => state);
   const { drawerIsOpen, results } = searchState.detailedSearch;
   const { propzip: code } = results[0].properties;
   const dispatch = useDispatch();
 
-  const { data: speculatorData, topCount, topPer } = useSpeculationByCode({
-    code,
-    year,
-  });
+  const { data: speculatorData, topCount, topPer } = useSpeculationByCode(
+    results,
+    {
+      code,
+      year,
+    }
+  );
 
   if (speculatorData) {
     return (
@@ -549,9 +715,10 @@ function SingleParcel(props) {
             </span>
           </Link>
           {praxisRecordYears
-            ? praxisRecordYears.map((year) => {
+            ? praxisRecordYears.map((year, index) => {
                 return (
                   <Link
+                    key={`${year}-${index}`}
                     to={createQueryStringFromParams(
                       {
                         type: "address",
@@ -581,7 +748,7 @@ function CodeSpeculatorParcels(props) {
   const { drawerIsOpen, results } = useSelector(
     (state) => state.searchState.detailedSearch
   );
-  const { speculatorData, zipsBySpeculator } = useCodesBySpeculator({
+  const { speculatorData, zipsBySpeculator } = useCodesBySpeculator(results, {
     code,
     ownid,
     year,
@@ -606,35 +773,13 @@ function CodeSpeculatorParcels(props) {
               in Detroit zip code<span>{` ${code} `}</span>
               in the year <span>{` ${year}. `}</span>
             </p>
-            {results.map((record, index) => {
-              const { centroid } = record;
-
-              const { propaddr } = record.properties;
-              return (
-                <div key={index} className="address-item">
-                  <Link
-                    to={createQueryStringFromParams(
-                      {
-                        type: "address",
-                        place: `${propaddr}, ${code}`,
-                        coordinates: parseCentroidString(centroid, true),
-                        year,
-                      },
-                      "/map"
-                    )}
-                  >
-                    <span
-                      title={`Search details for ${capitalizeFirstLetter(
-                        propaddr
-                      )}.`}
-                    >
-                      <img src={infoIcon} alt="More Information"></img>
-                      {capitalizeFirstLetter(propaddr)}
-                    </span>
-                  </Link>
-                </div>
-              );
-            })}
+            <DumbPaginator
+              data={results}
+              length={results.length}
+              queryParams={props.queryParams}
+            >
+              <AddressLink />
+            </DumbPaginator>
           </div>
           <div className="detailed-title">
             <img
@@ -644,9 +789,12 @@ function CodeSpeculatorParcels(props) {
             <span>{`Additional Properties by Zip Code for ${ownid}`}</span>
           </div>
           <div className="detailed-speculator">
-            {speculatorData.map((record) => {
+            {speculatorData.map((record, index) => {
               return (
-                <div className="speculator-item" key={record.own_id}>
+                <div
+                  className="speculator-item"
+                  key={`${record.own_id}-${index}`}
+                >
                   <div>
                     <Link
                       to={createQueryStringFromParams(
@@ -689,7 +837,7 @@ function SpeculatorCodeParcels(props) {
   const { drawerIsOpen, results } = useSelector(
     (state) => state.searchState.detailedSearch
   );
-  const { speculatorData, zipsBySpeculator } = useCodesBySpeculator({
+  const { speculatorData, zipsBySpeculator } = useCodesBySpeculator(results, {
     code,
     ownid,
     year,
@@ -714,28 +862,13 @@ function SpeculatorCodeParcels(props) {
               in Detroit zip code<span>{` ${code} `}</span>
               in the year <span>{` ${year}. `}</span>
             </p>
-            {results.map((record, index) => {
-              const { centroid } = record;
-
-              const { propaddr } = record.properties;
-              return (
-                <div key={index} className="address-item">
-                  <Link
-                    to={createQueryStringFromParams(
-                      {
-                        type: "address",
-                        place: `${propaddr}, ${code}`,
-                        coordinates: parseCentroidString(centroid, true),
-                        year,
-                      },
-                      "/map"
-                    )}
-                  >
-                    <span>{capitalizeFirstLetter(propaddr)}</span>
-                  </Link>
-                </div>
-              );
-            })}
+            <DumbPaginator
+              data={results}
+              length={results.length}
+              queryParams={props.queryParams}
+            >
+              <AddressLink />
+            </DumbPaginator>
           </div>
           <div className="detailed-title">
             <img
@@ -744,33 +877,13 @@ function SpeculatorCodeParcels(props) {
             />
             <span>{`Additional Properties by Zip Code for ${ownid}`}</span>
           </div>
-          <div className="detailed-speculator">
-            {speculatorData.map((record) => {
-              return (
-                <div className="speculator-item" key={record.own_id}>
-                  <div>
-                    <Link
-                      to={createQueryStringFromParams(
-                        {
-                          type: "speculator",
-                          code: record.propzip,
-                          ownid,
-                          coordinates: null,
-                          year,
-                        },
-                        "/map"
-                      )}
-                    >
-                      <span>{capitalizeFirstLetter(record.propzip)}</span>
-                    </Link>
-                  </div>
-                  <div>
-                    <div>{`${record.count}  properties`}</div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+          <DumbPaginator
+            data={speculatorData}
+            length={speculatorData.length}
+            queryParams={props.queryParams}
+          >
+            <ZipcodeLink />
+          </DumbPaginator>
         </div>
       </div>
     );
@@ -778,7 +891,7 @@ function SpeculatorCodeParcels(props) {
   return null;
 }
 
-function DetailedSearchResults(props) {
+function DetailedSearchResults({ detailsType, queryParams }) {
   const { drawerIsOpen, contentIsVisible, results, resultsType } = useSelector(
     (state) => state.searchState.detailedSearch
   );
@@ -817,7 +930,9 @@ function DetailedSearchResults(props) {
           <span className="angle-rotate">&#x276E;</span>
         ) : null}
       </div>
-      {contentIsVisible && <ContentSwitch {...props} />}
+      {contentIsVisible && (
+        <ContentSwitch detailsType={detailsType} queryParams={queryParams} />
+      )}
     </section>
   );
 }

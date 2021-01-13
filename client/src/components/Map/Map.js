@@ -1,4 +1,4 @@
-import React, { Component, useRef } from "react";
+import React, { Component } from "react";
 import PropTypes from "prop-types";
 import ReactMapGL, { Source, Layer, Marker } from "react-map-gl";
 import ParcelLayerController from "./ParcelLayerController";
@@ -15,7 +15,10 @@ import {
   getMapStateAction,
   toggleLoadingIndicatorAction,
 } from "../../actions/mapState";
-import { getHoveredFeatureAction } from "../../actions/currentFeature";
+import {
+  getHoveredFeatureAction,
+  setHighlightFeaturesAction,
+} from "../../actions/currentFeature";
 import {
   logMarkerDragEventAction,
   onMarkerDragEndAction,
@@ -28,6 +31,7 @@ import {
   parcelLayer,
   parcelHighlightLayer,
   parcelCentroid,
+  // parcelCentroidHighlightLayer,
   zipsLayer,
   zipsLabel,
 } from "./mapStyle";
@@ -37,7 +41,6 @@ import * as styleVars from "../../scss/colors.scss";
 /*This API token works for propertypraxis.org  */
 const MAPBOX_TOKEN =
   "pk.eyJ1IjoibWFwcGluZ2FjdGlvbiIsImEiOiJjazZrMTQ4bW4wMXpxM251cnllYnR6NjMzIn0.9KhQIoSfLvYrGCl3Hf_9Bw";
-// "pk.eyJ1IjoidGltLWhpdGNoaW5zIiwiYSI6ImNqdmNzODZ0dDBkdXIzeW9kbWRtczV3dDUifQ.29F1kg9koRwGRwjg-vpD6A";
 
 class PraxisMarker extends React.Component {
   _logDragEvent(name, event) {
@@ -172,7 +175,6 @@ class PraxisMap extends Component {
       "zipcode"
     );
 
-
     // Get Data
     const parcelsGeojson = await this.props.dispatch(
       handleGetParcelsByQueryAction(parcelsRoute)
@@ -217,6 +219,13 @@ class PraxisMap extends Component {
     this.props.dispatch(
       getHoveredFeatureAction({ hoveredFeature, x: offsetX, y: offsetY })
     );
+    if (hoveredFeature) {
+      this.props.dispatch(
+        setHighlightFeaturesAction([hoveredFeature.properties.feature_id])
+      );
+    } else {
+      this.props.dispatch(setHighlightFeaturesAction([""]));
+    }
   };
 
   _renderTooltip() {
@@ -233,6 +242,9 @@ class PraxisMap extends Component {
     );
   }
 
+  _removeTooltip() {
+    this.props.dispatch(getHoveredFeatureAction(null));
+  }
   // add a new marker if user clicks on a parcel feature
   // nothing happens if there is no feature
   _handleMapClick = async (event) => {
@@ -286,10 +298,7 @@ class PraxisMap extends Component {
   render() {
     //create the new viewport before rendering
     const { latitude, longitude } = this.props.mapData.marker;
-    const { hoveredFeature } = this.props.currentFeature;
-    const highlightFilter = hoveredFeature
-      ? hoveredFeature.properties.feature_id
-      : "";
+    const { highlightIds } = this.props.currentFeature;
     const { ppraxis, zips } = this.props.mapData;
     const { basemapLayer } = this.props.controller;
     const { sliderValue, filter } = this.props.controller;
@@ -315,6 +324,7 @@ class PraxisMap extends Component {
           onLoad={() => {
             this._handleToggleLoadingIndicator(false);
           }}
+          onMouseOut={() => this._removeTooltip()}
         >
           {latitude && longitude ? (
             <PraxisMarker
@@ -337,7 +347,13 @@ class PraxisMap extends Component {
                 "circle-opacity": sliderValue / 100,
               }}
             />
-
+            {/* this is an optional highlight layer that 
+            higlights centroids rather than polys */}
+            {/* <Layer
+              key="highlight-centroid-layer"
+              {...parcelCentroidHighlightLayer}
+              filter={["in", "feature_id", ...highlightIds]} // hightlight can be an array or string
+            /> */}
             <Layer
               key="parcel-layer"
               {...parcelLayer}
@@ -347,14 +363,14 @@ class PraxisMap extends Component {
                   stops: this._stops,
                 },
                 "fill-opacity": sliderValue / 100,
-                "fill-outline-color": "rgba(255,255,255,1)",
+                // "fill-outline-color": "rgba(255,255,255,1)",
               }}
               filter={parcelLayerFilter}
             />
             <Layer
               key="highlight-parcel-layer"
               {...parcelHighlightLayer}
-              filter={["in", "feature_id", highlightFilter]}
+              filter={["in", "feature_id", ...highlightIds]} // hightlight can be an array or string
             />
           </Source>
 
@@ -398,32 +414,3 @@ PraxisMap.propTypes = {
 };
 
 export default PraxisMap;
-
-// HOC wrapper to reuse reverse geocode logic
-// function withMapboxAPI(WrappedComponent) {
-//   return class extends Component {
-//     _reverseGeocode = async (inCoords) => {
-//       const apiReverseGeocodeRoute = `/api/address-search/reverse-geocode/${inCoords}`;
-
-//       const { place_name, geometry } = await this.props.dispatch(
-//         handleGetReverseGeocodeAction(apiReverseGeocodeRoute)
-//       );
-//       const [reverseGCLongitude, reverseGCLatitude] = geometry.coordinates;
-//       const reverseGCEncodedCoords = encodeURI(
-//         JSON.stringify({
-//           longitude: reverseGCLongitude,
-//           latitude: reverseGCLatitude,
-//         })
-//       );
-//       return { place_name, reverseGCEncodedCoords };
-//     };
-//     render() {
-//       return (
-//         <WrappedComponent
-//           {...this.props}
-//           _reverseGeocode={this._reverseGeocode}
-//         />
-//       );
-//     }
-//   };
-// }
