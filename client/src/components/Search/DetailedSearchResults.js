@@ -487,7 +487,6 @@ function SpeculatorParcels(props) {
 
 function MultipleParcels(props) {
   const { place, year } = props.queryParams;
-
   const { searchState } = useSelector((state) => state);
   const { drawerIsOpen, results } = searchState.detailedSearch;
   const { propzip: code } = results[0].properties;

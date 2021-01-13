@@ -220,7 +220,6 @@ class PraxisMap extends Component {
       getHoveredFeatureAction({ hoveredFeature, x: offsetX, y: offsetY })
     );
     if (hoveredFeature) {
-      console.log("hello");
       this.props.dispatch(
         setHighlightFeaturesAction([hoveredFeature.properties.feature_id])
       );
@@ -243,6 +242,9 @@ class PraxisMap extends Component {
     );
   }
 
+  _removeTooltip() {
+    this.props.dispatch(getHoveredFeatureAction(null));
+  }
   // add a new marker if user clicks on a parcel feature
   // nothing happens if there is no feature
   _handleMapClick = async (event) => {
@@ -322,6 +324,7 @@ class PraxisMap extends Component {
           onLoad={() => {
             this._handleToggleLoadingIndicator(false);
           }}
+          onMouseOut={() => this._removeTooltip()}
         >
           {latitude && longitude ? (
             <PraxisMarker
@@ -411,32 +414,3 @@ PraxisMap.propTypes = {
 };
 
 export default PraxisMap;
-
-// HOC wrapper to reuse reverse geocode logic
-// function withMapboxAPI(WrappedComponent) {
-//   return class extends Component {
-//     _reverseGeocode = async (inCoords) => {
-//       const apiReverseGeocodeRoute = `/api/address-search/reverse-geocode/${inCoords}`;
-
-//       const { place_name, geometry } = await this.props.dispatch(
-//         handleGetReverseGeocodeAction(apiReverseGeocodeRoute)
-//       );
-//       const [reverseGCLongitude, reverseGCLatitude] = geometry.coordinates;
-//       const reverseGCEncodedCoords = encodeURI(
-//         JSON.stringify({
-//           longitude: reverseGCLongitude,
-//           latitude: reverseGCLatitude,
-//         })
-//       );
-//       return { place_name, reverseGCEncodedCoords };
-//     };
-//     render() {
-//       return (
-//         <WrappedComponent
-//           {...this.props}
-//           _reverseGeocode={this._reverseGeocode}
-//         />
-//       );
-//     }
-//   };
-// }
