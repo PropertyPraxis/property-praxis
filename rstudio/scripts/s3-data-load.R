@@ -121,7 +121,8 @@ csvList <- map(seq_along(csvObjs), function(i) {
         propzip = col_character(),
         parcelno = col_character(),
         count = col_character()
-      )
+      ),
+      lazy = FALSE 
     )
   csvName <- basename(s3Csvs[[i]])
   log_info(paste("Writing", csvName, "to", csvDir, "..."))
@@ -132,7 +133,7 @@ csvList <- map(seq_along(csvObjs), function(i) {
     str_replace("_edit.csv", ""))
 
 
-shpList <- map(seq_along(shpObjs), function(i) {
+# shpList <- map(seq_along(shpObjs), function(i) {
   shpZipName <- basename(s3Shpfiles[[i]])
   shpName <- shpZipName %>% str_replace(".zip", "")
 
@@ -151,17 +152,17 @@ shpList <- map(seq_along(shpObjs), function(i) {
 
 ## clean up the global env
 log_info("Cleaning up global environement...")
-gc(rm(
-  list = c(
-    "csvObjs",
-    "shpObjs",
-    "s3Csvs",
-    "s3Shpfiles",
-    "s3FileNames",
-    "ppBucket",
-    "getBucketNames"
-  )
-))
+# gc(rm(
+#   list = c(
+#     "csvObjs",
+#     "shpObjs",
+#     "s3Csvs",
+#     "s3Shpfiles",
+#     "s3FileNames",
+#     "ppBucket",
+#     "getBucketNames"
+#   )
+# ))
 
 
 ## DETROIT DATA GEOJSON######
