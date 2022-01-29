@@ -16,7 +16,7 @@
     "helmet": "^3.21.2",
     "morgan": "^1.9.1",
     "node-fetch": "^2.6.0",
-    "pg": "^7.15.1",
+    "pg": "^8.7.1",
     "sql-template-strings": "^2.2.2"
   },
   "devDependencies": {
