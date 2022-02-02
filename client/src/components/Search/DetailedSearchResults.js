@@ -17,6 +17,8 @@ import {
   paginator,
 } from "../../utils/helper";
 import MapViewer from "./MapViewer";
+import MapViewerV4 from "./MapViewerV4";
+// import TimeGraph from "./TimeGraph";
 import * as infoIcon from "../../assets/img/info-icon.png";
 import { APISearchQueryFromRoute } from "../../utils/api";
 
@@ -504,6 +506,7 @@ function MultipleParcels(props) {
     return (
       <div className="results-inner scroller">
         <MapViewer searchState={searchState} dispatch={dispatch} />
+        <MapViewerV4 searchState={searchState} dispatch={dispatch}/>
         <div style={drawerIsOpen ? { display: "block" } : { display: "none" }}>
           <div className="detailed-title">
             <img
@@ -607,7 +610,7 @@ function SingleParcel(props) {
   return (
     <div className="results-inner scroller">
       <MapViewer searchState={searchState} dispatch={dispatch} />
-      <div style={drawerIsOpen ? { display: "block" } : { display: "none" }}>
+      <MapViewerV4 searchState={searchState} dispatch={dispatch}/>      <div style={drawerIsOpen ? { display: "block" } : { display: "none" }}>
         <div className="detailed-title">
           <img
             src="https://property-praxis-web.s3-us-west-2.amazonaws.com/map_marker_rose.svg"

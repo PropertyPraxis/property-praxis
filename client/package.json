@@ -13,7 +13,7 @@
     "immutable": "^4.0.0-rc.12",
     "json2csv": "^5.0.0",
     "leaflet": "^1.6.0",
-    "mapillary-js": "^2.20.0",
+    "mapillary-js": "^4.0.0",
     "p-debounce": "^2.1.0",
     "prop-types": "^15.7.2",
     "query-string": "^6.10.1",
