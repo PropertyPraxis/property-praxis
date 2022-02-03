@@ -3,12 +3,21 @@ import { useSelector, useDispatch } from "react-redux";
 import { Viewer } from "mapillary-js";
 import * as turf from "@turf/turf";
 
+// test images
+// 1456011628085234
+// 158792956297878
+// 490232582209226
+// 911499166077898
+// 1986938741445478
+// working on refresh 
+// http://localhost:3000/map?type=address&place=17315%20Fenton&coordinates=%257B%2522longitude%2522%3A-83.28279195454097%2C%2522latitude%2522%3A42.41714576967229%257D&year=2020
+
 function useImageKey(searchCoordinates) {
   const [data, setData] = useState(null);
 
   const { longitude, latitude } = JSON.parse(decodeURI(searchCoordinates));
   const point = turf.point([longitude, latitude]);
-  const buffered = turf.buffer(point, .1, { units: "kilometers" });
+  const buffered = turf.buffer(point, 150, { units: "meters" });
   const bbox = turf.bbox(buffered);
 
   const [minx, miny, maxx, maxy] = bbox;

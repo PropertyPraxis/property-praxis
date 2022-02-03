@@ -51,6 +51,13 @@ router.get("/", async (req, res) => {
       });
 
       clientData = data;
+    } else if (type === "speculator-by-year") {
+      const { data } = await queries.queryPGDB({
+        PGDBQueryType: queries.SPECULATOR_BY_YEAR,
+        ownid,
+      });
+
+      clientData = data;
     } else {
       clientData = null;
     }

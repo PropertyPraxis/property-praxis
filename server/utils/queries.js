@@ -20,6 +20,7 @@ const CODES_BY_SPECULATOR = "CODES_BY_SPECULATOR";
 const POINT_CODE = "POINT_CODE"; // get the zipcode for a specific point
 const SPECULATION_BY_CODE = "SPECULATION_BY_CODE";
 const SPECULATION_BY_OWNID = "SPECULATION_BY_OWNID";
+const SPECULATOR_BY_YEAR = "SPECULATOR_BY_YEAR"; //graph data
 const SQL_QUERY_GENERAL = "SQL_QUERY_GENERAL";
 
 /*Mapbox API query types*/
@@ -33,7 +34,7 @@ async function queryPGDB({
   ownid = null,
   coordinates = null,
   parpropid = null,
-  searchYears = [2015, 2016, 2017, 2018, 2019, 2020],
+  searchYears = [2015, 2016, 2017, 2018, 2019, 2020, 2021],
   searchRadius = 1000,
   year = null,
   q = null,
@@ -328,7 +329,7 @@ async function queryPGDB({
         break;
 
       case SPECULATION_BY_OWNID:
-        /*Search specualltion by own_id in each zipcode.*/
+        /*Search speculation by own_id in each zipcode.*/
         query = `SELECT DISTINCT 
         x.own_id, x.count::int, x.propzip, y.total::int,
         (x.count::float / y.total::float) * 100 AS per
@@ -358,6 +359,22 @@ async function queryPGDB({
           GROUP BY p2.zipcode_sj
           ) y ON x.propzip = y.propzip
           ORDER BY propzip, own_id, count;`;
+        break;
+
+      case SPECULATOR_BY_YEAR:
+        /*Search property count by own_id by year*/
+        query = `SELECT DISTINCT COUNT(ot.own_id),
+          ot.own_id, y.praxisyear
+          FROM owner_taxpayer AS ot
+          INNER JOIN taxpayer AS tp
+          ON ot.owntax_id = tp.owntax_id
+          INNER JOIN taxpayer_property AS tpp
+          ON tp.tp_id = tpp.tp_id
+          INNER JOIN year AS y 
+          ON tpp.taxparprop_id = y.taxparprop_id
+          WHERE ot.own_id LIKE '%${ownid}%'
+          GROUP BY ot.own_id, y.praxisyear`;
+
         break;
 
       case SQL_QUERY_GENERAL:
@@ -462,5 +479,6 @@ module.exports = {
   CODES_BY_SPECULATOR,
   SPECULATION_BY_CODE,
   SPECULATION_BY_OWNID,
+  SPECULATOR_BY_YEAR,
   SQL_QUERY_GENERAL,
 };

@@ -18,7 +18,7 @@ import {
 } from "../../utils/helper";
 import MapViewer from "./MapViewer";
 import MapViewerV4 from "./MapViewerV4";
-// import TimeGraph from "./TimeGraph";
+import TimeGraph from "./TimeGraph";
 import * as infoIcon from "../../assets/img/info-icon.png";
 import { APISearchQueryFromRoute } from "../../utils/api";
 
@@ -60,7 +60,7 @@ function useSpeculationByCode(results, { code, year }) {
               } else {
                 return null;
               }
-            })
+            })  
             .filter((id) => id !== null);
           item.featureIds = ids;
         });
@@ -466,6 +466,7 @@ function SpeculatorParcels(props) {
               in the year <span>{` ${year}. `}</span>
             </p>
           </div>
+          <TimeGraph ownid={ownid}/>
           <div className="detailed-title">
             <img
               src="https://property-praxis-web.s3-us-west-2.amazonaws.com/question_mark_rose.svg"
