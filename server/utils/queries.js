@@ -372,7 +372,7 @@ async function queryPGDB({
           ON tp.tp_id = tpp.tp_id
           INNER JOIN year AS y 
           ON tpp.taxparprop_id = y.taxparprop_id
-          WHERE ot.own_id LIKE '%${ownid}%'
+          WHERE ot.own_id = '${ownid}'
           GROUP BY ot.own_id, y.praxisyear`;
 
         break;
