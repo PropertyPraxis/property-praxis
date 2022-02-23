@@ -16,7 +16,7 @@ import {
   availablePraxisYears,
   paginator,
 } from "../../utils/helper";
-import MapViewer from "./MapViewer";
+// import MapViewer from "./MapViewer";
 import MapViewerV4 from "./MapViewerV4";
 import TimeGraph from "./TimeGraph";
 import * as infoIcon from "../../assets/img/info-icon.png";
@@ -60,7 +60,7 @@ function useSpeculationByCode(results, { code, year }) {
               } else {
                 return null;
               }
-            })  
+            })
             .filter((id) => id !== null);
           item.featureIds = ids;
         });
@@ -376,7 +376,11 @@ function CodeParcels(props) {
   const { code, year } = props.queryParams;
   const { searchState } = useSelector((state) => state);
   const { drawerIsOpen, results } = searchState.detailedSearch;
-  const { data: zipData, topCount, topPer } = useSpeculationByCode(results, {
+  const {
+    data: zipData,
+    topCount,
+    topPer,
+  } = useSpeculationByCode(results, {
     code,
     year,
   });
@@ -466,7 +470,7 @@ function SpeculatorParcels(props) {
               in the year <span>{` ${year}. `}</span>
             </p>
           </div>
-          <TimeGraph ownid={ownid}/>
+          <TimeGraph ownid={ownid} />
           <div className="detailed-title">
             <img
               src="https://property-praxis-web.s3-us-west-2.amazonaws.com/question_mark_rose.svg"
@@ -495,19 +499,25 @@ function MultipleParcels(props) {
   const { propzip: code } = results[0].properties;
   const dispatch = useDispatch();
 
-  const { data: speculatorData, topCount, topPer } = useSpeculationByCode(
-    results,
-    {
-      code,
-      year,
-    }
-  );
+  const {
+    data: speculatorData,
+    topCount,
+    topPer,
+  } = useSpeculationByCode(results, {
+    code,
+    year,
+  });
 
   if (speculatorData) {
     return (
       <div className="results-inner scroller">
-        <MapViewer searchState={searchState} dispatch={dispatch} />
+        {/* <MapViewer searchState={searchState} dispatch={dispatch} /> */}
         <MapViewerV4 searchState={searchState} dispatch={dispatch}/>
+        {/* <MapViewerV4
+          accessToken={"MLY|4790260297730810|2c2446b85cd5a589a6e1cd43aa3b3525"}
+          imageId={"498763468214164"}
+          style={{ width: "100%", height: "300px" }}
+        /> */}
         <div style={drawerIsOpen ? { display: "block" } : { display: "none" }}>
           <div className="detailed-title">
             <img
@@ -577,11 +587,8 @@ function MultipleParcels(props) {
 function SingleParcel(props) {
   const { searchState } = useSelector((state) => state);
   const { drawerIsOpen, recordYears, viewer } = searchState.detailedSearch;
-  const {
-    searchTerm,
-    searchYear,
-    searchCoordinates,
-  } = searchState.searchParams;
+  const { searchTerm, searchYear, searchCoordinates } =
+    searchState.searchParams;
   const dispatch = useDispatch();
 
   const {
@@ -610,8 +617,14 @@ function SingleParcel(props) {
 
   return (
     <div className="results-inner scroller">
-      <MapViewer searchState={searchState} dispatch={dispatch} />
-      <MapViewerV4 searchState={searchState} dispatch={dispatch}/>      <div style={drawerIsOpen ? { display: "block" } : { display: "none" }}>
+      {/* <MapViewer searchState={searchState} dispatch={dispatch} /> */}
+      <MapViewerV4 searchState={searchState} dispatch={dispatch} />{" "}
+      {/* <MapViewerV4
+        accessToken={"MLY|4790260297730810|2c2446b85cd5a589a6e1cd43aa3b3525"}
+        imageId={"498763468214164"}
+        style={{ width: "100%", height: "300px" }}
+      /> */}
+      <div style={drawerIsOpen ? { display: "block" } : { display: "none" }}>
         <div className="detailed-title">
           <img
             src="https://property-praxis-web.s3-us-west-2.amazonaws.com/map_marker_rose.svg"
