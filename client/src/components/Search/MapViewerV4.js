@@ -146,11 +146,11 @@ function MapViewerV4({ searchState }) {
   useEffect(() => {
     if (imageId && searchCoordinates) {
  
-      let viewer = new Viewer({
-        accessToken,
-        container: "mly",
-        imageId,
-      });
+      // let viewer = new Viewer({
+      //   accessToken,
+      //   container: "mly",
+      //   imageId,
+      // });
     }
 
     return () => null;
