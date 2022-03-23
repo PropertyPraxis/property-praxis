@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import ReactMapGL, { Source, Layer, Marker } from "react-map-gl";
-import ParcelLayerController from "./ParcelLayerController";
+// import ParcelLayerController from "./ParcelLayerController";
 import BasemapController from "./BasemapController";
 import { createNewViewport } from "../../utils/map";
 import {
@@ -36,7 +36,16 @@ import {
   zipsLabel,
 } from "./mapStyle";
 import Pin from "./Pin";
-import * as styleVars from "../../scss/colors.scss";
+// import * as styleVars from "../../scss/colors.scss";
+// import {
+//   parcelStop1,
+//   parcelStop2,
+//   parcelStop3,
+//   parcelStop4,
+//   parcelStop5,
+//   parcelStop6,
+//   parcelStop7,
+// } from "../../scss/colors.scss";
 
 /*This API token works for propertypraxis.org  */
 const MAPBOX_TOKEN =
@@ -130,14 +139,24 @@ PraxisMarker.propTypes = {
 };
 
 class PraxisMap extends Component {
+  // _stops = [
+  //   [1, parcelStop1],
+  //   [2, parcelStop2],
+  //   [3, parcelStop3],
+  //   [4, parcelStop4],
+  //   [5, parcelStop5],
+  //   [6, parcelStop6],
+  //   [7, parcelStop7],
+  // ];
+
   _stops = [
-    [1, styleVars.parcelStop1],
-    [2, styleVars.parcelStop2],
-    [3, styleVars.parcelStop3],
-    [4, styleVars.parcelStop4],
-    [5, styleVars.parcelStop5],
-    [6, styleVars.parcelStop6],
-    [7, styleVars.parcelStop7],
+    [1, "#f6d2a9;"],
+    [2, "#f5b78e"],
+    [3, "#f19c7c"],
+    [4, "#ea8171"],
+    [5, "#dd686c"],
+    [6, "#ca5268"],
+    [7, "#b13f64"],
   ];
 
   // create new vieport dependent on geojson bbox
@@ -380,7 +399,7 @@ class PraxisMap extends Component {
             <Layer key="zips-label" {...zipsLabel} />
           </Source>
         </ReactMapGL>
-        <ParcelLayerController {...this.props} />
+        {/* <ParcelLayerController {...this.props} /> */}
         <BasemapController {...this.props} />
       </div>
     );

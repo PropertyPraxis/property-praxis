@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { APISearchQueryFromRoute } from "../../utils/api";
 import { VictoryChart, VictoryLine, VictoryTheme } from "victory";
-import * as styleVars from "../../scss/colors.scss";
+// import * as styleVars from "../../scss/colors.scss";
 
 function TimeGraph({ ownid }) {
   const [data, setData] = useState(null);
@@ -38,7 +38,8 @@ function TimeGraph({ ownid }) {
     >
       <VictoryLine
         style={{
-          data: { stroke: styleVars.ppRose },
+          // data: { stroke: styleVars.ppRose },
+          data: { stroke: "ppRose" },
           parent: { border: "1px solid #ccc" },
         }}
         data={data}

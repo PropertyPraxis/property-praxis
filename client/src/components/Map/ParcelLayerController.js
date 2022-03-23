@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import Slider from "react-rangeslider";
+// import Slider from "react-rangeslider";
 import {
   setSliderValueAction,
   setParcelFilterAction,

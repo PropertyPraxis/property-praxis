@@ -10,7 +10,7 @@ import {
 import * as zipcodeIcon from "../../assets/img/zipcode-icon-transparent.png";
 import * as speculatorIcon from "../../assets/img/speculator-icon-transparent.png";
 import * as mapMarkerIcon from "../../assets/img/map-marker-transparent.png";
-import * as styleVars from "../../scss/colors.scss";
+// import * as styleVars from "../../scss/colors.scss";
 
 const primaryResultIcons = {
   address: mapMarkerIcon,
@@ -80,7 +80,8 @@ class PrimaryResults extends Component {
                   className={i % 2 ? "list-item-odd" : "list-item-even"}
                   style={
                     i === index
-                      ? { backgroundColor: styleVars.uiMedGray }
+                      ? // ? { backgroundColor: styleVars.uiMedGray }
+                        { backgroundColor: "#a9a9a9" }
                       : null
                   }
                   onClick={this._handleOnClick}
