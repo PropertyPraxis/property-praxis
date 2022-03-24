@@ -133,7 +133,7 @@ csvList <- map(seq_along(csvObjs), function(i) {
     str_replace("_edit.csv", ""))
 
 
-# shpList <- map(seq_along(shpObjs), function(i) {
+shpList <- map(seq_along(shpObjs), function(i) {
   shpZipName <- basename(s3Shpfiles[[i]])
   shpName <- shpZipName %>% str_replace(".zip", "")
 
@@ -378,7 +378,7 @@ ppFull <- ppFull[!duplicated(ppFull), ]
 
 ## cleanup env
 log_info("Cleaning up global environement...")
-gc(rm(list = c("csvList")))
+# gc(rm(list = c("csvList")))
 
 ## CREATE TABLES
 ## 1. parcels_property
@@ -734,18 +734,18 @@ praxiscount$group <- unlist(map(praxiscount$count, countGrouper))
 
 ## Remove intermediary tables from local env
 log_info("Cleaning up global environement...")
-gc(rm(
-  list = c(
-    "taxParProp",
-    "taxParPropwIds",
-    "shpList",
-    "geomList",
-    "geomList2",
-    "taxParPropYear",
-    "ppFull",
-    "parProp"
-  )
-))
+# gc(rm(
+#   list = c(
+#     "taxParProp",
+#     "taxParPropwIds",
+#     "shpList",
+#     "geomList",
+#     "geomList2",
+#     "taxParPropYear",
+#     "ppFull",
+#     "parProp"
+#   )
+# ))
 
 
 #########################
@@ -1052,3 +1052,5 @@ createParcelGeomByYear <- function(years) {
 }
 createParcelGeomByYear(yearList)
 print("Done.")
+
+
