@@ -618,7 +618,7 @@ function SingleParcel(props) {
   return (
     <div className="results-inner scroller">
       {/* <MapViewer searchState={searchState} dispatch={dispatch} /> */}
-      <MapViewerV4 searchState={searchState} dispatch={dispatch} />{" "}
+      <MapViewerV4 searchState={searchState} dispatch={dispatch} />
       {/* <MapViewerV4
         accessToken={"MLY|4790260297730810|2c2446b85cd5a589a6e1cd43aa3b3525"}
         imageId={"498763468214164"}
