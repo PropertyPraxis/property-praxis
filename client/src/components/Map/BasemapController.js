@@ -2,8 +2,8 @@ import React from "react";
 import ReactTooltip from "react-tooltip";
 import PropTypes from "prop-types";
 import { toggleBasemapAction } from "../../actions/controller";
-import * as monochromeLayerImage from "../../assets/img/monochrome-layer.png";
-import * as satelliteLayerImage from "../../assets/img/satellite-layer.jpg";
+import monochromeLayerImage from "../../assets/img/monochrome-layer.png";
+import satelliteLayerImage from "../../assets/img/satellite-layer.jpg";
 
 const basemapLayers = {
   monochromeDark: "mapbox://styles/mappingaction/ck8agoqtt043l1ik9bvf3v0cv",

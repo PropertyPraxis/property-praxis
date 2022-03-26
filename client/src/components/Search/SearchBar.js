@@ -15,7 +15,7 @@ import {
   createQueryStringFromParams,
 } from "../../utils/helper";
 import PrimaryResultsContainer from "./PrimarySearchResults";
-import * as searchIcon from "../../assets/img/search.png";
+import searchIcon from "../../assets/img/search.png";
 import styleVars from "../../scss/colors.scss";
 
 class SearchBar extends Component {
@@ -210,12 +210,8 @@ class SearchBar extends Component {
     // parse URL and dispatch params
     const { search: searchQuery, pathname } = this.props.history.location;
     if (pathname === "/map") {
-      const {
-        searchType,
-        searchTerm,
-        searchCoordinates,
-        searchYear,
-      } = URLParamsToSearchParams(searchQuery);
+      const { searchType, searchTerm, searchCoordinates, searchYear } =
+        URLParamsToSearchParams(searchQuery);
 
       this._setSearchStateParams({
         searchType,
@@ -236,12 +232,8 @@ class SearchBar extends Component {
     const { search: searchQuery, pathname } = this.props.history.location;
     if (prevProps.location.search !== searchQuery && pathname === "/map") {
       // parse URL and dispatch params
-      const {
-        searchType,
-        searchTerm,
-        searchYear,
-        searchCoordinates,
-      } = URLParamsToSearchParams(searchQuery);
+      const { searchType, searchTerm, searchYear, searchCoordinates } =
+        URLParamsToSearchParams(searchQuery);
       this._setSearchStateParams({
         searchType,
         searchTerm,
@@ -265,11 +257,8 @@ class SearchBar extends Component {
   }
 
   render() {
-    const {
-      searchType,
-      searchTerm,
-      searchYear,
-    } = this.props.searchState.searchParams;
+    const { searchType, searchTerm, searchYear } =
+      this.props.searchState.searchParams;
     const { searchYears } = this.props.searchState.searchBar;
 
     const { searchBarType, showSearchButtons } = this.props;
@@ -313,14 +302,16 @@ class SearchBar extends Component {
                   onChange={this._handleYearSelect}
                   onFocus={this._handleYearSelectFocus}
                 >
-                  {searchYears.map((result) => (
-                    <option
-                      key={result.praxisyear}
-                      selected={result.praxisyear.toString() === searchYear}
-                    >
-                      {result.praxisyear}
-                    </option>
-                  ))}
+                  {searchYears.map((result) => {
+                    return (
+                      <option
+                        key={result.praxisyear}
+                        selected={result.praxisyear.toString() === searchYear}
+                      >
+                        {result.praxisyear}
+                      </option>
+                    );
+                  })}
                 </select>
               </div>
               <div

@@ -36,7 +36,7 @@ import {
   zipsLabel,
 } from "./mapStyle";
 import Pin from "./Pin";
-// import * as styleVars from "../../scss/colors.scss";
+import styleVars from "../../scss/colors.scss";
 // import {
 //   parcelStop1,
 //   parcelStop2,
@@ -139,25 +139,25 @@ PraxisMarker.propTypes = {
 };
 
 class PraxisMap extends Component {
-  // _stops = [
-  //   [1, parcelStop1],
-  //   [2, parcelStop2],
-  //   [3, parcelStop3],
-  //   [4, parcelStop4],
-  //   [5, parcelStop5],
-  //   [6, parcelStop6],
-  //   [7, parcelStop7],
-  // ];
-
   _stops = [
-    [1, "#f6d2a9;"],
-    [2, "#f5b78e"],
-    [3, "#f19c7c"],
-    [4, "#ea8171"],
-    [5, "#dd686c"],
-    [6, "#ca5268"],
-    [7, "#b13f64"],
+    [1, styleVars.parcelStop1],
+    [2, styleVars.parcelStop2],
+    [3, styleVars.parcelStop3],
+    [4, styleVars.parcelStop4],
+    [5, styleVars.parcelStop5],
+    [6, styleVars.parcelStop6],
+    [7, styleVars.parcelStop7],
   ];
+
+  // _stops = [
+  //   [1, "#f6d2a9;"],
+  //   [2, "#f5b78e"],
+  //   [3, "#f19c7c"],
+  //   [4, "#ea8171"],
+  //   [5, "#dd686c"],
+  //   [6, "#ca5268"],
+  //   [7, "#b13f64"],
+  // ];
 
   // create new vieport dependent on geojson bbox
   _createNewViewport = (geojson) => {

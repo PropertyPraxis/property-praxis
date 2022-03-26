@@ -1,26 +1,26 @@
-// import * as styleVars from "../../scss/colors.scss";
+import styleVars from "../../scss/colors.scss";
 
 //this is where specific mapstyles will go for layers.
 
-// const stops = [
-//   [1, styleVars.parcelStop1],
-//   [2, styleVars.parcelStop2],
-//   [3, styleVars.parcelStop3],
-//   [4, styleVars.parcelStop4],
-//   [5, styleVars.parcelStop5],
-//   [6, styleVars.parcelStop6],
-//   [7, styleVars.parcelStop7],
-// ];
-
 const stops = [
-  [1, "#f6d2a9;"],
-  [2, "#f5b78e"],
-  [3, "#f19c7c"],
-  [4, "#ea8171"],
-  [5, "#dd686c"],
-  [6, "#ca5268"],
-  [7, "#b13f64"],
+  [1, styleVars.parcelStop1],
+  [2, styleVars.parcelStop2],
+  [3, styleVars.parcelStop3],
+  [4, styleVars.parcelStop4],
+  [5, styleVars.parcelStop5],
+  [6, styleVars.parcelStop6],
+  [7, styleVars.parcelStop7],
 ];
+
+// const stops = [
+//   [1, "#f6d2a9;"],
+//   [2, "#f5b78e"],
+//   [3, "#f19c7c"],
+//   [4, "#ea8171"],
+//   [5, "#dd686c"],
+//   [6, "#ca5268"],
+//   [7, "#b13f64"],
+// ];
 
 export const parcelLayer = {
   id: "parcel-polygon",
