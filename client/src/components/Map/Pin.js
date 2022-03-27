@@ -10,7 +10,7 @@ const pinStyle = {
   stroke: "none",
 };
 
-class Pin extends PureComponent {
+export class Pin extends PureComponent {
   render() {
     const { size = 20 } = this.props;
 
@@ -22,8 +22,39 @@ class Pin extends PureComponent {
   }
 }
 
+const arrowStyle = {
+  fill: "#e4002c",
+  stroke: "none",
+  transform: `rotate(90deg)`,
+};
+
+export function Arrow(props) {
+  const { size = 20 } = props;
+
+  return (
+    // <svg height={size} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+    //   <path
+    //     d="m26.934 28.641-10-26a1 1 0 0 0-1.868 0l-10 26A1 1 0 0 0 6.6 29.8l9.4-7.05 9.4 7.05a1 1 0 0 0 1.533-1.159z"
+    //     // style="fill:#262628"
+    //     style={arrowStyle}
+    //     data-name="Arrow GPS"
+    //   />
+    // </svg>
+    <svg
+      style={{ transform: `rotate(90deg)` }}
+      height={size}
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 32 32"
+    >
+      <path
+        d="m26.934 28.641-10-26a1 1 0 0 0-1.868 0l-10 26A1 1 0 0 0 6.6 29.8l9.4-7.05 9.4 7.05a1 1 0 0 0 1.533-1.159z"
+        style={{ fill: "blue" }}
+        data-name="Arrow GPS"
+      />
+    </svg>
+  );
+}
+
 Pin.propTypes = {
   size: PropTypes.number.isRequired,
 };
-
-export default Pin;
