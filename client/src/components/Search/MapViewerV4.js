@@ -1,9 +1,8 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { handleGetViewerImage } from "../../actions/search";
 import { calculateDesiredBearing, bearingToBasic } from "../../utils/viewer";
 import { Viewer, SimpleMarker } from "mapillary-js";
-import { init, dispose } from "../../utils/viewerv4";
 import * as turf from "@turf/turf";
 
 // test images
@@ -20,6 +19,17 @@ import * as turf from "@turf/turf";
 
 const accessToken = "MLY|4790260297730810|2c2446b85cd5a589a6e1cd43aa3b3525";
 
+function createMarker(markerId, lngLat, color) {
+  const marker = new SimpleMarker(markerId, lngLat, {
+    ballColor: "red",
+    ballOpacity: 0.9,
+    color,
+    opacity: 0.5,
+    interactive: true,
+  });
+  return marker;
+}
+
 function useImageKey(searchCoordinates) {
   const [imageId, setImageId] = useState(null);
 
@@ -29,19 +39,22 @@ function useImageKey(searchCoordinates) {
   const buffered = turf.buffer(point, 100, { units: "meters" });
   const bbox = turf.bbox(buffered);
 
+  // API params
   const [minx, miny, maxx, maxy] = bbox;
+  // const organization_id = 104740425095586; TODO: keep investigating for codgis
+  const fields = "id,geometry,captured_at,compass_angle";
+  const limit = 25;
 
   useEffect(() => {
     (async () => {
-      // const token = "MLY|4790260297730810|2c2446b85cd5a589a6e1cd43aa3b3525";
-      // &organization_id=${ORG_KEY}
-      const query = `https://graph.mapillary.com/images?access_token=${accessToken}&fields=id,geometry&bbox=${minx},${miny},${maxx},${maxy}`;
+      const query = `https://graph.mapillary.com/images?access_token=${accessToken}&fields=${fields}&bbox=${minx},${miny},${maxx},${maxy}&limit${limit}`;
       console.log(query);
 
       const res = await fetch(query);
       const json = await res.json();
 
       const imageIdClose = json.data.map((item) => {
+        console.log(item);
         return item.id;
         // calculate the distance and choose closest image key
       })[0]; // temporary
@@ -53,102 +66,39 @@ function useImageKey(searchCoordinates) {
 
   return { imageId };
 }
-// function useViewer({ searchCoordinates }) {
-//   const [imageId, setImageId] = useSate(null);
-
-//   useEffect(() => {
-//     setImageId("1182252392217616");
-
-//     return () => null;
-//   }, [searchCoordinates]);
-// }
-
-// function MapViewerV4({ searchState }) {
-//   const viewerEl = useRef(null);
-//   const { searchCoordinates } = searchState.searchParams;
-//   const { data } = useImageKey(searchCoordinates);
-//   useEffect(() => {
-//     if (data) {
-//       init({
-//         accessToken,
-//         container: "mly",
-//       });
-//     }
-//     return () => {
-//       // return null;
-//       dispose();
-//     };
-//   }, [data]);
-
-//   return <div id="mly" ref={viewerEl}></div>;
-// }
-
-// function MapViewerV4() {
-//   const ref = useRef(null);
-//   const [viewer, setViewer] = useState(null);
-//   useEffect(() => {
-//     if (ref.current && !viewer) {
-//       console.log("xxxxxxxxxxxxxxxx", viewer);
-
-//       let viewer = new Viewer({
-//         accessToken: "MLY|4790260297730810|2c2446b85cd5a589a6e1cd43aa3b3525",
-//         container: "xxx", // the ID of our container defined in the HTML body
-//         imageId: "1456011628085234",
-//       });
-//       setViewer(viewer);
-//     }
-//   }, [ref, viewer]);
-//   return <div id="xxx" ref={ref} />;
-// }
-
-// class MapViewerV4 extends React.Component {
-//   constructor(props) {
-//     super(props);
-//     this.containerRef = React.createRef();
-//   }
-
-//   componentDidMount() {
-//     debugger;
-
-//     this.viewer = new Viewer({
-//       accessToken: this.props.accessToken,
-//       // container: this.containerRef.current,
-//       container: "mly",
-//       imageId: this.props.imageId,
-//     });
-//   }
-
-//   componentWillUnmount() {
-//     if (this.viewer) {
-//       this.viewer.remove();
-//     }
-//   }
-
-//   render() {
-//     return <div id="mly" ref={this.containerRef} style={this.props.style} />;
-//   }
-// }
-
-////////////////////////////
-function makeContainer(parent) {
-  const container = document.createElement("div");
-  container.style.width = "calc(25% - 2px)";
-  container.style.height = "calc(100% - 2px)";
-  container.style.display = "inline-block";
-  container.style.margin = "1px";
-  parent.appendChild(container);
-  return container;
-}
 
 function MapViewerV4({ searchState }) {
   const { searchCoordinates } = searchState.searchParams;
   const { imageId } = useImageKey(searchCoordinates);
+
   useEffect(() => {
     if (imageId && searchCoordinates) {
+      const componentOptions = {
+        cover: false,
+        marker: true,
+      };
+
       let viewer = new Viewer({
         accessToken,
         container: "mly",
         imageId,
+        component: componentOptions,
+      });
+
+      // add marker
+      const coords = JSON.parse(decodeURIComponent(searchCoordinates));
+      const markerComponent = viewer.getComponent("marker");
+      markerComponent.add([
+        createMarker(
+          "test",
+          { lat: coords.latitude, lng: coords.longitude },
+          "red"
+        ),
+      ]);
+
+      viewer.on("bearing", function () {
+        console.log("A bearing event has occurred.");
+        console.log(viewer.getBearing());
       });
     }
 

@@ -35,7 +35,8 @@ import {
   zipsLayer,
   zipsLabel,
 } from "./mapStyle";
-import Pin from "./Pin";
+import { Pin, Arrow } from "./Pin";
+import infoIcon from "../../assets/img/info-icon.png";
 import styleVars from "../../scss/colors.scss";
 // import {
 //   parcelStop1,
@@ -351,7 +352,16 @@ class PraxisMap extends Component {
               createNewViewport={this._createNewViewport}
             />
           ) : null}
-
+          <Marker
+            latitude={42.326185679636275}
+            longitude={-83.07159392731673}
+            rotation={90}
+            rotationAlignment="map"
+            anchor="bottom"
+          >
+            {/* <img src={infoIcon} style={{ transform: "rotate(90deg)" }} /> */}
+            <Arrow />
+          </Marker>
           <Source id="parcels" type="geojson" data={ppraxis}>
             <Layer
               key="parcel-centroid"
