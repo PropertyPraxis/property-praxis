@@ -3,7 +3,7 @@
 *.env
 
 /pg/data
-
+/rstudio/data
 node_modules
 
 /rstudio/data/csvs
