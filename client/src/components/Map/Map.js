@@ -113,8 +113,8 @@ class PraxisMarker extends React.Component {
       <Marker
         longitude={longitude}
         latitude={latitude}
-        offsetTop={-20}
-        offsetLeft={-10}
+        // offsetTop={-20}
+        // offsetLeft={-10}
         draggable
         onDragStart={this._onMarkerDragStart}
         onDrag={this._onMarkerDrag}
@@ -322,6 +322,7 @@ class PraxisMap extends Component {
     const { ppraxis, zips } = this.props.mapData;
     const { basemapLayer } = this.props.controller;
     const { sliderValue, filter } = this.props.controller;
+    const { lat, lng, bearing } = this.props.searchState.viewerCoords;
     const parcelLayerFilter = createLayerFilter(filter);
 
     return (
@@ -352,16 +353,16 @@ class PraxisMap extends Component {
               createNewViewport={this._createNewViewport}
             />
           ) : null}
-          <Marker
-            latitude={42.326185679636275}
-            longitude={-83.07159392731673}
-            rotation={90}
-            rotationAlignment="map"
-            anchor="bottom"
-          >
-            {/* <img src={infoIcon} style={{ transform: "rotate(90deg)" }} /> */}
-            <Arrow />
-          </Marker>
+          {lat && lng && bearing ? (
+            <Marker
+              latitude={lat}
+              longitude={lng}
+              rotationAlignment="map"
+              anchor="bottom"
+            >
+              <Arrow compassAngle={bearing} />
+            </Marker>
+          ) : null}
           <Source id="parcels" type="geojson" data={ppraxis}>
             <Layer
               key="parcel-centroid"

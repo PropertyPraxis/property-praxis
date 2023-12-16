@@ -1,5 +1,5 @@
 import {
-  UPDATE_VIEWER_IMAGE,
+  UPDATE_VIEWER_POSITION,
   UPDATE_GENERAL_SEARCH,
   UPDATE_SEARCH_PARAMS,
   UPDATE_PRIMARY_SEARCH,
@@ -26,13 +26,20 @@ const initialSearchState = {
     recordYears: null,
   },
   downloadData: null,
-  viewer: null,
+  viewerCoords: {
+    lat: null,
+    lng: null,
+    bearing: null,
+  },
 };
 
 export default function searchState(state = initialSearchState, action) {
   switch (action.type) {
-    case UPDATE_VIEWER_IMAGE:
-      return { ...state, ...action.payload };
+    case UPDATE_VIEWER_POSITION:
+      return {
+        ...state,
+        viewerCoords: { ...state.viewerCoords, ...action.payload },
+      };
     case UPDATE_GENERAL_SEARCH:
       return { ...state, ...action.payload };
     case UPDATE_SEARCH_BAR:
