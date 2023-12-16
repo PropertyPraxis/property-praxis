@@ -3,7 +3,7 @@ import {
   APIQueryStringFromSearchParams,
   APISearchQueryFromRoute,
 } from "../utils/api";
-import { getImageKey } from "../utils/viewer";
+// import { getImageKey } from "../utils/viewer";
 import { flattenPrimaryResults } from "../utils/helper";
 
 export const UPDATE_GENERAL_SEARCH = "UPDATE_GENERAL_SEARCH"; // general shortcut
@@ -11,7 +11,7 @@ export const UPDATE_SEARCH_PARAMS = "UPDATE_SEARCH_PARAMS";
 export const UPDATE_PRIMARY_SEARCH = "UPDATE_PRIMARY_SEARCH";
 export const UPDATE_DETAILED_SEARCH = "UPDATE_DETAILED_SEARCH";
 export const UPDATE_SEARCH_BAR = "UPDATE_SEARCH_BAR";
-export const UPDATE_VIEWER_IMAGE = "UPDATE_VIEWER_IMAGE";
+export const UPDATE_VIEWER_POSITION = "UPDATE_VIEWER_POSITION";
 export const GET_DOWNLOAD_DATA = "GET_DOWNLOAD_DATA";
 
 /* General action to set search state
@@ -49,10 +49,10 @@ function updateSearchBar(searchBar) {
   };
 }
 
-function getViewerImage(viewer) {
+function getViewerPosition(viewerCoords) {
   return {
-    type: UPDATE_VIEWER_IMAGE,
-    payload: { viewer },
+    type: UPDATE_VIEWER_POSITION,
+    payload: { ...viewerCoords },
   };
 }
 
@@ -159,17 +159,20 @@ export function handleGetPraxisYearsAction(route) {
   };
 }
 
-export function handleGetViewerImage(longitude, latitude) {
+export function handleGetViewerPosition(coords) {
   return async (dispatch) => {
     try {
-      const viewer = await getImageKey(longitude, latitude);
-      dispatch(getViewerImage(null));
-      dispatch(getViewerImage(viewer));
-      return viewer;
+      // const pos = await getImageKey(longitude, latitude);
+      dispatch(getViewerPosition(null));
+      dispatch(getViewerPosition(coords));
+      // return pos;
     } catch (err) {
       // viewer image ui error
       // dispatch something here for error
-      console.error(`An error occured fetching viewer image. Message: ${err}`);
+      dispatch(triggerFetchError(true));
+      console.error(
+        `An error occured fetching viewer position. Message: ${err}`
+      );
     }
   };
 }
