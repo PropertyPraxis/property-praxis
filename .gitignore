@@ -3,6 +3,7 @@
 *.env
 
 /pg/data
+db_dump.sql
 /rstudio/data
 node_modules
 
