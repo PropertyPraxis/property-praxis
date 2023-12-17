@@ -1,4 +1,4 @@
-FROM rocker/geospatial:latest
+FROM rocker/geospatial:4.2.1
 
 RUN mkdir -p /home/rstudio/pp-pipeline/scripts \
     mkdir -p /home/rstudio/pp-pipeline/data

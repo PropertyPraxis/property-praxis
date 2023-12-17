@@ -28,6 +28,8 @@ log_info(
 )
 dotenv::load_dot_env(file = paste0(homeDir, "/pp-pipeline/scripts/rstudio.env"))
 
+bucket <- Sys.getenv("S3_BUCKET", "property-praxis-data")
+
 #####################
 ## DATA FETCHING PAHSE
 #####################
@@ -38,7 +40,8 @@ dotenv::load_dot_env(file = paste0(homeDir, "/pp-pipeline/scripts/rstudio.env"))
 tryCatch(
   {
     log_info("Fetching property praxis bucket data.")
-    ppBucket <- get_bucket("property-praxis")
+
+    ppBucket <- get_bucket(bucket)
 
     ## function to get file names
     getBucketNames <- function(x) {
@@ -96,7 +99,7 @@ if (!dir.exists(csvDir)) {
 log_info("Getting AWS CSV objects...")
 csvObjs <-
   map(s3Csvs, function(x) {
-    get_object(x, what = "raw", bucket = "property-praxis")
+    get_object(x, what = "raw", bucket = bucket)
   }) %>%
   set_names(s3Csvs)
 
@@ -105,7 +108,7 @@ walk(paste("Obtained CSV object", names(csvObjs)), log_info)
 log_info("Getting AWS Shapefile objects...")
 shpObjs <-
   map(s3Shpfiles, function(x) {
-    get_object(x, what = "raw", bucket = "property-praxis")
+    get_object(x, what = "raw", bucket = bucket)
   }) %>%
   set_names(s3Shpfiles)
 
@@ -176,6 +179,7 @@ for (i in 1:10) {
         log_info(paste("Done fetching from", zipUrl))
         break
       } else {
+        # TODO: What is ZIP_URL
         zipUrl <- Sys.getenv("ZIP_URL")
         log_info(paste("Fetching zipcode GeoJSON at", zipUrl))
         zips <- geojson_sf(zipUrl)
