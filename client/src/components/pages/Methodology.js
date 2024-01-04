@@ -1,6 +1,7 @@
 import React from "react";
 import Footer from "./Footer";
 import TopContainer from "./TopContainer";
+import nounMethodologies from "../../assets/img/noun_methodologies.svg";
 
 const Methodology = () => {
   return (
@@ -10,7 +11,7 @@ const Methodology = () => {
         <div className="middle-container">
           <div>
             <img
-              src="https://property-praxis-web.s3-us-west-2.amazonaws.com/noun_methodologies.svg"
+              src={nounMethodologies}
               alt="An illustration of a lightbulb"
             ></img>
           </div>

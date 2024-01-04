@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { triggerFetchError } from "../../actions/redirect";
 import { getYearString } from "../../utils/helper";
+import macLogoTransparent from "../../assets/img/mac_logo_transparent.png";
 
 const Footer = () => {
   const { isFetchError } = useSelector((state) => state.redirect);
@@ -27,7 +28,7 @@ const Footer = () => {
               rel="noopener noreferrer"
             >
               <img
-                src="https://property-praxis-web.s3-us-west-2.amazonaws.com/mac_logo_transparent.png"
+                src={macLogoTransparent}
                 alt="Mapping Action Collective Logo"
               ></img>
             </a>

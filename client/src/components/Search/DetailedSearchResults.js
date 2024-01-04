@@ -21,6 +21,9 @@ import MapViewerV4 from "./MapViewerV4";
 import TimeGraph from "./TimeGraph";
 import infoIcon from "../../assets/img/info-icon.png";
 import { APISearchQueryFromRoute } from "../../utils/api";
+import mapMarkerRose from "../../assets/img/map_marker_rose.svg";
+import mapMarkerPolygonRose from "../../assets/img/map_marker_polygon_rose.svg";
+import questionMarkRose from "../../assets/img/question_mark_rose.svg";
 
 // helper functions
 const reducer = (accumulator, currentValue) =>
@@ -355,10 +358,7 @@ function NoResults() {
     <div className="results-inner">
       <div style={drawerIsOpen ? { display: "block" } : { display: "none" }}>
         <div className="detailed-title">
-          <img
-            src="https://property-praxis-web.s3-us-west-2.amazonaws.com/map_marker_rose.svg"
-            alt="A map marker icon"
-          />
+          <img src={mapMarkerRose} alt="A map marker icon" />
           <span>No Results for this Search</span>
         </div>
         <div className="detailed-properties">
@@ -390,10 +390,7 @@ function CodeParcels(props) {
       <div className="results-inner scroller">
         <div style={drawerIsOpen ? { display: "block" } : { display: "none" }}>
           <div className="detailed-title">
-            <img
-              src="https://property-praxis-web.s3-us-west-2.amazonaws.com/map_marker_polygon_rose.svg"
-              alt="A map marker icon"
-            />
+            <img src={mapMarkerPolygonRose} alt="A map marker icon" />
             <span>Details for {code}</span>
           </div>
           <div className="detailed-properties">
@@ -409,10 +406,7 @@ function CodeParcels(props) {
             </p>
           </div>
           <div className="detailed-title">
-            <img
-              src="https://property-praxis-web.s3-us-west-2.amazonaws.com/question_mark_rose.svg"
-              alt="A question mark icon"
-            />
+            <img src={questionMarkRose} alt="A question mark icon" />
             <span>Top 10 Speculators</span>
           </div>
           <div className="detailed-zipcode">
@@ -455,10 +449,7 @@ function SpeculatorParcels(props) {
       <div className="results-inner scroller">
         <div style={drawerIsOpen ? { display: "block" } : { display: "none" }}>
           <div className="detailed-title">
-            <img
-              src="https://property-praxis-web.s3-us-west-2.amazonaws.com/map_marker_rose.svg"
-              alt="A map marker icon"
-            />
+            <img src={mapMarkerRose} alt="A map marker icon" />
             <span>{ownid}</span>
           </div>
           <div className="detailed-properties">
@@ -472,10 +463,7 @@ function SpeculatorParcels(props) {
           </div>
           <TimeGraph ownid={ownid} />
           <div className="detailed-title">
-            <img
-              src="https://property-praxis-web.s3-us-west-2.amazonaws.com/question_mark_rose.svg"
-              alt="A question mark icon"
-            />
+            <img src={questionMarkRose} alt="A question mark icon" />
             <span>Properties by Zip Code for this Speculator</span>
           </div>
           <DumbPaginator
@@ -520,10 +508,7 @@ function MultipleParcels(props) {
         /> */}
         <div style={drawerIsOpen ? { display: "block" } : { display: "none" }}>
           <div className="detailed-title">
-            <img
-              src="https://property-praxis-web.s3-us-west-2.amazonaws.com/map_marker_rose.svg"
-              alt="A map marker icon"
-            />
+            <img src={mapMarkerRose} alt="A map marker icon" />
             <span>{parseMBAddressString(place)}</span>
           </div>
           <div className="detailed-properties">
@@ -542,10 +527,7 @@ function MultipleParcels(props) {
             </p>
           </div>
           <div className="detailed-title">
-            <img
-              src="https://property-praxis-web.s3-us-west-2.amazonaws.com/question_mark_rose.svg"
-              alt="A question mark icon"
-            />
+            <img src={questionMarkRose} alt="A question mark icon" />
             <span> Top 10 Speculators in {`${code}`}</span>
           </div>
 
@@ -626,10 +608,7 @@ function SingleParcel(props) {
       /> */}
       <div style={drawerIsOpen ? { display: "block" } : { display: "none" }}>
         <div className="detailed-title">
-          <img
-            src="https://property-praxis-web.s3-us-west-2.amazonaws.com/map_marker_rose.svg"
-            alt="A map marker icon"
-          />
+          <img src={mapMarkerRose} alt="A map marker icon" />
           <span>{searchTerm}</span>
         </div>
         <div className="detailed-properties">
@@ -676,10 +655,7 @@ function SingleParcel(props) {
           )}
         </div>
         <div className="detailed-title">
-          <img
-            src="https://property-praxis-web.s3-us-west-2.amazonaws.com/question_mark_rose.svg"
-            alt="A question mark icon"
-          />
+          <img src={questionMarkRose} alt="A question mark icon" />
           <span> About the Property</span>
         </div>
         <div className="detailed-properties">
@@ -776,10 +752,7 @@ function CodeSpeculatorParcels(props) {
       <div className="results-inner scroller">
         <div style={drawerIsOpen ? { display: "block" } : { display: "none" }}>
           <div className="detailed-title">
-            <img
-              src="https://property-praxis-web.s3-us-west-2.amazonaws.com/map_marker_rose.svg"
-              alt="A map marker icon"
-            />
+            <img src={mapMarkerRose} alt="A map marker icon" />
             <div>{`Properties in ${code} owned by ${ownid}`}</div>
           </div>
           <div className="detailed-properties">
@@ -799,10 +772,7 @@ function CodeSpeculatorParcels(props) {
             </DumbPaginator>
           </div>
           <div className="detailed-title">
-            <img
-              src="https://property-praxis-web.s3-us-west-2.amazonaws.com/question_mark_rose.svg"
-              alt="A question mark icon"
-            />
+            <img src={questionMarkRose} alt="A question mark icon" />
             <span>{`Additional Properties by Zip Code for ${ownid}`}</span>
           </div>
           <div className="detailed-speculator">
@@ -865,10 +835,7 @@ function SpeculatorCodeParcels(props) {
       <div className="results-inner scroller">
         <div style={drawerIsOpen ? { display: "block" } : { display: "none" }}>
           <div className="detailed-title">
-            <img
-              src="https://property-praxis-web.s3-us-west-2.amazonaws.com/map_marker_rose.svg"
-              alt="A map marker icon"
-            />
+            <img src={mapMarkerRose} alt="A map marker icon" />
             <div>{`Properties in ${code} owned by ${ownid}`}</div>
           </div>
           <div className="detailed-properties">
@@ -888,10 +855,7 @@ function SpeculatorCodeParcels(props) {
             </DumbPaginator>
           </div>
           <div className="detailed-title">
-            <img
-              src="https://property-praxis-web.s3-us-west-2.amazonaws.com/question_mark_rose.svg"
-              alt="A question mark icon"
-            />
+            <img src={questionMarkRose} alt="A question mark icon" />
             <span>{`Additional Properties by Zip Code for ${ownid}`}</span>
           </div>
           <DumbPaginator

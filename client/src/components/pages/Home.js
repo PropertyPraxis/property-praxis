@@ -4,6 +4,10 @@ import { withRouter } from "react-router-dom";
 import PropTypes from "prop-types";
 import SearchBar from "../Search/SearchBar";
 import Footer from "./Footer";
+import nounMarketingRealEstate2 from "../../assets/img/noun_marketing_real estate_2.svg";
+import nounMarketingRealEstate from "../../assets/img/noun_marketing_real_estate.svg";
+import nounLandlordTenant from "../../assets/img/noun_Landlord_Tenant.svg";
+import logoTransparent from "../../assets/img/pp_logo_transparent.png";
 
 const Home = (props) => {
   return (
@@ -11,10 +15,7 @@ const Home = (props) => {
       <div className="header-container">
         <div className="home-logo-container">
           <div className="home-logo">
-            <img
-              src="https://property-praxis-web.s3-us-west-2.amazonaws.com/pp_logo_transparent.png"
-              alt="Property Praxis logo"
-            ></img>
+            <img src={logoTransparent} alt="Property Praxis logo"></img>
           </div>
           <header>
             Explore Yearly Bulk Ownership & Speculation in Detroit
@@ -34,7 +35,7 @@ const Home = (props) => {
             <aside>
               <h2>Who are the worst speculators?</h2>
               <img
-                src="https://property-praxis-web.s3-us-west-2.amazonaws.com/noun_marketing_real+estate_2.svg"
+                src={nounMarketingRealEstate2}
                 alt="An illustration of an investor"
               ></img>
               <p>
@@ -45,7 +46,7 @@ const Home = (props) => {
             <aside>
               <h2>What properties does a speculator own?</h2>
               <img
-                src="https://property-praxis-web.s3-us-west-2.amazonaws.com/noun_marketing_real_estate.svg"
+                src={nounMarketingRealEstate}
                 alt="An illustration of a speculator"
               ></img>
               <p>
@@ -56,7 +57,7 @@ const Home = (props) => {
             <aside>
               <h2>Does a speculator own my property?</h2>
               <img
-                src="https://property-praxis-web.s3-us-west-2.amazonaws.com/noun_Landlord_Tenant.svg"
+                src={nounLandlordTenant}
                 alt="An illustration of hands passing a key to another hand"
               ></img>
               <p>

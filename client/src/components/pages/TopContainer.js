@@ -2,6 +2,7 @@ import React from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { triggerFetchError } from "../../actions/redirect";
 import { Link } from "react-router-dom";
+import logoTransparent from "../../assets/img/pp_logo_transparent.png";
 
 const TopContainer = (props) => {
   const { isFetchError } = useSelector((state) => state.redirect);
@@ -17,10 +18,7 @@ const TopContainer = (props) => {
     <div className="top-container">
       <div className="top-logo">
         <Link to={{ pathname: "/" }} onClick={() => hideError()}>
-          <img
-            src="https://property-praxis-web.s3-us-west-2.amazonaws.com/pp_logo_transparent.png"
-            alt="Property Praxis logo"
-          ></img>
+          <img src={logoTransparent} alt="Property Praxis logo"></img>
         </Link>
       </div>
 

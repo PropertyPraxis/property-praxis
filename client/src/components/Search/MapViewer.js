@@ -3,6 +3,7 @@ import PropTypes, { string } from "prop-types";
 import { handleGetViewerImage } from "../../actions/search";
 import { calculateDesiredBearing, bearingToBasic } from "../../utils/viewer";
 import * as Mapillary from "mapillary-js";
+import noImageIcon from "../../assets/img/no_image_icon.svg";
 
 class MapViewer extends Component {
   _getViewerImage = ({ longitude, latitude }) => {
@@ -111,7 +112,7 @@ class MapViewer extends Component {
       >
         <div className="no-viewer-image">
           <img
-            src="https://property-praxis-web.s3-us-west-2.amazonaws.com/no_image_icon.svg"
+            src={noImageIcon}
             alt="An illustration to indicate no image returned"
           ></img>
           <span>Image not available.</span>

@@ -1,6 +1,7 @@
 import React from "react";
 import Footer from "./Footer";
 import TopContainer from "./TopContainer";
+import nounAbout from "../../assets/img/noun_about.svg";
 
 const About = () => {
   return (
@@ -9,10 +10,7 @@ const About = () => {
         <TopContainer title="About the Project" />
         <div className="middle-container">
           <div>
-            <img
-              src="https://property-praxis-web.s3-us-west-2.amazonaws.com/noun_about.svg"
-              alt="An illustration of a question mark"
-            ></img>
+            <img src={nounAbout} alt="An illustration of a question mark"></img>
           </div>
           <div>
             <p>
