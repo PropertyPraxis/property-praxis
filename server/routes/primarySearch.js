@@ -9,6 +9,7 @@ router.get("/", async (req, res) => {
     let clientData;
 
     if (type === "address") {
+      // TODO: Query internal address list?
       const { data } = await queries.queryMapboxAPI({
         place,
         coordinates,

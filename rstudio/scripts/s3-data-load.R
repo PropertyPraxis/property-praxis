@@ -759,7 +759,7 @@ log_info("Cleaning up global environement...")
 conn <- RPostgreSQL::dbConnect(
   "PostgreSQL",
   host = "postgres",
-  dbname = "db",
+  dbname = Sys.getenv("DB_NAME"),
   user = Sys.getenv("DB_USER"),
   password = Sys.getenv("DB_PASSWORD")
 )
