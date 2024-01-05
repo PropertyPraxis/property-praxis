@@ -102,6 +102,7 @@ module "s3" {
 
   website = {
     index_document = "index.html"
+    error_document = "index.html"
   }
 
   cors_rule = [
@@ -396,7 +397,7 @@ module "ecs_service" {
       ]
       environment = [
         {
-          name = "NODE_ENV"
+          name  = "NODE_ENV"
           value = "production"
         },
         {
