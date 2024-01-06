@@ -1,0 +1,153 @@
+name: CICD
+
+env:
+  VITE_PUBLIC_URL: ""
+  VITE_BASE_URL: ""
+
+permissions:
+  id-token: write
+  contents: read
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+  push:
+  workflow_dispatch:
+
+jobs:
+  client:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: client
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - uses: actions/cache@v3
+        with:
+          path: .npm
+          key: npm-client-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            npm-client-
+
+      - run: npm ci --prefer-offline --no-audit --no-optional
+
+      - run: npm run lint
+
+      - run: npm run prettier
+
+      - run: npm run build
+
+  server:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: server
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - uses: actions/cache@v3
+        with:
+          path: .npm
+          key: npm-server-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            npm-server-
+
+      - run: npm ci --prefer-offline --no-audit --no-optional
+
+      - run: npm run lint
+
+      - run: npm run prettier
+
+      - run: npm run build
+
+  # deploy:
+  #   needs: [client, server]
+  #   if: github.repository_owner == 'PropertyPraxis' && github.ref == 'refs/heads/production' && github.event_name == 'push'
+  #   runs-on: ubuntu-latest
+
+  #   env:
+  #     DEPLOY_ENV: ${{ github.ref == 'refs/heads/production' && 'prod' || 'prod' }}
+
+  #   steps:
+  #     - uses: actions/checkout@v4
+
+  #     - name: Configure AWS credentials
+  #       uses: aws-actions/configure-aws-credentials@v4
+  #       with:
+  #         role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/ptap-terraform-github-role
+  #         aws-region: us-east-1
+
+  #     - uses: actions/setup-node@v4
+  #       with:
+  #         node-version: 20
+
+  #     - uses: actions/cache@v3
+  #       working-directory: client
+  #       with:
+  #         path: .npm
+  #         key: npm-client-${{ hashFiles('**/package-lock.json') }}
+  #         restore-keys: |
+  #           npm-client-
+
+  #     - name: Build assets for ${{ env.DEPLOY_ENV }}
+  #       working-directory: client
+  #       env:
+  #         S3_BUCKET: property-praxis-${{ env.DEPLOY_ENV }}-assets
+  #         VITE_PUBLIC_URL: https://propertypraxis.com
+  #         VITE_BASE_URL: ""
+  #       run: |
+  #         npm ci --prefer-offline --no-audit --no-optional
+  #         npm run build
+
+  #     - env:
+  #         S3_BUCKET: property-praxis-${{ env.DEPLOY_ENV }}-assets
+  #       working-directory: client
+  #       run: aws s3 cp ./dist/ s3://$S3_BUCKET/ --cache-control no-cache --recursive
+
+  #     - name: Login to Amazon ECR
+  #       id: login-ecr
+  #       uses: aws-actions/amazon-ecr-login@v2
+
+  #     - name: Check if ECR image exists
+  #       id: container-exists
+  #       continue-on-error: true
+  #       env:
+  #         REPOSITORY: property-praxis-${{ env.DEPLOY_ENV }}
+  #         IMAGE_TAG: ${{ env.DEPLOY_ENV }}-${{ github.sha }}
+  #       run: aws ecr describe-images --repository-name=$REPOSITORY --image-ids=imageTag=$IMAGE_TAG
+
+  #     - name: Build, tag, and push docker image to ECR
+  #       if: steps.container-exists.outcome != 'success'
+  #       working-directory: server
+  #       env:
+  #         REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+  #         REPOSITORY: property-praxis-${{ env.DEPLOY_ENV }}
+  #         IMAGE_TAG: ${{ env.DEPLOY_ENV }}-${{ github.sha }}
+  #       run: |
+  #         docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
+  #         docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+
+  #     - uses: hashicorp/setup-terraform@v2
+  #       with:
+  #         terraform_version: 1.1.7
+
+  #     - name: Update Lambda with Terraform
+  #       working-directory: ./tf/${{ env.DEPLOY_ENV }}
+  #       env:
+  #         TF_VAR_lambda_image_tag: ${{ env.DEPLOY_ENV }}-${{ github.sha }}
+  #       run: |
+  #         terraform init
+  #         terraform apply -auto-approve
