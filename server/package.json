@@ -1,15 +1,15 @@
 {
-  "name": "docker-dev",
+  "name": "property-praxis-server",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "lint": "eslint \"/*.{js,jsx,ts}\" \"./config/**/*.{js,jsx,ts}\" \"./db/**/*.{js,jsx,ts}\" \"./routes/**/*.{js,jsx,ts}\" \"./utils/**/*.{js,jsx,ts}\"",
-    "lint:fix": "eslint --quiet --fix \"/*.{js,jsx,ts}\" \"./config/**/*.{js,jsx,ts}\" \"./db/**/*.{js,jsx,ts}\" \"./routes/**/*.{js,jsx,ts}\" \"./utils/**/*.{js,jsx,ts}\"",
-    "prettier": "prettier --check \"/*.{js,jsx,ts}\" \"./{config,db,routes,utils}/**/*.{js,jsx,css}\"",
-    "prettier:fix": "prettier --write \"/*.{js,jsx,ts}\" \"./{config,db,routes,utils}/**/*.{js,jsx,css}\""
+    "lint": "eslint \"*.{js,jsx,ts}\" \"./config/**/*.{js,jsx,ts}\" \"./db/**/*.{js,jsx,ts}\" \"./routes/**/*.{js,jsx,ts}\" \"./utils/**/*.{js,jsx,ts}\"",
+    "lint:fix": "eslint --quiet --fix \"*.{js,jsx,ts}\" \"./config/**/*.{js,jsx,ts}\" \"./db/**/*.{js,jsx,ts}\" \"./routes/**/*.{js,jsx,ts}\" \"./utils/**/*.{js,jsx,ts}\"",
+    "prettier": "prettier --check \"*.{js,jsx,ts}\" \"./{config,db,routes,utils}/**/*.{js,jsx,css}\"",
+    "prettier:fix": "prettier --write \"*.{js,jsx,ts}\" \"./{config,db,routes,utils}/**/*.{js,jsx,css}\""
   },
   "author": "",
   "license": "ISC",
