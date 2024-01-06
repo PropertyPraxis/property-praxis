@@ -4,7 +4,11 @@
   "private": true,
   "scripts": {
     "start": "VITE_PUBLIC_URL=\"\" vite --host",
-    "build": "VITE_PUBLIC_URL=\"\" vite build"
+    "build": "VITE_PUBLIC_URL=\"\" vite build",
+    "lint": "eslint \"./src/**/*.{js,jsx,ts}\"",
+    "lint:fix": "eslint --quiet --fix \"./src/**/*.{js,jsx,ts}\"",
+    "prettier": "prettier --check \"./src/**/*.{js,jsx,css}\"",
+    "prettier:fix": "prettier --write \"./src/**/*.{js,jsx,css}\""
   },
   "dependencies": {
     "@turf/turf": "^6.5.0",
@@ -63,6 +67,13 @@
         "version": "detect"
       }
     }
+  },
+  "prettier": {
+    "endOfLine": "lf",
+    "semi": false,
+    "singleQuote": false,
+    "tabWidth": 2,
+    "trailingComma": "es5"
   },
   "browserslist": {
     "production": [

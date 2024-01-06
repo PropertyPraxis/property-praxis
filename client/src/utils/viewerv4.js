@@ -1,4 +1,4 @@
-import { Viewer, SimpleMarker } from "mapillary-js";
+import { Viewer, SimpleMarker } from "mapillary-js"
 
 function createMarker(markerId, lngLat, color) {
   const marker = new SimpleMarker(markerId, lngLat, {
@@ -7,30 +7,29 @@ function createMarker(markerId, lngLat, color) {
     color,
     opacity: 0.5,
     interactive: true,
-  });
-  return marker;
+  })
+  return marker
 }
 
-let viewer;
+let viewer
 
 export function init(opts) {
-  const { accessToken, container } = opts;
-  const imageId = "1182252392217616";
+  const { accessToken, container } = opts
+  const imageId = "1182252392217616"
 
   const componentOptions = {
     cover: false,
     marker: true,
-  };
+  }
   const viewerOptions = {
     accessToken,
     component: componentOptions,
     container,
-    imageId
-  };
+    imageId,
+  }
 
-
-  viewer = new Viewer(viewerOptions);
-  viewer.moveTo(imageId).catch((error) => console.warn(error));
+  viewer = new Viewer(viewerOptions)
+  viewer.moveTo(imageId).catch((error) => console.warn(error))
 
   //   const markerComponent = viewer.getComponent('marker');
 
@@ -153,6 +152,6 @@ export function init(opts) {
 
 export function dispose() {
   if (viewer) {
-    viewer.remove();
+    viewer.remove()
   }
 }

@@ -1,6 +1,6 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import logoTransparent from "../../assets/img/pp_logo_transparent.png";
+import React from "react"
+import { Link } from "react-router-dom"
+import logoTransparent from "../../assets/img/pp_logo_transparent.png"
 
 export default function Logo() {
   return (
@@ -9,5 +9,5 @@ export default function Logo() {
         <img src={logoTransparent} alt="Property Praxis Logo"></img>
       </div>
     </Link>
-  );
+  )
 }

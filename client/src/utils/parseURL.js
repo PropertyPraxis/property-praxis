@@ -1,4 +1,4 @@
-import queryString from "query-string";
+import queryString from "query-string"
 
 export function URLParamsToSearchParams(searchQuery) {
   const {
@@ -8,24 +8,24 @@ export function URLParamsToSearchParams(searchQuery) {
     place = null,
     coordinates: searchCoordinates = null,
     year: searchYear = null,
-  } = queryString.parse(searchQuery);
+  } = queryString.parse(searchQuery)
 
-  let searchTerm;
+  let searchTerm
 
   // this assumes that there can only be one search term
   switch (searchType) {
     case "zipcode":
-      searchTerm = code;
-      break;
+      searchTerm = code
+      break
     case "speculator":
-      searchTerm = ownid;
-      break;
+      searchTerm = ownid
+      break
     case "address":
-      searchTerm = place;
-      break;
+      searchTerm = place
+      break
     default:
-      console.error(`Unkown search type:${searchType}`);
-      break;
+      console.error(`Unkown search type:${searchType}`)
+      break
   }
 
   return {
@@ -33,7 +33,7 @@ export function URLParamsToSearchParams(searchQuery) {
     searchTerm,
     searchCoordinates,
     searchYear,
-  };
+  }
 }
 
 export function URLParamsToAPIQueryString(searchQuery, layer) {
@@ -44,10 +44,10 @@ export function URLParamsToAPIQueryString(searchQuery, layer) {
     place = null,
     year = null,
     coordinates = null,
-  } = queryString.parse(searchQuery);
+  } = queryString.parse(searchQuery)
 
-  const route = "/api/geojson";
-  let qs;
+  const route = "/api/geojson"
+  let qs
 
   if (layer === "parcels") {
     switch (type) {
@@ -56,34 +56,34 @@ export function URLParamsToAPIQueryString(searchQuery, layer) {
           qs = `${route}?${queryString.stringify(
             { type: "parcels-by-code-speculator", ownid, code, year },
             { sort: false, skipNull: true }
-          )}`;
-          break;
+          )}`
+          break
         } else if (code && year) {
           qs = `${route}?${queryString.stringify(
             { type: "parcels-by-code", code, year },
             { sort: false, skipNull: true }
-          )}`;
-          break;
+          )}`
+          break
         } else {
-          qs = null;
-          break;
+          qs = null
+          break
         }
       case "speculator":
         if (ownid && code && year) {
           qs = `${route}?${queryString.stringify(
             { type: "parcels-by-speculator-code", ownid, code, year },
             { sort: false, skipNull: true }
-          )}`;
-          break;
+          )}`
+          break
         } else if (ownid && year) {
           qs = `${route}?${queryString.stringify(
             { type: "parcels-by-speculator", ownid, year },
             { sort: false, skipNull: true }
-          )}`;
-          break;
+          )}`
+          break
         } else {
-          qs = null;
-          break;
+          qs = null
+          break
         }
 
       case "address":
@@ -91,15 +91,15 @@ export function URLParamsToAPIQueryString(searchQuery, layer) {
           qs = `${route}?${queryString.stringify(
             { type: "parcels-by-geocode", place, coordinates, year },
             { sort: false, skipNull: true }
-          )}`;
-          break;
+          )}`
+          break
         } else {
-          qs = null;
-          break;
+          qs = null
+          break
         }
       default:
-        qs = null;
-        break;
+        qs = null
+        break
     }
   } else if (layer === "zipcode") {
     switch (type) {
@@ -108,38 +108,38 @@ export function URLParamsToAPIQueryString(searchQuery, layer) {
           qs = `${route}?${queryString.stringify(
             { type: "zipcode-intersect", ownid, year },
             { sort: false, skipNull: true }
-          )}`;
+          )}`
 
-          break;
+          break
         } else if (code && year) {
           qs = `${route}?${queryString.stringify(
             { type: "zipcode-intersect", code, year },
             { sort: false, skipNull: true }
-          )}`;
+          )}`
 
-          break;
+          break
         } else {
-          qs = null;
-          break;
+          qs = null
+          break
         }
       case "speculator":
         if (ownid && code && year) {
           qs = `${route}?${queryString.stringify(
             { type: "zipcode-intersect", ownid, code, year },
             { sort: false, skipNull: true }
-          )}`;
+          )}`
 
-          break;
+          break
         } else if (ownid && year) {
           qs = `${route}?${queryString.stringify(
             { type: "zipcode-intersect", ownid, year },
             { sort: false, skipNull: true }
-          )}`;
+          )}`
 
-          break;
+          break
         } else {
-          qs = null;
-          break;
+          qs = null
+          break
         }
 
       case "address":
@@ -147,17 +147,17 @@ export function URLParamsToAPIQueryString(searchQuery, layer) {
           qs = `${route}?${queryString.stringify(
             { type: "zipcode-intersect", place, coordinates, year },
             { sort: false, skipNull: true }
-          )}`;
+          )}`
 
-          break;
+          break
         } else {
-          qs = null;
-          break;
+          qs = null
+          break
         }
       default:
-        qs = null;
-        break;
+        qs = null
+        break
     }
   }
-  return qs;
+  return qs
 }

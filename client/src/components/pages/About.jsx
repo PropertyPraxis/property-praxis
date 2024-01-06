@@ -1,7 +1,7 @@
-import React from "react";
-import Footer from "./Footer";
-import TopContainer from "./TopContainer";
-import nounAbout from "../../assets/img/noun_about.svg";
+import React from "react"
+import Footer from "./Footer"
+import TopContainer from "./TopContainer"
+import nounAbout from "../../assets/img/noun_about.svg"
 
 const About = () => {
   return (
@@ -69,7 +69,7 @@ const About = () => {
         <Footer />
       </div>
     </main>
-  );
-};
+  )
+}
 
-export default About;
+export default About

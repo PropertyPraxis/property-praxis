@@ -6,7 +6,7 @@ import {
   parcelStop5,
   parcelStop6,
   parcelStop7,
-} from "../../utils/colors";
+} from "../../utils/colors"
 
 //this is where specific mapstyles will go for layers.
 
@@ -18,7 +18,7 @@ const stops = [
   [5, parcelStop5],
   [6, parcelStop6],
   [7, parcelStop7],
-];
+]
 
 // const stops = [
 //   [1, "#f6d2a9;"],
@@ -36,7 +36,7 @@ export const parcelLayer = {
   minzoom: 13,
   buffer: 0,
   tolerance: 0.9,
-};
+}
 
 export const parcelHighlightLayer = {
   id: "highlight-parcel-polygon",
@@ -50,7 +50,7 @@ export const parcelHighlightLayer = {
     "fill-opacity": 1,
     "fill-outline-color": "rgba(0,0,0,1)",
   },
-};
+}
 
 export const parcelCentroid = {
   id: "parcel-centroid",
@@ -58,7 +58,7 @@ export const parcelCentroid = {
   maxzoom: 13,
   buffer: 0,
   tolerance: 0.9,
-};
+}
 
 // export const parcelCentroidHighlightLayer = {
 //   id: "highlight-parcel-centroid",
@@ -76,7 +76,7 @@ export const zipsLayer = {
     "line-dasharray": [3, 3],
     "line-color": "red",
   },
-};
+}
 
 export const zipsLabel = {
   id: "zips-label",
@@ -91,4 +91,4 @@ export const zipsLabel = {
     "text-halo-color": "white",
     "text-halo-width": 1,
   },
-};
+}

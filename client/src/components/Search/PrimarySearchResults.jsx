@@ -1,46 +1,46 @@
-import React, { Component } from "react";
-import { Link, withRouter } from "react-router-dom";
-import PropTypes from "prop-types";
-import { updatePrimarySearch } from "../../actions/search";
+import React, { Component } from "react"
+import { Link, withRouter } from "react-router-dom"
+import PropTypes from "prop-types"
+import { updatePrimarySearch } from "../../actions/search"
 import {
   sanitizeSearchResult,
   createQueryStringFromParams,
   createResultFromParams,
-} from "../../utils/helper";
-import zipcodeIcon from "../../assets/img/zipcode-icon-transparent.png";
-import speculatorIcon from "../../assets/img/speculator-icon-transparent.png";
-import mapMarkerIcon from "../../assets/img/map-marker-transparent.png";
-import { uiMedGray } from "../../utils/colors";
+} from "../../utils/helper"
+import zipcodeIcon from "../../assets/img/zipcode-icon-transparent.png"
+import speculatorIcon from "../../assets/img/speculator-icon-transparent.png"
+import mapMarkerIcon from "../../assets/img/map-marker-transparent.png"
+import { uiMedGray } from "../../utils/colors"
 
 const primaryResultIcons = {
   address: mapMarkerIcon,
   speculator: speculatorIcon,
   zipcode: zipcodeIcon,
-};
+}
 
 class PrimaryResults extends Component {
   _handleOnMouseOver = () => {
     // turn active state to true
-    this.props.dispatch(updatePrimarySearch({ isActive: true }));
-  };
+    this.props.dispatch(updatePrimarySearch({ isActive: true }))
+  }
 
   _handleOnMouseOut = () => {
-    this.props.dispatch(updatePrimarySearch({ isActive: false }));
-  };
+    this.props.dispatch(updatePrimarySearch({ isActive: false }))
+  }
 
   _handleOnClick = () => {
-    this.props.dispatch(updatePrimarySearch({ isOpen: false }));
-  };
+    this.props.dispatch(updatePrimarySearch({ isOpen: false }))
+  }
 
   componentWillUnmount() {
     // turn active state to false
-    this.props.dispatch(updatePrimarySearch({ isActive: false }));
+    this.props.dispatch(updatePrimarySearch({ isActive: false }))
   }
 
   render() {
-    const { searchYear } = this.props.searchState.searchParams;
-    const { index } = this.props.searchState.primarySearch;
-    const { results } = this.props;
+    const { searchYear } = this.props.searchState.searchParams
+    const { index } = this.props.searchState.primarySearch
+    const { results } = this.props
 
     return (
       <section
@@ -60,7 +60,7 @@ class PrimaryResults extends Component {
             } = sanitizeSearchResult({
               result,
               year: searchYear,
-            });
+            })
 
             const searchQueryRoute = createQueryStringFromParams(
               {
@@ -72,7 +72,7 @@ class PrimaryResults extends Component {
                 year,
               },
               "/map"
-            );
+            )
 
             return (
               <Link key={searchQueryRoute} to={searchQueryRoute}>
@@ -90,11 +90,11 @@ class PrimaryResults extends Component {
                   })}
                 </li>
               </Link>
-            );
+            )
           })}
         </ul>
       </section>
-    );
+    )
   }
 }
 
@@ -104,21 +104,21 @@ PrimaryResults.propTypes = {
     searchYear: PropTypes.string.isRequired,
     primaryIndex: PropTypes.number.isRequired,
   }),
-};
+}
 
 const PrimaryResultsContainer = (props) => {
-  const { isOpen, results } = props.searchState.primarySearch;
+  const { isOpen, results } = props.searchState.primarySearch
 
   if (isOpen && results && results.length > 0) {
-    return <PrimaryResults {...props} results={results} />;
+    return <PrimaryResults {...props} results={results} />
   }
-  return null;
-};
+  return null
+}
 
 PrimaryResultsContainer.propTypes = {
   searchState: PropTypes.shape({
     primaryResults: PropTypes.array.isRequired,
   }).isRequired,
-};
+}
 
-export default withRouter(PrimaryResultsContainer);
+export default withRouter(PrimaryResultsContainer)

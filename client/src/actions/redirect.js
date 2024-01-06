@@ -1,4 +1,4 @@
-export const FETCH_ERROR = "FETCH_ERROR";
+export const FETCH_ERROR = "FETCH_ERROR"
 
 export function triggerFetchError(
   isFetchError,
@@ -7,5 +7,5 @@ export function triggerFetchError(
   return {
     type: FETCH_ERROR,
     payload: { isFetchError, message },
-  };
+  }
 }

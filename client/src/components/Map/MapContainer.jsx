@@ -1,19 +1,17 @@
-import React, { Component } from "react";
-import { withRouter } from "react-router-dom";
-import { connect } from "react-redux";
-import PropTypes from "prop-types";
-import {
-  URLParamsToSearchParams,
-} from "../../utils/parseURL";
-import PraxisMap from "./Map";
+import React, { Component } from "react"
+import { withRouter } from "react-router-dom"
+import { connect } from "react-redux"
+import PropTypes from "prop-types"
+import { URLParamsToSearchParams } from "../../utils/parseURL"
+import PraxisMap from "./Map"
 
 /*The MapContainer is responsible for passing 
 the search params to the map*/
 class MapContainer extends Component {
   render() {
-    const searchParams = URLParamsToSearchParams(this.props.location.search);
+    const searchParams = URLParamsToSearchParams(this.props.location.search)
 
-    return <PraxisMap {...this.props} searchParams={searchParams} />;
+    return <PraxisMap {...this.props} searchParams={searchParams} />
   }
 }
 
@@ -26,7 +24,7 @@ MapContainer.propTypes = {
   controller: PropTypes.object.isRequired,
   location: PropTypes.object.isRequired,
   mapParams: PropTypes.object.isRequired,
-};
+}
 
 function mapStateToProps({
   mapState,
@@ -43,10 +41,10 @@ function mapStateToProps({
     currentFeature,
     results,
     controller,
-  };
+  }
 }
 
-export default withRouter(connect(mapStateToProps)(MapContainer));
+export default withRouter(connect(mapStateToProps)(MapContainer))
 
 // _setSearchParams = ({
 //   searchType,

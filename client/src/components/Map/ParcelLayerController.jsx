@@ -1,27 +1,27 @@
-import React, { Component } from "react";
-import PropTypes from "prop-types";
+import React, { Component } from "react"
+import PropTypes from "prop-types"
 // import Slider from "react-rangeslider";
 import {
   setSliderValueAction,
   setParcelFilterAction,
-} from "../../actions/controller";
-import "react-rangeslider/lib/index.css";
-import styleVars from "../../utils/colors";
+} from "../../actions/controller"
+import "react-rangeslider/lib/index.css"
+import styleVars from "../../utils/colors"
 
 class ParcelLayerController extends Component {
   _getColors = (styles) => {
-    return styles.filter((style) => style[0].indexOf("parcelStop") > -1);
-  };
+    return styles.filter((style) => style[0].indexOf("parcelStop") > -1)
+  }
 
   render() {
-    const { sliderValue, filter } = this.props.controller;
-    const parcelColors = this._getColors(Object.entries(styleVars));
-    const labels = ["10-20", "100", "200", "500", "1000", "1500", "2000"];
+    const { sliderValue, filter } = this.props.controller
+    const parcelColors = this._getColors(Object.entries(styleVars))
+    const labels = ["10-20", "100", "200", "500", "1000", "1500", "2000"]
     return (
       <div className="parcel-layer-controller-container">
         <div className="parcel-layer-palette-labels">
           {labels.map((label) => {
-            return <div key={label}>{label}</div>;
+            return <div key={label}>{label}</div>
           })}
         </div>
         <div className="parcel-layer-palette">
@@ -36,11 +36,11 @@ class ParcelLayerController extends Component {
                     : { backgroundColor: styleVars.uiLightGray }
                 }
                 onClick={(event) => {
-                  event.preventDefault();
-                  this.props.dispatch(setParcelFilterAction(labels[index]));
+                  event.preventDefault()
+                  this.props.dispatch(setParcelFilterAction(labels[index]))
                 }}
               ></div>
-            );
+            )
           })}
         </div>
         <div className="slider-horizontal">
@@ -50,12 +50,12 @@ class ParcelLayerController extends Component {
             max={100}
             orientation="horizontal"
             onChange={(value) => {
-              this.props.dispatch(setSliderValueAction(value));
+              this.props.dispatch(setSliderValueAction(value))
             }}
           />
         </div>
       </div>
-    );
+    )
   }
 }
 
@@ -65,6 +65,6 @@ ParcelLayerController.propTypes = {
     sliderValue: PropTypes.number.isRequired,
   }).isRequired,
   dispatch: PropTypes.func.isRequired,
-};
+}
 
-export default ParcelLayerController;
+export default ParcelLayerController

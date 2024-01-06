@@ -1,19 +1,19 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
-import { triggerFetchError } from "../../actions/redirect";
-import { getYearString } from "../../utils/helper";
-import macLogoTransparent from "../../assets/img/mac_logo_transparent.png";
+import React from "react"
+import { Link } from "react-router-dom"
+import { useSelector, useDispatch } from "react-redux"
+import { triggerFetchError } from "../../actions/redirect"
+import { getYearString } from "../../utils/helper"
+import macLogoTransparent from "../../assets/img/mac_logo_transparent.png"
 
 const Footer = () => {
-  const { isFetchError } = useSelector((state) => state.redirect);
-  const dispatch = useDispatch();
+  const { isFetchError } = useSelector((state) => state.redirect)
+  const dispatch = useDispatch()
 
   const hideError = () => {
     if (isFetchError) {
-      dispatch(triggerFetchError(false));
+      dispatch(triggerFetchError(false))
     }
-  };
+  }
 
   return (
     <div>
@@ -58,7 +58,7 @@ const Footer = () => {
         </div>
       </footer>
     </div>
-  );
-};
+  )
+}
 
-export default Footer;
+export default Footer

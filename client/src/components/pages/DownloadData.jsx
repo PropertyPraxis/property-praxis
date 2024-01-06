@@ -1,6 +1,6 @@
-import React from "react";
-import Footer from "./Footer";
-import TopContainer from "./TopContainer";
+import React from "react"
+import Footer from "./Footer"
+import TopContainer from "./TopContainer"
 
 const DownloadData = (props) => {
   return (
@@ -11,7 +11,7 @@ const DownloadData = (props) => {
         <Footer />
       </div>
     </main>
-  );
-};
+  )
+}
 
-export default DownloadData;
+export default DownloadData

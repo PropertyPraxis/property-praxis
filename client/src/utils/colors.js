@@ -1,4 +1,4 @@
-import colors from "../scss/colors.module.scss";
+import colors from "../scss/colors.module.scss"
 
 const {
   ppGreen,
@@ -14,7 +14,7 @@ const {
   parcelStop5,
   parcelStop6,
   parcelStop7,
-} = colors;
+} = colors
 
 export {
   ppGreen,
@@ -30,4 +30,4 @@ export {
   parcelStop5,
   parcelStop6,
   parcelStop7,
-};
+}

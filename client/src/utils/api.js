@@ -1,12 +1,12 @@
-import queryString from "query-string";
-import store from "../reducers";
-import { triggerFetchError } from "../actions/redirect";
-import { toggleLoadingIndicatorAction } from "../actions/mapState";
+import queryString from "query-string"
+import store from "../reducers"
+import { triggerFetchError } from "../actions/redirect"
+import { toggleLoadingIndicatorAction } from "../actions/mapState"
 
 function triggerError(msg) {
-  store.dispatch(triggerFetchError(true, msg));
-  store.dispatch(toggleLoadingIndicatorAction(false));
-  console.error(msg);
+  store.dispatch(triggerFetchError(true, msg))
+  store.dispatch(toggleLoadingIndicatorAction(false))
+  console.error(msg)
 }
 
 export async function APIQueryStringFromSearchParams(
@@ -15,9 +15,9 @@ export async function APIQueryStringFromSearchParams(
 ) {
   try {
     if (searchTerm === "") {
-      return [];
+      return []
     }
-    let qs;
+    let qs
     switch (searchType) {
       case "address":
         qs = `${route}?${queryString.stringify(
@@ -28,52 +28,52 @@ export async function APIQueryStringFromSearchParams(
             year: searchYear,
           },
           { sort: false, skipNull: true }
-        )}`;
-        break;
+        )}`
+        break
       case "zipcode":
         qs = `${route}?${queryString.stringify(
           { type: searchType, code: searchTerm, year: searchYear },
           { sort: false, skipNull: true }
-        )}`;
-        break;
+        )}`
+        break
       case "speculator":
         qs = `${route}?${queryString.stringify(
           { type: searchType, ownid: searchTerm, year: searchYear },
           { sort: false, skipNull: true }
-        )}`;
-        break;
+        )}`
+        break
       default:
         console.error(
           `Search failed. Unknown API search param type: ${searchType}`
-        );
-        qs = null;
-        break;
+        )
+        qs = null
+        break
     }
 
-    const response = await fetch(qs);
-    return await response.json();
+    const response = await fetch(qs)
+    return await response.json()
   } catch (err) {
-    const msg = `An error occured querying API from params: ${err.message}`;
-    triggerError(msg);
+    const msg = `An error occured querying API from params: ${err.message}`
+    triggerError(msg)
   }
 }
 
 export async function APISearchQueryFromRoute(route) {
   try {
-    const respose = await fetch(route);
-    const json = await respose.json();
-    return json;
+    const respose = await fetch(route)
+    const json = await respose.json()
+    return json
   } catch (err) {
-    console.log("err", err);
-    const msg = `An error occurred querying API from route: ${err.message}`;
-    triggerError(msg);
+    console.log("err", err)
+    const msg = `An error occurred querying API from route: ${err.message}`
+    triggerError(msg)
   }
 }
 
 export function isGeoJSONEmpty(geojson) {
   if (geojson && geojson.features.length === 0) {
-    return true;
+    return true
   } else {
-    return false;
+    return false
   }
 }

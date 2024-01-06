@@ -1,13 +1,13 @@
-import React from "react";
-import { connect } from "react-redux";
-import { withRouter } from "react-router-dom";
-import PropTypes from "prop-types";
-import SearchBar from "../Search/SearchBar";
-import Footer from "./Footer";
-import nounMarketingRealEstate2 from "../../assets/img/noun_marketing_real estate_2.svg";
-import nounMarketingRealEstate from "../../assets/img/noun_marketing_real_estate.svg";
-import nounLandlordTenant from "../../assets/img/noun_Landlord_Tenant.svg";
-import logoTransparent from "../../assets/img/pp_logo_transparent.png";
+import React from "react"
+import { connect } from "react-redux"
+import { withRouter } from "react-router-dom"
+import PropTypes from "prop-types"
+import SearchBar from "../Search/SearchBar"
+import Footer from "./Footer"
+import nounMarketingRealEstate2 from "../../assets/img/noun_marketing_real estate_2.svg"
+import nounMarketingRealEstate from "../../assets/img/noun_marketing_real_estate.svg"
+import nounLandlordTenant from "../../assets/img/noun_Landlord_Tenant.svg"
+import logoTransparent from "../../assets/img/pp_logo_transparent.png"
 
 const Home = (props) => {
   return (
@@ -85,8 +85,8 @@ const Home = (props) => {
       </div>
       <Footer />
     </main>
-  );
-};
+  )
+}
 
 Home.propTypes = {
   searchState: PropTypes.object.isRequired,
@@ -94,10 +94,10 @@ Home.propTypes = {
   mapState: PropTypes.object.isRequired,
   results: PropTypes.object.isRequired,
   dipatch: PropTypes.func.isRequired,
-};
-
-function mapStateToProps({ searchState, mapData, mapState, results }) {
-  return { searchState, mapData, mapState, results };
 }
 
-export default withRouter(connect(mapStateToProps)(Home));
+function mapStateToProps({ searchState, mapData, mapState, results }) {
+  return { searchState, mapData, mapState, results }
+}
+
+export default withRouter(connect(mapStateToProps)(Home))

@@ -1,30 +1,30 @@
-import React, { Component } from "react";
-import { DebounceInput } from "react-debounce-input";
-import PropTypes from "prop-types";
+import React, { Component } from "react"
+import { DebounceInput } from "react-debounce-input"
+import PropTypes from "prop-types"
 import {
   handlePrimarySearchQuery,
   handlePrimarySearchAll,
   updateSearchParams,
   updatePrimarySearch,
   updateDetailedSearch,
-} from "../../actions/search";
-import { URLParamsToSearchParams } from "../../utils/parseURL";
+} from "../../actions/search"
+import { URLParamsToSearchParams } from "../../utils/parseURL"
 import {
   capitalizeFirstLetter,
   sanitizeSearchResult,
   createQueryStringFromParams,
-} from "../../utils/helper";
-import PrimaryResultsContainer from "./PrimarySearchResults";
-import searchIcon from "../../assets/img/search.png";
-import { ppRose } from "../../utils/colors";
+} from "../../utils/helper"
+import PrimaryResultsContainer from "./PrimarySearchResults"
+import searchIcon from "../../assets/img/search.png"
+import { ppRose } from "../../utils/colors"
 
 class SearchBar extends Component {
-  _inputRef = React.createRef();
+  _inputRef = React.createRef()
 
   /*Passed down to Search Results.
   Changes the browser query string*/
   _setSearchLocationParams = (result) => {
-    const { searchYear } = this.props.searchState.searchParams;
+    const { searchYear } = this.props.searchState.searchParams
 
     if (result) {
       const route = createQueryStringFromParams(
@@ -33,10 +33,10 @@ class SearchBar extends Component {
           year: searchYear,
         }),
         "/map"
-      );
-      this.props.history.push(route);
+      )
+      this.props.history.push(route)
     }
-  };
+  }
 
   _setSearchStateParams = ({
     searchType,
@@ -51,27 +51,27 @@ class SearchBar extends Component {
         searchYear,
         searchCoordinates,
       })
-    );
+    )
 
-    this.props.dispatch(updatePrimarySearch({ results: null, index: 0 }));
-  };
+    this.props.dispatch(updatePrimarySearch({ results: null, index: 0 }))
+  }
 
   _setSearchPlaceholderText = (searchType) => {
     switch (searchType) {
       case "all":
-        return "Search Property Praxis...";
+        return "Search Property Praxis..."
       case "address":
-        return "Search Adresses...";
+        return "Search Adresses..."
       case "speculator":
-        return "Search Speculators...";
+        return "Search Speculators..."
       case "zipcode":
-        return "Search Zipcodes...";
+        return "Search Zipcodes..."
       case "home":
-        return "Search for an address, speculator, or zipcode...";
+        return "Search for an address, speculator, or zipcode..."
       default:
-        return "Search Property Praxis...";
+        return "Search Property Praxis..."
     }
-  };
+  }
 
   _handleQueryPrimaryResults = ({ searchType, searchTerm, searchYear }) => {
     if (searchType === "all") {
@@ -80,7 +80,7 @@ class SearchBar extends Component {
           { searchTerm, searchYear },
           `/api/primary-search`
         )
-      );
+      )
     } else {
       // search type address, speculator, or zipcode
       this.props.dispatch(
@@ -92,33 +92,33 @@ class SearchBar extends Component {
           },
           "/api/primary-search"
         )
-      );
+      )
     }
-  };
+  }
 
   _handleOnChange = async (e) => {
-    const searchTerm = e.target.value;
-    const { searchType, searchYear } = this.props.searchState.searchParams;
+    const searchTerm = e.target.value
+    const { searchType, searchYear } = this.props.searchState.searchParams
 
-    this.props.dispatch(updateSearchParams({ searchTerm }));
+    this.props.dispatch(updateSearchParams({ searchTerm }))
 
     this._handleQueryPrimaryResults({
       searchType,
       searchTerm,
       searchYear,
-    });
-  };
+    })
+  }
 
   _handleOnFocus = () => {
-    this.props.dispatch(updatePrimarySearch({ isOpen: true }));
-  };
+    this.props.dispatch(updatePrimarySearch({ isOpen: true }))
+  }
 
   _handleOnBlur = () => {
-    const { isActive } = this.props.searchState.primarySearch;
+    const { isActive } = this.props.searchState.primarySearch
     if (!isActive) {
-      this.props.dispatch(updatePrimarySearch({ isOpen: false }));
+      this.props.dispatch(updatePrimarySearch({ isOpen: false }))
     }
-  };
+  }
 
   _handleSearchTypeButtonClick = (buttonType) => {
     this.props.dispatch(
@@ -127,9 +127,9 @@ class SearchBar extends Component {
         searchType: buttonType,
         searchCoordinates: null,
       })
-    );
+    )
 
-    this.props.dispatch(updatePrimarySearch({ results: null }));
+    this.props.dispatch(updatePrimarySearch({ results: null }))
     this.props.dispatch(
       updateDetailedSearch({
         results: null,
@@ -137,51 +137,51 @@ class SearchBar extends Component {
         drawerIsOpen: false,
         contentIsVisible: false,
       })
-    );
-  };
+    )
+  }
 
   _handleKeyPress = (e) => {
-    const { results, index } = this.props.searchState.primarySearch;
+    const { results, index } = this.props.searchState.primarySearch
     // if it is an enter key press
     if (e.key === "Enter") {
       if (results && results.length > 0) {
         // set location according to current index selection
-        this._setSearchLocationParams(results[index]);
-        this.props.dispatch(updatePrimarySearch({ isOpen: false }));
+        this._setSearchLocationParams(results[index])
+        this.props.dispatch(updatePrimarySearch({ isOpen: false }))
 
         // blur the input
-        this._inputRef.current.blur();
+        this._inputRef.current.blur()
       }
     }
-  };
+  }
 
   _handleOnKeyDown = (e) => {
-    const { results, index } = this.props.searchState.primarySearch;
+    const { results, index } = this.props.searchState.primarySearch
     if (e.key === "ArrowDown") {
       if (index < results.length - 1) {
-        this.props.dispatch(updatePrimarySearch({ index: index + 1 }));
+        this.props.dispatch(updatePrimarySearch({ index: index + 1 }))
       }
     }
-  };
+  }
 
   _handleOnKeyUp = (e) => {
-    const { index } = this.props.searchState.primarySearch;
+    const { index } = this.props.searchState.primarySearch
     if (e.key === "ArrowUp") {
       if (index > 0) {
-        this.props.dispatch(updatePrimarySearch({ index: index - 1 }));
+        this.props.dispatch(updatePrimarySearch({ index: index - 1 }))
       }
     }
-  };
+  }
 
   _handleSearchIconClick = () => {
-    const { results, index } = this.props.searchState.primarySearch;
+    const { results, index } = this.props.searchState.primarySearch
 
     if (results) {
-      this._setSearchLocationParams(results[index]);
+      this._setSearchLocationParams(results[index])
     } else {
-      this._inputRef.current.focus();
+      this._inputRef.current.focus()
     }
-  };
+  }
 
   _handleClearIconClick = () => {
     this.props.dispatch(
@@ -190,8 +190,8 @@ class SearchBar extends Component {
         searchType: "all",
         searchCoordinates: null,
       })
-    );
-    this.props.dispatch(updatePrimarySearch({ results: null, index: 0 }));
+    )
+    this.props.dispatch(updatePrimarySearch({ results: null, index: 0 }))
     this.props.dispatch(
       updateDetailedSearch({
         results: null,
@@ -199,69 +199,69 @@ class SearchBar extends Component {
         drawerIsOpen: false,
         contentIsVisible: false,
       })
-    );
-  };
+    )
+  }
 
   _handleYearSelect = (e) => {
-    this.props.dispatch(updateSearchParams({ searchYear: e.target.value }));
-  };
+    this.props.dispatch(updateSearchParams({ searchYear: e.target.value }))
+  }
 
   componentDidMount() {
     // parse URL and dispatch params
-    const { search: searchQuery, pathname } = this.props.history.location;
+    const { search: searchQuery, pathname } = this.props.history.location
     if (pathname === "/map") {
       const { searchType, searchTerm, searchCoordinates, searchYear } =
-        URLParamsToSearchParams(searchQuery);
+        URLParamsToSearchParams(searchQuery)
 
       this._setSearchStateParams({
         searchType,
         searchTerm,
         searchCoordinates,
         searchYear,
-      });
+      })
       this._handleQueryPrimaryResults({
         searchType,
         searchTerm,
         searchYear,
-      });
+      })
     }
   }
 
   componentDidUpdate(prevProps) {
     // set search if the full query string changes
-    const { search: searchQuery, pathname } = this.props.history.location;
+    const { search: searchQuery, pathname } = this.props.history.location
     if (prevProps.location.search !== searchQuery && pathname === "/map") {
       // parse URL and dispatch params
       const { searchType, searchTerm, searchYear, searchCoordinates } =
-        URLParamsToSearchParams(searchQuery);
+        URLParamsToSearchParams(searchQuery)
       this._setSearchStateParams({
         searchType,
         searchTerm,
         searchYear,
         searchCoordinates,
-      });
+      })
 
       this._handleQueryPrimaryResults({
         searchType,
         searchTerm,
         searchYear,
-      });
+      })
     } else if (prevProps.location.pathname !== pathname) {
       this._setSearchStateParams({
         searchTerm: "",
         searchType: "all",
         searchCoordinates: null,
         searchYear: "2020", //this is hardcoded and can be more dynamic
-      });
+      })
     }
   }
 
   render() {
     const { searchType, searchTerm, searchYear } =
-      this.props.searchState.searchParams;
-    const { searchYears } = this.props.searchState.searchBar;
+      this.props.searchState.searchParams
+    const { searchYears } = this.props.searchState.searchBar
 
-    const { searchBarType, showSearchButtons } = this.props;
+    const { searchBarType, showSearchButtons } = this.props
 
     if (searchYears) {
       return (
@@ -280,13 +280,13 @@ class SearchBar extends Component {
                     <div
                       key={button}
                       onClick={() => {
-                        this._handleSearchTypeButtonClick(button);
+                        this._handleSearchTypeButtonClick(button)
                       }}
                       style={button === searchType ? { color: ppRose } : null}
                     >
                       {capitalizeFirstLetter(button)}
                     </div>
-                  );
+                  )
                 })}
               </div>
             ) : null}
@@ -306,7 +306,7 @@ class SearchBar extends Component {
                       >
                         {result.praxisyear}
                       </option>
-                    );
+                    )
                   })}
                 </select>
               </div>
@@ -335,8 +335,8 @@ class SearchBar extends Component {
                   debounceTimeout={300}
                   onChange={this._handleOnChange}
                   onKeyPress={(event) => {
-                    event.persist();
-                    this._handleKeyPress(event);
+                    event.persist()
+                    this._handleKeyPress(event)
                   }}
                   onKeyDown={this._handleOnKeyDown}
                   onKeyUp={this._handleOnKeyUp}
@@ -354,10 +354,10 @@ class SearchBar extends Component {
             <PrimaryResultsContainer {...this.props} />
           </div>
         </section>
-      );
+      )
     }
 
-    return null;
+    return null
   }
 }
 
@@ -371,6 +371,6 @@ SearchBar.propTypes = {
     searchYears: PropTypes.oneOf([null, PropTypes.array]).isRequired,
   }),
   dispatch: PropTypes.func.isRequired,
-};
+}
 
-export default SearchBar;
+export default SearchBar

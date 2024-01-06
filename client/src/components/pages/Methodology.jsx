@@ -1,7 +1,7 @@
-import React from "react";
-import Footer from "./Footer";
-import TopContainer from "./TopContainer";
-import nounMethodologies from "../../assets/img/noun_methodologies.svg";
+import React from "react"
+import Footer from "./Footer"
+import TopContainer from "./TopContainer"
+import nounMethodologies from "../../assets/img/noun_methodologies.svg"
 
 const Methodology = () => {
   return (
@@ -32,7 +32,7 @@ const Methodology = () => {
         <Footer />
       </div>
     </main>
-  );
-};
+  )
+}
 
-export default Methodology;
+export default Methodology

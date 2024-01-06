@@ -1,11 +1,11 @@
-import React from "react";
-import { useSelector } from "react-redux";
-import Footer from "../pages/Footer";
-import TopContainer from "../pages/TopContainer";
-import errorIcon from "../../assets/img/error_icon.svg";
+import React from "react"
+import { useSelector } from "react-redux"
+import Footer from "../pages/Footer"
+import TopContainer from "../pages/TopContainer"
+import errorIcon from "../../assets/img/error_icon.svg"
 
 function Error() {
-  const { isFetchError, message } = useSelector((state) => state.redirect);
+  const { isFetchError, message } = useSelector((state) => state.redirect)
 
   if (isFetchError) {
     return (
@@ -21,9 +21,9 @@ function Error() {
           <Footer />
         </div>
       </main>
-    );
+    )
   }
-  return null;
+  return null
 }
 
-export default Error;
+export default Error
