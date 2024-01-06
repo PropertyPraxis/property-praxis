@@ -5,7 +5,11 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon index.js"
+    "dev": "nodemon index.js",
+    "lint": "eslint \"/*.{js,jsx,ts}\" \"./config/**/*.{js,jsx,ts}\" \"./db/**/*.{js,jsx,ts}\" \"./routes/**/*.{js,jsx,ts}\" \"./utils/**/*.{js,jsx,ts}\"",
+    "lint:fix": "eslint --quiet --fix \"/*.{js,jsx,ts}\" \"./config/**/*.{js,jsx,ts}\" \"./db/**/*.{js,jsx,ts}\" \"./routes/**/*.{js,jsx,ts}\" \"./utils/**/*.{js,jsx,ts}\"",
+    "prettier": "prettier --check \"/*.{js,jsx,ts}\" \"./{config,db,routes,utils}/**/*.{js,jsx,css}\"",
+    "prettier:fix": "prettier --write \"/*.{js,jsx,ts}\" \"./{config,db,routes,utils}/**/*.{js,jsx,css}\""
   },
   "author": "",
   "license": "ISC",
@@ -20,6 +24,35 @@
     "sql-template-strings": "^2.2.2"
   },
   "devDependencies": {
-    "nodemon": "^2.0.2"
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-prettier": "^5.1.2",
+    "nodemon": "^2.0.2",
+    "prettier": "^3.1.1",
+    "prettier-eslint": "^16.2.0"
+  },
+  "eslintConfig": {
+    "extends": [
+      "eslint:recommended",
+      "plugin:prettier/recommended"
+    ],
+    "parserOptions": {
+      "ecmaVersion": "latest"
+    },
+    "env": {
+      "node": true
+    },
+    "plugins": [
+      "import",
+      "prettier"
+    ]
+  },
+  "prettier": {
+    "endOfLine": "lf",
+    "semi": false,
+    "singleQuote": false,
+    "tabWidth": 2,
+    "trailingComma": "es5"
   }
 }

@@ -1,31 +1,31 @@
-const db = require("../db"); //index.js
-const fetch = require("node-fetch");
-const keys = require("../config/keys");
+const db = require("../db") //index.js
+const fetch = require("node-fetch")
+const keys = require("../config/keys")
 
 /*PG DB query types*/
-const PRIMARY_ZIPCODE = "PRIMARY_ZIPCODE";
-const PRIMARY_SPECULATOR = "PRIMARY_SPECULATOR";
-const GEOJSON_ZIPCODES = "GEOJSON_ZIPCODES";
-const GEOJSON_ZIPCODES_PARCELS = "GEOJSON_ZIPCODES_PARCELS";
-const GEOJSON_PARCELS_CODE = "GEOJSON_PARCELS_CODE";
-const GEOJSON_PARCELS_CODE_OWNID = "GEOJSON_PARCELS_CODE_OWNID";
-const GEOJSON_PARCELS_OWNID = "GEOJSON_PARCELS_OWNID";
-const GEOJSON_PARCELS_OWNID_CODE = "GEOJSON_PARCELS_OWNID_CODE";
-const GEOJSON_PARCELS_DISTANCE = "GEOJSON_PARCELS_DISTANCE";
-const GEOJSON_PARCELS_CODE_DISTANCE = "GEOJSON_PARCELS_CODE_DISTANCE";
-const DETAILED_RECORD_YEARS = "DETAILED_RECORD_YEARS"; // years for a praxis record
-const AVAILABLE_PRAXIS_YEARS = "AVAILABLE_PRAXIS_YEARS"; // all the available search years
-const SPECULATORS_BY_CODE = "SPECULATORS_BY_CODE";
-const CODES_BY_SPECULATOR = "CODES_BY_SPECULATOR";
-const POINT_CODE = "POINT_CODE"; // get the zipcode for a specific point
-const SPECULATION_BY_CODE = "SPECULATION_BY_CODE";
-const SPECULATION_BY_OWNID = "SPECULATION_BY_OWNID";
-const SPECULATOR_BY_YEAR = "SPECULATOR_BY_YEAR"; //graph data
-const SQL_QUERY_GENERAL = "SQL_QUERY_GENERAL";
+const PRIMARY_ZIPCODE = "PRIMARY_ZIPCODE"
+const PRIMARY_SPECULATOR = "PRIMARY_SPECULATOR"
+const GEOJSON_ZIPCODES = "GEOJSON_ZIPCODES"
+const GEOJSON_ZIPCODES_PARCELS = "GEOJSON_ZIPCODES_PARCELS"
+const GEOJSON_PARCELS_CODE = "GEOJSON_PARCELS_CODE"
+const GEOJSON_PARCELS_CODE_OWNID = "GEOJSON_PARCELS_CODE_OWNID"
+const GEOJSON_PARCELS_OWNID = "GEOJSON_PARCELS_OWNID"
+const GEOJSON_PARCELS_OWNID_CODE = "GEOJSON_PARCELS_OWNID_CODE"
+const GEOJSON_PARCELS_DISTANCE = "GEOJSON_PARCELS_DISTANCE"
+const GEOJSON_PARCELS_CODE_DISTANCE = "GEOJSON_PARCELS_CODE_DISTANCE"
+const DETAILED_RECORD_YEARS = "DETAILED_RECORD_YEARS" // years for a praxis record
+const AVAILABLE_PRAXIS_YEARS = "AVAILABLE_PRAXIS_YEARS" // all the available search years
+const SPECULATORS_BY_CODE = "SPECULATORS_BY_CODE"
+const CODES_BY_SPECULATOR = "CODES_BY_SPECULATOR"
+const POINT_CODE = "POINT_CODE" // get the zipcode for a specific point
+const SPECULATION_BY_CODE = "SPECULATION_BY_CODE"
+const SPECULATION_BY_OWNID = "SPECULATION_BY_OWNID"
+const SPECULATOR_BY_YEAR = "SPECULATOR_BY_YEAR" //graph data
+const SQL_QUERY_GENERAL = "SQL_QUERY_GENERAL"
 
 /*Mapbox API query types*/
-const GEOCODE = "GEOCODE"; // works for primary address as well
-const REVERSE_GEOCODE = "REVERSE_GEOCODE";
+const GEOCODE = "GEOCODE" // works for primary address as well
+const REVERSE_GEOCODE = "REVERSE_GEOCODE"
 
 /*All the queries for the db are managed in here.*/
 async function queryPGDB({
@@ -40,14 +40,15 @@ async function queryPGDB({
   q = null,
 }) {
   try {
-    let query, longitude, latitude;
+    let query, longitude, latitude
 
     if (coordinates) {
-      const parsedCoordinates = JSON.parse(decodeURI(coordinates));
-      longitude = parsedCoordinates.longitude;
-      latitude = parsedCoordinates.latitude;
+      const parsedCoordinates = JSON.parse(decodeURI(coordinates))
+      longitude = parsedCoordinates.longitude
+      latitude = parsedCoordinates.latitude
     }
 
+    /* eslint-disable no-case-declarations */
     switch (PGDBQueryType) {
       case PRIMARY_ZIPCODE:
         query = `SELECT DISTINCT p.zipcode_sj AS propzip, AVG(oc.count) as avg_count
@@ -62,8 +63,8 @@ async function queryPGDB({
           GROUP BY  p.zipcode_sj
           ORDER BY avg_count DESC
           LIMIT 5;
-          `;
-        break;
+          `
+        break
 
       case PRIMARY_SPECULATOR:
         query = `SELECT * FROM owner_count
@@ -71,8 +72,8 @@ async function queryPGDB({
           AND praxisyear = '${year}'
           AND count > 9
           ORDER BY count DESC
-          LIMIT 5;`;
-        break;
+          LIMIT 5;`
+        break
       // add WHERE to query for all the intersecting zips/parcels
       case GEOJSON_ZIPCODES:
         query = `SELECT jsonb_build_object(
@@ -88,8 +89,8 @@ async function queryPGDB({
             FROM (
               SELECT * FROM zips_geom
             ) inputs
-          ) features;`;
-        break;
+          ) features;`
+        break
 
       case GEOJSON_ZIPCODES_PARCELS:
         query = `SELECT jsonb_build_object(
@@ -108,8 +109,8 @@ async function queryPGDB({
             INNER JOIN parcels_${year} AS p ON ST_Intersects(geometry, p.geom_${year})
             ${createCodeSQLPredicate({ code, ownid, coordinates })}
             ) inputs
-        ) features;`;
-        break;
+        ) features;`
+        break
 
       case GEOJSON_PARCELS_CODE:
         query = `SELECT jsonb_build_object(
@@ -127,8 +128,8 @@ async function queryPGDB({
               SELECT * FROM parcels_${year} 
               WHERE propzip LIKE '%${code}%'
             ) inputs
-          ) features;`;
-        break;
+          ) features;`
+        break
 
       case GEOJSON_PARCELS_OWNID:
         query = `SELECT jsonb_build_object(
@@ -146,8 +147,8 @@ async function queryPGDB({
               SELECT * FROM parcels_${year} 
               WHERE own_id LIKE '%${decodeURI(ownid).toUpperCase()}%'
             ) inputs
-          ) features;`;
-        break;
+          ) features;`
+        break
 
       case GEOJSON_PARCELS_CODE_OWNID:
         query = `SELECT jsonb_build_object(
@@ -166,8 +167,8 @@ async function queryPGDB({
                 WHERE propzip LIKE '%${code}%'
                 AND own_id LIKE '%${decodeURI(ownid).toUpperCase()}%'
               ) inputs
-            ) features;`;
-        break;
+            ) features;`
+        break
 
       case GEOJSON_PARCELS_OWNID_CODE:
         query = `SELECT jsonb_build_object(
@@ -186,8 +187,8 @@ async function queryPGDB({
                 WHERE own_id LIKE '%${decodeURI(ownid).toUpperCase()}%'
                 AND propzip LIKE '%${code}%'
               ) inputs
-            ) features;`;
-        break;
+            ) features;`
+        break
 
       /*currenlty dead query - not used*/
       case GEOJSON_PARCELS_DISTANCE:
@@ -216,8 +217,8 @@ async function queryPGDB({
                 4326)::geography,
               geom_${year}::geography) < ${searchRadius}
             ) inputs
-          ) features;`;
-        break;
+          ) features;`
+        break
 
       case GEOJSON_PARCELS_CODE_DISTANCE:
         query = `SELECT jsonb_build_object(
@@ -241,8 +242,8 @@ async function queryPGDB({
             FROM parcels_${year}
             WHERE propzip LIKE'${code}%'
           ) inputs
-        ) features;`;
-        break;
+        ) features;`
+        break
 
       case POINT_CODE:
         query = `SELECT * 
@@ -252,8 +253,8 @@ async function queryPGDB({
             ST_SetSRID(
               ST_MakePoint(${longitude}, ${latitude}),
             4326)::geography,
-          z.geometry)`;
-        break;
+          z.geometry)`
+        break
 
       // search for available geometry cols
       case DETAILED_RECORD_YEARS:
@@ -266,19 +267,19 @@ async function queryPGDB({
           END AS geom_${year}
           `
           )
-          .join(", ");
+          .join(", ")
 
         query = `SELECT
           ${geomCols}  
           FROM parcel_property_geom
-          WHERE parprop_id = '${parpropid}'`;
-        break;
+          WHERE parprop_id = '${parpropid}'`
+        break
 
       // all the years in the DB to search
       case AVAILABLE_PRAXIS_YEARS:
         query = `SELECT DISTINCT praxisyear FROM year 
-          ORDER BY praxisyear DESC;`;
-        break;
+          ORDER BY praxisyear DESC;`
+        break
 
       case SPECULATORS_BY_CODE:
         query = `SELECT DISTINCT otp.own_id, oc.count
@@ -291,8 +292,8 @@ async function queryPGDB({
         AND oc.praxisyear = '${year}'
         ORDER BY oc.count DESC
         LIMIT 5
-        `;
-        break;
+        `
+        break
 
       case CODES_BY_SPECULATOR:
         query = `SELECT DISTINCT p.zipcode_sj AS propzip,
@@ -307,8 +308,8 @@ async function queryPGDB({
           AND y.praxisyear = '${year}'
           GROUP BY p.zipcode_sj, ot.own_id
           ORDER BY count DESC;
-        `;
-        break;
+        `
+        break
 
       case SPECULATION_BY_CODE:
         /*Query to  get the rate of speculation in a zipcode.*/
@@ -324,9 +325,9 @@ async function queryPGDB({
             WHERE propzip LIKE '%${code}%'
             GROUP BY own_id) x
           GROUP BY own_id, total
-          ORDER BY count DESC ) y;`;
+          ORDER BY count DESC ) y;`
 
-        break;
+        break
 
       case SPECULATION_BY_OWNID:
         /*Search speculation by own_id in each zipcode.*/
@@ -358,8 +359,8 @@ async function queryPGDB({
           AND y2.praxisyear = '${year}'
           GROUP BY p2.zipcode_sj
           ) y ON x.propzip = y.propzip
-          ORDER BY propzip, own_id, count;`;
-        break;
+          ORDER BY propzip, own_id, count;`
+        break
 
       case SPECULATOR_BY_YEAR:
         /*Search property count by own_id by year*/
@@ -373,61 +374,61 @@ async function queryPGDB({
           INNER JOIN year AS y 
           ON tpp.taxparprop_id = y.taxparprop_id
           WHERE ot.own_id = '${ownid}'
-          GROUP BY ot.own_id, y.praxisyear`;
+          GROUP BY ot.own_id, y.praxisyear`
 
-        break;
+        break
 
       case SQL_QUERY_GENERAL:
-        query = q;
-        break;
+        query = q
+        break
 
       default:
-        console.error(`Unknown SQL query type: ${type}`);
-        break;
+        console.error(`Unknown SQL query type: ${PGDBQueryType}`)
+        break
     }
-    console.log(`DB Query: ${query}`);
-    const { rows } = await db.query(query);
-    return { data: rows };
+    console.log(`DB Query: ${query}`)
+    const { rows } = await db.query(query)
+    return { data: rows }
   } catch (err) {
-    const query = "UNKNOWN QUERY";
+    const query = "UNKNOWN QUERY"
     console.error(
       `An error occurred executing SQL query type$: ${PGDBQueryType}, 
       query: ${query}. Message: ${err}`
-    );
+    )
   }
 }
 
 async function queryMapboxAPI({ coordinates, place, mbQueryType }) {
   try {
-    let mbResponse, mbJSON, APIRequest;
+    let mbResponse, mbJSON, APIRequest
 
     switch (mbQueryType) {
       case GEOCODE:
-        APIRequest = `https://api.mapbox.com/geocoding/v5/mapbox.places/${place}.json?fuzzyMatch=true&bbox=-83.287959,42.25519197,-82.91043917,42.45023198&types=address,poi&access_token=${keys.MAPBOX_ACCESS_TOKEN}`;
-        console.log(`MBAPIRequest: ${APIRequest}`);
-        mbResponse = await fetch(APIRequest);
-        mbJSON = await mbResponse.json();
+        APIRequest = `https://api.mapbox.com/geocoding/v5/mapbox.places/${place}.json?fuzzyMatch=true&bbox=-83.287959,42.25519197,-82.91043917,42.45023198&types=address,poi&access_token=${keys.MAPBOX_ACCESS_TOKEN}`
+        console.log(`MBAPIRequest: ${APIRequest}`)
+        mbResponse = await fetch(APIRequest)
+        mbJSON = await mbResponse.json()
         const mb = mbJSON.features.map(({ place_name, geometry }) => ({
           place_name,
           geometry, //contains the coordinates
-        }));
-        return { data: mb };
+        }))
+        return { data: mb }
 
       case REVERSE_GEOCODE:
-        const { longitude, latitude } = JSON.parse(decodeURI(coordinates));
-        APIRequest = `https://api.mapbox.com/geocoding/v5/mapbox.places/${longitude},${latitude}.json?access_token=${keys.MAPBOX_ACCESS_TOKEN}`;
-        console.log(`MBAPIRequest: ${APIRequest}`);
-        mbResponse = await fetch(APIRequest);
-        mbJSON = await mbResponse.json();
-        const { place_name, geometry } = mbJSON.features[0];
-        return { data: { place_name, geometry } };
+        const { longitude, latitude } = JSON.parse(decodeURI(coordinates))
+        APIRequest = `https://api.mapbox.com/geocoding/v5/mapbox.places/${longitude},${latitude}.json?access_token=${keys.MAPBOX_ACCESS_TOKEN}`
+        console.log(`MBAPIRequest: ${APIRequest}`)
+        mbResponse = await fetch(APIRequest)
+        mbJSON = await mbResponse.json()
+        const { place_name, geometry } = mbJSON.features[0]
+        return { data: { place_name, geometry } }
 
       default:
-        console.error(`Unkown Mapbox query type: ${mbQueryType}`);
-        return { data: `Unkown Mapbox query type: ${mbQueryType}` };
+        console.error(`Unkown Mapbox query type: ${mbQueryType}`)
+        return { data: `Unkown Mapbox query type: ${mbQueryType}` }
     }
   } catch (err) {
-    console.error(`An error occurred executing MB query. Message: ${err}`);
+    console.error(`An error occurred executing MB query. Message: ${err}`)
   }
 }
 
@@ -437,23 +438,23 @@ function createCodeSQLPredicate({
   ownid = null,
   coordinates = null,
 }) {
-  if (code) {
-    return `WHERE p.propzip LIKE '%${code}%'`;
-  } else if (ownid) {
-    return `WHERE p.own_id LIKE '%${decodeURI(ownid).toUpperCase()}%'`;
-  } else if (ownid && code) {
+  if (ownid && code) {
     return `WHERE p.own_id LIKE '%${decodeURI(ownid).toUpperCase()}%'
-            AND p.propzip LIKE '%${code}%'`;
+            AND p.propzip LIKE '%${code}%'`
+  } else if (code) {
+    return `WHERE p.propzip LIKE '%${code}%'`
+  } else if (ownid) {
+    return `WHERE p.own_id LIKE '%${decodeURI(ownid).toUpperCase()}%'`
   } else if (coordinates) {
-    const { longitude, latitude } = JSON.parse(decodeURI(coordinates));
+    const { longitude, latitude } = JSON.parse(decodeURI(coordinates))
     return `WHERE 
     ST_Intersects(
       ST_SetSRID(
         ST_MakePoint(${longitude}, ${latitude}),
       4326)::geography,
-    z.geometry)`;
+    z.geometry)`
   } else {
-    return "";
+    return ""
   }
 }
 
@@ -481,4 +482,4 @@ module.exports = {
   SPECULATION_BY_OWNID,
   SPECULATOR_BY_YEAR,
   SQL_QUERY_GENERAL,
-};
+}

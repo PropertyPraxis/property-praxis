@@ -5,51 +5,51 @@ function findTargetAddress(features) {
     const targetAddress = features
       .map((feature) => {
         if (feature.properties.distance === 0) {
-          return feature;
+          return feature
         }
-        return null;
+        return null
       })
-      .filter((result) => result !== null);
+      .filter((result) => result !== null)
 
     const nearbyAddresses = features
       .map((feature) => {
         if (feature.properties.distance !== 0) {
-          return feature;
+          return feature
         }
-        return null;
+        return null
       })
-      .filter((result) => result !== null);
+      .filter((result) => result !== null)
 
-    return { targetAddress, nearbyAddresses };
+    return { targetAddress, nearbyAddresses }
   }
 
   return {
     targetAddress: [],
     nearbyAddresses: [],
-  };
+  }
 }
 
 function buildGeoJSONTemplate(features) {
   const template = {
     type: "FeatureCollection",
     features: features,
-  };
-  return template;
+  }
+  return template
 }
 
 function isGeoJSONEmpty(geoJSON) {
   if (geoJSON.features === null || geoJSON.features.length === 0) {
-    return true;
+    return true
   } else {
-    return false;
+    return false
   }
 }
 
 function checkEmptyGeoJSON(geoJSON) {
   if (isGeoJSONEmpty(geoJSON)) {
-    return buildGeoJSONTemplate([]);
+    return buildGeoJSONTemplate([])
   } else {
-    return geoJSON;
+    return geoJSON
   }
 }
 
@@ -58,4 +58,4 @@ module.exports = {
   buildGeoJSONTemplate,
   isGeoJSONEmpty,
   checkEmptyGeoJSON,
-};
+}
