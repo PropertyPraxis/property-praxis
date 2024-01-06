@@ -16,7 +16,7 @@ import {
 } from "../../utils/helper";
 import PrimaryResultsContainer from "./PrimarySearchResults";
 import searchIcon from "../../assets/img/search.png";
-import styleVars from "../../scss/colors.scss";
+import { ppRose } from "../../utils/colors";
 
 class SearchBar extends Component {
   _inputRef = React.createRef();
@@ -282,11 +282,7 @@ class SearchBar extends Component {
                       onClick={() => {
                         this._handleSearchTypeButtonClick(button);
                       }}
-                      style={
-                        button === searchType
-                          ? { color: styleVars.ppRose }
-                          : null
-                      }
+                      style={button === searchType ? { color: ppRose } : null}
                     >
                       {capitalizeFirstLetter(button)}
                     </div>

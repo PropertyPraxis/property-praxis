@@ -6,7 +6,7 @@ import {
   setParcelFilterAction,
 } from "../../actions/controller";
 import "react-rangeslider/lib/index.css";
-import styleVars from "../../scss/colors.scss";
+import styleVars from "../../utils/colors";
 
 class ParcelLayerController extends Component {
   _getColors = (styles) => {

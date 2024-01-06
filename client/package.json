@@ -1,15 +1,14 @@
 {
-  "name": "sample",
+  "name": "property-praxis-client",
   "version": "0.1.0",
   "private": true,
-  "proxy": "http://api:5000",
+  "scripts": {
+    "start": "VITE_PUBLIC_URL=\"\" vite --host",
+    "build": "VITE_PUBLIC_URL=\"\" vite build"
+  },
   "dependencies": {
-    "@testing-library/jest-dom": "^5.16.2",
-    "@testing-library/react": "^12.1.4",
-    "@testing-library/user-event": "^13.5.0",
     "@turf/turf": "^6.5.0",
     "flat": "^5.0.2",
-    "immutable": "^4.0.0",
     "leaflet": "^1.7.1",
     "mapillary-js": "^4.1.0",
     "p-debounce": "^4.0.0",
@@ -23,7 +22,6 @@
     "react-redux": "^7.2.6",
     "react-responsive": "^9.0.0-beta.6",
     "react-router-dom": "^5.0.0",
-    "react-scripts": "5.0.0",
     "react-tooltip": "^4.2.21",
     "react-transition-group": "^4.4.2",
     "redux": "^4.1.2",
@@ -31,17 +29,40 @@
     "victory": "^36.3.1",
     "web-vitals": "^2.1.4"
   },
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.2.1",
+    "eslint": "^8.56.0",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-prettier": "^5.1.2",
+    "eslint-plugin-react": "^7.33.2",
+    "prettier": "^3.1.1",
+    "prettier-eslint": "^16.2.0",
+    "sass": "^1.49.9",
+    "vite": "^5.0.11"
   },
   "eslintConfig": {
     "extends": [
+      "eslint:recommended",
+      "plugin:react/recommended",
       "react-app",
       "react-app/jest"
-    ]
+    ],
+    "env": {
+      "browser": true,
+      "commonjs": true,
+      "es6": true,
+      "node": true
+    },
+    "plugins": [
+      "import",
+      "prettier",
+      "react"
+    ],
+    "settings": {
+      "react": {
+        "version": "detect"
+      }
+    }
   },
   "browserslist": {
     "production": [
@@ -54,8 +75,5 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "devDependencies": {
-    "sass": "^1.49.9"
   }
 }

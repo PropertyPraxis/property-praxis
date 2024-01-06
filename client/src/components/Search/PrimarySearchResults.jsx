@@ -10,7 +10,7 @@ import {
 import zipcodeIcon from "../../assets/img/zipcode-icon-transparent.png";
 import speculatorIcon from "../../assets/img/speculator-icon-transparent.png";
 import mapMarkerIcon from "../../assets/img/map-marker-transparent.png";
-import styleVars from "../../scss/colors.scss";
+import { uiMedGray } from "../../utils/colors";
 
 const primaryResultIcons = {
   address: mapMarkerIcon,
@@ -78,11 +78,7 @@ class PrimaryResults extends Component {
               <Link key={searchQueryRoute} to={searchQueryRoute}>
                 <li
                   className={i % 2 ? "list-item-odd" : "list-item-even"}
-                  style={
-                    i === index
-                      ? { backgroundColor: styleVars.uiMedGray }
-                      : null
-                  }
+                  style={i === index ? { backgroundColor: uiMedGray } : null}
                   onClick={this._handleOnClick}
                 >
                   <img src={primaryResultIcons[type]} alt={`Icon of ${type}`} />

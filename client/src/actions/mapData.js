@@ -1,4 +1,4 @@
-import { APISearchQueryFromRoute, APIParcelQueryFromRoute } from "../utils/api";
+import { APISearchQueryFromRoute } from "../utils/api";
 
 export const GET_PARCELS_BY_QUERY = "GET_PARCELS_BY_QUERY";
 export const GET_YEAR = "GET_YEAR";

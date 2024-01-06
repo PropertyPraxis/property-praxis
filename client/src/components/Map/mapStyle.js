@@ -1,15 +1,23 @@
-import styleVars from "../../scss/colors.scss";
+import {
+  parcelStop1,
+  parcelStop2,
+  parcelStop3,
+  parcelStop4,
+  parcelStop5,
+  parcelStop6,
+  parcelStop7,
+} from "../../utils/colors";
 
 //this is where specific mapstyles will go for layers.
 
 const stops = [
-  [1, styleVars.parcelStop1],
-  [2, styleVars.parcelStop2],
-  [3, styleVars.parcelStop3],
-  [4, styleVars.parcelStop4],
-  [5, styleVars.parcelStop5],
-  [6, styleVars.parcelStop6],
-  [7, styleVars.parcelStop7],
+  [1, parcelStop1],
+  [2, parcelStop2],
+  [3, parcelStop3],
+  [4, parcelStop4],
+  [5, parcelStop5],
+  [6, parcelStop6],
+  [7, parcelStop7],
 ];
 
 // const stops = [

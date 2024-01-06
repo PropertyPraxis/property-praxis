@@ -1,7 +1,6 @@
 import React from "react";
 import { useSelector } from "react-redux";
 import PropTypes from "prop-types";
-import * as styleVars from "../../scss/colors.scss";
 
 function LoadingIndicator() {
   const { loadingIsOpen } = useSelector((state) => state.mapState);
