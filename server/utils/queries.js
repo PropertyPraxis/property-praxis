@@ -404,7 +404,15 @@ async function queryMapboxAPI({ coordinates, place, mbQueryType }) {
 
     switch (mbQueryType) {
       case GEOCODE:
-        APIRequest = `https://api.mapbox.com/geocoding/v5/mapbox.places/${place}.json?fuzzyMatch=true&bbox=-83.287959,42.25519197,-82.91043917,42.45023198&types=address,poi&access_token=${keys.MAPBOX_ACCESS_TOKEN}`
+        const queryParams = new URLSearchParams({
+          // autocomplete: "true", TODO: Is this right?
+          fuzzyMatch: "true",
+          country: "US",
+          bbox: [-83.287959, 42.25519197, -82.91043917, 42.45023198].join(","),
+          types: ["address", "poi"].join(","),
+          access_token: keys.MAPBOX_ACCESS_TOKEN,
+        })
+        APIRequest = `https://api.mapbox.com/geocoding/v5/mapbox.places/${place}.json?${queryParams}`
         console.log(`MBAPIRequest: ${APIRequest}`)
         mbResponse = await fetch(APIRequest)
         mbJSON = await mbResponse.json()
