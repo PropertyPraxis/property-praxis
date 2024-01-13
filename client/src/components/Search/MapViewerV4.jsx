@@ -189,7 +189,11 @@ function MapViewerV4({ searchState }) {
       )
     }
   }, [imageProps, searchCoordinates])
-  return <div className="map-viewer" id="mly"></div>
+  return (
+    <div className="map-viewer" id="mly">
+      <div className="loader" />
+    </div>
+  )
 }
 
 export default MapViewerV4

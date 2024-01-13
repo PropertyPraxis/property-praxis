@@ -82,6 +82,7 @@ input[type="text"] {
   -webkit-transition: 0.2s;
   transition: 0.2s;
   outline: none;
+  font-size: 1rem;
 }
 
 .search-form {
@@ -164,6 +165,7 @@ input[type="text"] {
   border-left: 4px solid $ui-black;
   border-bottom: 4px solid $ui-black;
   border-right: 2px solid $ui-black;
+  font-size: 1rem;
 }
 
 .year-select > select:focus,
