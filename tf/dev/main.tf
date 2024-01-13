@@ -162,6 +162,7 @@ module "cloudfront" {
     target_origin_id       = "app"
     viewer_protocol_policy = "allow-all"
     # viewer_protocol_policy = "redirect-to-https"
+    compress     = true
     query_string = true
   }
 
@@ -409,7 +410,7 @@ module "ecs_service" {
           value = "production"
         },
         {
-          name = "ENVIRONMENT"
+          name  = "ENVIRONMENT"
           value = local.env
         },
         {
