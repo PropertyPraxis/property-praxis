@@ -409,6 +409,10 @@ module "ecs_service" {
           value = "production"
         },
         {
+          name = "ENVIRONMENT"
+          value = local.env
+        },
+        {
           name  = "DATABASE_HOST"
           value = module.rds.db_instance_endpoint
         },

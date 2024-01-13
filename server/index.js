@@ -1,9 +1,18 @@
 const express = require("express")
-const app = express()
-const cors = require("cors")
-const mountRoutes = require("./routes") //index.js
 const morgan = require("morgan")
 const helmet = require("helmet")
+const cors = require("cors")
+const mountRoutes = require("./routes")
+const Sentry = require("@sentry/node")
+
+const app = express()
+
+Sentry.init({
+  dsn: "https://66094b96912bcb73c3fcfa41b394e9bb@o86794.ingest.sentry.io/4506565004754944",
+  environment: process.env.ENVIRONMENT,
+})
+
+app.use(Sentry.Handlers.requestHandler())
 
 //cors
 app.use(cors())

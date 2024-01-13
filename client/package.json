@@ -11,6 +11,7 @@
     "prettier:fix": "prettier --write \"./src/**/*.{js,jsx,css}\""
   },
   "dependencies": {
+    "@sentry/react": "^7.93.0",
     "@turf/turf": "^6.5.0",
     "flat": "^5.0.2",
     "leaflet": "^1.7.1",
