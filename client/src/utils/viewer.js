@@ -4,7 +4,7 @@ import * as turf from "@turf/turf"
 //using the mapillary api
 const MAPILLARY_CLIENT_ID =
   "S3NrdE1uVHdoRVhQeFN6WUZCTzItUTo5MGFlYTRiNjg3ODAxNTNi"
-const USER_KEY = "XiyggdTq2tc0ZSL8u3TtxA" //codgis
+// const USER_KEY = "XiyggdTq2tc0ZSL8u3TtxA" //codgis
 const ORG_KEY = "NZ8NFgreZHnVBmPwrtGYEA" // city of detroit
 
 export async function getImageKey(longitude, latitude) {

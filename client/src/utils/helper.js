@@ -36,7 +36,7 @@ export function createAddressString({ propno, propdir, propstr }) {
       : ""
   } ${propstr}`
 
-  return capitalizeFirstLetter(addressString).replace(/  /g, " ")
+  return capitalizeFirstLetter(addressString).replace(/ {2}/g, " ")
 }
 
 export function parseMBAddressString(addressString) {

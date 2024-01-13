@@ -86,7 +86,7 @@ export function handlePrimarySearchAll({ searchTerm, searchYear }, route) {
         partialSpeculatorResults,
         partialZipcodeResults,
       ] = await Promise.all(
-        types.map(async (searchType, index) => {
+        types.map(async (searchType) => {
           return await APIQueryStringFromSearchParams(
             { searchType, searchTerm, searchYear },
             route

@@ -2,7 +2,7 @@ import React from "react"
 import Footer from "./Footer"
 import TopContainer from "./TopContainer"
 
-const DownloadData = (props) => {
+const DownloadData = () => {
   return (
     <main className="main-container">
       <div className="page-container">

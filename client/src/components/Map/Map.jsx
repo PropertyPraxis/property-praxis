@@ -36,7 +36,6 @@ import {
   zipsLabel,
 } from "./mapStyle"
 import { Pin, Arrow } from "./Pin"
-import infoIcon from "../../assets/img/info-icon.png"
 import {
   parcelStop1,
   parcelStop2,

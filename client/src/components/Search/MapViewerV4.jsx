@@ -29,7 +29,7 @@ function createMarker(markerId, lngLat, color) {
   return marker
 }
 
-function useImageKey({ searchCoordinates, searchYears, searchYear }) {
+function useImageKey({ searchCoordinates, searchYears }) {
   const [imageProps, setSelectedImage] = useState(null)
 
   // create buffer search distance

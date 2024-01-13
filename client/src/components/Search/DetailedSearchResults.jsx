@@ -124,7 +124,7 @@ function useCodesBySpeculator(results, { code, ownid, year }) {
 }
 
 /*Specific Link components to pass to  paginator component*/
-function SpeculatorLink({ record, index, queryParams }) {
+function SpeculatorLink({ record, queryParams }) {
   const { code, year } = queryParams
   const dispatch = useDispatch()
 
@@ -136,7 +136,7 @@ function SpeculatorLink({ record, index, queryParams }) {
   }
 
   return (
-    <div className="zipcode-item" key={`${record.own_id}-${index}`}>
+    <div className="zipcode-item">
       <div>
         <Link
           onMouseOver={() => highlightFeatures(record.featureIds)}
@@ -411,8 +411,8 @@ function CodeParcels(props) {
             {zipData.slice(0, 10).map((record, index) => {
               return (
                 <SpeculatorLink
+                  key={`${record.own_id}-${index}`}
                   record={record}
-                  index={index}
                   queryParams={props.queryParams}
                 />
               )
@@ -566,7 +566,8 @@ function MultipleParcels(props) {
 
 function SingleParcel(props) {
   const { searchState } = useSelector((state) => state)
-  const { drawerIsOpen, recordYears, viewer } = searchState.detailedSearch
+  // const { drawerIsOpen, recordYears, viewer } = searchState.detailedSearch
+  const { drawerIsOpen, recordYears } = searchState.detailedSearch
   const { searchTerm, searchYear, searchCoordinates } = searchState.searchParams
   const dispatch = useDispatch()
 

@@ -1,15 +1,16 @@
-import { Viewer, SimpleMarker } from "mapillary-js"
+import { Viewer } from "mapillary-js"
+// import { SimpleMarker } from "mapillary-js"
 
-function createMarker(markerId, lngLat, color) {
-  const marker = new SimpleMarker(markerId, lngLat, {
-    ballColor: 0xffa500,
-    ballOpacity: 0.9,
-    color,
-    opacity: 0.5,
-    interactive: true,
-  })
-  return marker
-}
+// function createMarker(markerId, lngLat, color) {
+//   const marker = new SimpleMarker(markerId, lngLat, {
+//     ballColor: 0xffa500,
+//     ballOpacity: 0.9,
+//     color,
+//     opacity: 0.5,
+//     interactive: true,
+//   })
+//   return marker
+// }
 
 let viewer
 

@@ -10,6 +10,7 @@ const initialControllerState = {
   basemapLayer: "mapbox://styles/mappingaction/ck8agoqtt043l1ik9bvf3v0cv",
 }
 
+/* eslint-disable no-case-declarations */
 export default function controller(state = initialControllerState, action) {
   switch (action.type) {
     case SET_SLIDER_VALUE:
@@ -28,3 +29,4 @@ export default function controller(state = initialControllerState, action) {
       return state
   }
 }
+/* eslint-enable no-case-declarations */

@@ -1,8 +1,8 @@
 import React, { Component } from "react"
 import PropTypes from "prop-types"
-// import Slider from "react-rangeslider";
+// import Slider from "react-rangeslider"
 import {
-  setSliderValueAction,
+  // setSliderValueAction,
   setParcelFilterAction,
 } from "../../actions/controller"
 import "react-rangeslider/lib/index.css"
@@ -14,7 +14,7 @@ class ParcelLayerController extends Component {
   }
 
   render() {
-    const { sliderValue, filter } = this.props.controller
+    const { filter } = this.props.controller
     const parcelColors = this._getColors(Object.entries(styleVars))
     const labels = ["10-20", "100", "200", "500", "1000", "1500", "2000"]
     return (
@@ -44,7 +44,7 @@ class ParcelLayerController extends Component {
           })}
         </div>
         <div className="slider-horizontal">
-          <Slider
+          {/* <Slider
             value={sliderValue}
             min={0}
             max={100}
@@ -52,7 +52,7 @@ class ParcelLayerController extends Component {
             onChange={(value) => {
               this.props.dispatch(setSliderValueAction(value))
             }}
-          />
+          /> */}
         </div>
       </div>
     )
