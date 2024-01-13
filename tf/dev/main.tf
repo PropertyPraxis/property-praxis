@@ -40,6 +40,14 @@ locals {
 
 data "aws_availability_zones" "available" {}
 
+data "aws_ssm_parameter" "db_username" {
+  name = "/${local.name}/${local.env}/db_username"
+}
+
+data "aws_ssm_parameter" "db_password" {
+  name = "/${local.name}/${local.env}/db_password"
+}
+
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "~> 5.0"
@@ -190,8 +198,6 @@ module "ecr" {
         rulePriority = 1,
         description  = "Keep last 5 images",
         selection = {
-          # tagStatus     = "tagged",
-          # tagPrefixList = ["prod-"],
           tagStatus   = "any",
           countType   = "imageCountMoreThan",
           countNumber = 5
@@ -205,7 +211,6 @@ module "ecr" {
 
   tags = local.tags
 }
-
 
 module "rds" {
   source  = "terraform-aws-modules/rds/aws"
@@ -224,7 +229,10 @@ module "rds" {
 
   db_name  = local.appname
   port     = 5432
-  username = local.appname
+  username = data.aws_ssm_parameter.db_username.value
+  password = data.aws_ssm_parameter.db_password.value
+
+  manage_master_user_password = false
 
   multi_az               = false
   db_subnet_group_name   = module.vpc.database_subnet_group
@@ -411,8 +419,12 @@ module "ecs_service" {
       ]
       secrets = [
         {
-          name      = "DATABASE_CREDENTIALS"
-          valueFrom = module.rds.db_instance_master_user_secret_arn
+          name      = "DATABASE_USERNAME",
+          valueFrom = data.aws_ssm_parameter.db_username.arn
+        },
+        {
+          name      = "DATABASE_PASSWORD",
+          valueFrom = data.aws_ssm_parameter.db_password.arn
         },
         {
           name      = "MAPBOX_ACCESS_TOKEN",
