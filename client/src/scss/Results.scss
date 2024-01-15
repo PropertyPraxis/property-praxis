@@ -92,7 +92,7 @@
   .results-drawer-enter-active,
   .results-drawer-enter-done,
   .results-drawer-appear {
-    height: calc(100vh - 120px);
+    height: calc(100dvh - 120px);
     transition: height 300ms;
     overflow: hidden;
   }

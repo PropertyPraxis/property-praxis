@@ -330,7 +330,7 @@ class PraxisMap extends Component {
           mapOptions={{ attributionControl: false }}
           mapStyle={basemapLayer}
           width="100vw"
-          height="100vh"
+          height="100dvh"
           minZoom={10}
           maxZoom={18}
           mapboxApiAccessToken={MAPBOX_TOKEN}

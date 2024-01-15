@@ -84,6 +84,7 @@ class PrimaryResults extends Component {
               aria-selected={(i === index).toString()}
               className={i % 2 ? "list-item-odd" : "list-item-even"}
               style={i === index ? { backgroundColor: uiMedGray } : null}
+              onClick={this._handleOnClick}
               to={searchQueryRoute}
             >
               <img src={primaryResultIcons[type]} alt={type} />

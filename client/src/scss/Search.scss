@@ -81,7 +81,7 @@ button {
 
 input[type="text"] {
   flex: 1;
-  padding: 12px 20px;
+  padding: 12px;
   box-sizing: inherit;
   border: none;
   border-radius: 0;
@@ -142,13 +142,12 @@ input[type="text"] {
 }
 
 .clear-button {
+  width: 36px;
   padding-left: 5px;
+  text-align: center;
   box-sizing: inherit;
   background: $ui-white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
+  display: block;
   font-size: 45px;
   color: $ui-dark-gray;
 }
