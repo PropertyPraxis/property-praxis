@@ -93,9 +93,8 @@ jobs:
           node-version: 20
 
       - uses: actions/cache@v3
-        working-directory: client
         with:
-          path: .npm
+          path: client/.npm
           key: npm-client-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             npm-client-
