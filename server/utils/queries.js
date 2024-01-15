@@ -68,7 +68,7 @@ async function queryPGDB({
 
       case PRIMARY_SPECULATOR:
         query = `SELECT * FROM owner_count
-          WHERE own_id LIKE '${decodeURI(ownid).toUpperCase()}%'
+          WHERE own_id LIKE '%${decodeURI(ownid).toUpperCase()}%'
           AND praxisyear = '${year}'
           AND count > 9
           ORDER BY count DESC
@@ -304,7 +304,7 @@ async function queryPGDB({
           INNER JOIN year AS y on tp.taxparprop_id = y.taxparprop_id
           INNER JOIN taxpayer AS t ON tp.tp_id = t.tp_id
           INNER JOIN owner_taxpayer AS ot ON t.owntax_id = ot.owntax_id
-          WHERE ot.own_id LIKE '${decodeURI(ownid).toUpperCase()}%'
+          WHERE ot.own_id LIKE '%${decodeURI(ownid).toUpperCase()}%'
           AND y.praxisyear = '${year}'
           GROUP BY p.zipcode_sj, ot.own_id
           ORDER BY count DESC;
