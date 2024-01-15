@@ -28,7 +28,7 @@ locals {
   github_subjects = ["PropertyPraxis/property-praxis:*"]
 
   tags = {
-    project     = local.name
+    project = local.name
   }
 }
 
@@ -59,8 +59,15 @@ resource "aws_iam_policy" "update_access" {
         Effect = "Allow"
         Resource = [
           "arn:aws:ecs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:cluster:${local.name}*",
-          "arn:aws:ecs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:cluster:${local.name}*:*"
+          "arn:aws:ecs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:cluster:${local.name}*:*",
+          "arn:aws:ecs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:service/${local.name}*",
+          "arn:aws:ecs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:service/${local.name}*:*"
         ]
+      },
+      {
+        Action   = ["ecs:RegisterTaskDefinition", "ecs:DeregisterTaskDefinition"],
+        Effect   = "Allow"
+        Resource = "*"
       },
       {
         Action = [
@@ -103,6 +110,11 @@ resource "aws_iam_policy" "read_access" {
         Resource = "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/${local.name}/*"
       },
       {
+        Action   = ["iam:PassRole"],
+        Effect   = "Allow",
+        Resource = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${local.name}*"
+      },
+      {
         Action = [
           "iam:Get*",
           "iam:List*",
@@ -117,6 +129,11 @@ resource "aws_iam_policy" "read_access" {
           "events:List*",
           "events:Describe*",
           "ec2:Describe*",
+          "elasticloadbalancing:Describe*",
+          "elasticloadbalancing:List*",
+          "application-autoscaling:Describe*",
+          "application-autoscaling:List*",
+          "ecs:Describe*",
           "rds:Describe*",
           "rds:List*",
           "apigateway:GET",
@@ -129,6 +146,8 @@ resource "aws_iam_policy" "read_access" {
           "cloudfront:Get*",
           "cloudfront:Describe*",
           "cloudfront:List*",
+          "secretsmanager:Get*",
+          "secretsmanager:Describe*"
         ]
         Effect   = "Allow"
         Resource = "*"
