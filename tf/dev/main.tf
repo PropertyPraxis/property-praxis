@@ -250,8 +250,7 @@ module "rds" {
   skip_final_snapshot     = true
   deletion_protection     = false
 
-  performance_insights_enabled          = true
-  performance_insights_retention_period = 7
+  performance_insights_enabled          = false
   create_monitoring_role                = true
   monitoring_interval                   = 60
 
@@ -362,15 +361,14 @@ module "ecs_cluster" {
   fargate_capacity_providers = {
     FARGATE = {
       default_capacity_provider_strategy = {
-        # weight = 50
-        base = 1
+        weight = 50
       }
     }
-    # FARGATE_SPOT = {
-    #   default_capacity_provider_strategy = {
-    #     weight = 50
-    #   }
-    # }
+    FARGATE_SPOT = {
+      default_capacity_provider_strategy = {
+        weight = 50
+      }
+    }
   }
 }
 
@@ -385,15 +383,15 @@ module "ecs_service" {
   name        = local.name
   cluster_arn = module.ecs_cluster.arn
 
-  cpu    = 1024
-  memory = 2048
+  cpu    = 256
+  memory = 512
 
   enable_execute_command = true
 
   container_definitions = {
     praxis = {
-      cpu       = 1024
-      memory    = 2048
+      cpu       = 256
+      memory    = 512
       essential = true
       image     = "${module.ecr.repository_url}:${var.ecs_image_tag}"
       port_mappings = [
