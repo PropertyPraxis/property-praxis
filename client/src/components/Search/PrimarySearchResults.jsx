@@ -44,55 +44,58 @@ class PrimaryResults extends Component {
 
     return (
       <section
+        id="primary-search-results"
+        role="listbox"
+        aria-label="Search results"
         className="partial-results-container"
         onMouseOver={this._handleOnMouseOver}
         onMouseOut={this._handleOnMouseOut}
       >
-        <ul>
-          {results.map((result, i) => {
-            const {
-              type,
-              code = null,
-              ownid = null,
-              place = null,
-              coordinates = null,
-              year,
-            } = sanitizeSearchResult({
-              result,
-              year: searchYear,
-            })
+        {results.map((result, i) => {
+          const {
+            type,
+            code = null,
+            ownid = null,
+            place = null,
+            coordinates = null,
+            year,
+          } = sanitizeSearchResult({
+            result,
+            year: searchYear,
+          })
 
-            const searchQueryRoute = createQueryStringFromParams(
-              {
+          const searchQueryRoute = createQueryStringFromParams(
+            {
+              type,
+              code,
+              ownid,
+              place,
+              coordinates,
+              year,
+            },
+            "/map"
+          )
+
+          return (
+            <Link
+              key={searchQueryRoute}
+              role="option"
+              id={`primary-search-result-${index}`}
+              aria-selected={(i === index).toString()}
+              className={i % 2 ? "list-item-odd" : "list-item-even"}
+              style={i === index ? { backgroundColor: uiMedGray } : null}
+              to={searchQueryRoute}
+            >
+              <img src={primaryResultIcons[type]} alt={type} />
+              {createResultFromParams({
                 type,
                 code,
                 ownid,
                 place,
-                coordinates,
-                year,
-              },
-              "/map"
-            )
-
-            return (
-              <Link key={searchQueryRoute} to={searchQueryRoute}>
-                <li
-                  className={i % 2 ? "list-item-odd" : "list-item-even"}
-                  style={i === index ? { backgroundColor: uiMedGray } : null}
-                  onClick={this._handleOnClick}
-                >
-                  <img src={primaryResultIcons[type]} alt={`Icon of ${type}`} />
-                  {createResultFromParams({
-                    type,
-                    code,
-                    ownid,
-                    place,
-                  })}
-                </li>
-              </Link>
-            )
-          })}
-        </ul>
+              })}
+            </Link>
+          )
+        })}
       </section>
     )
   }

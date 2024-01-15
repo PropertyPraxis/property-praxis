@@ -1,3 +1,8 @@
+button {
+  border: none;
+  border-radius: 0;
+}
+
 /*----- visible only on map -----*/
 .search-grid-item {
   grid-row: 1;
@@ -79,6 +84,7 @@ input[type="text"] {
   padding: 12px 20px;
   box-sizing: inherit;
   border: none;
+  border-radius: 0;
   -webkit-transition: 0.2s;
   transition: 0.2s;
   outline: none;
@@ -152,6 +158,7 @@ input[type="text"] {
   // left: 4px;
   background-color: $ui-white;
   min-width: 60px;
+  border-radius: 0;
 }
 
 .year-select > select {
@@ -161,6 +168,7 @@ input[type="text"] {
   width: 100%;
   background-color: $ui-white;
   outline: 0px;
+  border-radius: 0;
   border-top: 4px solid $ui-black;
   border-left: 4px solid $ui-black;
   border-bottom: 4px solid $ui-black;
@@ -190,7 +198,7 @@ select > option {
   border-left: 4px solid $ui-black;
   border-right: 4px solid $ui-black;
   border-bottom: 4px solid $ui-black;
-  ul > a > li {
+  a {
     display: flex;
     width: 100%;
     padding: 10px;
@@ -199,11 +207,11 @@ select > option {
     color: $ui-black;
   }
 
-  ul > a > li:hover {
+  a:hover {
     border: 1px solid $ui-black;
   }
 
-  ul > a > li > img {
+  a > img {
     height: 30px;
     margin-right: 20px;
   }

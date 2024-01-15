@@ -53,7 +53,7 @@ class SearchBar extends Component {
       })
     )
 
-    this.props.dispatch(updatePrimarySearch({ results: null, index: 0 }))
+    this.props.dispatch(updatePrimarySearch({ results: null, index: -1 }))
   }
 
   _setSearchPlaceholderText = (searchType) => {
@@ -140,7 +140,7 @@ class SearchBar extends Component {
     )
   }
 
-  _handleKeyPress = (e) => {
+  _handleOnKeyDown = (e) => {
     const { results, index } = this.props.searchState.primarySearch
     // if it is an enter key press
     if (e.key === "Enter") {
@@ -148,26 +148,22 @@ class SearchBar extends Component {
         // set location according to current index selection
         this._setSearchLocationParams(results[index])
         this.props.dispatch(updatePrimarySearch({ isOpen: false }))
-
         // blur the input
         this._inputRef.current.blur()
       }
-    }
-  }
-
-  _handleOnKeyDown = (e) => {
-    const { results, index } = this.props.searchState.primarySearch
-    if (e.key === "ArrowDown") {
+    } else if (
+      ["Down", "ArrowDown"].includes(e.key) ||
+      (["Right", "ArrowRight"].includes(e.key) && index >= 0)
+    ) {
       if (index < results.length - 1) {
         this.props.dispatch(updatePrimarySearch({ index: index + 1 }))
       }
-    }
-  }
-
-  _handleOnKeyUp = (e) => {
-    const { index } = this.props.searchState.primarySearch
-    if (e.key === "ArrowUp") {
-      if (index > 0) {
+    } else if (
+      ["Up", "ArrowUp"].includes(e.key) ||
+      (["Left", "ArrowLeft"].includes(e.key) && index >= 0)
+    ) {
+      e.preventDefault()
+      if (index >= 0) {
         this.props.dispatch(updatePrimarySearch({ index: index - 1 }))
       }
     }
@@ -191,7 +187,7 @@ class SearchBar extends Component {
         searchCoordinates: null,
       })
     )
-    this.props.dispatch(updatePrimarySearch({ results: null, index: 0 }))
+    this.props.dispatch(updatePrimarySearch({ results: null, index: -1 }))
     this.props.dispatch(
       updateDetailedSearch({
         results: null,
@@ -260,6 +256,8 @@ class SearchBar extends Component {
     const { searchType, searchTerm, searchYear } =
       this.props.searchState.searchParams
     const { searchYears } = this.props.searchState.searchBar
+    const { isOpen, index: selectedIndex } =
+      this.props.searchState.primarySearch
 
     const { searchBarType, showSearchButtons } = this.props
 
@@ -295,14 +293,16 @@ class SearchBar extends Component {
               <div className="year-select">
                 <select
                   id="years"
+                  aria-label="year"
                   onChange={this._handleYearSelect}
                   onFocus={this._handleYearSelectFocus}
+                  value={searchYear}
                 >
                   {searchYears.map((result) => {
                     return (
                       <option
                         key={result.praxisyear}
-                        selected={result.praxisyear.toString() === searchYear}
+                        value={result.praxisyear.toString()}
                       >
                         {result.praxisyear}
                       </option>
@@ -315,16 +315,25 @@ class SearchBar extends Component {
                   showSearchButtons ? "search-form" : "search-form-home"
                 }
               >
-                <div
+                <button
                   className="clear-button"
+                  aria-label="Clear search"
+                  type="button"
                   onClick={this._handleClearIconClick}
                 >
                   &times;
-                </div>
+                </button>
                 <DebounceInput
                   inputRef={this._inputRef}
                   type="text"
                   size="1"
+                  role="combobox"
+                  aria-autocomplete="list"
+                  aria-controls="primary-search-results"
+                  aria-expanded={isOpen.toString()}
+                  aria-activedescendant={
+                    isOpen ? `primary-search-result-${selectedIndex}` : null
+                  }
                   placeholder={
                     showSearchButtons
                       ? this._setSearchPlaceholderText(searchType)
@@ -334,21 +343,18 @@ class SearchBar extends Component {
                   minLength={1}
                   debounceTimeout={300}
                   onChange={this._handleOnChange}
-                  onKeyPress={(event) => {
-                    event.persist()
-                    this._handleKeyPress(event)
-                  }}
                   onKeyDown={this._handleOnKeyDown}
-                  onKeyUp={this._handleOnKeyUp}
                   onFocus={this._handleOnFocus}
                   onBlur={this._handleOnBlur}
                 />
-                <div
+                <button
                   className="search-button"
+                  aria-label="Search"
+                  type="button"
                   onClick={this._handleSearchIconClick}
                 >
-                  <img src={searchIcon} alt="search button"></img>
-                </div>
+                  <img src={searchIcon} alt=""></img>
+                </button>
               </div>
             </div>
             <PrimaryResultsContainer {...this.props} />

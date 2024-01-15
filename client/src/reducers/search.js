@@ -17,7 +17,7 @@ const initialSearchState = {
     searchTerm: "",
     searchCoordinates: null,
   },
-  primarySearch: { results: null, index: 0, isOpen: false, isActive: false },
+  primarySearch: { results: null, index: -1, isOpen: false, isActive: false },
   detailedSearch: {
     results: null,
     drawerIsOpen: false,
