@@ -280,16 +280,18 @@
   }
 
   a > span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
     color: $ui-black;
-    border-bottom: 2px solid $pp-rose;
   }
 
-  a > span:hover {
+  a:hover > span {
     color: $ui-dark-gray;
   }
 
-  a > span:active,
-  a > span:visited {
+  a:active > span,
+  a:visited > span {
     color: $pp-rose;
   }
 
@@ -304,9 +306,12 @@
   width: fit-content;
   border-bottom: 2px solid $pp-rose;
 
-  a > span:hover {
+  a:hover > span {
     color: $ui-dark-gray;
     text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
   }
 }
 
@@ -326,6 +331,9 @@
   line-height: 1.6;
 
   div > a > span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
     color: $ui-black;
     font-weight: bold;
     border-bottom: 2px solid $pp-rose;
@@ -335,7 +343,7 @@
     }
   }
 
-  div > a > span:hover {
+  div > a:hover > span {
     font-weight: bold;
     color: $ui-dark-gray;
   }
