@@ -3,6 +3,7 @@ name: CICD
 env:
   VITE_PUBLIC_URL: ""
   VITE_BASE_URL: ""
+  SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
 permissions:
   id-token: write
