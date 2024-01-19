@@ -250,9 +250,9 @@ module "rds" {
   skip_final_snapshot     = true
   deletion_protection     = false
 
-  performance_insights_enabled          = false
-  create_monitoring_role                = true
-  monitoring_interval                   = 60
+  performance_insights_enabled = false
+  create_monitoring_role       = true
+  monitoring_interval          = 60
 
   apply_immediately = true
 
@@ -369,6 +369,11 @@ module "ecs_cluster" {
         weight = 50
       }
     }
+  }
+
+  cluster_settings = {
+    name  = "containerInsights"
+    value = "disabled"
   }
 }
 
