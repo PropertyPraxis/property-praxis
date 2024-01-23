@@ -28,6 +28,7 @@ router.get("/", async (req, res) => {
         clientData = null
         break
     }
+    res.set("Cache-Control", "public, max-age=86400")
     res.json(clientData)
   } catch (err) {
     const msg = `An error occurred executing search search query. Message: ${err}`

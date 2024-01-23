@@ -174,6 +174,7 @@ module "cloudfront" {
       # viewer_protocol_policy = "redirect-to-https"
       allowed_methods = ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"]
       cached_methods  = ["GET", "HEAD"]
+      compress        = true
       query_string    = true
     }
   ]

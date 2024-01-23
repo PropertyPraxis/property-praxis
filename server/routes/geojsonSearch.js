@@ -45,8 +45,11 @@ router.get("/", async (req, res) => {
 
         // check to see if there is a distance of 0
         // which represents a target match
-        const { features } = pgData.data[0].jsonb_build_object
-
+        const features = pgData.data.map((feature) => ({
+          type: "Feature",
+          geometry: feature.geometry,
+          properties: feature,
+        }))
         // returns arrays
         const { targetAddress, nearbyAddresses } = findTargetAddress(features)
 
@@ -137,7 +140,7 @@ router.get("/", async (req, res) => {
           year,
         })
 
-        geoJSON = pgData.data[0].jsonb_build_object
+        geoJSON = { type: "FeatureCollection", features: pgData.data }
         clientData = checkEmptyGeoJSON(geoJSON)
         praxisDataType = "zipcode-intersect"
         break
@@ -147,6 +150,7 @@ router.get("/", async (req, res) => {
         break
     }
     clientData.praxisDataType = praxisDataType
+    res.set("Cache-Control", "public, max-age=86400")
     res.json(clientData)
   } catch (err) {
     const msg = `An error occurred executing parcels geoJSON query. Message: ${err}`

@@ -92,11 +92,7 @@ async function queryPGDB({
         break
 
       case GEOJSON_ZIPCODES_PARCELS:
-        query = `SELECT jsonb_build_object(
-          'type',     'FeatureCollection',
-          'features', jsonb_agg(feature)
-        )
-        FROM (
+        query = `
           SELECT jsonb_build_object(
             'type',       'Feature',
             'geometry',   ST_AsGeoJSON(geometry, 6)::json,
@@ -109,8 +105,7 @@ async function queryPGDB({
             ON p.year = ${year}
             AND ST_Intersects(z.geometry, p.geom)
             ${createCodeSQLPredicate({ code, ownid, coordinates })}
-            ) inputs
-        ) features;`
+            ) inputs;`
         break
 
       case GEOJSON_PARCELS_CODE:
@@ -197,59 +192,71 @@ async function queryPGDB({
 
       /*currenlty dead query - not used*/
       case GEOJSON_PARCELS_DISTANCE:
-        query = `SELECT jsonb_build_object(
-            'type',     'FeatureCollection',
-            'features', jsonb_agg(feature)
-          )
-          FROM (
-            SELECT jsonb_build_object(
-              'type',       'Feature',
-              'id',          feature_id,
-              'geometry',   ST_AsGeoJSON(geom, 6)::json,
-              'properties', to_jsonb(inputs) - 'geom',
-              'centroid',   ST_AsText(centroid)
-            ) AS feature
-            FROM (
-              SELECT *, ST_Distance(
-                ST_SetSRID(
-                  ST_MakePoint(${longitude}, ${latitude}),
-                4326)::geography,
-              geom::geography) AS distance
+        query = `
+              SELECT
+                feature_id,
+                saledate,
+                saleprice,
+                totsqft,
+                totacres,
+                cityrbuilt,
+                resyrbuilt,
+                prop_id,
+                year,
+                propaddr,
+                own_id,
+                taxpayer,
+                count,
+                own_group,
+                propno,
+                propdir,
+                propzip,
+                ST_AsText(centroid) AS centroid, 
+                ST_AsGeoJSON(geom, 6)::json AS geometry,
+                ST_Distance(
+                  ST_SetSRID(
+                    ST_MakePoint(${longitude}, ${latitude}),
+                  4326)::geography,
+                geom::geography) AS distance
               FROM parcels
               WHERE year = ${year}
               AND ST_Distance(
                 ST_SetSRID(
                   ST_MakePoint(${longitude}, ${latitude}),
                 4326)::geography,
-              geom::geography) < ${searchRadius}
-            ) inputs
-          ) features;`
+              geom::geography) < ${searchRadius};`
         break
 
       case GEOJSON_PARCELS_CODE_DISTANCE:
-        query = `SELECT jsonb_build_object(
-          'type',     'FeatureCollection',
-          'features', jsonb_agg(feature)
-        )
-        FROM (
-          SELECT jsonb_build_object(
-            'type',       'Feature',
-            'id',          feature_id,
-            'geometry',   ST_AsGeoJSON(geom, 6)::json,
-            'properties', to_jsonb(inputs) - 'geom',
-            'centroid',   ST_AsText(centroid)
-          ) AS feature
-          FROM (
-            SELECT *, ST_Distance(
-              ST_SetSRID(
-                ST_MakePoint(${longitude}, ${latitude}),
-              4326)::geography,
-            geom::geography) AS distance
+        query = `
+            SELECT
+              feature_id,
+              saledate,
+              saleprice,
+              totsqft,
+              totacres,
+              cityrbuilt,
+              resyrbuilt,
+              prop_id,
+              year,
+              propaddr,
+              own_id,
+              taxpayer,
+              count,
+              own_group,
+              propno,
+              propdir,
+              propzip,
+              ST_AsText(centroid) AS centroid,
+              ST_AsGeoJSON(geom, 6)::json AS geometry,
+              ST_Distance(
+                ST_SetSRID(
+                  ST_MakePoint(${longitude}, ${latitude}),
+                4326)::geography,
+              geom::geography) AS distance
             FROM parcels
             WHERE year = ${year}
-            AND propzip LIKE'${code}%'
-          ) inputs
-        ) features;`
+            AND propzip LIKE '${code}%';`
         break
 
       case POINT_CODE:
