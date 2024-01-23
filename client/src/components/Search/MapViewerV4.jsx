@@ -39,9 +39,7 @@ function useImageKey({ searchCoordinates, searchYears }) {
   const bbox = turf.bbox(buffered)
 
   // calculate start and end for searching
-  const allSearchYears = searchYears
-    .map((year) => Number(year.praxisyear))
-    .sort()
+  const allSearchYears = searchYears.map((year) => Number(year.year)).sort()
 
   // create ISO strings
   const start_captured_at = new Date(allSearchYears[0], 0, 1).toISOString()

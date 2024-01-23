@@ -13,9 +13,9 @@ function TimeGraph({ ownid }) {
         const graph_data = data
           .map((record) => {
             // cast data
-            const { praxisyear, count } = record
+            const { year, count } = record
             return {
-              year: new Date(praxisyear, 1, 1),
+              year: new Date(year, 1, 1),
               count: Number(count),
             }
           })

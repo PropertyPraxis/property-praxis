@@ -17,6 +17,7 @@ import {
 import PrimaryResultsContainer from "./PrimarySearchResults"
 import searchIcon from "../../assets/img/search.png"
 import { ppRose } from "../../utils/colors"
+import { DEFAULT_YEAR } from "../../utils/constants"
 
 class SearchBar extends Component {
   _inputRef = React.createRef()
@@ -247,7 +248,7 @@ class SearchBar extends Component {
         searchTerm: "",
         searchType: "all",
         searchCoordinates: null,
-        searchYear: "2020", //this is hardcoded and can be more dynamic
+        searchYear: DEFAULT_YEAR, //this is hardcoded and can be more dynamic
       })
     }
   }
@@ -300,11 +301,8 @@ class SearchBar extends Component {
                 >
                   {searchYears.map((result) => {
                     return (
-                      <option
-                        key={result.praxisyear}
-                        value={result.praxisyear.toString()}
-                      >
-                        {result.praxisyear}
+                      <option key={result.year} value={result.year.toString()}>
+                        {result.year}
                       </option>
                     )
                   })}

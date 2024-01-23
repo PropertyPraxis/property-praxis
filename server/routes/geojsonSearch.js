@@ -15,7 +15,7 @@ router.get("/", async (req, res) => {
       code = null,
       place = null,
       coordinates = null,
-      year = "2020",
+      year = "2021",
     } = req.query
 
     let pgData, geoJSON, clientData, praxisDataType

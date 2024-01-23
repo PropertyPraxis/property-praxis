@@ -223,10 +223,10 @@ module "rds" {
   engine_version       = "14"
   family               = "postgres14"
   major_engine_version = "14"
-  instance_class       = "db.t4g.micro"
+  instance_class       = "db.t4g.small"
 
-  allocated_storage     = 5
-  max_allocated_storage = 20
+  allocated_storage     = 20
+  max_allocated_storage = 50
 
   db_name  = local.appname
   port     = 5432

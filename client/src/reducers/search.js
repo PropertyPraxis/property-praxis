@@ -6,6 +6,7 @@ import {
   UPDATE_DETAILED_SEARCH,
   UPDATE_SEARCH_BAR,
 } from "../actions/search"
+import { DEFAULT_YEAR } from "../utils/constants"
 
 const initialSearchState = {
   searchBar: {
@@ -13,7 +14,7 @@ const initialSearchState = {
   },
   searchParams: {
     searchType: "all",
-    searchYear: "2020",
+    searchYear: DEFAULT_YEAR,
     searchTerm: "",
     searchCoordinates: null,
   },

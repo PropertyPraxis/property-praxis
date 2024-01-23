@@ -10,7 +10,7 @@ router.get("/", async (req, res) => {
       const years = await queries.queryPGDB({
         PGDBQueryType: queries.AVAILABLE_PRAXIS_YEARS,
       })
-      const searchYears = years.data.map((record) => record.praxisyear)
+      const searchYears = years.data.map((record) => record.year)
       // .filter((pyear) => Number(pyear) !== Number(year)); //filter the current year
 
       const { data } = await queries.queryPGDB({
