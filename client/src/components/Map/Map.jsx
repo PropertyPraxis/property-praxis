@@ -1,6 +1,6 @@
 import React, { Component } from "react"
 import PropTypes from "prop-types"
-import ReactMapGL, { Source, Layer, Marker } from "react-map-gl"
+import ReactMapGL, { Source, Layer, Marker, Popup } from "react-map-gl"
 // import ParcelLayerController from "./ParcelLayerController";
 import BasemapController from "./BasemapController"
 import { createNewViewport } from "../../utils/map"
@@ -184,12 +184,12 @@ class PraxisMap extends Component {
 
     // Build route and get data
     const parcelsRoute = URLParamsToAPIQueryString(
-      this.props.location.search,
+      this.props.router?.location?.search,
       "parcels"
     )
 
     const zipRoute = URLParamsToAPIQueryString(
-      this.props.location.search,
+      this.props.router?.location?.search,
       "zipcode"
     )
 
@@ -228,26 +228,32 @@ class PraxisMap extends Component {
   _onHover = (event) => {
     const {
       features,
-      srcEvent: { offsetX, offsetY },
+      lngLat,
+      originalEvent: { offsetX, offsetY },
     } = event
 
     const hoveredFeature =
       features && features.find((f) => f.layer.id === "parcel-polygon")
 
     this.props.dispatch(
-      getHoveredFeatureAction({ hoveredFeature, x: offsetX, y: offsetY })
+      getHoveredFeatureAction({
+        hoveredFeature,
+        x: offsetX,
+        y: offsetY,
+        lngLat,
+      })
     )
     if (hoveredFeature) {
-      this.props.dispatch(
-        setHighlightFeaturesAction([hoveredFeature.properties.feature_id])
-      )
+      this.props.dispatch(setHighlightFeaturesAction([hoveredFeature.id]))
     } else {
       this.props.dispatch(setHighlightFeaturesAction([""]))
     }
   }
 
   _renderTooltip() {
+    // TODO: Move to use mapbox native tooltip, performance on this is too rough
     const { hoveredFeature, x, y } = this.props.currentFeature
+    console.log(hoveredFeature)
 
     return (
       hoveredFeature && (
@@ -308,7 +314,9 @@ class PraxisMap extends Component {
 
   componentDidUpdate(prevProps) {
     // if the location changes, query for new data
-    if (this.props.location.search !== prevProps.location.search) {
+    if (
+      this.props.router?.location?.search !== prevProps.router?.location?.search
+    ) {
       this._getMapData()
     }
   }
@@ -316,27 +324,33 @@ class PraxisMap extends Component {
   render() {
     //create the new viewport before rendering
     const { latitude, longitude } = this.props.mapData.marker
-    const { highlightIds } = this.props.currentFeature
+    const { highlightIds, hoveredFeature, x, y, lngLat } =
+      this.props.currentFeature
     const { ppraxis, zips } = this.props.mapData
     const { basemapLayer } = this.props.controller
     const { sliderValue, filter } = this.props.controller
+    const { searchYear } = this.props.searchState.searchParams
     const { lat, lng, bearing } = this.props.searchState.viewerCoords
     const parcelLayerFilter = createLayerFilter(filter)
+    // TODO: replace parcelLayerFilter with something
 
     return (
       <div className="map">
         <ReactMapGL
-          {...this.props.mapState.viewport}
+          // TODO: Don't control view state, but still move around
+          initialViewState={this.props.mapState.viewport}
           mapOptions={{ attributionControl: false }}
           mapStyle={basemapLayer}
           width="100vw"
           height="100dvh"
           minZoom={10}
           maxZoom={18}
-          mapboxApiAccessToken={MAPBOX_TOKEN}
-          onViewportChange={this._onViewportChange}
+          mapboxAccessToken={MAPBOX_TOKEN}
+          onMove={this._onViewportChange}
+          // TODO:
+          // onViewportChange={this._onViewportChange}
           interactiveLayerIds={["parcel-polygon"]}
-          onHover={this._onHover}
+          onMouseMove={this._onHover}
           onClick={(e) => {
             this._handleMapClick(e)
           }}
@@ -361,7 +375,17 @@ class PraxisMap extends Component {
               <Arrow compassAngle={bearing} />
             </Marker>
           ) : null}
-          <Source id="parcels" type="geojson" data={ppraxis}>
+          {/* TODO: Clean up */}
+          <Source
+            id="parcels-centroids"
+            type="vector"
+            tiles={[
+              `https://property-praxis-dev-assets.s3.amazonaws.com/tiles/dev/parcels-centroids-${searchYear}/{z}/{x}/{y}.pbf`,
+            ]}
+            minzoom={8}
+            maxzoom={13}
+          >
+            {/* <Source id="parcels" type="geojson" data={ppraxis}> */}
             <Layer
               key="parcel-centroid"
               {...parcelCentroid}
@@ -375,12 +399,22 @@ class PraxisMap extends Component {
                 "circle-opacity": sliderValue / 100,
               }}
             />
+          </Source>
+          <Source
+            id="parcels"
+            type="vector"
+            tiles={[
+              `https://property-praxis-dev-assets.s3.amazonaws.com/tiles/dev/parcels-${searchYear}/{z}/{x}/{y}.pbf`,
+            ]}
+            minzoom={13}
+            maxzoom={14}
+          >
             {/* this is an optional highlight layer that 
             higlights centroids rather than polys */}
             {/* <Layer
               key="highlight-centroid-layer"
               {...parcelCentroidHighlightLayer}
-              filter={["in", "feature_id", ...highlightIds]} // hightlight can be an array or string
+              filter={["in", "id", ...highlightIds]} // hightlight can be an array or string
             /> */}
             <Layer
               key="parcel-layer"
@@ -398,11 +432,21 @@ class PraxisMap extends Component {
             <Layer
               key="highlight-parcel-layer"
               {...parcelHighlightLayer}
-              filter={["in", "feature_id", ...highlightIds]} // hightlight can be an array or string
+              filter={["in", "id", ...highlightIds]} // hightlight can be an array or string
             />
           </Source>
 
-          {this._renderTooltip()}
+          {hoveredFeature && (
+            <Popup longitude={lngLat.lng} latitude={lngLat.lat}>
+              <div className="tooltip">
+                <div>{hoveredFeature.properties.propaddr}</div>
+                <div>Speculator: {hoveredFeature.properties.own_id}</div>
+                <div>
+                  Properties owned: {hoveredFeature.properties.own_count}
+                </div>
+              </div>
+            </Popup>
+          )}
           <Source id="zips" type="geojson" data={zips}>
             <Layer key="zips-layer" {...zipsLayer} />
             <Layer key="zips-label" {...zipsLabel} />

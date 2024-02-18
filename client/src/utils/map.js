@@ -1,4 +1,4 @@
-import { WebMercatorViewport } from "react-map-gl"
+import { WebMercatorViewport } from "viewport-mercator-project"
 import bbox from "@turf/bbox"
 
 // function to create the new viewport to zoom to
@@ -24,7 +24,9 @@ export function createNewViewport(geojson, mapState) {
   if (features && featureCount > 0) {
     const [minLng, minLat, maxLng, maxLat] = bbox(geojson)
     // construct a viewport instance from the current state
+    console.log(mapState)
     const viewport = new WebMercatorViewport(mapState)
+    console.log(viewport)
     // Note: padding has been known to cause odd errors
     const { longitude, latitude, zoom } = viewport.fitBounds(
       [
@@ -32,7 +34,7 @@ export function createNewViewport(geojson, mapState) {
         [maxLng, maxLat],
       ],
       {
-        padding: 40,
+        padding: 10,
       }
     )
 

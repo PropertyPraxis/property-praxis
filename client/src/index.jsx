@@ -1,5 +1,5 @@
 import React from "react"
-import ReactDOM from "react-dom"
+import { createRoot } from "react-dom/client"
 import store from "./reducers"
 import { Provider } from "react-redux"
 import * as Sentry from "@sentry/react"
@@ -16,9 +16,9 @@ if (import.meta.env.PROD) {
   })
 }
 
-ReactDOM.render(
+const root = createRoot(document.getElementById("root"))
+root.render(
   <Provider store={store}>
     <App />
-  </Provider>,
-  document.getElementById("root")
+  </Provider>
 )

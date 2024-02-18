@@ -1,6 +1,6 @@
 //uncomment logger for development
 import logger from "./logger"
-import thunk from "redux-thunk"
+import { thunk } from "redux-thunk"
 import { applyMiddleware, compose } from "redux"
 
 //boiler plate to use redux devtools

@@ -1,6 +1,6 @@
 import React from "react"
 import { connect } from "react-redux"
-import { withRouter } from "react-router-dom"
+import { withRouter } from "../../utils/router"
 import PropTypes from "prop-types"
 import SearchBar from "../Search/SearchBar"
 import Footer from "./Footer"
@@ -100,4 +100,4 @@ function mapStateToProps({ searchState, mapData, mapState, results }) {
   return { searchState, mapData, mapState, results }
 }
 
-export default withRouter(connect(mapStateToProps)(Home))
+export default connect(mapStateToProps)(Home)

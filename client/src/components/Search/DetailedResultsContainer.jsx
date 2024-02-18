@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react"
 import { useSelector, useDispatch } from "react-redux"
-import { withRouter } from "react-router-dom"
+import { withRouter } from "../../utils/router"
 import { CSSTransition } from "react-transition-group"
 import queryString from "query-string"
 import { updateDetailedSearch } from "../../actions/search"

@@ -53,6 +53,7 @@ router.get("/", async (req, res) => {
         // returns arrays
         const { targetAddress, nearbyAddresses } = findTargetAddress(features)
 
+        // TODO: Change how this is displayed, pull single parcel on client?
         if (targetAddress.length === 0 && nearbyAddresses.length === 0) {
           // this is a default empty geojson
           // where there is no features returned

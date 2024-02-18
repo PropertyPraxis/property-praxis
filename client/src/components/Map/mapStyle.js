@@ -32,6 +32,7 @@
 
 export const parcelLayer = {
   id: "parcel-polygon",
+  "source-layer": "parcels",
   type: "fill",
   minzoom: 13,
   buffer: 0,
@@ -41,7 +42,7 @@ export const parcelLayer = {
 export const parcelHighlightLayer = {
   id: "highlight-parcel-polygon",
   type: "fill",
-  source: "parcel-polygon",
+  "source-layer": "parcels",
   // minzoom: 13,
   buffer: 0,
   tolerance: 0.9,
@@ -55,6 +56,7 @@ export const parcelHighlightLayer = {
 export const parcelCentroid = {
   id: "parcel-centroid",
   type: "circle",
+  "source-layer": "parcels",
   maxzoom: 13,
   buffer: 0,
   tolerance: 0.9,

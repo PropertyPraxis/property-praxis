@@ -1,5 +1,5 @@
 import React, { Component } from "react"
-import { withRouter } from "react-router-dom"
+import { withRouter } from "../../utils/router"
 import { connect } from "react-redux"
 import PropTypes from "prop-types"
 import { URLParamsToSearchParams } from "../../utils/parseURL"
@@ -9,7 +9,9 @@ import PraxisMap from "./Map"
 the search params to the map*/
 class MapContainer extends Component {
   render() {
-    const searchParams = URLParamsToSearchParams(this.props.location.search)
+    const searchParams = URLParamsToSearchParams(
+      this.props.router?.location?.search
+    )
 
     return <PraxisMap {...this.props} searchParams={searchParams} />
   }

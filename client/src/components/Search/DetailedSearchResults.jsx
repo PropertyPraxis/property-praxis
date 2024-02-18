@@ -59,7 +59,7 @@ function useSpeculationByCode(results, { code, year }) {
           const ids = results
             .map((record) => {
               if (record.properties.own_id === item.own_id) {
-                return record.properties.feature_id
+                return record.properties.prop_id
               } else {
                 return null
               }
@@ -101,7 +101,7 @@ function useCodesBySpeculator(results, { code, ownid, year }) {
           const ids = results
             .map((record) => {
               if (record.properties.propzip === item.propzip) {
-                return record.properties.feature_id
+                return record.properties.prop_id
               } else {
                 return null
               }
@@ -219,7 +219,7 @@ function ZipcodeLink({ record, index, queryParams }) {
 function AddressLink({ index, record, queryParams }) {
   const { code, year } = queryParams
   const { centroid } = record
-  const { propaddr, feature_id } = record.properties
+  const { propaddr, prop_id } = record.properties
 
   const dispatch = useDispatch()
   const highlightFeatures = (id) => {
@@ -232,7 +232,7 @@ function AddressLink({ index, record, queryParams }) {
   return (
     <div className="address-item" key={index}>
       <Link
-        onMouseOver={() => highlightFeatures([feature_id])}
+        onMouseOver={() => highlightFeatures([prop_id])}
         onMouseOut={() => removeHighlightFeatures()}
         onClick={() => removeHighlightFeatures()}
         to={createQueryStringFromParams(
@@ -308,6 +308,7 @@ function ContentSwitch({ detailsType, queryParams }) {
     (state) => state.searchState.detailedSearch
   )
 
+  // TODO: Don't worry as much about single vs multiple
   if (results && results.length > 0 && resultsType) {
     switch (detailsType) {
       case "parcels-by-geocode:single-parcel":

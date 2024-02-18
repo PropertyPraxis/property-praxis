@@ -1,5 +1,6 @@
 import React, { Component } from "react"
-import { Link, withRouter } from "react-router-dom"
+import { Link } from "react-router-dom"
+import { withRouter } from "../../utils/router"
 import PropTypes from "prop-types"
 import { updatePrimarySearch } from "../../actions/search"
 import {

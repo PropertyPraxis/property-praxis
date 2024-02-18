@@ -1,6 +1,6 @@
 import React, { Component } from "react"
 import { connect } from "react-redux"
-import { withRouter } from "react-router-dom"
+import { withRouter } from "../../utils/router"
 import PropTypes from "prop-types"
 import { handleSearchBarYearsAction } from "../../actions/search"
 import SearchBar from "./SearchBar"

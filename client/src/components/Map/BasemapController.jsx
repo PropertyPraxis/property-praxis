@@ -1,5 +1,5 @@
 import React from "react"
-import ReactTooltip from "react-tooltip"
+import { Tooltip as ReactTooltip } from "react-tooltip"
 import PropTypes from "prop-types"
 import { toggleBasemapAction } from "../../actions/controller"
 import monochromeLayerImage from "../../assets/img/monochrome-layer.png"

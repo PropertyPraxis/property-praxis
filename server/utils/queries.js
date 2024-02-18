@@ -101,9 +101,9 @@ async function queryPGDB({
           FROM (
             SELECT DISTINCT z.geometry AS geometry, z.zipcode AS zipcode 
             FROM zips_geom AS z
-            INNER JOIN parcels AS p
+            INNER JOIN parcel_property_geom AS p
             ON p.year = ${year}
-            AND ST_Intersects(z.geometry, p.geom)
+            AND ST_Intersects(z.geometry, p.centroid)
             ${createCodeSQLPredicate({ code, ownid, coordinates })}
             ) inputs;`
         break
@@ -116,8 +116,8 @@ async function queryPGDB({
           FROM (
             SELECT jsonb_build_object(
               'type',       'Feature',
-              'geometry',   ST_AsGeoJSON(geom, 6)::json,
-              'properties', to_jsonb(inputs) - 'geom',
+              'geometry',   ST_AsGeoJSON(centroid, 6)::json,
+              'properties', to_jsonb(inputs) - 'centroid',
               'centroid',   ST_AsText(centroid)
             ) AS feature
             FROM (
@@ -212,22 +212,23 @@ async function queryPGDB({
                 propdir,
                 propzip,
                 ST_AsText(centroid) AS centroid, 
-                ST_AsGeoJSON(geom, 6)::json AS geometry,
+                ST_AsGeoJSON(centroid, 6)::json AS geometry,
                 ST_Distance(
                   ST_SetSRID(
                     ST_MakePoint(${longitude}, ${latitude}),
                   4326)::geography,
-                geom::geography) AS distance
+                centroid::geography) AS distance
               FROM parcels
               WHERE year = ${year}
               AND ST_Distance(
                 ST_SetSRID(
                   ST_MakePoint(${longitude}, ${latitude}),
                 4326)::geography,
-              geom::geography) < ${searchRadius};`
+              centroid::geography) < ${searchRadius};`
         break
 
       case GEOJSON_PARCELS_CODE_DISTANCE:
+        // TODO:
         query = `
             SELECT
               feature_id,
@@ -248,12 +249,12 @@ async function queryPGDB({
               propdir,
               propzip,
               ST_AsText(centroid) AS centroid,
-              ST_AsGeoJSON(geom, 6)::json AS geometry,
+              ST_AsGeoJSON(centroid, 6)::json AS geometry,
               ST_Distance(
                 ST_SetSRID(
                   ST_MakePoint(${longitude}, ${latitude}),
                 4326)::geography,
-              geom::geography) AS distance
+              centroid::geography) AS distance
             FROM parcels
             WHERE year = ${year}
             AND propzip LIKE '${code}%';`
@@ -341,7 +342,7 @@ async function queryPGDB({
         x.own_id, x.count::int, x.propzip, y.total::int,
         (x.count::float / y.total::float) * 100 AS per
         FROM (
-          SELECT DISTINCT COUNT(ppg1.geom) AS count, 
+          SELECT DISTINCT COUNT(ppg1.parprop_id) AS count, 
           ot1.own_id AS own_id, p1.zipcode_sj AS propzip
           FROM parcel_property_geom AS ppg1
           INNER JOIN property AS p1 ON ppg1.prop_id = p1.prop_id
@@ -355,7 +356,7 @@ async function queryPGDB({
           GROUP BY ot1.own_id, p1.zipcode_sj
         ) x 
         INNER JOIN (
-          SELECT DISTINCT COUNT(ppg2.geom) AS total, 
+          SELECT DISTINCT COUNT(ppg2.parprop_id) AS total, 
           p2.zipcode_sj AS propzip
           FROM parcel_property_geom AS ppg2
           INNER JOIN property AS p2 ON ppg2.prop_id = p2.prop_id

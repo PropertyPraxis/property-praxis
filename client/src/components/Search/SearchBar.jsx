@@ -205,7 +205,7 @@ class SearchBar extends Component {
 
   componentDidMount() {
     // parse URL and dispatch params
-    const { search: searchQuery, pathname } = this.props.history.location
+    const { search: searchQuery, pathname } = this.props.router?.location || {}
     if (pathname === "/map") {
       const { searchType, searchTerm, searchCoordinates, searchYear } =
         URLParamsToSearchParams(searchQuery)
@@ -226,8 +226,11 @@ class SearchBar extends Component {
 
   componentDidUpdate(prevProps) {
     // set search if the full query string changes
-    const { search: searchQuery, pathname } = this.props.history.location
-    if (prevProps.location.search !== searchQuery && pathname === "/map") {
+    const { search: searchQuery, pathname } = this.props.router?.location || {}
+    if (
+      prevProps.router?.location.search !== searchQuery &&
+      pathname === "/map"
+    ) {
       // parse URL and dispatch params
       const { searchType, searchTerm, searchYear, searchCoordinates } =
         URLParamsToSearchParams(searchQuery)
@@ -243,7 +246,7 @@ class SearchBar extends Component {
         searchTerm,
         searchYear,
       })
-    } else if (prevProps.location.pathname !== pathname) {
+    } else if (prevProps.router?.location?.pathname !== pathname) {
       this._setSearchStateParams({
         searchTerm: "",
         searchType: "all",
