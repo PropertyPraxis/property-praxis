@@ -1,6 +1,5 @@
 import React from "react"
 import { connect } from "react-redux"
-import { withRouter } from "../../utils/router"
 import PropTypes from "prop-types"
 import SearchBar from "../Search/SearchBar"
 import Footer from "./Footer"

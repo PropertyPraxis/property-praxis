@@ -9,7 +9,7 @@ import Methodology from "./pages/Methodology"
 import MapContainer from "./Map/MapContainer"
 import SearchContainer from "./Search/SearchContainer"
 import DetailedResultsContainer from "./Search/DetailedResultsContainer"
-import LoadingIndicator from "./LoadingIndicator/LoadingIndicator"
+// import LoadingIndicator from "./LoadingIndicator/LoadingIndicator"
 import Error from "./Redirect/Error"
 import PPLogo from "./Logo/Logo"
 

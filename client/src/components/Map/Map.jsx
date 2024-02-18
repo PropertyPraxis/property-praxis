@@ -329,9 +329,8 @@ class PraxisMap extends Component {
   render() {
     //create the new viewport before rendering
     const { latitude, longitude } = this.props.mapData.marker
-    const { highlightIds, hoveredFeature, x, y, lngLat } =
-      this.props.currentFeature
-    const { ppraxis, zips } = this.props.mapData
+    const { highlightIds, hoveredFeature, lngLat } = this.props.currentFeature
+    const { zips } = this.props.mapData
     const { basemapLayer } = this.props.controller
     const { sliderValue, filter } = this.props.controller
     const { searchYear } = this.props.searchState.searchParams
