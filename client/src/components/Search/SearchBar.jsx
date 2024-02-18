@@ -1,6 +1,7 @@
 import React, { Component } from "react"
 import { DebounceInput } from "react-debounce-input"
 import PropTypes from "prop-types"
+import { withRouter } from "../../utils/router"
 import {
   handlePrimarySearchQuery,
   handlePrimarySearchAll,
@@ -35,7 +36,7 @@ class SearchBar extends Component {
         }),
         "/map"
       )
-      this.props.history.push(route)
+      this.props.router?.navigate(route)
     }
   }
 
@@ -380,4 +381,4 @@ SearchBar.propTypes = {
   dispatch: PropTypes.func.isRequired,
 }
 
-export default SearchBar
+export default withRouter(SearchBar)

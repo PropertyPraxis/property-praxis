@@ -102,7 +102,7 @@ class PraxisMarker extends React.Component {
       "/map"
     )
 
-    this.props.history.push(clientRoute)
+    this.props.router?.navigate(clientRoute)
   }
 
   render() {
@@ -148,6 +148,8 @@ class PraxisMap extends Component {
     [7, parcelStop7],
   ]
 
+  mapRef = React.createRef()
+
   // _stops = [
   //   [1, "#f6d2a9;"],
   //   [2, "#f5b78e"],
@@ -162,7 +164,10 @@ class PraxisMap extends Component {
   _createNewViewport = (geojson) => {
     const features = geojson.features
     const { viewport } = this.props.mapState
-    const { longitude, latitude, zoom } = createNewViewport(geojson, viewport)
+    const { longitude, latitude, zoom } = createNewViewport(
+      geojson,
+      this.mapRef
+    )
     const newViewport = {
       ...viewport,
       longitude,
@@ -300,7 +305,7 @@ class PraxisMap extends Component {
         },
         "/map"
       )
-      this.props.history.push(clientRoute)
+      this.props.router?.navigate(clientRoute)
     }
   }
 
@@ -337,6 +342,7 @@ class PraxisMap extends Component {
     return (
       <div className="map">
         <ReactMapGL
+          ref={this.mapRef}
           // TODO: Don't control view state, but still move around
           initialViewState={this.props.mapState.viewport}
           mapOptions={{ attributionControl: false }}

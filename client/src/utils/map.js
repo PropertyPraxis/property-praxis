@@ -1,8 +1,7 @@
-import { WebMercatorViewport } from "viewport-mercator-project"
 import bbox from "@turf/bbox"
 
 // function to create the new viewport to zoom to
-export function createNewViewport(geojson, mapState) {
+export function createNewViewport(geojson, mapRef) {
   const { features } = geojson
   let featureCount = 0
   if (features && features.length > 0) {
@@ -23,32 +22,24 @@ export function createNewViewport(geojson, mapState) {
   // create the appropriate
   if (features && featureCount > 0) {
     const [minLng, minLat, maxLng, maxLat] = bbox(geojson)
-    // construct a viewport instance from the current state
-    console.log(mapState)
-    const viewport = new WebMercatorViewport(mapState)
-    console.log(viewport)
-    // Note: padding has been known to cause odd errors
-    const { longitude, latitude, zoom } = viewport.fitBounds(
+    mapRef.current.fitBounds(
       [
         [minLng, minLat],
         [maxLng, maxLat],
       ],
       {
-        padding: 10,
+        padding: 40,
       }
     )
-
-    return { longitude, latitude, zoom }
   } else if (geojson.geometry && geojson.geometry.type === "Point") {
     //if it is a point return this
     const [longitude, latitude] = geojson.center
-    return { longitude, latitude, zoom: 15 }
+    mapRef.current.flyTo({ center: [longitude, latitude], zoom: 15 })
   } else {
-    return {
-      latitude: 42.40230199308517,
-      longitude: -83.11182404081912,
+    mapRef.current.flyTo({
+      center: [-83.11182404081912, 42.40230199308517],
       zoom: 10,
-    }
+    })
   }
 }
 
