@@ -4,11 +4,7 @@
 
 /pg/data
 db_dump.sql
-/rstudio/data
 node_modules
-
-/rstudio/data/csvs
-/rstudio/data/shps
 
 # VS Code stuff
 .vscode/*

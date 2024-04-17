@@ -7,16 +7,3 @@ services:
     env_file: ./envs/db.env
     volumes:
       - ./pg/data:/var/lib/postgresql/data
-
-  rstudio:
-    build:
-      context: ./rstudio/
-      dockerfile: Dockerfile
-    depends_on:
-      - postgres
-    ports:
-      - "8787:8787"
-    env_file: ./envs/rstudio.env
-    volumes:
-      - ./rstudio/data:/home/rstudio/pp-pipeline/data
-      - ./rstudio/scripts:/home/rstudio/pp-pipeline/scripts
