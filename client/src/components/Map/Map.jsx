@@ -442,7 +442,11 @@ class PraxisMap extends Component {
           </Source>
 
           {hoveredFeature && (
-            <Popup longitude={lngLat.lng} latitude={lngLat.lat}>
+            <Popup
+              longitude={lngLat.lng}
+              latitude={lngLat.lat}
+              closeOnClick={false}
+            >
               <div className="tooltip">
                 <div>{hoveredFeature.properties.propaddr}</div>
                 <div>Speculator: {hoveredFeature.properties.own_id}</div>
