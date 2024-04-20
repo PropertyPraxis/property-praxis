@@ -111,10 +111,10 @@ async function queryPGDB({
 
         if (ownid && code) {
           query.append(
-            `WHERE p.own_id LIKE ${ownIdMatch} AND p.propzip LIKE ${zipMatch}`
+            `WHERE p.own_id LIKE ${ownIdMatch} AND p.zipcode_sj LIKE ${zipMatch}`
           )
         } else if (code) {
-          query.append(`WHERE p.propzip LIKE ${zipMatch}`)
+          query.append(`WHERE p.zipcode_sj LIKE ${zipMatch}`)
         } else if (ownid) {
           query.append(`WHERE p.own_id LIKE ${ownIdMatch}`)
         } else if (coordinates) {
@@ -416,7 +416,7 @@ async function queryPGDB({
         console.error(`Unknown SQL query type: ${PGDBQueryType}`)
         break
     }
-    console.log(`DB Query: ${query.strings.join("")}`)
+    console.log(`DB Query: ${query.text}`)
     const { rows } = await db.query(query)
     return { data: rows }
   } catch (err) {
