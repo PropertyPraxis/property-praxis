@@ -1,6 +1,7 @@
 const db = require("../db") //index.js
 const fetch = require("node-fetch")
 const keys = require("../config/keys")
+const SQL = require("sql-template-strings")
 
 /*PG DB query types*/
 const PRIMARY_ZIPCODE = "PRIMARY_ZIPCODE"
@@ -47,17 +48,20 @@ async function queryPGDB({
       latitude = parsedCoordinates.latitude
     }
 
+    const zipMatch = `%${code}%`
+    const ownIdMatch = `%${decodeURI(ownid).toUpperCase()}%`
+
     /* eslint-disable no-case-declarations */
     switch (PGDBQueryType) {
       case PRIMARY_ZIPCODE:
-        query = `SELECT DISTINCT p.zipcode_sj AS propzip, AVG(oc.count) as avg_count
+        query = SQL`SELECT DISTINCT p.zipcode_sj AS propzip, AVG(oc.count) as avg_count
           FROM property as p
           INNER JOIN taxpayer_property AS tpp ON p.prop_id = tpp.prop_id
           INNER JOIN year AS y ON tpp.taxparprop_id = y.taxparprop_id
           INNER JOIN taxpayer as tp ON tpp.tp_id = tp.tp_id
           INNER JOIN owner_taxpayer AS otp ON tp.owntax_id = otp.owntax_id
           INNER JOIN owner_count as OC ON otp.own_id = oc.own_id
-          WHERE p.zipcode_sj LIKE '${code}%' 
+          WHERE p.zipcode_sj LIKE ${zipMatch} 
           AND y.year = ${year}
           GROUP BY  p.zipcode_sj
           ORDER BY avg_count DESC
@@ -66,8 +70,8 @@ async function queryPGDB({
         break
 
       case PRIMARY_SPECULATOR:
-        query = `SELECT * FROM owner_count
-          WHERE own_id LIKE '%${decodeURI(ownid).toUpperCase()}%'
+        query = SQL`SELECT * FROM owner_count
+          WHERE own_id LIKE ${ownIdMatch}
           AND year = ${year}
           AND count > 9
           ORDER BY count DESC
@@ -75,7 +79,7 @@ async function queryPGDB({
         break
       // add WHERE to query for all the intersecting zips/parcels
       case GEOJSON_ZIPCODES:
-        query = `SELECT jsonb_build_object(
+        query = SQL`SELECT jsonb_build_object(
             'type',     'FeatureCollection',
             'features', jsonb_agg(feature)
           )
@@ -92,7 +96,7 @@ async function queryPGDB({
         break
 
       case GEOJSON_ZIPCODES_PARCELS:
-        query = `
+        query = SQL`
           SELECT jsonb_build_object(
             'type',       'Feature',
             'geometry',   ST_AsGeoJSON(geometry, 6)::json,
@@ -103,13 +107,30 @@ async function queryPGDB({
             FROM zips_geom AS z
             INNER JOIN parcel_property_geom AS p
             ON p.year = ${year}
-            AND ST_Intersects(z.geometry, p.centroid)
-            ${createCodeSQLPredicate({ code, ownid, coordinates })}
-            ) inputs;`
+            AND ST_Intersects(z.geometry, p.centroid)`
+
+        if (ownid && code) {
+          query.append(
+            `WHERE p.own_id LIKE ${ownIdMatch} AND p.propzip LIKE ${zipMatch}`
+          )
+        } else if (code) {
+          query.append(`WHERE p.propzip LIKE ${zipMatch}`)
+        } else if (ownid) {
+          query.append(`WHERE p.own_id LIKE ${ownIdMatch}`)
+        } else if (coordinates) {
+          query.append(SQL`WHERE 
+            ST_Intersects(
+              ST_SetSRID(
+                ST_MakePoint(${longitude}, ${latitude}),
+              4326)::geography,
+            z.geometry)`)
+        }
+
+        query.append(SQL`) inputs;`)
         break
 
       case GEOJSON_PARCELS_CODE:
-        query = `SELECT jsonb_build_object(
+        query = SQL`SELECT jsonb_build_object(
             'type',     'FeatureCollection',
             'features', jsonb_agg(feature)
           )
@@ -123,13 +144,13 @@ async function queryPGDB({
             FROM (
               SELECT * FROM parcels
               WHERE year = ${year}
-              AND propzip LIKE '%${code}%'
+              AND propzip LIKE ${zipMatch}
             ) inputs
           ) features;`
         break
 
       case GEOJSON_PARCELS_OWNID:
-        query = `SELECT jsonb_build_object(
+        query = SQL`SELECT jsonb_build_object(
             'type',     'FeatureCollection',
             'features', jsonb_agg(feature)
           )
@@ -143,13 +164,13 @@ async function queryPGDB({
             FROM (
               SELECT * FROM parcels
               WHERE year = ${year}
-              AND own_id LIKE '%${decodeURI(ownid).toUpperCase()}%'
+              AND own_id LIKE ${ownIdMatch}
             ) inputs
           ) features;`
         break
 
       case GEOJSON_PARCELS_CODE_OWNID:
-        query = `SELECT jsonb_build_object(
+        query = SQL`SELECT jsonb_build_object(
               'type',     'FeatureCollection',
               'features', jsonb_agg(feature)
             )
@@ -163,14 +184,14 @@ async function queryPGDB({
               FROM (
                 SELECT * FROM parcels
                 WHERE year = ${year}
-                AND propzip LIKE '%${code}%'
-                AND own_id LIKE '%${decodeURI(ownid).toUpperCase()}%'
+                AND propzip LIKE ${zipMatch}
+                AND own_id LIKE ${ownIdMatch}
               ) inputs
             ) features;`
         break
 
       case GEOJSON_PARCELS_OWNID_CODE:
-        query = `SELECT jsonb_build_object(
+        query = SQL`SELECT jsonb_build_object(
               'type',     'FeatureCollection',
               'features', jsonb_agg(feature)
             )
@@ -184,15 +205,15 @@ async function queryPGDB({
               FROM (
                 SELECT * FROM parcels
                 WHERE year = ${year}
-                AND own_id LIKE '%${decodeURI(ownid).toUpperCase()}%'
-                AND propzip LIKE '%${code}%'
+                AND own_id LIKE ${ownIdMatch}
+                AND propzip LIKE ${zipMatch}
               ) inputs
             ) features;`
         break
 
       /*currenlty dead query - not used*/
       case GEOJSON_PARCELS_DISTANCE:
-        query = `
+        query = SQL`
               SELECT
                 feature_id,
                 saledate,
@@ -229,7 +250,7 @@ async function queryPGDB({
 
       case GEOJSON_PARCELS_CODE_DISTANCE:
         // TODO:
-        query = `
+        query = SQL`
             SELECT
               feature_id,
               saledate,
@@ -257,11 +278,11 @@ async function queryPGDB({
               centroid::geography) AS distance
             FROM parcels
             WHERE year = ${year}
-            AND propzip LIKE '${code}%';`
+            AND propzip LIKE ${zipMatch};`
         break
 
       case POINT_CODE:
-        query = `SELECT * 
+        query = SQL`SELECT * 
           FROM zips_geom AS z
           WHERE 
           ST_Intersects(
@@ -273,7 +294,7 @@ async function queryPGDB({
 
       // search for available geometry cols
       case DETAILED_RECORD_YEARS:
-        query = `SELECT
+        query = SQL`SELECT
           DISTINCT year
           FROM property
           WHERE prop_id = ${parpropid}`
@@ -281,18 +302,18 @@ async function queryPGDB({
 
       // all the years in the DB to search
       case AVAILABLE_PRAXIS_YEARS:
-        query = `SELECT DISTINCT year FROM year 
+        query = SQL`SELECT DISTINCT year FROM year 
           ORDER BY year DESC;`
         break
 
       case SPECULATORS_BY_CODE:
-        query = `SELECT DISTINCT otp.own_id, oc.count
+        query = SQL`SELECT DISTINCT otp.own_id, oc.count
         FROM property as p
         INNER JOIN taxpayer_property AS tpp ON p.prop_id = tpp.prop_id
         INNER JOIN taxpayer as tp ON tpp.tp_id = tp.tp_id
         INNER JOIN owner_taxpayer AS otp ON tp.owntax_id = otp.owntax_id
         INNER JOIN owner_count as OC ON otp.own_id = oc.own_id
-        WHERE p.zipcode_sj LIKE '${code}%'
+        WHERE p.zipcode_sj LIKE ${zipMatch}
         AND p.year = ${year}
         AND oc.year = ${year}
         ORDER BY oc.count DESC
@@ -301,7 +322,7 @@ async function queryPGDB({
         break
 
       case CODES_BY_SPECULATOR:
-        query = `SELECT DISTINCT p.zipcode_sj AS propzip,
+        query = SQL`SELECT DISTINCT p.zipcode_sj AS propzip,
           STRING_AGG(DISTINCT ot.own_id, ',') AS own_id, COUNT(ot.own_id) AS count
           FROM parcel_property_geom AS ppg
           INNER JOIN property AS p ON ppg.prop_id = p.prop_id
@@ -309,7 +330,7 @@ async function queryPGDB({
           INNER JOIN year AS y on tp.taxparprop_id = y.taxparprop_id
           INNER JOIN taxpayer AS t ON tp.tp_id = t.tp_id
           INNER JOIN owner_taxpayer AS ot ON t.owntax_id = ot.owntax_id
-          WHERE ot.own_id LIKE '%${decodeURI(ownid).toUpperCase()}%'
+          WHERE ot.own_id LIKE ${ownIdMatch}
           AND y.year = ${year}
           AND ppg.year = ${year}
           GROUP BY p.zipcode_sj, ot.own_id
@@ -319,17 +340,17 @@ async function queryPGDB({
 
       case SPECULATION_BY_CODE:
         /*Query to  get the rate of speculation in a zipcode.*/
-        query = `SELECT y.own_id, y.count, y.total,
+        query = SQL`SELECT y.own_id, y.count, y.total,
         (y.count::float / y.total::float) * 100 AS per
          FROM 
         (SELECT SUM(x.count)::INT as count, x.own_id as own_id, x.total
           FROM
             (SELECT DISTINCT own_id, COUNT(own_id)::INT as count,
             (SELECT COUNT(feature_id) FROM parcels
-            WHERE year = ${year} AND propzip LIKE '%${code}%')::INT AS total 
+            WHERE year = ${year} AND propzip LIKE ${zipMatch})::INT AS total 
             FROM parcels
             WHERE year = ${year}
-            AND propzip LIKE '%${code}%'
+            AND propzip LIKE ${zipMatch}
             GROUP BY own_id) x
           GROUP BY own_id, total
           ORDER BY count DESC ) y;`
@@ -338,7 +359,7 @@ async function queryPGDB({
 
       case SPECULATION_BY_OWNID:
         /*Search speculation by own_id in each zipcode.*/
-        query = `SELECT DISTINCT 
+        query = SQL`SELECT DISTINCT 
         x.own_id, x.count::int, x.propzip, y.total::int,
         (x.count::float / y.total::float) * 100 AS per
         FROM (
@@ -351,7 +372,7 @@ async function queryPGDB({
           INNER JOIN taxpayer AS t1 ON tp1.tp_id = t1.tp_id
           INNER JOIN owner_taxpayer AS ot1 ON t1.owntax_id = ot1.owntax_id
           WHERE ppg1.year = ${year}
-          AND ot1.own_id LIKE '%${ownid}%'
+          AND ot1.own_id LIKE ${ownIdMatch}
           AND y1.year = ${year}
           GROUP BY ot1.own_id, p1.zipcode_sj
         ) x 
@@ -373,7 +394,7 @@ async function queryPGDB({
 
       case SPECULATOR_BY_YEAR:
         /*Search property count by own_id by year*/
-        query = `SELECT DISTINCT COUNT(ot.own_id),
+        query = SQL`SELECT DISTINCT COUNT(ot.own_id),
           ot.own_id, y.year
           FROM owner_taxpayer AS ot
           INNER JOIN taxpayer AS tp
@@ -382,7 +403,7 @@ async function queryPGDB({
           ON tp.tp_id = tpp.tp_id
           INNER JOIN year AS y 
           ON tpp.taxparprop_id = y.taxparprop_id
-          WHERE ot.own_id = '${ownid}'
+          WHERE ot.own_id = ${ownid}
           GROUP BY ot.own_id, y.year`
 
         break
@@ -395,7 +416,7 @@ async function queryPGDB({
         console.error(`Unknown SQL query type: ${PGDBQueryType}`)
         break
     }
-    console.log(`DB Query: ${query}`)
+    console.log(`DB Query: ${query.strings.join("")}`)
     const { rows } = await db.query(query)
     return { data: rows }
   } catch (err) {
@@ -446,32 +467,6 @@ async function queryMapboxAPI({ coordinates, place, mbQueryType }) {
     }
   } catch (err) {
     console.error(`An error occurred executing MB query. Message: ${err}`)
-  }
-}
-
-/*String helper function*/
-function createCodeSQLPredicate({
-  code = null,
-  ownid = null,
-  coordinates = null,
-}) {
-  if (ownid && code) {
-    return `WHERE p.own_id LIKE '%${decodeURI(ownid).toUpperCase()}%'
-            AND p.propzip LIKE '%${code}%'`
-  } else if (code) {
-    return `WHERE p.propzip LIKE '%${code}%'`
-  } else if (ownid) {
-    return `WHERE p.own_id LIKE '%${decodeURI(ownid).toUpperCase()}%'`
-  } else if (coordinates) {
-    const { longitude, latitude } = JSON.parse(decodeURI(coordinates))
-    return `WHERE 
-    ST_Intersects(
-      ST_SetSRID(
-        ST_MakePoint(${longitude}, ${latitude}),
-      4326)::geography,
-    z.geometry)`
-  } else {
-    return ""
   }
 }
 
