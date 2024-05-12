@@ -162,25 +162,7 @@ class PraxisMap extends Component {
 
   // create new vieport dependent on geojson bbox
   _createNewViewport = (geojson) => {
-    const features = geojson.features
-    const { viewport } = this.props.mapState
-    const { longitude, latitude, zoom } = createNewViewport(
-      geojson,
-      this.mapRef
-    )
-    const newViewport = {
-      ...viewport,
-      longitude,
-      latitude,
-      zoom,
-      transitionDuration: 1000,
-    }
-
-    // if the return geojson has features aka the search term was
-    // valid then change the veiwport accordingly
-    if (features) {
-      this.props.dispatch(getMapStateAction(newViewport))
-    }
+    createNewViewport(geojson, this.mapRef)
   }
 
   _getMapData = async () => {
@@ -476,8 +458,8 @@ PraxisMap.propTypes = {
         longitude: PropTypes.number.isRequired,
       }.isRequired
     ),
-    ppraxis: PropTypes.object.isRequired,
-    zips: PropTypes.object.isRequired,
+    ppraxis: PropTypes.object,
+    zips: PropTypes.object,
   }).isRequired,
   currentFeature: PropTypes.shape({
     hoveredFeature: PropTypes.oneOfType([

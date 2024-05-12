@@ -106,8 +106,8 @@ class PrimaryResults extends Component {
 PrimaryResults.propTypes = {
   results: PropTypes.array.isRequired,
   searchState: PropTypes.shape({
-    searchYear: PropTypes.string.isRequired,
-    primaryIndex: PropTypes.number.isRequired,
+    searchYear: PropTypes.string,
+    primaryIndex: PropTypes.number,
   }),
 }
 
@@ -122,7 +122,7 @@ const PrimaryResultsContainer = (props) => {
 
 PrimaryResultsContainer.propTypes = {
   searchState: PropTypes.shape({
-    primaryResults: PropTypes.array.isRequired,
+    primaryResults: PropTypes.array,
   }).isRequired,
 }
 

@@ -91,11 +91,11 @@ Home.propTypes = {
   searchState: PropTypes.object.isRequired,
   mapData: PropTypes.object.isRequired,
   mapState: PropTypes.object.isRequired,
-  results: PropTypes.object.isRequired,
+  results: PropTypes.object,
   dispatch: PropTypes.func.isRequired,
 }
 
-function mapStateToProps({ searchState, mapData, mapState, results }) {
+function mapStateToProps({ searchState, mapData, mapState, results = {} }) {
   return { searchState, mapData, mapState, results }
 }
 

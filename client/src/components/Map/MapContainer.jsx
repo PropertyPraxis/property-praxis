@@ -18,14 +18,14 @@ class MapContainer extends Component {
 }
 
 MapContainer.propTypes = {
-  mapState: PropTypes.object.isRequired,
-  mapData: PropTypes.object.isRequired,
-  searchState: PropTypes.object.isRequired,
-  currentFeature: PropTypes.object.isRequired,
-  results: PropTypes.object.isRequired,
-  controller: PropTypes.object.isRequired,
-  location: PropTypes.object.isRequired,
-  mapParams: PropTypes.object.isRequired,
+  mapState: PropTypes.object,
+  mapData: PropTypes.object,
+  searchState: PropTypes.object,
+  currentFeature: PropTypes.object,
+  results: PropTypes.object,
+  controller: PropTypes.object,
+  location: PropTypes.object,
+  mapParams: PropTypes.object,
 }
 
 function mapStateToProps({

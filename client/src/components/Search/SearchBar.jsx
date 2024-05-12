@@ -373,10 +373,10 @@ SearchBar.propTypes = {
   searchBarType: PropTypes.string.isRequired,
   showSearchButtons: PropTypes.bool.isRequired,
   searchState: PropTypes.shape({
-    searchType: PropTypes.string.isRequired,
-    searchTerm: PropTypes.string.isRequired,
-    searchYear: PropTypes.string.isRequired,
-    searchYears: PropTypes.oneOf([null, PropTypes.array]).isRequired,
+    searchType: PropTypes.string,
+    searchTerm: PropTypes.string,
+    searchYear: PropTypes.string,
+    searchYears: PropTypes.oneOf([null, PropTypes.array]),
   }),
   dispatch: PropTypes.func.isRequired,
 }
