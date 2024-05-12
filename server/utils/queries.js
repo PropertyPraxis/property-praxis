@@ -86,8 +86,8 @@ async function queryPGDB({
           FROM (
             SELECT jsonb_build_object(
               'type',       'Feature',
-              'geometry',   ST_AsGeoJSON(geom, 6)::json,
-              'properties', to_jsonb(inputs) - 'geom'
+              'geometry',   ST_AsGeoJSON(geometry, 6)::json,
+              'properties', to_jsonb(inputs)
             ) AS feature
             FROM (
               SELECT * FROM zips_geom
@@ -105,20 +105,23 @@ async function queryPGDB({
           FROM (
             SELECT DISTINCT z.geometry AS geometry, z.zipcode AS zipcode 
             FROM zips_geom AS z
-            INNER JOIN parcel_property_geom AS p
-            ON p.year = ${year}
-            AND ST_Intersects(z.geometry, p.centroid)`
+            INNER JOIN parcel_property_geom AS ppg ON ppg.year = ${year}
+            INNER JOIN property AS p ON p.prop_id = ppg.prop_id
+            INNER JOIN taxpayer_property AS tpp ON p.prop_id = tpp.prop_id
+            INNER JOIN taxpayer as tp ON tpp.tp_id = tp.tp_id
+            INNER JOIN owner_taxpayer AS otp ON tp.owntax_id = otp.owntax_id
+            AND ST_Intersects(z.geometry, ppg.centroid)`
 
         if (ownid && code) {
           query.append(
-            `WHERE p.own_id LIKE ${ownIdMatch} AND p.zipcode_sj LIKE ${zipMatch}`
+            SQL` WHERE otp.own_id LIKE ${ownIdMatch} AND ppg.zipcode_sj LIKE ${zipMatch}`
           )
         } else if (code) {
-          query.append(`WHERE p.zipcode_sj LIKE ${zipMatch}`)
+          query.append(SQL` WHERE ppg.zipcode_sj LIKE ${zipMatch}`)
         } else if (ownid) {
-          query.append(`WHERE p.own_id LIKE ${ownIdMatch}`)
+          query.append(SQL` WHERE otp.own_id LIKE ${ownIdMatch}`)
         } else if (coordinates) {
-          query.append(SQL`WHERE 
+          query.append(SQL` WHERE 
             ST_Intersects(
               ST_SetSRID(
                 ST_MakePoint(${longitude}, ${latitude}),
@@ -149,6 +152,7 @@ async function queryPGDB({
           ) features;`
         break
 
+      // TODO: geom getting replaced
       case GEOJSON_PARCELS_OWNID:
         query = SQL`SELECT jsonb_build_object(
             'type',     'FeatureCollection',
@@ -157,8 +161,8 @@ async function queryPGDB({
           FROM (
             SELECT jsonb_build_object(
               'type',       'Feature',
-              'geometry',   ST_AsGeoJSON(geom, 6)::json,
-              'properties', to_jsonb(inputs) - 'geom',
+              'geometry',   ST_AsGeoJSON(centroid, 6)::json,
+              'properties', to_jsonb(inputs),
               'centroid',   ST_AsText(centroid)
             ) AS feature
             FROM (
@@ -177,8 +181,8 @@ async function queryPGDB({
             FROM (
               SELECT jsonb_build_object(
                 'type',       'Feature',
-                'geometry',   ST_AsGeoJSON(geom, 6)::json,
-                'properties', to_jsonb(inputs) - 'geom',
+                'geometry',   ST_AsGeoJSON(centroid, 6)::json,
+                'properties', to_jsonb(inputs),
                 'centroid',   ST_AsText(centroid)
               ) AS feature
               FROM (
@@ -190,6 +194,7 @@ async function queryPGDB({
             ) features;`
         break
 
+      // TODO: Clean up feature collections that aren't used for geom anymore
       case GEOJSON_PARCELS_OWNID_CODE:
         query = SQL`SELECT jsonb_build_object(
               'type',     'FeatureCollection',
@@ -198,8 +203,8 @@ async function queryPGDB({
             FROM (
               SELECT jsonb_build_object(
                 'type',       'Feature',
-                'geometry',   ST_AsGeoJSON(geom, 6)::json,
-                'properties', to_jsonb(inputs) - 'geom',
+                'geometry',   ST_AsGeoJSON(centroid, 6)::json,
+                'properties', to_jsonb(inputs),
                 'centroid',   ST_AsText(centroid)
               ) AS feature
               FROM (
