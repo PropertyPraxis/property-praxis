@@ -3,7 +3,7 @@ const { Pool } = require("pg")
 //DB Connection
 const CONNECTION_STRING =
   process.env.DATABASE_URL ||
-  `postgresql://${process.env.DATABASE_USERNAME}:${process.env.DATABASE_PASSWORD}@${process.env.DATABASE_HOST}/${process.env.DATABASE_NAME}`
+  `postgresql://${process.env.DATABASE_USERNAME}:${process.env.DATABASE_PASSWORD}@${process.env.DATABASE_HOST}:${process.env.DATABASE_PORT}/${process.env.DATABASE_NAME}`
 
 const pool = new Pool({
   connectionString: CONNECTION_STRING,

@@ -1,9 +1,33 @@
-version: "3"
 services:
   postgres:
-    image: mdillon/postgis:11 #this may affect drivers for rstudio!
+    image: mdillon/postgis:11
     ports:
       - "35432:5432"
     env_file: ./envs/db.env
     volumes:
       - ./pg/data:/var/lib/postgresql/data
+  api:
+    build:
+      context: ./server/
+      dockerfile: Dockerfile.dev
+    depends_on:
+      - postgres
+    env_file: ./envs/api.env
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./server/:/app/
+      - /app/node_modules
+  client:
+    build:
+      context: ./client/
+      dockerfile: Dockerfile.dev
+    depends_on:
+      - api
+    env_file: ./envs/client.env
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./client/:/app/
+      - /app/node_modules
+    stdin_open: true
