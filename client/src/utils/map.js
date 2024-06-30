@@ -19,6 +19,10 @@ export function createNewViewport(geojson, mapRef) {
       .reduce(reducer)
   }
 
+  if (!mapRef?.current) {
+    return
+  }
+
   // create the appropriate
   if (features && featureCount > 0) {
     const [minLng, minLat, maxLng, maxLat] = bbox(geojson)
