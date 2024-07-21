@@ -103,25 +103,18 @@ async function queryPGDB({
             'properties', to_jsonb(inputs) - 'geometry'
           ) AS feature
           FROM (
-            SELECT DISTINCT z.geometry AS geometry, z.zipcode AS zipcode 
-            FROM zips_geom AS z
-            INNER JOIN parcel_property_geom AS ppg ON ppg.year = ${year}
-            INNER JOIN property AS p ON p.prop_id = ppg.prop_id
-            INNER JOIN taxpayer_property AS tpp ON p.prop_id = tpp.prop_id
-            INNER JOIN taxpayer as tp ON tpp.tp_id = tp.tp_id
-            INNER JOIN owner_taxpayer AS otp ON tp.owntax_id = otp.owntax_id
-            AND ST_Intersects(z.geometry, ppg.centroid)`
-
-        if (ownid && code) {
-          query.append(
-            SQL` WHERE otp.own_id LIKE ${ownIdMatch} AND ppg.zipcode_sj LIKE ${zipMatch}`
-          )
-        } else if (code) {
-          query.append(SQL` WHERE ppg.zipcode_sj LIKE ${zipMatch}`)
-        } else if (ownid) {
-          query.append(SQL` WHERE otp.own_id LIKE ${ownIdMatch}`)
-        } else if (coordinates) {
-          query.append(SQL` WHERE 
+            SELECT DISTINCT z.zipcode AS zipcode, z.geometry AS geometry
+            FROM parcels AS p
+            INNER JOIN zips_geom AS z ON p.propzip = z.zipcode
+            WHERE p.year = ${year}`
+        if (code) {
+          query.append(SQL` AND p.propzip LIKE ${zipMatch}`)
+        }
+        if (ownid) {
+          query.append(SQL` ANND p.own_id LIKE ${ownIdMatch}`)
+        }
+        if (coordinates) {
+          query.append(SQL` AND 
             ST_Intersects(
               ST_SetSRID(
                 ST_MakePoint(${longitude}, ${latitude}),
@@ -254,7 +247,6 @@ async function queryPGDB({
         break
 
       case GEOJSON_PARCELS_CODE_DISTANCE:
-        // TODO:
         query = SQL`
             SELECT
               feature_id,
