@@ -141,7 +141,10 @@ router.get("/", async (req, res) => {
           year,
         })
 
-        geoJSON = { type: "FeatureCollection", features: pgData.data }
+        geoJSON = {
+          type: "FeatureCollection",
+          features: pgData.data.map(({ feature }) => feature),
+        }
         clientData = checkEmptyGeoJSON(geoJSON)
         praxisDataType = "zipcode-intersect"
         break

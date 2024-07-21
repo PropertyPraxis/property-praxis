@@ -76,7 +76,7 @@ export const zipsLayer = {
   paint: {
     "line-width": 3,
     "line-dasharray": [3, 3],
-    "line-color": "red",
+    "line-color": "white",
   },
 }
 

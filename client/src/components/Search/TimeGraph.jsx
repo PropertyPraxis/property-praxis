@@ -11,18 +11,11 @@ function TimeGraph({ ownid }) {
         const route = `/api/detailed-search?type=speculator-by-year&ownid=${ownid.toUpperCase()}`
         const data = await APISearchQueryFromRoute(route)
         const graph_data = data
-          .map((record) => {
-            // cast data
-            const { year, count } = record
-            return {
-              year: new Date(year, 1, 1),
-              count: Number(count),
-            }
-          })
-          .sort((a, b) => {
-            return a.year - b.year
-          })
-        console.log("GRAPH DATA xxxxxxxxx", graph_data)
+          .map(({ year, count }) => ({
+            x: new Date(year, 1, 1),
+            y: Number(count),
+          }))
+          .sort((a, b) => a.year - b.year)
         setData(graph_data)
       }
     })()
@@ -30,20 +23,13 @@ function TimeGraph({ ownid }) {
   }, [ownid])
 
   return (
-    <VictoryChart
-      theme={VictoryTheme.material}
-      scale={{ x: "time" }}
-      // animate={{ duration: 500 }}
-    >
+    <VictoryChart theme={VictoryTheme.material} scale={{ x: "time" }}>
       <VictoryLine
         style={{
-          // data: { stroke: styleVars.ppRose },
-          data: { stroke: "ppRose" },
+          data: { stroke: "#e4002c" },
           parent: { border: "1px solid #ccc" },
         }}
         data={data}
-        x="year"
-        y="count"
       />
     </VictoryChart>
   )
