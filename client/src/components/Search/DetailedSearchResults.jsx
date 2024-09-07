@@ -75,7 +75,7 @@ function useSpeculationByCode(results, { code, year }) {
       }
     })()
     return () => null
-  }, [code, year, results])
+  }, [code, year])
   return { data, topCount, topPer }
 }
 
@@ -315,7 +315,7 @@ function ContentSwitch({ detailsType, queryParams }) {
         return <SingleParcel result={results[0]} queryParams={queryParams} />
 
       case "parcels-by-geocode:multiple-parcels":
-        return <MultipleParcels results={results} queryParams={queryParams} />
+        return <MultipleParcels results={[]} queryParams={queryParams} />
 
       case "parcels-by-speculator":
         return <SpeculatorParcels results={results} queryParams={queryParams} />
@@ -342,6 +342,8 @@ function ContentSwitch({ detailsType, queryParams }) {
       default:
         return null
     }
+  } else if (detailsType === "parcels-by-geocode:multiple-parcels") {
+    return <MultipleParcels results={[]} queryParams={queryParams} />
   } else if (results && results.length === 0) {
     return <NoResults />
   } else {
@@ -482,15 +484,19 @@ function SpeculatorParcels(props) {
 function MultipleParcels(props) {
   const { place, year } = props.queryParams
   const { searchState } = useSelector((state) => state)
-  const { drawerIsOpen, results } = searchState.detailedSearch
-  const { propzip: code } = results[0].properties
+  const {
+    drawerIsOpen,
+    resultsCount,
+    resultsZip = props.queryParams?.code,
+  } = searchState.detailedSearch
+  const code = resultsZip
   const dispatch = useDispatch()
 
   const {
     data: speculatorData,
     topCount,
     topPer,
-  } = useSpeculationByCode(results, {
+  } = useSpeculationByCode([], {
     code,
     year,
   })
@@ -516,7 +522,7 @@ function MultipleParcels(props) {
               <span>{` ${parseMBAddressString(place)} `}</span> in
               <span>{` ${year}. `}</span> In zip code
               <span>{` ${code}`}</span> we have identified
-              <span>{` ${results.length} `}</span>
+              <span>{` ${resultsCount} `}</span>
               other properties owned by{" "}
               <span>{`${speculatorData.length} `}</span>
               speculators. Of these speculators, the top ten owned
@@ -527,7 +533,7 @@ function MultipleParcels(props) {
           </div>
           <div className="detailed-title">
             <img src={questionMarkRose} alt="A question mark icon" />
-            <span> Top 10 Speculators in {`${code}`}</span>
+            <span> Top 10 Speculators in {`${resultsZip}`}</span>
           </div>
 
           <div className="detailed-zipcode">
@@ -539,7 +545,7 @@ function MultipleParcels(props) {
                       to={createQueryStringFromParams(
                         {
                           type: "zipcode",
-                          code,
+                          code: resultsZip,
                           ownid: record.own_id,
                           coordinates: null,
                           year,

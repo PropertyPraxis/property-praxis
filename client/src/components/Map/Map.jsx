@@ -188,9 +188,10 @@ class PraxisMap extends Component {
       handleGetZipcodesDataAction(zipRoute)
     )
 
-    //Set viewport to parcels bbox
-    if (parcelsGeojson) {
+    if (parcelsGeojson?.type === "FeatureCollection") {
       this._createNewViewport(parcelsGeojson)
+    } else if (zipsGeojson) {
+      this._createNewViewport(zipsGeojson)
     }
 
     // set marker not undefined or null
@@ -396,13 +397,6 @@ class PraxisMap extends Component {
             minzoom={13}
             maxzoom={14}
           >
-            {/* this is an optional highlight layer that 
-            higlights centroids rather than polys */}
-            {/* <Layer
-              key="highlight-centroid-layer"
-              {...parcelCentroidHighlightLayer}
-              filter={["in", "id", ...highlightIds]} // hightlight can be an array or string
-            /> */}
             <Layer
               key="parcel-layer"
               {...parcelLayer}
@@ -412,7 +406,6 @@ class PraxisMap extends Component {
                   stops: this._stops,
                 },
                 "fill-opacity": sliderValue / 100,
-                // "fill-outline-color": "rgba(255,255,255,1)",
               }}
               filter={parcelLayerFilter}
             />

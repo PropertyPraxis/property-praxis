@@ -5,7 +5,7 @@ const morgan = require("morgan")
 const helmet = require("helmet")
 const cors = require("cors")
 const mountRoutes = require("./routes")
-const Sentry = require("@sentry/node")
+// const Sentry = require("@sentry/node")
 
 const app = express()
 
@@ -22,7 +22,8 @@ app.use(morgan("combined"))
 //mount routes
 mountRoutes(app)
 
-Sentry.setupExpressErrorHandler(app)
+// TODO:
+// Sentry.setupExpressErrorHandler(app)
 
 app.listen(5000, () => {
   console.log("Listening on port 5000...")

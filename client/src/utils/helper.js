@@ -202,15 +202,35 @@ export function flattenPrimaryResults(primaryResults) {
   return primaryResults.reduce((acc, val) => acc.concat(val), [])
 }
 
+// Hacking this a bit to handle different response types
 export function getDetailsFromGeoJSON(geojson) {
-  if (geojson) {
+  if (geojson?.type === "FeatureCollection") {
     const details = geojson.features.map((feature) => {
       const { centroid, properties } = feature
       return { centroid, properties }
     })
-    return { details, detailsType: geojson.praxisDataType }
+    return {
+      details,
+      detailsZip: geojson.zipcode || details[0].properties.propzip,
+      detailsCount: geojson.count || details.length,
+      detailsType: geojson.praxisDataType,
+    }
+  } else if (
+    geojson?.praxisDataType === "parcels-by-geocode:multiple-parcels"
+  ) {
+    return {
+      details: [],
+      detailsZip: geojson.code,
+      detailsCount: +geojson.count,
+      detailsType: geojson.praxisDataType,
+    }
   } else {
-    return { details: null, detailsType: null }
+    return {
+      details: null,
+      detailsZip: null,
+      detailsCount: null,
+      detailsType: null,
+    }
   }
 }
 

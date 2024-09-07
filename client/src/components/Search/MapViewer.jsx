@@ -5,6 +5,7 @@ import { calculateDesiredBearing, bearingToBasic } from "../../utils/viewer"
 import * as Mapillary from "mapillary-js"
 import noImageIcon from "../../assets/img/no_image_icon.svg"
 
+// TODO: TypeError: cnavasPoint is null
 class MapViewer extends Component {
   _getViewerImage = ({ longitude, latitude }) => {
     this.props.dispatch(handleGetViewerImage(longitude, latitude))

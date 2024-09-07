@@ -1,10 +1,6 @@
 const Router = require("express-promise-router")
 const queries = require("../utils/queries")
-const {
-  checkEmptyGeoJSON,
-  buildGeoJSONTemplate,
-  findTargetAddress,
-} = require("../utils/geojson")
+const { checkEmptyGeoJSON, buildGeoJSONTemplate } = require("../utils/geojson")
 const router = new Router()
 
 router.get("/", async (req, res) => {
@@ -43,15 +39,27 @@ router.get("/", async (req, res) => {
           PGDBQueryType: queries.GEOJSON_PARCELS_CODE_DISTANCE,
         })
 
-        // check to see if there is a distance of 0
-        // which represents a target match
-        const features = pgData.data.map((feature) => ({
-          type: "Feature",
-          geometry: feature.geometry,
-          properties: feature,
-        }))
-        // returns arrays
-        const { targetAddress, nearbyAddresses } = findTargetAddress(features)
+        const targetAddress = pgData.data
+          .map(({ geometry, ...properties }) => ({
+            type: "Feature",
+            geometry,
+            properties,
+          }))
+          .filter(
+            ({ properties: { propno } }) =>
+              !place || +place.split(" ")[0] === propno // TODO: Is this good enough?
+          )
+        let nearbyAddresses = []
+
+        if (targetAddress.length === 0) {
+          nearbyAddresses = (
+            await queries.queryPGDB({
+              code: zipcode,
+              year,
+              PGDBQueryType: queries.ZIPCODE_PARCEL_COUNT,
+            })
+          ).data
+        }
 
         // TODO: Change how this is displayed, pull single parcel on client?
         if (targetAddress.length === 0 && nearbyAddresses.length === 0) {
@@ -63,7 +71,7 @@ router.get("/", async (req, res) => {
           geoJSON = buildGeoJSONTemplate(targetAddress)
           praxisDataType = "parcels-by-geocode:single-parcel"
         } else if (targetAddress.length === 0 && nearbyAddresses.length > 0) {
-          geoJSON = buildGeoJSONTemplate(nearbyAddresses)
+          geoJSON = { ...nearbyAddresses[0], code: zipcode }
           praxisDataType = "parcels-by-geocode:multiple-parcels"
         } else {
           geoJSON = buildGeoJSONTemplate([])
@@ -133,6 +141,7 @@ router.get("/", async (req, res) => {
         break
 
       case "zipcode-intersect": // this should be reowrked to hanlde "codes"
+        // TODO: fix speed
         pgData = await queries.queryPGDB({
           PGDBQueryType: queries.GEOJSON_ZIPCODES_PARCELS,
           ownid,

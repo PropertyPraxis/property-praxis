@@ -9,10 +9,10 @@ export function createNewViewport(geojson, mapRef) {
     const reducer = (accumulator, currentValue) => accumulator + currentValue
     featureCount = features
       .map((feature) => {
-        if (feature.geometry.geometries)
-          return feature.geometry.geometries.length
-        if (feature.geometry.coordinates)
-          return feature.geometry.coordinates.length
+        if (feature?.geometry?.geometries)
+          return feature?.geometry?.geometries.length
+        if (feature?.geometry?.coordinates)
+          return feature?.geometry?.coordinates.length
 
         return 0
       })

@@ -12,7 +12,6 @@ const GEOJSON_PARCELS_CODE = "GEOJSON_PARCELS_CODE"
 const GEOJSON_PARCELS_CODE_OWNID = "GEOJSON_PARCELS_CODE_OWNID"
 const GEOJSON_PARCELS_OWNID = "GEOJSON_PARCELS_OWNID"
 const GEOJSON_PARCELS_OWNID_CODE = "GEOJSON_PARCELS_OWNID_CODE"
-const GEOJSON_PARCELS_DISTANCE = "GEOJSON_PARCELS_DISTANCE"
 const GEOJSON_PARCELS_CODE_DISTANCE = "GEOJSON_PARCELS_CODE_DISTANCE"
 const DETAILED_RECORD_YEARS = "DETAILED_RECORD_YEARS" // years for a praxis record
 const AVAILABLE_PRAXIS_YEARS = "AVAILABLE_PRAXIS_YEARS" // all the available search years
@@ -23,6 +22,7 @@ const SPECULATION_BY_CODE = "SPECULATION_BY_CODE"
 const SPECULATION_BY_OWNID = "SPECULATION_BY_OWNID"
 const SPECULATOR_BY_YEAR = "SPECULATOR_BY_YEAR" //graph data
 const SQL_QUERY_GENERAL = "SQL_QUERY_GENERAL"
+const ZIPCODE_PARCEL_COUNT = "ZIPCODE_PARCEL_COUNT"
 
 /*Mapbox API query types*/
 const GEOCODE = "GEOCODE" // works for primary address as well
@@ -111,14 +111,14 @@ async function queryPGDB({
           query.append(SQL` AND p.propzip LIKE ${zipMatch}`)
         }
         if (ownid) {
-          query.append(SQL` ANND p.own_id LIKE ${ownIdMatch}`)
+          query.append(SQL` AND p.own_id LIKE ${ownIdMatch}`)
         }
         if (coordinates) {
           query.append(SQL` AND 
-            ST_Intersects(
+            ST_Within(
               ST_SetSRID(
                 ST_MakePoint(${longitude}, ${latitude}),
-              4326)::geography,
+              4326),
             z.geometry)`)
         }
 
@@ -209,83 +209,52 @@ async function queryPGDB({
             ) features;`
         break
 
-      /*currenlty dead query - not used*/
-      case GEOJSON_PARCELS_DISTANCE:
-        query = SQL`
-              SELECT
-                feature_id,
-                saledate,
-                saleprice,
-                totsqft,
-                totacres,
-                cityrbuilt,
-                resyrbuilt,
-                prop_id,
-                year,
-                propaddr,
-                own_id,
-                taxpayer,
-                count,
-                own_group,
-                propno,
-                propdir,
-                propzip,
-                ST_AsText(centroid) AS centroid, 
-                ST_AsGeoJSON(centroid, 6)::json AS geometry,
-                ST_Distance(
-                  ST_SetSRID(
-                    ST_MakePoint(${longitude}, ${latitude}),
-                  4326)::geography,
-                centroid::geography) AS distance
-              FROM parcels
-              WHERE year = ${year}
-              AND ST_Distance(
-                ST_SetSRID(
-                  ST_MakePoint(${longitude}, ${latitude}),
-                4326)::geography,
-              centroid::geography) < ${searchRadius};`
-        break
-
       case GEOJSON_PARCELS_CODE_DISTANCE:
         query = SQL`
-            SELECT
-              feature_id,
-              saledate,
-              saleprice,
-              totsqft,
-              totacres,
-              cityrbuilt,
-              resyrbuilt,
-              prop_id,
-              year,
-              propaddr,
-              own_id,
-              taxpayer,
-              count,
-              own_group,
-              propno,
-              propdir,
-              propzip,
-              ST_AsText(centroid) AS centroid,
-              ST_AsGeoJSON(centroid, 6)::json AS geometry,
-              ST_Distance(
-                ST_SetSRID(
-                  ST_MakePoint(${longitude}, ${latitude}),
-                4326)::geography,
-              centroid::geography) AS distance
-            FROM parcels
-            WHERE year = ${year}
-            AND propzip LIKE ${zipMatch};`
+          SELECT
+            feature_id,
+            saledate,
+            saleprice,
+            totsqft,
+            totacres,
+            cityrbuilt,
+            resyrbuilt,
+            prop_id,
+            year,
+            propaddr,
+            own_id,
+            taxpayer,
+            count,
+            own_group,
+            propno,
+            propdir,
+            propzip,
+            ST_AsText(centroid) AS centroid,
+            ST_AsGeoJSON(centroid, 6)::json AS geometry,
+            ST_Distance(
+              ST_SetSRID(
+                ST_MakePoint(${longitude}, ${latitude}),
+              4326)::geography,
+            centroid::geography) AS distance
+          FROM parcels
+          WHERE year = ${year}
+          AND propzip LIKE ${zipMatch}
+          ORDER BY parcels.centroid <-> ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326)::geography
+          LIMIT 1;`
+        break
+
+      case ZIPCODE_PARCEL_COUNT:
+        query = SQL`SELECT COUNT(*) FROM parcels WHERE year = ${year} AND propzip LIKE ${zipMatch};`
         break
 
       case POINT_CODE:
         query = SQL`SELECT * 
           FROM zips_geom AS z
           WHERE 
-          ST_Intersects(
+          ST_Within(
             ST_SetSRID(
               ST_MakePoint(${longitude}, ${latitude}),
-            4326)::geography,
+            4326),
           z.geometry)`
         break
 
@@ -478,7 +447,6 @@ module.exports = {
   GEOJSON_PARCELS_CODE_OWNID,
   GEOJSON_PARCELS_OWNID,
   GEOJSON_PARCELS_OWNID_CODE,
-  GEOJSON_PARCELS_DISTANCE,
   GEOJSON_PARCELS_CODE_DISTANCE,
   POINT_CODE,
   DETAILED_RECORD_YEARS,
@@ -491,4 +459,5 @@ module.exports = {
   SPECULATION_BY_OWNID,
   SPECULATOR_BY_YEAR,
   SQL_QUERY_GENERAL,
+  ZIPCODE_PARCEL_COUNT,
 }

@@ -23,6 +23,8 @@ const initialSearchState = {
     results: null,
     drawerIsOpen: false,
     contentIsVisible: false,
+    resultsZip: null,
+    resultsCount: null,
     resultsType: null,
     recordYears: null,
   },

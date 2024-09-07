@@ -25,7 +25,8 @@ function DetailedResultsContainer() {
   const { drawerIsOpen, results, resultsType } = useSelector(
     (state) => state.searchState.detailedSearch
   )
-  const { details, detailsType } = getDetailsFromGeoJSON(ppraxis)
+  const { details, detailsCount, detailsZip, detailsType } =
+    getDetailsFromGeoJSON(ppraxis)
   const dispatch = useDispatch()
 
   const queryParams = useQueryParams({ searchQuery: window.location.search })
@@ -33,10 +34,12 @@ function DetailedResultsContainer() {
     dispatch(
       updateDetailedSearch({
         results: details,
+        resultsZip: detailsZip,
+        resultsCount: detailsCount,
         resultsType: detailsType,
       })
     )
-  }, [JSON.stringify(details), detailsType])
+  }, [JSON.stringify(details), detailsZip, detailsCount, detailsType])
 
   if (results && resultsType && queryParams) {
     return (
