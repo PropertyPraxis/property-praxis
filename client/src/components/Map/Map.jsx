@@ -316,7 +316,7 @@ class PraxisMap extends Component {
     const { highlightIds, hoveredFeature, lngLat } = this.props.currentFeature
     const { zips } = this.props.mapData
     const { basemapLayer } = this.props.controller
-    const { sliderValue, filter } = this.props.controller
+    const { sliderValue } = this.props.controller
     const { searchYear } = this.props.searchState.searchParams
     const { lat, lng, bearing } = this.props.searchState.viewerCoords
     const parcelLayerFilter = createFilterFromParams(
