@@ -35,7 +35,6 @@ async function queryPGDB({
   ownid = null,
   coordinates = null,
   parpropid = null,
-  searchRadius = 1000,
   year = null,
   q = null,
 }) {
