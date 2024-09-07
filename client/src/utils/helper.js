@@ -44,6 +44,22 @@ export function parseMBAddressString(addressString) {
   return strAddress[0].trim()
 }
 
+export function createFilterFromParams(params) {
+  let layerFilter = []
+
+  if (params.ownid) {
+    layerFilter = [...layerFilter, ["==", "own_id", params.ownid.toUpperCase()]]
+  }
+  if (params.code) {
+    layerFilter = [...layerFilter, ["==", "zipcode_sj", params.code]]
+  }
+  if (layerFilter.length > 0) {
+    return ["all", ...layerFilter]
+  } else {
+    return ["none"]
+  }
+}
+
 export function createLayerFilter(arr) {
   let layerFilter = []
 

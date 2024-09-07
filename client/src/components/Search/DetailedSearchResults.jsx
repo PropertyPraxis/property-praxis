@@ -79,7 +79,7 @@ function useSpeculationByCode(results, { code, year }) {
   return { data, topCount, topPer }
 }
 
-function useCodesBySpeculator(results, { code, ownid, year }) {
+function useCodesBySpeculator({ code, ownid, year }) {
   const [speculatorData, setSpeculatorData] = useState(null)
   const [propCount, setPropCount] = useState(null)
   const [zipsBySpeculator, setZipsBySpeculator] = useState(null)
@@ -95,21 +95,6 @@ function useCodesBySpeculator(results, { code, ownid, year }) {
       if (code) {
         const route = `/api/detailed-search?type=codes-by-speculator&ownid=${ownid}&year=${year}`
         const data = await APISearchQueryFromRoute(route)
-
-        //get feature ids based on speculator name
-        await data.map((item) => {
-          const ids = results
-            .map((record) => {
-              if (record.properties.propzip === item.propzip) {
-                return record.properties.prop_id
-              } else {
-                return null
-              }
-            })
-            .filter((id) => id !== null)
-          item.featureIds = ids
-        })
-
         setSpeculatorData(data)
 
         const { propCount, speculatorZips } = calulateSpeculatorTotals(data)
@@ -436,14 +421,11 @@ function SpeculatorParcels(props) {
   )
   const code = results[0].properties.propzip // need some error handling
 
-  const { speculatorData, propCount, zipsBySpeculator } = useCodesBySpeculator(
-    results,
-    {
-      code,
-      ownid,
-      year,
-    }
-  )
+  const { speculatorData, propCount, zipsBySpeculator } = useCodesBySpeculator({
+    code,
+    ownid,
+    year,
+  })
 
   if (speculatorData && zipsBySpeculator) {
     return (
@@ -746,7 +728,7 @@ function CodeSpeculatorParcels(props) {
   const { drawerIsOpen, results } = useSelector(
     (state) => state.searchState.detailedSearch
   )
-  const { speculatorData, zipsBySpeculator } = useCodesBySpeculator(results, {
+  const { speculatorData, zipsBySpeculator } = useCodesBySpeculator({
     code,
     ownid,
     year,
@@ -829,7 +811,7 @@ function SpeculatorCodeParcels(props) {
   const { drawerIsOpen, results } = useSelector(
     (state) => state.searchState.detailedSearch
   )
-  const { speculatorData, zipsBySpeculator } = useCodesBySpeculator(results, {
+  const { speculatorData, zipsBySpeculator } = useCodesBySpeculator({
     code,
     ownid,
     year,

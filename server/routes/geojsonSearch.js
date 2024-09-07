@@ -47,7 +47,7 @@ router.get("/", async (req, res) => {
           }))
           .filter(
             ({ properties: { propno } }) =>
-              !place || +place.split(" ")[0] === propno // TODO: Is this good enough?
+              !!place || +place.split(" ")[0] === propno
           )
         let nearbyAddresses = []
 
@@ -61,7 +61,6 @@ router.get("/", async (req, res) => {
           ).data
         }
 
-        // TODO: Change how this is displayed, pull single parcel on client?
         if (targetAddress.length === 0 && nearbyAddresses.length === 0) {
           // this is a default empty geojson
           // where there is no features returned
@@ -96,6 +95,7 @@ router.get("/", async (req, res) => {
         pgData = await queries.queryPGDB({
           ownid,
           year,
+          // TODO: Check
           PGDBQueryType: queries.GEOJSON_PARCELS_OWNID,
         })
 

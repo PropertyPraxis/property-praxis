@@ -7,9 +7,10 @@ import { createNewViewport } from "../../utils/map"
 import {
   capitalizeFirstLetter,
   parseMBAddressString,
-  createLayerFilter,
+  createFilterFromParams,
   createQueryStringFromParams,
 } from "../../utils/helper"
+import queryString from "query-string"
 import { URLParamsToAPIQueryString } from "../../utils/parseURL"
 import {
   getMapStateAction,
@@ -318,8 +319,9 @@ class PraxisMap extends Component {
     const { sliderValue, filter } = this.props.controller
     const { searchYear } = this.props.searchState.searchParams
     const { lat, lng, bearing } = this.props.searchState.viewerCoords
-    const parcelLayerFilter = createLayerFilter(filter)
-    // TODO: replace parcelLayerFilter with something
+    const parcelLayerFilter = createFilterFromParams(
+      queryString.parse(window.location.search)
+    )
 
     return (
       <div className="map">
@@ -412,7 +414,7 @@ class PraxisMap extends Component {
             <Layer
               key="highlight-parcel-layer"
               {...parcelHighlightLayer}
-              filter={["in", "id", ...highlightIds]} // hightlight can be an array or string
+              filter={["in", "id", ...(highlightIds || [])]} // hightlight can be an array or string
             />
           </Source>
 
