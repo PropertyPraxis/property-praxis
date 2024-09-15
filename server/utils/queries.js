@@ -125,44 +125,11 @@ async function queryPGDB({
         break
 
       case GEOJSON_PARCELS_CODE:
-        query = SQL`SELECT jsonb_build_object(
-            'type',     'FeatureCollection',
-            'features', jsonb_agg(feature)
-          )
-          FROM (
-            SELECT jsonb_build_object(
-              'type',       'Feature',
-              'geometry',   ST_AsGeoJSON(centroid, 6)::json,
-              'properties', to_jsonb(inputs) - 'centroid',
-              'centroid',   ST_AsText(centroid)
-            ) AS feature
-            FROM (
-              SELECT * FROM parcels
-              WHERE year = ${year}
-              AND propzip LIKE ${zipMatch}
-            ) inputs
-          ) features;`
+        query = SQL`SELECT COUNT(*) FROM parcels WHERE year = ${year} AND propzip LIKE ${zipMatch};`
         break
 
-      // TODO: geom getting replaced
       case GEOJSON_PARCELS_OWNID:
-        query = SQL`SELECT jsonb_build_object(
-            'type',     'FeatureCollection',
-            'features', jsonb_agg(feature)
-          )
-          FROM (
-            SELECT jsonb_build_object(
-              'type',       'Feature',
-              'geometry',   ST_AsGeoJSON(centroid, 6)::json,
-              'properties', to_jsonb(inputs),
-              'centroid',   ST_AsText(centroid)
-            ) AS feature
-            FROM (
-              SELECT * FROM parcels
-              WHERE year = ${year}
-              AND own_id LIKE ${ownIdMatch}
-            ) inputs
-          ) features;`
+        query = SQL`SELECT COUNT(*) FROM parcels WHERE year = ${year} AND own_id LIKE ${ownIdMatch};`
         break
 
       case GEOJSON_PARCELS_CODE_OWNID:

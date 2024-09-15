@@ -47,7 +47,7 @@ router.get("/", async (req, res) => {
           }))
           .filter(
             ({ properties: { propno } }) =>
-              !!place || +place.split(" ")[0] === propno
+              !!place && +place.split(" ")[0] === propno
           )
         let nearbyAddresses = []
 
@@ -70,7 +70,7 @@ router.get("/", async (req, res) => {
           geoJSON = buildGeoJSONTemplate(targetAddress)
           praxisDataType = "parcels-by-geocode:single-parcel"
         } else if (targetAddress.length === 0 && nearbyAddresses.length > 0) {
-          geoJSON = { ...nearbyAddresses[0], code: zipcode }
+          geoJSON = { count: +nearbyAddresses[0].count, code: zipcode }
           praxisDataType = "parcels-by-geocode:multiple-parcels"
         } else {
           geoJSON = buildGeoJSONTemplate([])
@@ -86,8 +86,8 @@ router.get("/", async (req, res) => {
           PGDBQueryType: queries.GEOJSON_PARCELS_CODE,
         })
 
-        geoJSON = pgData.data[0].jsonb_build_object
-        clientData = checkEmptyGeoJSON(geoJSON)
+        geoJSON = { count: +pgData.data[0].count, code }
+        clientData = geoJSON
         praxisDataType = "parcels-by-code"
         break
 
@@ -95,12 +95,11 @@ router.get("/", async (req, res) => {
         pgData = await queries.queryPGDB({
           ownid,
           year,
-          // TODO: Check
           PGDBQueryType: queries.GEOJSON_PARCELS_OWNID,
         })
 
-        geoJSON = pgData.data[0].jsonb_build_object
-        clientData = checkEmptyGeoJSON(geoJSON)
+        geoJSON = { count: +pgData.data[0].count, ownid }
+        clientData = geoJSON
         praxisDataType = "parcels-by-speculator"
         break
 
