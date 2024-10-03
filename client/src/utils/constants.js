@@ -1,1 +1,1 @@
-export const DEFAULT_YEAR = "2021"
+export const DEFAULT_YEAR = "2022"
