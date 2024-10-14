@@ -59,6 +59,7 @@
 .scroller {
   height: 100%;
   overflow-y: scroll;
+  overflow-x: hidden;
   scrollbar-color: #7f7f7f white;
   scrollbar-width: thin;
 }

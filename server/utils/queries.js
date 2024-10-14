@@ -192,6 +192,7 @@ async function queryPGDB({
             taxpayer,
             count,
             own_group,
+            parcelno,
             propno,
             propdir,
             propzip,

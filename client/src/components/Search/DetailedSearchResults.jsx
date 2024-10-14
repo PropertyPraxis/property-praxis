@@ -618,7 +618,7 @@ function SingleParcel(props) {
           {saledate === 0 || saledate === null ? null : (
             <div>
               <span>Last Sale Date </span>
-              <span>{saledate}</span>
+              <span>{saledate.split("T")[0]}</span>
             </div>
           )}
 

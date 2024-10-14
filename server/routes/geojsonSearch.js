@@ -46,8 +46,8 @@ router.get("/", async (req, res) => {
             properties,
           }))
           .filter(
-            ({ properties: { propno } }) =>
-              !!place && +place.split(" ")[0] === propno
+            ({ properties: { propaddr } }) =>
+              !!place && +place.split(" ")[0] === +propaddr.split(" ")[0]
           )
         let nearbyAddresses = []
 
