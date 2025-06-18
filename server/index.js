@@ -5,6 +5,7 @@ const morgan = require("morgan")
 const helmet = require("helmet")
 const cors = require("cors")
 const mountRoutes = require("./routes")
+const serverlessHttp = require("serverless-http")
 // const Sentry = require("@sentry/node")
 
 const app = express()
@@ -22,9 +23,13 @@ app.use(morgan("combined"))
 //mount routes
 mountRoutes(app)
 
-// TODO:
-// Sentry.setupExpressErrorHandler(app)
+// exports.handler = serverlessExpress({ app })
+exports.handler = serverlessHttp(app)
 
-app.listen(5000, () => {
-  console.log("Listening on port 5000...")
-})
+// Development server - only run if not in Lambda environment
+if (require.main === module || process.env.NODE_ENV === "development") {
+  const port = process.env.PORT || 5000
+  app.listen(port, () => {
+    console.log(`Listening on port ${port}...`)
+  })
+}

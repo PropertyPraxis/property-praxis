@@ -1,13 +1,11 @@
-FROM node:20-alpine
+FROM public.ecr.aws/lambda/nodejs:20
 
-WORKDIR /app
+COPY package*.json ${LAMBDA_TASK_ROOT}/
 
-COPY package*.json ./
+RUN npm ci --only=production
 
-RUN npm install
+COPY . ${LAMBDA_TASK_ROOT}/
 
-COPY . .
+EXPOSE 5000
 
-EXPOSE 5173
-
-CMD ["npm", "start"]
+CMD [ "index.handler" ]

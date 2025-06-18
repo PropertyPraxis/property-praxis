@@ -48,6 +48,10 @@ data "aws_ssm_parameter" "db_password" {
   name = "/${local.name}/${local.env}/db_password"
 }
 
+data "aws_ssm_parameter" "mapbox_token" {
+  name = "/${local.name}/${local.env}/mapbox_api_key"
+}
+
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "~> 5.0"
@@ -59,8 +63,6 @@ module "vpc" {
   public_subnets   = [for k, v in local.azs : cidrsubnet(local.vpc_cidr, 8, k)]
   private_subnets  = [for k, v in local.azs : cidrsubnet(local.vpc_cidr, 8, k + 3)]
   database_subnets = [for k, v in local.azs : cidrsubnet(local.vpc_cidr, 8, k + 6)]
-
-  map_public_ip_on_launch = true
 
   create_database_subnet_group           = true
   create_database_subnet_route_table     = true
@@ -146,12 +148,12 @@ module "cloudfront" {
       }
     }
     api = {
-      domain_name = module.alb.dns_name
+      domain_name = replace(module.apigw.api_endpoint, "https://", "")
       custom_origin_config = {
         http_port              = 80
         https_port             = 443
-        origin_protocol_policy = "http-only"
-        origin_ssl_protocols   = ["TLSv1", "TLSv1.1", "TLSv1.2"]
+        origin_protocol_policy = "https-only"
+        origin_ssl_protocols   = ["TLSv1.2"]
       }
     }
   }
@@ -194,6 +196,10 @@ module "ecr" {
   repository_type = "private"
 
   repository_read_write_access_arns = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"]
+  repository_lambda_read_access_arns = [
+    "arn:aws:lambda:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:function:${local.name}*",
+    "arn:aws:lambda:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:function:${local.name}*:*",
+  ]
   repository_lifecycle_policy = jsonencode({
     rules = [
       {
@@ -214,6 +220,80 @@ module "ecr" {
   tags = local.tags
 }
 
+module "lambda" {
+  source  = "terraform-aws-modules/lambda/aws"
+  version = "6.0.1"
+
+  function_name  = "${local.name}-${local.env}"
+  package_type   = "Image"
+  create_package = false
+  publish        = true
+  timeout        = 30
+  memory_size    = 1024
+
+  image_uri = "${module.ecr.repository_url}:${var.lambda_image_tag}"
+
+  vpc_subnet_ids         = module.vpc.private_subnets
+  vpc_security_group_ids = [module.vpc.default_security_group_id, module.security_group.security_group_id]
+  attach_network_policy  = true
+
+  allowed_triggers = {
+    AllowExecutionFromAPIGateway = {
+      service = "apigateway"
+      arn     = "${module.apigw.api_execution_arn}/*/*/*"
+    },
+  }
+
+  environment_variables = {
+    ENVIRONMENT         = local.env
+    NODE_ENV            = "production"
+    DATABASE_HOST       = module.rds.db_instance_endpoint
+    DATABASE_NAME       = local.appname
+    DATABASE_USERNAME   = data.aws_ssm_parameter.db_username.value
+    DATABASE_PASSWORD   = data.aws_ssm_parameter.db_password.value
+    MAPBOX_ACCESS_TOKEN = data.aws_ssm_parameter.mapbox_token.value
+  }
+
+  tags = local.tags
+}
+
+module "apigw" {
+  source  = "terraform-aws-modules/apigateway-v2/aws"
+  version = "5.3.0"
+
+  name          = "${local.name}-${local.env}"
+  protocol_type = "HTTP"
+
+  cors_configuration = {
+    allow_headers = ["content-type", "x-amz-date", "authorization", "x-api-key", "x-amz-security-token", "x-amz-user-agent"]
+    allow_methods = ["*"]
+    allow_origins = ["*"]
+  }
+
+  create_domain_name = false
+  create_stage       = true
+  stage_name         = "$default"
+
+  routes = {
+    "ANY /" = {
+      integration = {
+        uri                    = module.lambda.lambda_function_arn
+        payload_format_version = "1.0"
+        timeout_milliseconds   = 30000
+      }
+    }
+
+    "ANY /{proxy+}" = {
+      integration = {
+        uri                    = module.lambda.lambda_function_arn
+        payload_format_version = "1.0"
+        timeout_milliseconds   = 30000
+    } }
+  }
+
+  tags = local.tags
+}
+
 module "rds" {
   source  = "terraform-aws-modules/rds/aws"
   version = "6.1.1"
@@ -224,7 +304,7 @@ module "rds" {
   engine_version       = "14"
   family               = "postgres14"
   major_engine_version = "14"
-  instance_class       = "db.t4g.small"
+  instance_class       = "db.t4g.micro"
 
   allocated_storage     = 20
   max_allocated_storage = 50
@@ -270,205 +350,4 @@ module "rds" {
 
   monitoring_role_name            = "${local.name}-rds-monitor"
   monitoring_role_use_name_prefix = true
-}
-
-module "alb" {
-  source  = "terraform-aws-modules/alb/aws"
-  version = "9.2.0"
-
-  name    = "${local.name}-${local.env}-alb"
-  vpc_id  = module.vpc.vpc_id
-  subnets = module.vpc.public_subnets
-
-  security_group_ingress_rules = {
-    all_http = {
-      from_port   = 80
-      to_port     = 80
-      ip_protocol = "tcp"
-      description = "HTTP web traffic"
-      cidr_ipv4   = "0.0.0.0/0"
-    }
-    all_https = {
-      from_port   = 443
-      to_port     = 443
-      ip_protocol = "tcp"
-      description = "HTTPS web traffic"
-      cidr_ipv4   = "0.0.0.0/0"
-    }
-  }
-  security_group_egress_rules = {
-    all = {
-      ip_protocol = "-1"
-      cidr_ipv4   = module.vpc.vpc_cidr_block
-    }
-  }
-
-  listeners = {
-    http-https-redirect = {
-      port     = 80
-      protocol = "HTTP"
-      forward = {
-        target_group_key = "app"
-      }
-      # redirect = {
-      #   port        = "443"
-      #   protocol    = "HTTPS"
-      #   status_code = "HTTP_301"
-      # }
-    }
-    # https = {
-    #   port     = 443
-    #   protocol = "HTTPS"
-    #   # certificate_arn = "arn:aws:iam::123456789012:server-certificate/test_cert-123456789012"
-
-    #   forward = {
-    #     target_group_key = "app"
-    #   }
-    # }
-  }
-
-  target_groups = {
-    app = {
-      name_prefix = "app"
-      protocol    = "HTTP"
-      port        = local.container_port
-      target_type = "ip"
-
-      health_check = {
-        enabled             = true
-        healthy_threshold   = 5
-        interval            = 30
-        matcher             = "200"
-        path                = "/api/health"
-        port                = "traffic-port"
-        protocol            = "HTTP"
-        timeout             = 5
-        unhealthy_threshold = 2
-      }
-
-      create_attachment = false
-    }
-  }
-
-  tags = local.tags
-}
-
-module "ecs_cluster" {
-  source  = "terraform-aws-modules/ecs/aws//modules/cluster"
-  version = "5.7.4"
-
-  cluster_name = "${local.name}-${local.env}"
-
-  fargate_capacity_providers = {
-    FARGATE = {
-      default_capacity_provider_strategy = {
-        weight = 50
-      }
-    }
-    FARGATE_SPOT = {
-      default_capacity_provider_strategy = {
-        weight = 50
-      }
-    }
-  }
-
-  cluster_settings = {
-    name  = "containerInsights"
-    value = "disabled"
-  }
-}
-
-data "aws_secretsmanager_secret" "mapbox_token" {
-  name = "/${local.name}/${local.env}/mapbox_api_key"
-}
-
-module "ecs_service" {
-  source  = "terraform-aws-modules/ecs/aws//modules/service"
-  version = "5.7.4"
-
-  name        = local.name
-  cluster_arn = module.ecs_cluster.arn
-
-  cpu    = 256
-  memory = 512
-
-  enable_execute_command = true
-
-  container_definitions = {
-    praxis = {
-      cpu       = 256
-      memory    = 512
-      essential = true
-      image     = "${module.ecr.repository_url}:${var.ecs_image_tag}"
-      port_mappings = [
-        {
-          name          = "praxis"
-          host_port     = local.container_port
-          containerPort = local.container_port
-          protocol      = "tcp"
-        }
-      ]
-      environment = [
-        {
-          name  = "NODE_ENV"
-          value = "production"
-        },
-        {
-          name  = "ENVIRONMENT"
-          value = local.env
-        },
-        {
-          name  = "DATABASE_HOST"
-          value = module.rds.db_instance_endpoint
-        },
-        {
-          name  = "DATABASE_NAME"
-          value = local.appname
-        }
-      ]
-      secrets = [
-        {
-          name      = "DATABASE_USERNAME",
-          valueFrom = data.aws_ssm_parameter.db_username.arn
-        },
-        {
-          name      = "DATABASE_PASSWORD",
-          valueFrom = data.aws_ssm_parameter.db_password.arn
-        },
-        {
-          name      = "MAPBOX_ACCESS_TOKEN",
-          valueFrom = data.aws_secretsmanager_secret.mapbox_token.arn
-        }
-      ]
-      readonly_root_filesystem = false
-    }
-  }
-
-  load_balancer = {
-    service = {
-      target_group_arn = module.alb.target_groups["app"].arn
-      container_name   = "praxis"
-      container_port   = local.container_port
-    }
-  }
-
-  subnet_ids       = module.vpc.public_subnets
-  assign_public_ip = true
-  security_group_rules = {
-    alb_ingress = {
-      type                     = "ingress"
-      from_port                = local.container_port
-      to_port                  = local.container_port
-      protocol                 = "tcp"
-      source_security_group_id = module.alb.security_group_id
-    }
-
-    egress_all = {
-      type        = "egress"
-      from_port   = 0
-      to_port     = 0
-      protocol    = "-1"
-      cidr_blocks = ["0.0.0.0/0"]
-    }
-  }
 }
