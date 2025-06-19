@@ -233,10 +233,6 @@ module "lambda" {
 
   image_uri = "${module.ecr.repository_url}:${var.lambda_image_tag}"
 
-  vpc_subnet_ids         = module.vpc.private_subnets
-  vpc_security_group_ids = [module.vpc.default_security_group_id, module.security_group.security_group_id]
-  attach_network_policy  = true
-
   allowed_triggers = {
     AllowExecutionFromAPIGateway = {
       service = "apigateway"

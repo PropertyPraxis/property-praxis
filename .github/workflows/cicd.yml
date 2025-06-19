@@ -146,7 +146,7 @@ jobs:
       - name: Update ECS with Terraform
         working-directory: ./tf/${{ env.DEPLOY_ENV }}
         env:
-          TF_VAR_ecs_image_tag: ${{ env.DEPLOY_ENV }}-${{ github.sha }}
+          TF_VAR_lambda_image_tag: ${{ env.DEPLOY_ENV }}-${{ github.sha }}
         run: |
           terraform init
           terraform apply -auto-approve

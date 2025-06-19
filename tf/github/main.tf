@@ -54,20 +54,14 @@ resource "aws_iam_policy" "update_access" {
       },
       {
         Action = [
-          "ecs:*"
+          "lambda:*"
         ]
         Effect = "Allow"
+        Effect = "Allow"
         Resource = [
-          "arn:aws:ecs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:cluster:${local.name}*",
-          "arn:aws:ecs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:cluster:${local.name}*:*",
-          "arn:aws:ecs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:service/${local.name}*",
-          "arn:aws:ecs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:service/${local.name}*:*"
+          "arn:aws:lambda:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:function:${local.name}*",
+          "arn:aws:lambda:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:function:${local.name}*:*"
         ]
-      },
-      {
-        Action   = ["ecs:RegisterTaskDefinition", "ecs:DeregisterTaskDefinition"],
-        Effect   = "Allow"
-        Resource = "*"
       },
       {
         Action = [

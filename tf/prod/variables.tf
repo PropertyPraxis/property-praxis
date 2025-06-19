@@ -1,3 +1,3 @@
-variable "ecs_image_tag" {
+variable "lambda_image_tag" {
   default = "latest"
 }
