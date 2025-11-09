@@ -17,7 +17,6 @@
     "leaflet": "^1.7.1",
     "mapbox-gl": "^3.1.2",
     "mapillary-js": "^4.1.0",
-    "p-debounce": "^4.0.0",
     "prop-types": "^15.8.1",
     "query-string": "^8.2.0",
     "react": "^18.2.0",
