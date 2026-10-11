@@ -51,7 +51,7 @@ router.get("/", async (req, res) => {
               (inside ||
                 (+place.split(" ")[0] === +(propaddr || "").split(" ")[0] &&
                   place.split(" ")[1].toUpperCase() ===
-                  (propaddr || "").split(" ")[1].toUpperCase())) // TODO: Might be too strict
+                    (propaddr || "").split(" ")[1].toUpperCase())) // TODO: Might be too strict
           )
         let nearbyAddresses = []
 
