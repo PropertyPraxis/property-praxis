@@ -5,7 +5,7 @@ services:
       - "35432:5432"
     env_file: ./envs/db.env
     volumes:
-      - ./pg/data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
   api:
     build:
       context: ./server/
@@ -31,3 +31,6 @@ services:
       - ./client/:/app/
       - /app/node_modules
     stdin_open: true
+
+volumes:
+  postgres_data:

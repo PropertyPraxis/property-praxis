@@ -1,7 +1,7 @@
 export const MINIMUM_YEAR = "2015"
 
-export const DEFAULT_YEAR = "2025"
+export const DEFAULT_YEAR = "2026"
 
 export const YEARS = [
-  2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025,
+  2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026
 ]

@@ -11,7 +11,7 @@ router.get("/", async (req, res) => {
       code = null,
       place = null,
       coordinates = null,
-      year = "2025",
+      year = "2026",
     } = req.query
 
     let pgData, geoJSON, clientData, praxisDataType
@@ -51,7 +51,7 @@ router.get("/", async (req, res) => {
               (inside ||
                 (+place.split(" ")[0] === +(propaddr || "").split(" ")[0] &&
                   place.split(" ")[1].toUpperCase() ===
-                    (propaddr || "").split(" ")[1].toUpperCase())) // TODO: Might be too strict
+                  (propaddr || "").split(" ")[1].toUpperCase())) // TODO: Might be too strict
           )
         let nearbyAddresses = []
 
