@@ -44,6 +44,14 @@ router.get("/", async (req, res) => {
       })
 
       clientData = data
+    } else if (type === "taxpayers-by-speculator") {
+      const { data } = await queries.queryPGDB({
+        PGDBQueryType: queries.TAXPAYERS_BY_SPECULATOR,
+        ownid,
+        year,
+      })
+
+      clientData = data
     } else {
       clientData = null
     }

@@ -48,7 +48,7 @@ function useSpeculationByCode(results, { code, year }) {
   const [topPer, setTopPer] = useState(null)
 
   useEffect(() => {
-    ;(async () => {
+    ; (async () => {
       if (code) {
         const route = `/api/detailed-search?type=speculation-by-code&code=${code}&year=${year}`
         const data = await APISearchQueryFromRoute(route)
@@ -90,7 +90,7 @@ function useCodesBySpeculator({ ownid, year }) {
   }
 
   useEffect(() => {
-    ;(async () => {
+    ; (async () => {
       const route = `/api/detailed-search?type=codes-by-speculator&ownid=${ownid}&year=${year}`
       const data = await APISearchQueryFromRoute(route)
       setSpeculatorData(data)
@@ -103,6 +103,22 @@ function useCodesBySpeculator({ ownid, year }) {
   }, [ownid, year])
 
   return { speculatorData, propCount, zipsBySpeculator }
+}
+
+
+function useTaxpayersBySpeculator({ ownid, year }) {
+  const [taxpayerData, setTaxpayerData] = useState([])
+
+  useEffect(() => {
+    ; (async () => {
+      const route = `/api/detailed-search?type=taxpayers-by-speculator&ownid=${ownid}&year=${year}`
+      const data = await APISearchQueryFromRoute(route)
+      setTaxpayerData(data)
+    })()
+    return () => null
+  }, [ownid, year])
+
+  return { taxpayerData }
 }
 
 /*Specific Link components to pass to  paginator component*/
@@ -142,6 +158,21 @@ function SpeculatorLink({ record, queryParams }) {
   )
 }
 
+function TaxpayerLine({ record, index }) {
+  return (
+    <div className="speculator-item" key={`taxpayer-${record.taxpayer}-${index}`}>
+      <div>
+        <span className="taxpayer-name">
+          {record.taxpayer}
+        </span>
+      </div>
+      <div>
+        <div>{`${record.taxpayer_count}  properties`}</div>
+      </div>
+    </div>
+  )
+}
+
 function ZipcodeLink({ record, index, queryParams }) {
   const { ownid, year } = queryParams
 
@@ -160,11 +191,7 @@ function ZipcodeLink({ record, index, queryParams }) {
             "/map"
           )}
         >
-          <span
-            title={`Seach ${capitalizeFirstLetter(ownid)}'s properties in ${
-              record.propzip
-            }`}
-          >
+          <span title={`Search ${capitalizeFirstLetter(ownid)}'s properties in ${record.propzip}`}>
             <img src={infoIcon} alt="More Information"></img>
             {capitalizeFirstLetter(record.propzip)}
           </span>
@@ -389,6 +416,7 @@ function SpeculatorParcels(props) {
     ownid,
     year,
   })
+  const { taxpayerData } = useTaxpayersBySpeculator({ ownid, year })
 
   if (speculatorData && zipsBySpeculator) {
     return (
@@ -408,6 +436,17 @@ function SpeculatorParcels(props) {
             </p>
           </div>
           <TimeGraph ownid={ownid} />
+          <div className="detailed-title">
+            <img src={questionMarkRose} alt="A question mark icon" />
+            <span>LLCs used by this Speculator</span>
+          </div>
+          <DumbPaginator
+            data={taxpayerData}
+            length={taxpayerData.length}
+            queryParams={props.queryParams}
+          >
+            <TaxpayerLine />
+          </DumbPaginator>
           <div className="detailed-title">
             <img src={questionMarkRose} alt="A question mark icon" />
             <span>Properties by Zip Code for this Speculator</span>

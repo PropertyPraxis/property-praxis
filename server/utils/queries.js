@@ -20,6 +20,7 @@ const POINT_CODE = "POINT_CODE" // get the zipcode for a specific point
 const SPECULATION_BY_CODE = "SPECULATION_BY_CODE"
 const SPECULATOR_BY_YEAR = "SPECULATOR_BY_YEAR" //graph data
 const ZIPCODE_PARCEL_COUNT = "ZIPCODE_PARCEL_COUNT"
+const TAXPAYERS_BY_SPECULATOR = "TAXPAYERS_BY_SPECULATOR"
 
 /*Mapbox API query types*/
 const GEOCODE = "GEOCODE" // works for primary address as well
@@ -279,6 +280,14 @@ async function queryPGDB({
           ORDER BY year ASC`
         break
 
+      case TAXPAYERS_BY_SPECULATOR:
+        query = SQL`SELECT COUNT(*) AS taxpayer_count, taxpayer
+          FROM parcels
+          WHERE own_id = ${ownid.toUpperCase()} AND year = ${year}
+          GROUP BY taxpayer
+          ORDER BY taxpayer_count DESC`
+        break
+
       default:
         console.error(`Unknown SQL query type: ${PGDBQueryType}`)
         break
@@ -361,4 +370,5 @@ module.exports = {
   SPECULATION_BY_CODE,
   SPECULATOR_BY_YEAR,
   ZIPCODE_PARCEL_COUNT,
+  TAXPAYERS_BY_SPECULATOR,
 }
