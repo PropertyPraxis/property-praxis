@@ -48,7 +48,7 @@ function useSpeculationByCode(results, { code, year }) {
   const [topPer, setTopPer] = useState(null)
 
   useEffect(() => {
-    ; (async () => {
+    ;(async () => {
       if (code) {
         const route = `/api/detailed-search?type=speculation-by-code&code=${code}&year=${year}`
         const data = await APISearchQueryFromRoute(route)
@@ -90,7 +90,7 @@ function useCodesBySpeculator({ ownid, year }) {
   }
 
   useEffect(() => {
-    ; (async () => {
+    ;(async () => {
       const route = `/api/detailed-search?type=codes-by-speculator&ownid=${ownid}&year=${year}`
       const data = await APISearchQueryFromRoute(route)
       setSpeculatorData(data)
@@ -105,12 +105,11 @@ function useCodesBySpeculator({ ownid, year }) {
   return { speculatorData, propCount, zipsBySpeculator }
 }
 
-
 function useTaxpayersBySpeculator({ ownid, year }) {
   const [taxpayerData, setTaxpayerData] = useState([])
 
   useEffect(() => {
-    ; (async () => {
+    ;(async () => {
       const route = `/api/detailed-search?type=taxpayers-by-speculator&ownid=${ownid}&year=${year}`
       const data = await APISearchQueryFromRoute(route)
       setTaxpayerData(data)
@@ -160,11 +159,12 @@ function SpeculatorLink({ record, queryParams }) {
 
 function TaxpayerLine({ record, index }) {
   return (
-    <div className="speculator-item" key={`taxpayer-${record.taxpayer}-${index}`}>
+    <div
+      className="speculator-item"
+      key={`taxpayer-${record.taxpayer}-${index}`}
+    >
       <div>
-        <span className="taxpayer-name">
-          {record.taxpayer}
-        </span>
+        <span className="taxpayer-name">{record.taxpayer}</span>
       </div>
       <div>
         <div>{`${record.taxpayer_count}  properties`}</div>
@@ -191,7 +191,9 @@ function ZipcodeLink({ record, index, queryParams }) {
             "/map"
           )}
         >
-          <span title={`Search ${capitalizeFirstLetter(ownid)}'s properties in ${record.propzip}`}>
+          <span
+            title={`Search ${capitalizeFirstLetter(ownid)}'s properties in ${record.propzip}`}
+          >
             <img src={infoIcon} alt="More Information"></img>
             {capitalizeFirstLetter(record.propzip)}
           </span>
